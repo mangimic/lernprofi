@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useApp } from "../appContext.jsx";
 import { MATHE_DATEN, MATHE_BEREICHE } from "../calc/aufgaben/mathe.js";
 import { SACH_DATEN, SACH_BEREICHE } from "../calc/aufgaben/sachkunde.js";
+import { GESCH_DATEN, ddPool, doppelPool, DEUTSCH_BEREICHE } from "../calc/aufgaben/deutsch.js";
+import { STARK_DATEN, STARK_BEREICHE } from "../calc/aufgaben/stark.js";
 import { rngAusSeed } from "../calc/rng.js";
 import { aktiveStufe, leererFortschritt, rundeAbschliessen, STUFEN_NAMEN, stufenMax } from "../calc/stufen.js";
 import { paketWaehlen, antwortOptionen, antwortRichtig } from "../calc/aufgabenRunde.js";
@@ -12,14 +14,18 @@ import { muenzenNachRunde, aufgabenZaehlen, heutigerTag, lernspur } from "../cal
    bewusst schlicht; der Feinschliff (Fokus-Modus, alle Deutsch-
    Lernfelder) folgt in Etappe 4. */
 
+const DEUTSCH_DATEN = { gesch: GESCH_DATEN, dd: ddPool(), doppel: doppelPool() };
+
 const FAECHER = [
+  { id: "deutsch", emoji: "📗", name: "Deutsch", bereiche: DEUTSCH_BEREICHE, daten: DEUTSCH_DATEN },
   { id: "mathe", emoji: "🔢", name: "Mathe", bereiche: MATHE_BEREICHE, daten: MATHE_DATEN },
   { id: "sachkunde", emoji: "🌍", name: "Sachkunde", bereiche: SACH_BEREICHE, daten: SACH_DATEN },
+  { id: "stark", emoji: "💪", name: "Stark", bereiche: STARK_BEREICHE, daten: { stark: STARK_DATEN } },
 ];
 
 export default function Ueben() {
   const { data, update, logChange, T, heute } = useApp();
-  const [fachId, setFachId] = useState("mathe");
+  const [fachId, setFachId] = useState("deutsch");
   const [runde, setRunde] = useState(null); // { key, name, emoji, stufe, paket, aufgaben, optionen, index, fehler, gewaehlt }
   const fach = FAECHER.find((f) => f.id === fachId);
 
@@ -135,7 +141,7 @@ export default function Ueben() {
             {runde.index + 1 < runde.aufgaben.length ? "Weiter" : "Runde abschließen"}
           </button>
         </div>
-        <button onClick={() => setRunde(null)} style={{ background: "transparent", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+        <button data-test="abbrechen" onClick={() => setRunde(null)} style={{ background: "transparent", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           ← Abbrechen (zählt nicht)
         </button>
       </div>
@@ -171,7 +177,8 @@ export default function Ueben() {
         );
       })}
       <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-        Vorschau: Deutsch, Spiele und der Feinschliff folgen in den nächsten Etappen.
+        Vorschau: Die Antipp-Übungen (Satzglieder, Groß/Klein, wörtliche Rede …),
+        Spiele und der Feinschliff folgen in den nächsten Etappen.
       </p>
     </div>
   );

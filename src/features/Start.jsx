@@ -31,7 +31,7 @@ export default function Start() {
         </p>
         <button data-test="zum-ueben" onClick={() => navTo("ueben")}
           style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
-          ✏️ Jetzt üben (Mathe & Sachkunde)
+          ✏️ Jetzt üben (Deutsch · Mathe · Sachkunde · Stark)
         </button>
       </div>
       <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand }}>

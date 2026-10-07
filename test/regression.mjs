@@ -36,6 +36,30 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.4: Deutsch + Stark mit Leo ----------
+console.log("== v0.4: Deutsch + Stark mit Leo ==");
+test("v0.4: APP_VERSION mindestens 0.4.0", versionMindestens("0.4.0"));
+test("v0.4: rn-006 vorhanden", releaseNoteVorhanden("rn-006"));
+test("v0.4: Deutsch-Pools mit Konvertern (gesch, ddPool, doppelPool)", (() => {
+  const d = quelle("src/calc/aufgaben/deutsch.js");
+  return d.includes("export const GESCH_DATEN") && d.includes("export function ddPool")
+    && d.includes("export function doppelPool") && d.includes("DEUTSCH_BEREICHE");
+})());
+test("v0.4: Stark-Pool mit Mut-Sätzen", (() => {
+  const s = quelle("src/calc/aufgaben/stark.js");
+  return s.includes("export const STARK_DATEN") && s.includes("export const STARK_SAETZE");
+})());
+test("v0.4: Üben kennt alle 4 Fächer (Deutsch · Mathe · Sachkunde · Stark)", (() => {
+  const u = quelle("src/features/Ueben.jsx");
+  return ["\"deutsch\"", "\"mathe\"", "\"sachkunde\"", "\"stark\""].every((f) => u.includes(f))
+    && u.includes("DEUTSCH_BEREICHE") && u.includes("STARK_BEREICHE");
+})());
+test("v0.4: kein Beschämungs-Vokabular in den Deutsch/Stark-Pools", (() => {
+  const t = quelle("src/calc/aufgaben/deutsch.js") + quelle("src/calc/aufgaben/stark.js");
+  return !/unmotiviert|Versager|dumm/i.test(t);
+})());
+
+
 // ---------- v0.3.1: Cache-Regeln + version.json ----------
 console.log("== v0.3.1: Cache-Regeln + version.json ==");
 test("v0.3.1: APP_VERSION mindestens 0.3.1", versionMindestens("0.3.1"));

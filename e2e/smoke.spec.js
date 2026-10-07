@@ -79,10 +79,11 @@ test("Release-Notes öffnen und zurück", async ({ page }) => {
   await expect(page.getByTestId("start-seite")).toBeVisible();
 });
 
-test("Übungsrunde Mathe: 10 Aufgaben, Münze, Stufe 2 freigeschaltet", async ({ page }) => {
+test("Übungsrunde Mathe: 10 Aufgaben, Münze, Stufe 3 freigeschaltet", async ({ page }) => {
   await tresorAnlegen(page);
   await page.getByTestId("zum-ueben").click();
   await expect(page.getByTestId("ueben-bereiche")).toBeVisible();
+  await page.getByTestId("ueben-fach-mathe").click();
   await page.getByTestId("bereich-mrechnen").click();
   await expect(page.getByTestId("frage-karte")).toBeVisible();
 
@@ -121,4 +122,22 @@ test("Sachkunde-Runde zählt falsch beantwortete Aufgaben nicht als gelöst", as
   // mit Fehler: keine neue Stufe, aber die Münze für die Runde gibt es
   await expect(page.getByTestId("runde-ergebnis")).not.toContainText("freigeschaltet");
   await expect(page.getByTestId("runde-ergebnis")).toContainText("+1 Münze");
+});
+
+test("Deutsch: dass/das-Frage hat genau 2 Antworten, Stark mit Leo ist da", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("zum-ueben").click();
+  // Deutsch ist der Standard-Tab
+  await expect(page.getByTestId("bereich-gesch")).toBeVisible();
+  await page.getByTestId("bereich-dd").click();
+  await expect(page.getByTestId("frage-karte")).toBeVisible();
+  await expect(page.getByTestId("frage-text")).toContainText("___");
+  await expect(page.locator('[data-test="antwort-opt"]')).toHaveCount(2);
+  await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+  await expect(page.getByTestId("feedback")).toContainText("Richtig");
+  // Stark-Tab
+  await page.getByTestId("abbrechen").click();
+  await page.getByTestId("ueben-fach-stark").click();
+  await page.getByTestId("bereich-stark").click();
+  await expect(page.getByTestId("frage-karte")).toBeVisible();
 });

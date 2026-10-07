@@ -34,13 +34,14 @@ export function antwortRichtig(aufgabe, wahl) {
   return wahl === aufgabe.r;
 }
 
-/** Datenqualität eines Pools (für Tests und Regression). */
+/** Datenqualität eines Pools (für Tests und Regression).
+    1–2 Falsch-Antworten: dass/das hat natürlich nur eine Alternative. */
 export function poolGesund(pool) {
   const alle = [...(pool.easy || []), ...(pool.hard || [])];
   return alle.length > 0 && alle.every(
     (a) => typeof a.f === "string" && a.f
       && typeof a.r === "string" && a.r
-      && Array.isArray(a.x) && a.x.length === 2 && !a.x.includes(a.r)
+      && Array.isArray(a.x) && a.x.length >= 1 && a.x.length <= 2 && !a.x.includes(a.r)
       && typeof a.tipp === "string" && a.tipp,
   );
 }

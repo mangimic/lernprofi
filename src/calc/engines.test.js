@@ -5,6 +5,8 @@ import { PAKET_GROESSE, paketWaehlen, antwortOptionen, antwortRichtig, poolGesun
 import { muenzenNachRunde, aufgabenZaehlen, heutigerTag, lernspur, MISSIONS_LAENGE } from "./lerntage.js";
 import { MATHE_DATEN, MATHE_BEREICHE } from "./aufgaben/mathe.js";
 import { SACH_DATEN, SACH_BEREICHE } from "./aufgaben/sachkunde.js";
+import { GESCH_DATEN, ddPool, doppelPool, DEUTSCH_BEREICHE } from "./aufgaben/deutsch.js";
+import { STARK_DATEN, STARK_SAETZE } from "./aufgaben/stark.js";
 
 // Fiktive Fixtures – niemals echte Daten.
 const HEUTE = "2026-01-15";
@@ -95,8 +97,34 @@ describe("aufgabenRunde", () => {
   });
 
   it("keine Beschämungs-/Diagnosesprache in den Pools", () => {
-    const alles = JSON.stringify(MATHE_DATEN) + JSON.stringify(SACH_DATEN);
+    const alles = JSON.stringify(MATHE_DATEN) + JSON.stringify(SACH_DATEN)
+      + JSON.stringify(GESCH_DATEN) + JSON.stringify(STARK_DATEN)
+      + JSON.stringify(ddPool()) + JSON.stringify(doppelPool());
     expect(/ADHS|Störung|unmotiviert|Versager|dumm/i.test(alles)).toBe(false);
+  });
+
+  it("Deutsch-Pools: Geschichten-Werkstatt, dass/das und Doppel-Konverter sind gesund", () => {
+    expect(DEUTSCH_BEREICHE.map((b) => b.key)).toEqual(["gesch", "dd", "doppel"]);
+    expect(poolGesund(GESCH_DATEN)).toBe(true);
+    const dd = ddPool();
+    expect(poolGesund(dd)).toBe(true);
+    expect(dd.easy.length).toBeGreaterThanOrEqual(20);
+    // dass/das: Lösung und Alternative sind immer das Gegenpaar
+    expect(dd.easy.every((a) => ["das", "dass"].includes(a.r)
+      && a.x.length === 1 && a.x[0] === (a.r === "das" ? "dass" : "das")
+      && a.f.includes("___"))).toBe(true);
+    const dp = doppelPool();
+    expect(poolGesund(dp)).toBe(true);
+    expect(dp.easy.length).toBeGreaterThanOrEqual(24);
+    // Doppel: die richtige Schreibweise ist länger als die falsche (Doppelbuchstabe)
+    expect(dp.easy.every((a) => a.r.length === a.x[0].length + 1)).toBe(true);
+  });
+
+  it("Stark-mit-Leo-Pool und Mut-Sätze sind vollständig", () => {
+    expect(poolGesund(STARK_DATEN)).toBe(true);
+    expect(STARK_DATEN.easy.length).toBe(17);
+    expect(STARK_DATEN.hard.length).toBe(24);
+    expect(STARK_SAETZE.length).toBe(16);
   });
 });
 

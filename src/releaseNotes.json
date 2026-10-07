@@ -1,5 +1,16 @@
 [
   {
+    "id": "rn-006",
+    "version": "0.4.0",
+    "datum": "2026-10-07",
+    "titel": "Deutsch und Stark mit Leo ziehen ein",
+    "entries": [
+      { "type": "neu", "text": "Im Üben-Tab gibt es jetzt 📗 Deutsch mit drei Bereichen: Geschichten-Werkstatt (Aufbau, Überschriften, wörtliche Rede), „das oder dass?“ (24 Sätze mit der dieses/welches-Probe als Tipp) und Doppelte Mitlaute (32 Wörter: richtige gegen falsche Schreibweise)." },
+      { "type": "neu", "text": "💪 Stark mit Leo ist da: alle 41 Mut-Situationen zu Freundschaft, Grenzen und Stehauf-Kraft – mit bestärkendem Tipp zu jeder Antwort." },
+      { "type": "hinweis", "text": "Die Antipp-Übungen (Subjekt, Satzglieder umstellen, Groß/Klein, wörtliche Rede setzen) brauchen ihre eigene Oberfläche und folgen in der nächsten Etappe." }
+    ]
+  },
+  {
     "id": "rn-005",
     "version": "0.3.1",
     "datum": "2026-10-07",
