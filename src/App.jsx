@@ -5,7 +5,7 @@ import Ueben from "./features/Ueben.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.3.0";
+export const APP_VERSION = "0.3.1";
 
 const RN_TYP = {
   neu: "✨ Neu",

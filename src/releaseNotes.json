@@ -1,5 +1,15 @@
 [
   {
+    "id": "rn-005",
+    "version": "0.3.1",
+    "datum": "2026-10-07",
+    "titel": "Updates kommen jetzt sofort an",
+    "entries": [
+      { "type": "fix", "text": "Nach einem Update zeigte der Browser manchmal noch die alte Version an. Die Startdatei wird jetzt mit „no-cache“ ausgeliefert (der Browser fragt bei jedem Start kurz nach), die Bausteine mit langem Cache – schnell UND aktuell." },
+      { "type": "technik", "text": "Neu: /version.json (Version, Datum, Git-Stand, niemals gecacht) – damit lässt sich jederzeit prüfen, welche Version wirklich live ist." }
+    ]
+  },
+  {
     "id": "rn-004",
     "version": "0.3.0",
     "datum": "2026-10-07",

@@ -36,6 +36,21 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.3.1: Cache-Regeln + version.json ----------
+console.log("== v0.3.1: Cache-Regeln + version.json ==");
+test("v0.3.1: APP_VERSION mindestens 0.3.1", versionMindestens("0.3.1"));
+test("v0.3.1: rn-005 vorhanden", releaseNoteVorhanden("rn-005"));
+test("v0.3.1: index.html no-cache, assets immutable, version.json no-store", (() => {
+  const h = quelle("public/_headers");
+  return /\/index\.html\n  Cache-Control: no-cache/.test(h)
+    && /\/assets\/\*\n  Cache-Control: public, max-age=31536000, immutable/.test(h)
+    && /\/version\.json\n  Cache-Control: no-store/.test(h);
+})());
+test("v0.3.1: Build schreibt dist/version.json mit Version, Datum und Git-Hash", (() => {
+  const v = quelle("vite.config.js");
+  return v.includes("dist/version.json") && v.includes("appVersion()") && v.includes("rev-parse");
+})());
+
 // ---------- v0.3: Fachlogik Mathe + Sachkunde ----------
 console.log("== v0.3: Fachlogik Mathe + Sachkunde ==");
 test("v0.3: APP_VERSION mindestens 0.3.0", versionMindestens("0.3.0"));
