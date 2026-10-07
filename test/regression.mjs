@@ -36,6 +36,34 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.15: Satzglieder umstellen ----------
+console.log("== v0.15: Satzglieder umstellen ==");
+test("v0.15: APP_VERSION mindestens 0.15.0", versionMindestens("0.15.0"));
+test("v0.15: rn-018 vorhanden", releaseNoteVorhanden("rn-018"));
+test("v0.15: alle 9 Original-Aufgaben (5 Umstellen + 4 Zeit/Ort) in reiner calc-Logik", (() => {
+  const q = quelle("src/calc/aufgaben/satzglieder.js");
+  return q.includes("SG_UM_AUFGABEN") && q.includes("umstellenPruefen")
+    && q.includes('"Nico", "hat", "ein Aquarium", "im Zimmer"')
+    && q.includes('"morgens", "füttert", "Opa", "auf dem Bauernhof", "die Hühner"')
+    && q.includes("ort: null");
+})());
+test("v0.15: Regel geprüft (anders als Ausgangssatz + Prädikat an 2. Stelle)", (() => {
+  const q = quelle("src/calc/aufgaben/satzglieder.js");
+  return q.includes("gleich") && q.includes("folge[1] === aufgabe.verb")
+    && q.includes("charAt(0).toUpperCase()");
+})());
+test("v0.15: Übungstyp umstellen im Üben-Bereich (Bausteine, Neu bauen, Keine da)", (() => {
+  const u = quelle("src/features/Ueben.jsx");
+  return u.includes('typ: "umstellen"') && u.includes('data-test="um-chip"')
+    && u.includes('data-test="um-reset"') && u.includes('data-test="zo-keine"')
+    && u.includes("ANDERE Reihenfolge") && u.includes("KEINE Ortsbestimmung");
+})());
+test("v0.15: Zeit/Ort in Schulfarben (Zeit orange, Ort grün)", (() => {
+  const u = quelle("src/features/Ueben.jsx");
+  return u.includes("#c77800") && u.includes("#1e6b34")
+    && u.includes("#ffd9a0") && u.includes("#c9edcc");
+})());
+
 // ---------- v0.14: Schach ----------
 console.log("== v0.14: Schach ==");
 test("v0.14: APP_VERSION mindestens 0.14.0", versionMindestens("0.14.0"));

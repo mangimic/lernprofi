@@ -4,6 +4,7 @@ import { MATHE_DATEN, MATHE_BEREICHE } from "../calc/aufgaben/mathe.js";
 import { SACH_DATEN, SACH_BEREICHE } from "../calc/aufgaben/sachkunde.js";
 import { GESCH_DATEN, ddPool, doppelPool, DEUTSCH_BEREICHE } from "../calc/aufgaben/deutsch.js";
 import { subjektPool, praedikatPool, gkPool } from "../calc/aufgaben/saetze.js";
+import { umstellenPool, umSatzText, umstellenPruefen } from "../calc/aufgaben/satzglieder.js";
 import { zeitPool, wortartenPool, faellePool, redePool, gwsPool } from "../calc/aufgaben/deutschKonverter.js";
 import { STARK_DATEN, STARK_BEREICHE } from "../calc/aufgaben/stark.js";
 import { rngAusSeed } from "../calc/rng.js";
@@ -12,19 +13,21 @@ import { paketWaehlen, antwortOptionen, antwortRichtig } from "../calc/aufgabenR
 import { auswahlPruefen } from "../calc/wortTippen.js";
 import { muenzenNachRunde, aufgabenZaehlen, heutigerTag, lernspur } from "../calc/lerntage.js";
 
-/* Üben: zwei Übungstypen über denselben Runden-/Stufen-/Münz-Mechanismus:
-   - "mc":     Frage mit 2-3 Antwort-Knöpfen (Mathe, Sachkunde, Deutsch-MC, Stark)
-   - "tippen": Wörter im Satz antippen (Subjekte, Prädikate, Groß & Klein)
-   Feinschliff (Fokus-Modus, weitere Deutsch-Typen) folgt in Etappe 4. */
+/* Üben: drei Übungstypen über denselben Runden-/Stufen-/Münz-Mechanismus:
+   - "mc":        Frage mit 2-3 Antwort-Knöpfen (Mathe, Sachkunde, Deutsch-MC, Stark)
+   - "tippen":    Wörter im Satz antippen (Subjekte, Prädikate, Groß & Klein)
+   - "umstellen": Satzglied-Bausteine neu zusammenbauen + Zeit/Ort erkennen
+   Feinschliff (Fokus-Modus) folgt später. */
 
 const DEUTSCH_DATEN = {
   subj: subjektPool(), praed: praedikatPool(), gk: gkPool(), rede: redePool(),
   zeit: zeitPool(), wa: wortartenPool(), faelle: faellePool(), gws: gwsPool(),
-  gesch: GESCH_DATEN, dd: ddPool(), doppel: doppelPool(),
+  gesch: GESCH_DATEN, dd: ddPool(), doppel: doppelPool(), satzglied: umstellenPool(),
 };
 const DEUTSCH_LISTE = [
   { key: "subj", emoji: "🔎", name: "Subjekte", typ: "tippen" },
   { key: "praed", emoji: "🧲", name: "Prädikate", typ: "tippen" },
+  { key: "satzglied", emoji: "🔀", name: "Satzglieder umstellen", typ: "umstellen" },
   { key: "rede", emoji: "💬", name: "Wörtliche Rede", typ: "tippen" },
   { key: "zeit", emoji: "⏳", name: "Zeitformen" },
   { key: "wa", emoji: "🏷️", name: "Wortarten" },
@@ -64,11 +67,20 @@ export default function Ueben() {
       gewaehlt: null,   // mc: gewählte Antwort
       auswahl: [],      // tippen: gewählte Wort-Indizes
       geprueft: null,   // tippen: Ergebnis von auswahlPruefen
+      folge: [],        // umstellen: gebaute Reihenfolge
+      zoPhase: "zeit",  // umstellen (Zeit/Ort): erst Wann?, dann Wo?
+      fertig: false,    // umstellen: Aufgabe gelöst
+      fehlversuch: false,
+      meldung: null,    // umstellen: { ok, text }
       ergebnis: null,
     });
   };
 
-  const beantwortet = runde ? (runde.typ === "mc" ? runde.gewaehlt !== null : runde.geprueft !== null) : false;
+  const beantwortet = runde
+    ? (runde.typ === "mc" ? runde.gewaehlt !== null
+      : runde.typ === "umstellen" ? runde.fertig
+      : runde.geprueft !== null)
+    : false;
 
   const antwortenMc = (wahl) => {
     if (runde.gewaehlt !== null) return;
@@ -87,9 +99,78 @@ export default function Ueben() {
     setRunde({ ...runde, geprueft: erg, fehler: runde.fehler + (erg.richtig ? 0 : 1), geloest: runde.geloest + (erg.richtig ? 1 : 0) });
   };
 
+  // --- Umstellen: Satz neu bauen (Prädikat an 2. Stelle) ---
+  const umChip = (i) => {
+    if (runde.fertig || runde.folge.includes(i)) return;
+    const a = runde.aufgaben[runde.index];
+    const folge = [...runde.folge, i];
+    if (folge.length < a.teile.length) { setRunde({ ...runde, folge, meldung: null }); return; }
+    const erg = umstellenPruefen(a, folge);
+    if (erg.richtig) {
+      setRunde({
+        ...runde, folge, fertig: true, geloest: runde.geloest + (runde.fehlversuch ? 0 : 1),
+        meldung: { ok: true, text: "Super umgestellt! 🌟 Das Prädikat steht an 2. Stelle – der Satz stimmt." },
+      });
+    } else {
+      setRunde({
+        ...runde, folge: [], fehlversuch: true, fehler: runde.fehler + 1,
+        meldung: {
+          ok: false,
+          text: erg.grund === "gleich"
+            ? "Das ist noch der Ausgangssatz – stelle die Satzglieder in eine ANDERE Reihenfolge!"
+            : `Fast! Das Prädikat (die Verb-Karte „${a.teile[a.verb]}“) muss an 2. Stelle stehen.`,
+        },
+      });
+    }
+  };
+
+  // --- Umstellen (Zeit/Ort): erst die Zeit-, dann die Ortsbestimmung ---
+  const zoChip = (i) => {
+    if (runde.fertig) return;
+    const a = runde.aufgaben[runde.index];
+    if (runde.zoPhase === "zeit") {
+      if (i === a.zeit) {
+        setRunde({ ...runde, zoPhase: "ort", meldung: { ok: true, text: "Genau, das ist die Zeitbestimmung! 🕐" } });
+      } else {
+        setRunde({ ...runde, fehlversuch: true, fehler: runde.fehler + 1, meldung: { ok: false, text: "Das ist keine Zeitbestimmung. Frage dich: WANN passiert es?" } });
+      }
+    } else if (a.ort !== null && i === a.ort) {
+      setRunde({
+        ...runde, fertig: true, geloest: runde.geloest + (runde.fehlversuch ? 0 : 1),
+        meldung: { ok: true, text: "Richtig, das ist die Ortsbestimmung! 📍🌟" },
+      });
+    } else {
+      setRunde({
+        ...runde, fehlversuch: true, fehler: runde.fehler + 1,
+        meldung: {
+          ok: false,
+          text: a.ort === null
+            ? "Schau genau: Sagt dieses Satzglied wirklich, WO etwas passiert?"
+            : "Das ist kein Ort. Frage dich: WO passiert es?",
+        },
+      });
+    }
+  };
+
+  const zoKeine = () => {
+    if (runde.fertig || runde.zoPhase !== "ort") return;
+    const a = runde.aufgaben[runde.index];
+    if (a.ort === null) {
+      setRunde({
+        ...runde, fertig: true, geloest: runde.geloest + (runde.fehlversuch ? 0 : 1),
+        meldung: { ok: true, text: "Stark! Dieser Satz hat wirklich KEINE Ortsbestimmung. 🌟" },
+      });
+    } else {
+      setRunde({ ...runde, fehlversuch: true, fehler: runde.fehler + 1, meldung: { ok: false, text: "Doch, eine Ortsbestimmung versteckt sich im Satz. WO passiert es?" } });
+    }
+  };
+
   const weiter = () => {
     if (runde.index + 1 < runde.aufgaben.length) {
-      setRunde({ ...runde, index: runde.index + 1, gewaehlt: null, auswahl: [], geprueft: null });
+      setRunde({
+        ...runde, index: runde.index + 1, gewaehlt: null, auswahl: [], geprueft: null,
+        folge: [], zoPhase: "zeit", fertig: false, fehlversuch: false, meldung: null,
+      });
       return;
     }
     const pool = fach.daten[runde.key];
@@ -172,6 +253,76 @@ export default function Ueben() {
                 </p>
               )}
             </>
+          ) : runde.typ === "umstellen" ? (
+            <>
+              {a.art === "um" ? (
+                <>
+                  <p data-test="frage-text" style={{ margin: "10px 0 4px" }}>
+                    Ausgangssatz: <b style={{ fontSize: "var(--schrift-gross)" }}>{umSatzText(a.teile, a.teile.map((_, i) => i))}</b>
+                  </p>
+                  <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+                    💡 Baue ihn <b>NEU</b> – das Prädikat (Verb) bleibt an <b>2. Stelle</b>.
+                  </p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {a.teile.map((t2, i) => (
+                      <button key={i} data-test="um-chip" data-i={i}
+                        disabled={runde.fertig || runde.folge.includes(i)} onClick={() => umChip(i)}
+                        style={{
+                          background: runde.folge.includes(i) ? T.primaer : T.weich,
+                          color: runde.folge.includes(i) ? T.primaerText : T.text,
+                          fontWeight: 700, padding: "0 12px",
+                        }}>
+                        {t2}
+                      </button>
+                    ))}
+                  </div>
+                  <p data-test="um-bau" style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px", minHeight: 24, fontWeight: 700 }}>
+                    {runde.folge.length
+                      ? (runde.fertig ? umSatzText(a.teile, runde.folge) : runde.folge.map((i) => a.teile[i]).join(" ") + " …")
+                      : " "}
+                  </p>
+                  {!runde.fertig && runde.folge.length > 0 && (
+                    <button data-test="um-reset" onClick={() => setRunde({ ...runde, folge: [], meldung: null })}
+                      style={{ background: "transparent", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+                      🔄 Neu bauen
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p data-test="frage-text" style={{ fontSize: "var(--schrift)", fontWeight: 700, margin: "10px 0" }}>
+                    {runde.zoPhase === "zeit"
+                      ? <>Tippe die <span style={{ color: "#c77800" }}>Zeitbestimmung</span> an! <span style={{ color: T.textLeise, fontWeight: 400 }}>(Wann?)</span></>
+                      : <>Und jetzt: Tippe die <span style={{ color: "#1e6b34" }}>Ortsbestimmung</span> an! <span style={{ color: T.textLeise, fontWeight: 400 }}>(Wo?)</span></>}
+                  </p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {a.teile.map((t2, i) => {
+                      const zeitOk = runde.zoPhase === "ort" && i === a.zeit;
+                      const ortOk = runde.fertig && a.ort !== null && i === a.ort;
+                      return (
+                        <button key={i} data-test="zo-chip" data-i={i} disabled={runde.fertig} onClick={() => zoChip(i)}
+                          style={{
+                            background: ortOk ? "#c9edcc" : zeitOk ? "#ffd9a0" : T.weich,
+                            color: zeitOk || ortOk ? "#333" : T.text,
+                            fontWeight: 700, padding: "0 12px",
+                          }}>
+                          {t2}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {runde.zoPhase === "ort" && !runde.fertig && (
+                    <button data-test="zo-keine" onClick={zoKeine}
+                      style={{ marginTop: 10, background: T.weich, color: T.text, fontWeight: 700 }}>
+                      🚫 Keine da!
+                    </button>
+                  )}
+                </>
+              )}
+              {runde.meldung && (
+                <p data-test="feedback" style={{ color: runde.meldung.ok ? T.ok : T.warn }}>{runde.meldung.text}</p>
+              )}
+            </>
           ) : (
             <>
               <p data-test="frage-text" style={{ fontSize: "var(--schrift)", fontWeight: 700, margin: "10px 0" }}>{a.frage}</p>
@@ -251,8 +402,8 @@ export default function Ueben() {
         );
       })}
       <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-        Vorschau: Weitere Deutsch-Typen (Satzglieder umstellen, wörtliche Rede,
-        Zeitformen, Grundwortschatz), Spiele und der Feinschliff folgen.
+        Tipp: Eine fehlerfreie Runde schaltet die nächste Stufe frei – und jede
+        Runde bringt eine 🪙 Münze für die Spielhalle.
       </p>
     </div>
   );

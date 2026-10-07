@@ -471,3 +471,40 @@ test("Schach: Schule spielt Züge vor, Taktik-Aufgabe, echter Zug gegen den Comp
   await page.getByTestId("sch-undo").click();
   await expect(page.locator('[data-feld="52"]')).toHaveText(/♙/);
 });
+
+test("Satzglieder umstellen: Umstellprobe mit Regel-Feedback und Zeit/Ort-Erkennung", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("nav-ueben").click();
+  await page.getByTestId("bereich-satzglied").click();
+
+  const chip = (i) => page.locator(`[data-test="um-chip"][data-i="${i}"]`);
+  // Aufgabe 1: erst der Ausgangssatz (Fehlversuch), dann richtig umgestellt
+  for (const i of [0, 1, 2, 3]) await chip(i).click();
+  await expect(page.getByTestId("feedback")).toContainText("ANDERE Reihenfolge");
+  for (const i of [3, 1, 0, 2]) await chip(i).click();
+  await expect(page.getByTestId("feedback")).toContainText("Super umgestellt");
+  await expect(page.getByTestId("um-bau")).toContainText("Im Zimmer hat Nico ein Aquarium.");
+  await page.getByTestId("weiter-knopf").click();
+  // Aufgaben 2–5 (Verb immer an Index 1): [2,1,0,3] ist stets eine gültige Umstellung
+  for (let n = 0; n < 4; n++) {
+    for (const i of [2, 1, 0, 3]) await chip(i).click();
+    await expect(page.getByTestId("feedback")).toContainText("Super umgestellt");
+    await page.getByTestId("weiter-knopf").click();
+  }
+  // Aufgabe 6 (Zeit/Ort ohne Ortsbestimmung): Zeit antippen, dann „Keine da!“
+  const zo = (i) => page.locator(`[data-test="zo-chip"][data-i="${i}"]`);
+  await zo(0).click();
+  await expect(page.getByTestId("feedback")).toContainText("Zeitbestimmung");
+  await page.getByTestId("zo-keine").click();
+  await expect(page.getByTestId("feedback")).toContainText("KEINE Ortsbestimmung");
+  await page.getByTestId("weiter-knopf").click();
+  // Aufgaben 7–9: Zeit = Baustein 0, Ort = Baustein 3
+  for (let n = 0; n < 3; n++) {
+    await zo(0).click();
+    await zo(3).click();
+    await expect(page.getByTestId("feedback")).toContainText("Ortsbestimmung! 📍");
+    await page.getByTestId("weiter-knopf").click();
+  }
+  // 8 von 9 gelöst (Aufgabe 1 hatte einen Fehlversuch)
+  await expect(page.getByTestId("runde-ergebnis")).toContainText("8 von 9");
+});

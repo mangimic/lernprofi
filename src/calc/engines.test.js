@@ -355,3 +355,24 @@ describe("schachLogik (echte Regeln)", () => {
     }
   });
 });
+
+describe("satzglieder umstellen", () => {
+  it("Pool gesund, Satzbau mit großem Anfang und Punkt", async () => {
+    const S = await import("./aufgaben/satzglieder.js");
+    expect(S.SG_UM_AUFGABEN.length).toBe(9);
+    expect(S.SG_UM_AUFGABEN.filter((a) => a.art === "um").length).toBe(5);
+    expect(S.SG_UM_AUFGABEN.filter((a) => a.art === "zo").length).toBe(4);
+    expect(S.umstellenGesund()).toBe(true);
+    const a = S.SG_UM_AUFGABEN[1]; // "tagsüber sitzt der Wasserfrosch …"
+    expect(S.umSatzText(a.teile, [0, 1, 2, 3])).toBe("Tagsüber sitzt der Wasserfrosch auf einem Seerosenblatt.");
+    expect(S.umSatzText(a.teile, [2, 1, 0, 3])).toBe("Der Wasserfrosch sitzt tagsüber auf einem Seerosenblatt.");
+  });
+
+  it("Prüfung: anders als Ausgangssatz UND Prädikat an 2. Stelle", async () => {
+    const S = await import("./aufgaben/satzglieder.js");
+    const a = S.SG_UM_AUFGABEN[0]; // verb an Index 1
+    expect(S.umstellenPruefen(a, [3, 1, 0, 2])).toEqual({ richtig: true, grund: null });
+    expect(S.umstellenPruefen(a, [0, 1, 2, 3])).toEqual({ richtig: false, grund: "gleich" });
+    expect(S.umstellenPruefen(a, [1, 0, 2, 3])).toEqual({ richtig: false, grund: "verb" });
+  });
+});

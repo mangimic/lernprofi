@@ -1,5 +1,16 @@
 [
   {
+    "id": "rn-018",
+    "version": "0.15.0",
+    "datum": "2026-10-07",
+    "titel": "Satzglieder umstellen",
+    "entries": [
+      { "type": "neu", "text": "🔀 Der Deutsch-Bereich „Satzglieder umstellen“ ist umgezogen (nach Könnernachweis 8 „Sprache untersuchen“): Baue Sätze aus Satzglied-Bausteinen NEU zusammen – die Regel: Das Prädikat bleibt an 2. Stelle, und die Reihenfolge muss sich vom Ausgangssatz unterscheiden." },
+      { "type": "neu", "text": "🕐📍 Dazu Zeit- und Ortsbestimmungen erkennen: erst die Zeitbestimmung (Wann?) antippen, dann die Ortsbestimmung (Wo?) – inklusive Sätzen, die gar KEINE Ortsbestimmung haben („🚫 Keine da!“). Die Schulfarben (Zeit = orange, Ort = grün) sind wie im Original." },
+      { "type": "verbessert", "text": "Am Satzanfang wird der erste Buchstabe automatisch groß – die Bausteine stehen wie auf den Schul-Kärtchen in Satzmitte-Schreibung. Alle 9 Original-Aufgaben sind 1:1 übernommen; der Fortschritt zählt wie gewohnt in Stufen, Münzen und Mini-Missionen." }
+    ]
+  },
+  {
     "id": "rn-017",
     "version": "0.14.0",
     "datum": "2026-10-07",
