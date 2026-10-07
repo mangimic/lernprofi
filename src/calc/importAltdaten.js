@@ -129,6 +129,12 @@ export function importAltdaten(roh, heute) {
     hinzu("Konzentrations-Training", "übernommen", "Zahlenkette, ABC-Bestwerte und Blitzlese-Runden");
   }
 
+  // Vorgangsbeschreibung: gewählter Ablauf (z. B. Waffelrezept)
+  if (alt.vorgang && typeof alt.vorgang === "object" && typeof alt.vorgang.rezept === "string") {
+    dokument.lernstand.vorgang = { rezept: alt.vorgang.rezept };
+    hinzu("Vorgangsbeschreibung", "übernommen", "Gewählter Ablauf bleibt eingestellt");
+  }
+
   // Mut-Satz des Tages
   if (alt.mutSatz && typeof alt.mutSatz === "object" && typeof alt.mutSatz.tag === "string") {
     dokument.lernstand.mutSatz = {

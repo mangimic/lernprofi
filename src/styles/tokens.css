@@ -175,3 +175,16 @@ button {
 .sch-feld.gruen { box-shadow: inset 0 0 0 3px #3f9d54; background: #d9f0dd; }
 .sch-feld.ziel::after { content: ""; position: absolute; width: 26%; height: 26%; border-radius: 50%;
   background: rgba(74, 127, 214, 0.55); }
+
+/* 📝 Vorgangsbeschreibung: Arbeitsblatt (Schreiblinien, Kästchen, Druck) */
+.vg-zeile { height: 26px; border-bottom: 2px solid var(--rand); margin: 6px 0; }
+.vg-kasten { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--text-leise);
+  border-radius: 3px; vertical-align: -2px; margin-right: 6px; }
+@media print {
+  body[data-druck] * { visibility: hidden; }
+  body[data-druck] .vg-druck, body[data-druck] .vg-druck * { visibility: visible; }
+  body[data-druck] .vg-druck { position: absolute; left: 0; top: 0; width: 100%;
+    background: #fff !important; color: #000; }
+  body[data-druck] .vg-zeile { border-bottom-color: #888; }
+  body[data-druck] .vg-kasten { border-color: #555; }
+}

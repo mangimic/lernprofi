@@ -36,6 +36,33 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.16: Vorgangsbeschreibung ----------
+console.log("== v0.16: Vorgangsbeschreibung ==");
+test("v0.16: APP_VERSION mindestens 0.16.0", versionMindestens("0.16.0"));
+test("v0.16: rn-019 vorhanden", releaseNoteVorhanden("rn-019"));
+test("v0.16: alle 7 Original-Abläufe in reiner calc-Logik", (() => {
+  const q = quelle("src/calc/aufgaben/vorgang.js");
+  return ["waffel", "toast", "flieger", "fahrrad", "angeln", "tennis", "fussball"].every((k) => q.includes(k + ":{"))
+    && q.includes("Waffeleisen") && q.includes("anfangRichtig") && q.includes("vgStrip");
+})());
+test("v0.16: drei Übungs-Spiele + Arbeitsblatt + Lösungs-Hürde + Selbst-Check", (() => {
+  const v = quelle("src/features/Vorgang.jsx");
+  return v.includes("vg-tab-${") && v.includes("vg-utab-${")
+    && ["ordnen", "anfang", "zutaten", "grundlagen"].every((t) => v.includes(`"${t}"`))
+    && v.includes('data-test="vg-drucken"') && v.includes("tries >= 3 && geschrieben >= 3")
+    && v.includes("KRIT_INHALT") && v.includes("mit der Hand");
+})());
+test("v0.16: Spiele belohnen (Münze + Missionen), Stand im Tresor", (() => {
+  const v = quelle("src/features/Vorgang.jsx");
+  return v.includes("muenzenNachRunde") && v.includes("aufgabenZaehlen")
+    && quelle("src/calc/migrateData.js").includes("vorgang: null")
+    && quelle("src/calc/importAltdaten.js").includes("alt.vorgang");
+})());
+test("v0.16: Druck blendet nur das Arbeitsblatt ein", (() => {
+  const css = quelle("src/styles/tokens.css");
+  return css.includes("body[data-druck] .vg-druck") && css.includes("@media print");
+})());
+
 // ---------- v0.15: Satzglieder umstellen ----------
 console.log("== v0.15: Satzglieder umstellen ==");
 test("v0.15: APP_VERSION mindestens 0.15.0", versionMindestens("0.15.0"));

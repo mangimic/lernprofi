@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-019",
+    "version": "0.16.0",
+    "datum": "2026-10-07",
+    "titel": "Vorgangsbeschreibung",
+    "entries": [
+      { "type": "neu", "text": "📝 Die Vorgangsbeschreibung ist komplett umgezogen – mit allen 7 Abläufen (🧇 Waffelrezept, 🍞 Toast, ✈️ Papierflieger, 🚲 Fahrrad putzen, 🎣 Angeltag, 🎾 Tennis-Aufschlag, ⚽ Elfmeter) und den drei Übungs-Spielen: 🧩 Schritte ordnen, 🚦 Satzanfänge wählen und 🧺 Zutaten-Check mit Ablenkern aus anderen Rezepten." },
+      { "type": "neu", "text": "🖨️ Das Arbeitsblatt zum Drucken ist dabei: Aufgabe (Klasse 4 mit man-Form, Fachbegriffen und Bindewörtern), Überschrift- und Zutaten-Zeilen, die 5 Schritt-Stichworte und die Checkliste – geschrieben wird wie in der Schule MIT DER HAND." },
+      { "type": "neu", "text": "🔑 Die Muster-Lösung gibt es erst nach der Fleiß-Hürde (3× „Ich habe es versucht“ + mindestens 3 Schritte abgehakt) – und 🌸 der Selbst-Check mit den 12 Schul-Kriterien (Inhalt/Sprache/Form) wird im Tresor gespeichert." },
+      { "type": "verbessert", "text": "Jedes abgeschlossene Übungs-Spiel bringt 1 🪙 Münze und zählt in die Mini-Missionen; der gewählte Ablauf wandert bei der Datenübernahme aus der Alt-App mit." }
+    ]
+  },
+  {
     "id": "rn-018",
     "version": "0.15.0",
     "datum": "2026-10-07",

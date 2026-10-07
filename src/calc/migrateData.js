@@ -25,6 +25,7 @@ export function leeresDokument(heute) {
       blockwelt: null,     // dauerhafte Spiel-Welt (Raster, Inventar, Meilensteine)
       konzentration: null, // Zahlenkette, ABC-Bestwerte, Blitzlese-Runden
       mutSatz: { tag: "", idx: 0 }, // Mut-Satz des Tages (Stark mit Leo)
+      vorgang: null,       // Vorgangsbeschreibung: gewählter Ablauf + Selbst-Check
     },
     einstellungen: {
       thema: "hell",   // "hell" | "dunkel"
@@ -59,6 +60,7 @@ export function migrateData(alt, heute) {
   if (!istObjekt(d.lernstand.rekorde)) d.lernstand.rekorde = {};
   if (!istObjekt(d.lernstand.blockwelt)) d.lernstand.blockwelt = null;
   if (!istObjekt(d.lernstand.konzentration)) d.lernstand.konzentration = null;
+  if (!istObjekt(d.lernstand.vorgang)) d.lernstand.vorgang = null;
   const mut = istObjekt(d.lernstand.mutSatz) ? d.lernstand.mutSatz : {};
   d.lernstand.mutSatz = {
     tag: typeof mut.tag === "string" ? mut.tag : "",

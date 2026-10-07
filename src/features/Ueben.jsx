@@ -12,6 +12,7 @@ import { aktiveStufe, leererFortschritt, rundeAbschliessen, STUFEN_NAMEN, stufen
 import { paketWaehlen, antwortOptionen, antwortRichtig } from "../calc/aufgabenRunde.js";
 import { auswahlPruefen } from "../calc/wortTippen.js";
 import { muenzenNachRunde, aufgabenZaehlen, heutigerTag, lernspur } from "../calc/lerntage.js";
+import Vorgang from "./Vorgang.jsx";
 
 /* Üben: drei Übungstypen über denselben Runden-/Stufen-/Münz-Mechanismus:
    - "mc":        Frage mit 2-3 Antwort-Knöpfen (Mathe, Sachkunde, Deutsch-MC, Stark)
@@ -35,6 +36,7 @@ const DEUTSCH_LISTE = [
   { key: "gk", emoji: "🔠", name: "Groß & Klein", typ: "tippen" },
   { key: "gws", emoji: "📖", name: "Grundwortschatz" },
   ...DEUTSCH_BEREICHE,
+  { key: "vorgang", emoji: "📝", name: "Vorgangsbeschreibung", typ: "modul" },
 ];
 
 const FAECHER = [
@@ -54,6 +56,7 @@ export default function Ueben() {
   const primaerKnopf = { width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 };
 
   const starten = (b) => {
+    if (b.typ === "modul") { setRunde({ typ: "modul", key: b.key }); return; }
     const pool = fach.daten[b.key];
     const fortschritt = data.lernstand.stufen[b.key] || leererFortschritt();
     const stufe = aktiveStufe(fortschritt, data.profil.klasse, pool, stufenVorgabe(data.einstellungen, b.key));
@@ -187,6 +190,11 @@ export default function Ueben() {
     logChange(neu, "ueben", "neu", `Runde ${runde.name} (Stufe ${runde.stufe}): ${runde.geloest} von ${runde.aufgaben.length} gelöst`);
     setRunde({ ...runde, ergebnis: erg });
   };
+
+  // --- Modul (Vorgangsbeschreibung): eigene Ansicht statt Runde ---
+  if (runde?.typ === "modul") {
+    return <Vorgang zurueck={() => setRunde(null)} />;
+  }
 
   // --- Ergebnis-Karte ---
   if (runde?.ergebnis) {
@@ -390,13 +398,14 @@ export default function Ueben() {
       </div>
       {fach.bereiche.map((b) => {
         const fortschritt = data.lernstand.stufen[b.key];
-        const stufe = aktiveStufe(fortschritt, data.profil.klasse, fach.daten[b.key], stufenVorgabe(data.einstellungen, b.key));
+        const stufe = b.typ === "modul" ? null
+          : aktiveStufe(fortschritt, data.profil.klasse, fach.daten[b.key], stufenVorgabe(data.einstellungen, b.key));
         return (
           <button key={b.key} data-test={`bereich-${b.key}`} onClick={() => starten(b)}
             style={{ ...karte, width: "100%", textAlign: "left", display: "block", border: `1px solid ${T.rand}` }}>
             <b>{b.emoji} {b.name}</b>
             <span style={{ float: "right", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-              🎯 Stufe {stufe}{fortschritt?.krone ? " 👑" : ""}
+              {stufe === null ? "✏️ Üben + Schreiben" : <>🎯 Stufe {stufe}{fortschritt?.krone ? " 👑" : ""}</>}
             </span>
           </button>
         );

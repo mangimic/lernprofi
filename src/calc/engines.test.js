@@ -376,3 +376,30 @@ describe("satzglieder umstellen", () => {
     expect(S.umstellenPruefen(a, [1, 0, 2, 3])).toEqual({ richtig: false, grund: "verb" });
   });
 });
+
+describe("vorgangsbeschreibung (Daten + Logik)", () => {
+  it("7 Abläufe gesund (5 Lösungs-Sätze, 5 Schritt-Stichworte, Zuerst/Zum Schluss)", async () => {
+    const V = await import("./aufgaben/vorgang.js");
+    expect(Object.keys(V.REZEPTE)).toEqual(["waffel", "toast", "flieger", "fahrrad", "angeln", "tennis", "fussball"]);
+    expect(V.vorgangGesund()).toBe(true);
+    expect(V.KRIT_INHALT.length + V.KRIT_SPRACHE.length + V.KRIT_FORM.length).toBe(12);
+    expect(V.zutatenListe(V.REZEPTE.toast)).toEqual(["2 Scheiben Toastbrot", "Butter", "Toaster", "Messer", "Teller"]);
+  });
+
+  it("Satzanfang-Logik: Zuerst am Start, Zum Schluss am Ende, Mitte flexibel", async () => {
+    const V = await import("./aufgaben/vorgang.js");
+    expect(V.anfangRichtig("Zuerst", 0, 5)).toBe(true);
+    expect(V.anfangRichtig("Danach", 0, 5)).toBe(false);
+    expect(V.anfangRichtig("Zum Schluss", 4, 5)).toBe(true);
+    expect(V.anfangRichtig("Nun", 2, 5)).toBe(true);
+    expect(V.anfangRichtig("Zum Schluss", 2, 5)).toBe(false);
+    expect(V.vgStrip("Zuerst lege ich den Ball hin.")).toBe("lege ich den Ball hin.");
+    expect(V.vgStrip("Zum Schluss esse ich den Toast.")).toBe("esse ich den Toast.");
+    for (let i = 0; i < 5; i++) {
+      const opts = V.anfangOptionen(i);
+      expect(opts.length).toBeGreaterThanOrEqual(3);
+      expect(opts.some((w) => V.anfangRichtig(w, i, 5))).toBe(true);
+      expect(opts.some((w) => !V.anfangRichtig(w, i, 5))).toBe(true);
+    }
+  });
+});

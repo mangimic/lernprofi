@@ -508,3 +508,60 @@ test("Satzglieder umstellen: Umstellprobe mit Regel-Feedback und Zeit/Ort-Erkenn
   // 8 von 9 gelöst (Aufgabe 1 hatte einen Fehlversuch)
   await expect(page.getByTestId("runde-ergebnis")).toContainText("8 von 9");
 });
+
+test("Vorgangsbeschreibung: Ablauf wählen, drei Spiele, Arbeitsblatt, Lösungs-Hürde, Selbst-Check", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("nav-ueben").click();
+  await page.getByTestId("bereich-vorgang").click();
+  await expect(page.getByTestId("vorgang")).toBeVisible();
+
+  // 📋 Ablauf: Toast wählen und loslegen
+  await page.locator('[data-test="vg-rezept"][data-key="toast"]').click();
+  await page.getByTestId("vg-los").click();
+  await page.getByTestId("vg-beispiel-knopf").click();
+  await expect(page.getByTestId("vg-beispiel")).toContainText("Toast");
+
+  // 🧩 Ordnen: ein Fehlversuch, dann alle 5 der Reihe nach
+  await page.getByTestId("vg-utab-ordnen").click();
+  await page.locator('[data-test="ord-schritt"][data-i="2"]').click();
+  await expect(page.getByTestId("vg-feedback")).toContainText("Was muss vorher passieren");
+  for (const i of [0, 1, 2, 3, 4]) await page.locator(`[data-test="ord-schritt"][data-i="${i}"]`).click();
+  await expect(page.getByTestId("ord-ergebnis")).toContainText("4 von 5");
+
+  // 🚦 Satzanfänge: 5 Sätze richtig (Mitte hat mehrere passende Anfänge)
+  await page.getByTestId("vg-utab-anfang").click();
+  for (let i = 0; i < 5; i++) {
+    await page.locator('[data-test="anf-opt"][data-richtig="1"]').first().click();
+    await expect(page.getByTestId("vg-feedback")).toContainText("Richtig");
+    await page.getByTestId("anf-weiter").click();
+  }
+  await expect(page.getByTestId("anf-ergebnis")).toContainText("5 von 5");
+
+  // 🧺 Zutaten-Check: genau die echten Zutaten einpacken → perfekt
+  await page.getByTestId("vg-utab-zutaten").click();
+  const echte = page.locator('[data-test="zut-karte"][data-echt="1"]');
+  const n = await echte.count();
+  for (let i = 0; i < n; i++) await echte.nth(i).click();
+  await page.getByTestId("zut-pruefen").click();
+  await expect(page.getByTestId("zut-ergebnis")).toContainText("Perfekt eingepackt");
+
+  // 🖨️ Arbeitsblatt (Klasse 4: man-Form-Aufgabe)
+  await page.getByTestId("vg-tab-blatt").click();
+  await expect(page.getByTestId("vg-blatt")).toContainText("Vorgangsbeschreibung: Toast machen");
+  await expect(page.getByTestId("vg-blatt")).toContainText("man-Form");
+
+  // 🔑 Lösung erst nach der Fleiß-Hürde (3 Versuche + 3 Schritte)
+  await page.getByTestId("vg-tab-loesung").click();
+  await expect(page.getByTestId("vg-loesung-zeigen")).toBeDisabled();
+  for (let i = 0; i < 3; i++) await page.getByTestId("vg-versuch").click();
+  for (let i = 0; i < 3; i++) await page.getByTestId("vg-geschrieben").nth(i).check();
+  await expect(page.getByTestId("vg-loesung-zeigen")).toBeEnabled();
+  await page.getByTestId("vg-loesung-zeigen").click();
+  await expect(page.getByTestId("vg-loesung")).toContainText("Zuerst nehme ich zwei Scheiben Toastbrot");
+
+  // 🌸 Selbst-Check zählt mit
+  await page.getByTestId("vg-tab-selbst").click();
+  await page.getByTestId("selbst-inhalt").first().check();
+  await page.getByTestId("selbst-form").last().check();
+  await expect(page.getByTestId("selbst-stand")).toContainText("2 von 12");
+});
