@@ -33,6 +33,6 @@ function versionJson() {
 export default defineConfig({
   plugins: [react(), versionJson()],
   test: {
-    include: ["src/**/*.test.js"],
+    include: ["src/**/*.test.js", "server/**/*.test.js"],
   },
 });

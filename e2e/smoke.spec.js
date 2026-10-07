@@ -70,6 +70,10 @@ test("Eltern-Zugang mit Passwort: Eltern-Tab, Import aus der Alt-App, Sperren", 
   await expect(page.getByTestId("eltern-karte")).toBeVisible();
   await page.getByTestId("ziel-3").click();
 
+  // Geräte-Abgleich: ohne Worker-API zeigt die Karte einen klaren Status (kein Crash)
+  await expect(page.getByTestId("eltern-sync")).toBeVisible();
+  await expect(page.getByTestId("eltern-sync")).not.toContainText("Prüfe Verbindung", { timeout: 10000 });
+
   // Alt-App-Export einspielen → Bericht + übernommene Werte
   const dateiWahl = page.waitForEvent("filechooser");
   await page.getByTestId("import-knopf").click();

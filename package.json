@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "oxlint src test e2e",
+    "lint": "oxlint src test e2e server",
     "test": "vitest run",
     "regression": "node test/regression.mjs",
     "smoke": "playwright test",

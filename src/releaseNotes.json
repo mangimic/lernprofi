@@ -1,5 +1,16 @@
 [
   {
+    "id": "rn-013",
+    "version": "0.10.0",
+    "datum": "2026-10-07",
+    "titel": "Geräte-Abgleich (Etappe 6)",
+    "entries": [
+      { "type": "neu", "text": "Der Elternbereich hat jetzt „☁️ Geräte-Abgleich“: Den verschlüsselten Tresor auf den Server sichern und auf iPad, Laptop und Handy holen – der Server sieht dabei nie Klartext, nur Chiffrat mit Revisionsnummer. Konflikte werden gemeldet und niemals still überschrieben." },
+      { "type": "hinweis", "text": "Zum Aktivieren einmalig den KV-Namespace anlegen und in wrangler.jsonc eintragen – Schritt-für-Schritt in docs/DEPLOY-CLOUDFLARE.md (dort steht auch die Cloudflare-Access-Einrichtung und der Ablauf für neue Geräte). Bis dahin zeigt die Karte „noch nicht eingerichtet“." },
+      { "type": "technik", "text": "Worker-API /api/meta und /api/vault (GET/PUT mit baseRev, 409 bei Konflikt, 401 ohne Access, Eingabe-Validierung) als reines Modul mit 5 Tests; Client-Sync in src/sync.js." }
+    ]
+  },
+  {
     "id": "rn-012",
     "version": "0.9.0",
     "datum": "2026-10-07",

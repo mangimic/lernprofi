@@ -1,6 +1,8 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useApp } from "../appContext.jsx";
 import { heutigerTag, lernspur } from "../calc/lerntage.js";
+import { idbStorage } from "../idbShim.js";
+import { syncStatus, hochladen, herunterladen, konfliktUeberschreiben } from "../sync.js";
 
 /* Elternbereich (eigener Tab, nur nach Entsperren mit dem Eltern-Passwort):
    Profil · Tagesziel · Stufen-Steuerung · neutrale Lern-Übersicht ·
@@ -112,6 +114,26 @@ export default function Eltern() {
   const spur = lernspur(data.lernstand.lerntage, heute);
   const tagHeute = heutigerTag(data.lernstand.lerntage, heute);
 
+  // ☁️ Geräte-Abgleich
+  const [sync, setSync] = useState(null);           // Status von /api/meta
+  const [syncMeldung, setSyncMeldung] = useState("");
+  const [frage, setFrage] = useState(null);         // "laden" | {typ:"konflikt", serverRev}
+  useEffect(() => { syncStatus().then(setSync); }, []);
+  const syncAktion = async (arbeit, erfolgsText) => {
+    setSyncMeldung("⏳ Einen Moment …"); setFrage(null);
+    const erg = await arbeit();
+    if (erg.ok) { setSyncMeldung(erfolgsText(erg)); setSync(await syncStatus()); return erg; }
+    if (erg.grund === "konflikt") { setFrage({ typ: "konflikt", serverRev: erg.serverRev }); setSyncMeldung(""); }
+    else if (erg.grund === "lokal-leer") setSyncMeldung("Auf diesem Gerät ist noch kein Tresor gespeichert.");
+    else if (erg.grund === "server-leer") setSyncMeldung("Auf dem Server liegt noch kein Stand – erst einmal hochladen.");
+    else setSyncMeldung("Das hat nicht geklappt – bitte später noch einmal.");
+    return erg;
+  };
+  const ladenBestaetigt = async () => {
+    const erg = await syncAktion(() => herunterladen(idbStorage), () => "✅ Server-Stand übernommen – die App startet neu …");
+    if (erg.ok) setTimeout(() => window.location.reload(), 900);
+  };
+
   return (
     <div data-test="eltern-karte">
       <h2>🔧 Elternbereich</h2>
@@ -175,6 +197,46 @@ export default function Eltern() {
             </tbody>
           </table>
         ) : <p style={{ color: T.textLeise }}>Noch keine Lerntage – die Übersicht füllt sich beim Üben.</p>}
+      </Karte>
+
+      <Karte test="eltern-sync">
+        <b>☁️ Geräte-Abgleich</b>
+        <p style={{ margin: "4px 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          {sync === null ? "Prüfe Verbindung …"
+            : sync.verfuegbar ? <>Verbunden · Server-Stand Rev. {sync.rev}{sync.aktualisiert ? ` vom ${new Date(sync.aktualisiert).toLocaleString("de-DE")}` : " (noch leer)"}. Es wandern nur verschlüsselte Daten – der Server kann nichts lesen.</>
+            : sync.grund === "nicht-eingerichtet" ? "Der Sync-Speicher (KV) ist noch nicht eingerichtet – Anleitung: docs/DEPLOY-CLOUDFLARE.md."
+            : sync.grund === "kein-zugang" ? "Cloudflare Access hat diese Anfrage nicht freigegeben – bitte einmal neu anmelden."
+            : "Gerade keine Verbindung zum Server (offline?)."}
+        </p>
+        {sync?.verfuegbar && !frage && (
+          <>
+            <button data-test="sync-hoch" style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700, marginBottom: 8 }}
+              onClick={() => syncAktion(() => hochladen(idbStorage), (e) => `✅ Auf dem Server gesichert (Rev. ${e.rev}).`)}>
+              ⬆️ Diesen Stand auf den Server sichern
+            </button>
+            <button data-test="sync-runter" style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700, marginBottom: 8 }}
+              onClick={() => setFrage("laden")}>
+              ⬇️ Server-Stand auf dieses Gerät holen
+            </button>
+          </>
+        )}
+        {frage === "laden" && (
+          <div data-test="sync-frage" style={{ background: T.grund, borderRadius: T.radiusKlein, padding: 10, marginBottom: 8 }}>
+            <p style={{ margin: "0 0 8px" }}>⚠️ Das <b>ersetzt</b> den Stand auf diesem Gerät durch den Server-Stand. Fortfahren?</p>
+            <button data-test="sync-laden-ja" onClick={ladenBestaetigt} style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700, marginBottom: 6 }}>Ja, Server-Stand übernehmen</button>
+            <button onClick={() => setFrage(null)} style={{ width: "100%", background: T.weich, color: T.text }}>Abbrechen</button>
+          </div>
+        )}
+        {frage?.typ === "konflikt" && (
+          <div data-test="sync-konflikt" style={{ background: T.grund, borderRadius: T.radiusKlein, padding: 10, marginBottom: 8 }}>
+            <p style={{ margin: "0 0 8px" }}>⚠️ Auf dem Server liegt ein <b>neuerer Stand</b> (von einem anderen Gerät). Nichts wurde überschrieben. Was soll gelten?</p>
+            <button onClick={ladenBestaetigt} style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700, marginBottom: 6 }}>⬇️ Server-Stand übernehmen (empfohlen)</button>
+            <button onClick={() => syncAktion(() => konfliktUeberschreiben(idbStorage, frage.serverRev), (e) => `✅ Server überschrieben (Rev. ${e.rev}).`)}
+              style={{ width: "100%", background: T.weich, color: T.text, marginBottom: 6 }}>⬆️ Trotzdem diesen Stand hochladen</button>
+            <button onClick={() => setFrage(null)} style={{ width: "100%", background: T.weich, color: T.text }}>Abbrechen</button>
+          </div>
+        )}
+        {syncMeldung && <p data-test="sync-meldung" style={{ color: T.ok, fontSize: "var(--schrift-klein)" }}>{syncMeldung}</p>}
       </Karte>
 
       <Karte test="eltern-daten">

@@ -36,6 +36,33 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.10: Geräte-Abgleich ----------
+console.log("== v0.10: Geräte-Abgleich ==");
+test("v0.10: APP_VERSION mindestens 0.10.0", versionMindestens("0.10.0"));
+test("v0.10: rn-013 vorhanden", releaseNoteVorhanden("rn-013"));
+test("v0.10: Worker-API prüft Access, speichert nur Chiffrat-Blobs, 409 bei Konflikt", (() => {
+  const a = quelle("server/_lib/vaultApi.js");
+  return a.includes("Cf-Access-Authenticated-User-Email") && a.includes("baseRev !== s.rev")
+    && a.includes("409") && a.includes("tresor.meta") && !a.includes("entschluesseln");
+})());
+test("v0.10: Worker bedient /api/* und sonst die Assets", (() => {
+  const w = quelle("server/index.js");
+  return w.includes("vaultApi(request, env)") && w.includes("env.ASSETS.fetch(request)")
+    && quelle("wrangler.jsonc").includes('"main": "server/index.js"');
+})());
+test("v0.10: Client-Sync meldet Konflikte (nichts wird still überschrieben)", (() => {
+  const c = quelle("src/sync.js");
+  return c.includes("409") && c.includes("konflikt") && c.includes("hochladen") && c.includes("herunterladen");
+})());
+test("v0.10: Eltern-Karte Geräte-Abgleich mit Rückfragen", (() => {
+  const e = quelle("src/features/Eltern.jsx");
+  return ["eltern-sync", "sync-hoch", "sync-runter", "sync-konflikt", "sync-frage"].every((t) => e.includes(`"${t}"`));
+})());
+test("v0.10: Deploy-Doku vorhanden (KV, Access, neues Gerät, Flugmodus-Test)", (() => {
+  const d = quelle("docs/DEPLOY-CLOUDFLARE.md");
+  return d.includes("KV") && d.includes("Access") && d.includes("Neues Gerät") && d.includes("Flugmodus");
+})());
+
 // ---------- v0.9: See-Abenteuer originalgetreu ----------
 console.log("== v0.9: See-Abenteuer originalgetreu ==");
 test("v0.9: APP_VERSION mindestens 0.9.0", versionMindestens("0.9.0"));

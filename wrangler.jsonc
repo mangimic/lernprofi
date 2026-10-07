@@ -1,10 +1,17 @@
-// Cloudflare-Worker-Konfiguration: statische Assets aus dist/.
-// Wird vom automatischen Build (Workers Builds) und von
-// `npx wrangler deploy` gelesen. Keine Secrets hier ablegen!
+// Cloudflare-Worker-Konfiguration: statische Assets aus dist/ +
+// Tresor-Sync-API (/api/*) im Worker (server/index.js).
+// Keine Secrets hier ablegen!
 {
   "name": "lernprofi",
   "compatibility_date": "2026-10-01",
+  "main": "server/index.js",
   "assets": {
-    "directory": "./dist"
+    "directory": "./dist",
+    "binding": "ASSETS"
   }
+  // ☁️ Geräte-Abgleich aktivieren (einmalig):
+  // 1. Dashboard → Storage & Databases → KV → Namespace „lernprofi-tresor" anlegen
+  // 2. Die Namespace-ID unten eintragen und die Zeilen einkommentieren:
+  // ,"kv_namespaces": [{ "binding": "TRESOR", "id": "HIER-DIE-KV-ID-EINTRAGEN" }]
+  // Bis dahin antwortet /api/* mit 503 und die App zeigt „noch nicht eingerichtet".
 }
