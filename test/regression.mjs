@@ -36,6 +36,45 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.13: Tennis- und Fußball-Match ----------
+console.log("== v0.13: Tennis- und Fußball-Match ==");
+test("v0.13: APP_VERSION mindestens 0.13.0", versionMindestens("0.13.0"));
+test("v0.13: rn-016 vorhanden", releaseNoteVorhanden("rn-016"));
+test("v0.13: Tennis originalgetreu (15-30-40, Entscheidungsball, 2 Gewinnspiele, Ballflug)", (() => {
+  const t = quelle("src/spiele/tennisMatch.js");
+  return t.includes('["0", "15", "30", "40"]') && t.includes("t.mir === 3 && t.ihm === 3")
+    && t.includes("spieleMir >= 2 || t.spieleIhm >= 2") && t.includes("Math.sin(z * Math.PI) * 34")
+    && t.includes("prefers-reduced-motion");
+})());
+test("v0.13: Fußball originalgetreu (2 Halbzeiten à 5 Chancen, Elfmeter bei Gleichstand)", (() => {
+  const f = quelle("src/spiele/fussballMatch.js");
+  return f.includes("FB_CHANCEN = 5") && f.includes('f.phase = "halbzeit"')
+    && f.includes('f.phase = "elfmeter"') && f.includes("f.mir === f.ihm");
+})());
+test("v0.13: Mutmacher-Rollenspiel (sag-Blase muss angetippt werden, Rotation, kein TTS)", (() => {
+  const m = quelle("src/spiele/mutmacher.js");
+  return m.includes("sag es laut und tippe") && m.includes("sagBinden")
+    && m.includes("[m.mut, m.punkt, m.mission]")
+    && !m.includes("speechSynthesis") && !m.includes("speak(");
+})());
+test("v0.13: Spiel-Daten vollständig kopiert (Gegner, Fakten, Mental-Karten)", (() => {
+  const t = JSON.parse(quelle("src/spiele/tennis.json"));
+  const f = JSON.parse(quelle("src/spiele/fussball.json"));
+  return t.gegner.length === 3 && t.mental.length === 12 && t.fakten.length === 8
+    && f.gegner.length === 3 && f.mental.length === 13 && f.fakten.length === 10
+    && f.mental.some((m) => m.id === "torwart") && f.mental.some((m) => m.id === "elfmeter");
+})());
+test("v0.13: Spielhalle bindet beide Matches an (Münz-Gate, Match-Zähler, Missionen)", (() => {
+  const s2 = quelle("src/features/Spielhalle.jsx");
+  return s2.includes("tennisMatchStart") && s2.includes("fussballMatchStart")
+    && s2.includes('data-test="spiel-tennis"') && s2.includes('data-test="spiel-fussball"')
+    && s2.includes("runden: alt.runden + 1") && s2.includes("aufgabenZaehlen(data.lernstand.lerntage, heute, ergebnis.wins");
+})());
+test("v0.13: Alt-Übernahme bringt die Match-Zähler mit", (() => {
+  const i = quelle("src/calc/importAltdaten.js");
+  return i.includes('"tennis", "fussball", "schach"');
+})());
+
 // ---------- v0.12: Konzentrations-Training & Mut-Satz ----------
 console.log("== v0.12: Konzentrations-Training & Mut-Satz ==");
 test("v0.12: APP_VERSION mindestens 0.12.0", versionMindestens("0.12.0"));

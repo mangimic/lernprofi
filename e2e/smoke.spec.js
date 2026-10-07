@@ -356,3 +356,80 @@ test("Konzentration: Blitzlesen-Runde im Zeitraffer + Mut-Satz des Tages bleibt"
   await page.getByTestId("konz-zurueck").click();
   await expect(page.getByTestId("start-seite")).toBeVisible();
 });
+
+async function muenzeVerdienen(page) {
+  await page.getByTestId("nav-ueben").click();
+  await page.getByTestId("bereich-dd").click();
+  for (let i = 0; i < 10; i++) {
+    await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+    await page.getByTestId("weiter-knopf").click();
+  }
+  await expect(page.getByTestId("runde-ergebnis")).toBeVisible();
+  await page.getByTestId("nav-spiele").click();
+}
+
+test("Tennis-Match: Mutmacher-Rollenspiel, 2 Gewinnspiele, Auswertung zählt", async ({ page }) => {
+  await tresorAnlegen(page);
+  await muenzeVerdienen(page);
+  await page.evaluate(() => { window.__SPIEL_SCHNELL__ = true; });
+  await page.getByTestId("spiel-tennis").click();
+
+  // Coach Leo: erst alle Blasen aufdecken, Mut-Satz-Blase selbst antippen
+  await expect(page.getByTestId("tennis-start")).toBeDisabled();
+  await page.getByTestId("mut-weiter").click();
+  await page.getByTestId("mut-weiter").click();
+  await page.locator(".bubble.sag").click();
+  await expect(page.getByTestId("tennis-start")).toBeEnabled();
+  await page.getByTestId("tennis-start").click();
+
+  const ballSpielen = async (erwartet) => {
+    await page.locator('[data-test="spiel-opt"][data-richtig="1"]').click();
+    await expect(page.getByTestId("tennis-feedback")).toContainText(erwartet);
+    await page.getByTestId("tennis-weiter").click();
+  };
+  // Spiel 1: 4 Punkte in Folge (15–30–40–Spiel)
+  await ballSpielen("15 : 0");
+  await ballSpielen("30 : 0");
+  await ballSpielen("40 : 0");
+  await ballSpielen("Punkt für dich");
+  await expect(page.getByTestId("tennis-spielende")).toContainText("Spiele 1 : 0");
+  await page.getByTestId("tennis-weiter").click();
+  // Spiel 2 (ab jetzt schwere Fragen) → Match gewonnen
+  for (let i = 0; i < 4; i++) await ballSpielen("Punkt für dich");
+  await expect(page.getByTestId("tennis-ende")).toContainText("Match gewonnen");
+  await page.getByTestId("tennis-fertig").click();
+  await expect(page.getByTestId("match-ergebnis")).toContainText("8 von 8");
+});
+
+test("Fußball-Match: Konter bei Fehler, Halbzeit, Match-Ende mit Auswertung", async ({ page }) => {
+  await tresorAnlegen(page);
+  await muenzeVerdienen(page);
+  await page.evaluate(() => { window.__SPIEL_SCHNELL__ = true; });
+  await page.getByTestId("spiel-fussball").click();
+  await page.getByTestId("mut-weiter").click();
+  await page.getByTestId("mut-weiter").click();
+  await page.locator(".bubble.sag").click();
+  await page.getByTestId("fb-start").click();
+
+  // Torchance 1 absichtlich falsch → Konter-Tor + Mutmacher
+  await page.locator('[data-test="spiel-opt"]:not([data-richtig])').first().click();
+  await expect(page.getByTestId("fb-feedback")).toContainText("Gehalten");
+  await expect(page.locator(".mut-dialog .bubble.coach").last()).toBeVisible();
+  await page.getByTestId("fb-weiter").click();
+  // Chancen 2–5: Tore
+  for (let i = 0; i < 4; i++) {
+    await page.locator('[data-test="spiel-opt"][data-richtig="1"]').click();
+    await expect(page.getByTestId("fb-feedback")).toContainText("TOOOR");
+    await page.getByTestId("fb-weiter").click();
+  }
+  await expect(page.getByTestId("fb-halbzeit")).toContainText("4 : 1");
+  await page.getByTestId("fb-weiter").click();
+  // 2. Halbzeit: 5 Tore → kein Gleichstand, direkt zum Ende
+  for (let i = 0; i < 5; i++) {
+    await page.locator('[data-test="spiel-opt"][data-richtig="1"]').click();
+    await page.getByTestId("fb-weiter").click();
+  }
+  await expect(page.getByTestId("fb-ende")).toContainText("Match gewonnen");
+  await page.getByTestId("fb-fertig").click();
+  await expect(page.getByTestId("match-ergebnis")).toContainText("9 von 10");
+});

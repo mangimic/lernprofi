@@ -105,3 +105,35 @@ button {
 .bw-confirm-karte { max-width: 340px; width: 100%; text-align: center; background: var(--karte);
   border-radius: var(--radius); padding: var(--abstand); }
 .bw-confirm-karte button { background: var(--weich); color: var(--text); font-weight: 700; }
+
+/* 🦁 Mutmacher (Coach Leo): Comic-Sprechblasen – Tennis & Fußball */
+.mut-dialog { background: color-mix(in srgb, var(--primaer) 7%, var(--karte));
+  border: 2px solid color-mix(in srgb, var(--primaer) 25%, var(--karte));
+  border-radius: 14px; padding: 10px 12px; margin: 10px 0; }
+.mut-dialog.klein { padding: 8px 10px; }
+.mut-kopf { font-weight: 800; color: var(--primaer); font-size: 14px; margin-bottom: 4px; }
+.bubble { position: relative; max-width: 90%; padding: 8px 12px; border-radius: 16px; margin: 7px 0;
+  font-size: 16px; line-height: 1.4; animation: bubbleIn 0.25s ease; }
+.bubble.coach { background: var(--karte); border: 2px solid var(--rand); border-bottom-left-radius: 4px; margin-right: auto; }
+.bubble.coach::before { content: "🦁 "; }
+.bubble.kind { background: color-mix(in srgb, var(--primaer) 16%, var(--karte));
+  border: 2px solid color-mix(in srgb, var(--primaer) 40%, var(--karte));
+  border-bottom-right-radius: 4px; margin-left: auto; text-align: right; font-weight: 700; }
+.bubble.zu { display: none; }
+.bubble.sag { cursor: pointer; border-color: var(--primaer);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primaer) 25%, transparent); animation: sagPuls 1.2s ease infinite; }
+.bubble.gesagt { box-shadow: none; }
+.mut-weiter { margin-top: 4px; }
+@keyframes bubbleIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes sagPuls {
+  0%, 100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--primaer) 15%, transparent); }
+  50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--primaer) 35%, transparent); }
+}
+
+/* 🎾⚽ Spielfeld-Layout für Tennis- und Fußball-Match */
+.tennis-wrap { display: grid; gap: 12px; }
+.tennis-feld svg { width: 100%; height: auto; max-height: 44vh; aspect-ratio: 340/180;
+  display: block; margin: 0 auto; touch-action: manipulation; }
+@media (min-width: 820px) {
+  .tennis-wrap { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); align-items: start; }
+}

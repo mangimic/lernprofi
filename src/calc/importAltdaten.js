@@ -20,6 +20,7 @@ const STUFEN_KEYS = [
   "mrechnen", "mzahlen", "mgeo", "mgroessen", "mdaten",
   "sstrom", "srad", "skarte", "sgemeinde", "skoerper", "szeit",
   "gesch", "stark", "kompass",
+  "tennis", "fussball", "schach", // Spiele: gespielte Matches (Gegner-Rotation)
 ];
 
 function fortschritt(alt) {

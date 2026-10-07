@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-016",
+    "version": "0.13.0",
+    "datum": "2026-10-07",
+    "titel": "Tennis- und Fußball-Match",
+    "entries": [
+      { "type": "neu", "text": "🎾 Das Tennis-Match ist originalgetreu umgezogen: Wörter- und Mathe-Fragen als Ballwechsel (15–30–40–Spiel, bei 40:40 Entscheidungsball), 2 Spiele gewinnen das Match – mit Ballflug-Animation, 3 Gegnern in Rotation und Tennis-Wissen beim Seitenwechsel." },
+      { "type": "neu", "text": "⚽ Das Fußball-Match ist da: 2 Halbzeiten mit je 5 Torchancen, richtig = TOOOR, falsch = Konter – bei Gleichstand entscheidet ein Elfmeter. Mit Torwart-Mutmacher und Fußball-Wissen in der Halbzeit." },
+      { "type": "neu", "text": "🦁 Coach Leo (Mutmacher) begleitet beide Matches wie im Original: Rollenspiel mit Sprechblasen vor dem Start (dein Mut-Satz ist DEINE Rolle – laut sagen und antippen!), kurze Mutmacher im Spiel, nach Fehlern, bei Führung/Rückstand und ein Lob am Ende." },
+      { "type": "verbessert", "text": "Gewonnene Bälle zählen für deine Mini-Missionen; gespielte Matches werden im Tresor gezählt, damit jedes Mal ein anderer Gegner wartet. Die Datenübernahme bringt die Match-Zähler aus der Alt-App mit." }
+    ]
+  },
+  {
     "id": "rn-015",
     "version": "0.12.0",
     "datum": "2026-10-07",
