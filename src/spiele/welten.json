@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "kommentar": "Spielwelten. Der See nutzt jetzt ein echtes Foto (Angelteich im Schwarzwald) als Hintergrund; Wasser-Ellipse, Start und Spots sind auf das Foto abgestimmt.",
+  "welten": [
+    {
+      "id": "see",
+      "name": "See-Abenteuer",
+      "emoji": "🎣",
+      "feld": { "breite": 340, "hoehe": 230 },
+      "hintergrund": "bilder/see.jpg",
+      "wasser": { "form": "ellipse", "cx": 150, "cy": 145, "rx": 145, "ry": 50 },
+      "start": { "x": 36, "y": 208 },
+      "spots": [
+        { "x": 80,  "y": 200 },
+        { "x": 170, "y": 210 },
+        { "x": 255, "y": 198 },
+        { "x": 306, "y": 132 },
+        { "x": 180, "y": 72 }
+      ],
+      "besatz": ["rotfeder", "barsch", "bachforelle", "schleie", "zander", "aal", "karpfen", "hecht"],
+      "deko": [
+        { "emoji": "🐟", "x": 120, "y": 152, "groesse": 11 },
+        { "emoji": "🦆", "x": 215, "y": 122, "groesse": 13 }
+      ]
+    }
+  ]
+}

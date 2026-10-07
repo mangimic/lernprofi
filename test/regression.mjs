@@ -36,6 +36,27 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.9: See-Abenteuer originalgetreu ----------
+console.log("== v0.9: See-Abenteuer originalgetreu ==");
+test("v0.9: APP_VERSION mindestens 0.9.0", versionMindestens("0.9.0"));
+test("v0.9: rn-012 vorhanden", releaseNoteVorhanden("rn-012"));
+test("v0.9: Original-Mechaniken portiert (Wegfindung um den See, Angelwurf, Heranziehen, Denk-Pause)", (() => {
+  const s = quelle("src/spiele/seeAbenteuer.js");
+  return ["spielWegpunkte", "spielWerfen", "spielZiehen", "drittesFalsch"].every((f) => s.includes(`function ${f}`))
+    && s.includes("Nächster Versuch (") && s.includes("steigerung");
+})());
+test("v0.9: Spiel-Daten aus der Alt-App (Welt mit Besatz, 8 Fischarten, See-Foto)", (() => {
+  const w = JSON.parse(quelle("src/spiele/welten.json")).welten[0];
+  const f = JSON.parse(quelle("src/spiele/fische.json")).fische;
+  return w.besatz.length === 8 && w.spots.length === 5 && f.length === 8
+    && f.some((x) => x.fragen === 3) && quelle("src/spiele/seeAbenteuer.js").includes("/spiel/see.jpg");
+})());
+test("v0.9: Spielhalle bettet die Engine ein (kein Quiz-Ersatz mehr)", (() => {
+  const h = quelle("src/features/Spielhalle.jsx");
+  return h.includes("seeAbenteuerStart(host.current") && !h.includes("blitzFragen");
+})());
+
+
 // ---------- v0.8: Spielhalle + See-Abenteuer ----------
 console.log("== v0.8: Spielhalle + See-Abenteuer ==");
 test("v0.8: APP_VERSION mindestens 0.8.0", versionMindestens("0.8.0"));
@@ -46,7 +67,7 @@ test("v0.8: Spiel-Logik rein (Münz-Regel, Blitz-Fragen, Serien-Fische)", (() =>
     && !/document\.|window\.|fetch\(|Math\.random|Date\.now\(/.test(s);
 })());
 test("v0.8: Spielhalle gated über Münzen und löst genau 1 Münze ein", (() => {
-  const h = quelle("src/features/Spielhalle.jsx");
+  const h = quelle("src/features/Spielhalle.jsx") + quelle("src/spiele/seeAbenteuer.js");
   return h.includes("spielStartbar(muenzen)") && h.includes("muenzeEinloesen(muenzen)")
     && ["spielhalle", "spiel-see", "spiel-opt", "see-ergebnis"].every((t) => h.includes(`"${t}"`));
 })());

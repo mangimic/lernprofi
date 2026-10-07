@@ -1,5 +1,16 @@
 [
   {
+    "id": "rn-012",
+    "version": "0.9.0",
+    "datum": "2026-10-07",
+    "titel": "Das echte See-Abenteuer ist zurück",
+    "entries": [
+      { "type": "geaendert", "text": "Das See-Abenteuer ist jetzt das Original aus der bisherigen App: Lauf mit deiner Figur um den Schwarzwald-See (Angelplatz antippen – sie läuft von selbst außen herum), wirf die Angel mit Schwimmer-Animation aus und fang alle 5 Fische aus dem Besatz." },
+      { "type": "neu", "text": "8 echte Fischarten mit naturgetreuen Zeichnungen und Wusstest-du-Infos: Rotfeder, Barsch, Bachforelle, Schleie, Zander, Aal, Karpfen – und der Hecht, der sich dreimal wehrt und Stück für Stück herangezogen wird." },
+      { "type": "neu", "text": "Wie im Original: ~jede zweite Frage ist Mathe, Wort-Fragen bekommen eine dritte Falsch-Schreibweise (Ratechance nur 33 %), und nach einem Fehler gibt es die 3-Sekunden-Denk-Pause statt Durchklicken." }
+    ]
+  },
+  {
     "id": "rn-011",
     "version": "0.8.0",
     "datum": "2026-10-07",

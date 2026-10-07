@@ -61,3 +61,24 @@ button {
   border-radius: var(--radius-klein);
   cursor: pointer;
 }
+
+/* 🎣 See-Abenteuer (aus der Alt-App übernommen): Hochformat gestapelt,
+   iPad-Querformat Feld + Fragen nebeneinander. */
+.spiel-wrap { display: grid; gap: 12px; }
+.spiel-feld svg { width: 100%; height: auto; max-height: 56vh; aspect-ratio: 340/230; display: block; margin: 0 auto; touch-action: manipulation; }
+#spielPad { display: grid; grid-template-columns: repeat(3, 52px); gap: 5px; justify-content: center; margin-top: 10px; }
+#spielPad button { min-height: 44px; font-size: 18px; padding: 0; background: var(--weich); color: var(--text); }
+@media (min-width: 820px) {
+  .spiel-wrap { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); align-items: start; }
+  .spiel-feld svg { max-height: 62vh; }
+  #spielPad { justify-content: start; }
+}
+.spiel-hint { background: var(--grund); border-radius: var(--radius-klein); padding: 10px 12px; margin-top: 8px; }
+.spiel-leise { color: var(--text-leise); font-size: var(--schrift-klein); }
+.spiel-opt { flex: 1 1 30%; min-width: 0; font-size: 18px; font-weight: 700; background: var(--weich); color: var(--text); padding: 0 10px; overflow-wrap: anywhere; }
+.spiel-opt.spiel-opt-ok { background: var(--ok); color: #fff; }
+.spiel-feedback { border-radius: var(--radius-klein); padding: 10px 12px; margin-top: 8px; line-height: 1.45; }
+.spiel-feedback.ok { background: color-mix(in srgb, var(--ok) 14%, var(--karte)); }
+.spiel-feedback.tip { background: color-mix(in srgb, var(--warn) 14%, var(--karte)); }
+.spiel-weiter { width: 100%; margin-top: 8px; background: var(--primaer); color: var(--primaer-text); font-weight: 700; }
+.spiel-weiter:disabled { opacity: 0.6; }

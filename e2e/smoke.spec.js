@@ -198,7 +198,7 @@ test("Neue Deutsch-Bereiche: Zeitformen (3 Optionen) und Grundwortschatz mit Reg
   await expect(page.getByTestId("feedback")).toContainText("Richtig");
 });
 
-test("Spielhalle: ohne Münze gesperrt, mit Münze kostet der Besuch genau eine", async ({ page }) => {
+test("Spielhalle: Münze einlösen und im echten See-Abenteuer einen Fisch fangen", async ({ page }) => {
   await tresorAnlegen(page);
   // Ohne Münze: Spiel gesperrt
   await page.getByTestId("nav-spiele").click();
@@ -214,19 +214,32 @@ test("Spielhalle: ohne Münze gesperrt, mit Münze kostet der Besuch genau eine"
   }
   await expect(page.getByTestId("runde-ergebnis")).toBeVisible();
 
-  // Spielbesuch: Münze wird eingelöst, Spiel läuft, Ergebnis mit Punkten
+  // Spielbesuch: Münze wird eingelöst, das ORIGINAL-Spiel startet
   await page.getByTestId("nav-spiele").click();
   await expect(page.getByTestId("spielhalle-muenzen")).toHaveText("1");
   await page.getByTestId("spiel-see").click();
   await expect(page.getByTestId("see-spiel")).toBeVisible();
-  for (let i = 0; i < 10; i++) {
+  await expect(page.getByTestId("spiel-korb")).toContainText("0 / 5");
+  await page.evaluate(() => { window.__SPIEL_SCHNELL__ = true; });
+
+  // Angelplatz antippen → Figur läuft hin, wirft aus, Frage erscheint
+  await page.locator('[data-test="spiel-spot"]').first().click();
+  await expect(page.getByTestId("spiel-frage")).toBeVisible({ timeout: 15000 });
+
+  // Fisch fangen (große Fische brauchen bis zu 3 richtige Antworten)
+  for (let versuch = 0; versuch < 4; versuch++) {
     await page.locator('[data-test="spiel-opt"][data-richtig="1"]').click();
-    await expect(page.getByTestId("spiel-feedback")).toContainText("gefangen");
-    await page.getByTestId("spiel-weiter").click();
+    const weiter = page.getByTestId("spiel-weiter");
+    await expect(weiter).toBeEnabled({ timeout: 10000 });
+    const text = await weiter.textContent();
+    await weiter.click();
+    if (text.includes("Weiter angeln")) break;
+    await expect(page.getByTestId("spiel-frage")).toBeVisible({ timeout: 15000 });
   }
-  await expect(page.getByTestId("see-ergebnis")).toBeVisible();
-  await expect(page.getByTestId("see-ergebnis")).toContainText("Neuer Rekord");
-  await page.getByTestId("spiel-nochmal").click();
+  await expect(page.getByTestId("spiel-korb")).toContainText("1 / 5");
+
+  // Verlassen: Münze bleibt eingelöst, Spiel wieder gesperrt
+  await page.getByTestId("spiel-abbrechen").click();
   await expect(page.getByTestId("spielhalle-muenzen")).toHaveText("0");
   await expect(page.getByTestId("spiel-see")).toBeDisabled();
 });
