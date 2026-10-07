@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useApp } from "../appContext.jsx";
 import { heutigerTag, lernspur } from "../calc/lerntage.js";
+import { ZEIT_STUFEN, SPIELE_SCHALTER, spielAktiv, zeitHeute, GESPRAECH_BEREICHE, gespraechDesTages } from "../calc/elternWerkzeuge.js";
 import { idbStorage } from "../idbShim.js";
 import { syncStatus, hochladen, herunterladen, konfliktUeberschreiben } from "../sync.js";
 
@@ -197,6 +198,87 @@ export default function Eltern() {
             </tbody>
           </table>
         ) : <p style={{ color: T.textLeise }}>Noch keine Lerntage – die Übersicht füllt sich beim Üben.</p>}
+      </Karte>
+
+      <Karte test="eltern-spiele">
+        <b>🎮 Spiele & Lernzeit</b>
+        <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          Deaktivierte Spiele verschwinden aus der Spielhalle – die Lernfelder bleiben immer verfügbar.
+        </p>
+        {SPIELE_SCHALTER.map((s) => (
+          <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
+            <span style={{ flex: 1, fontSize: "var(--schrift-klein)" }}>{s.name}</span>
+            <div style={{ flex: 1 }}>
+              <Seg test={`spiel-an-${s.id}`} werte={[{ v: 1, label: "An" }, { v: 0, label: "Aus" }]}
+                aktiv={spielAktiv(data.einstellungen, s.id) ? 1 : 0}
+                auf={(v) => einstellung(
+                  { spieleAktiv: { ...data.einstellungen.spieleAktiv, [s.id]: v === 1 } },
+                  `${s.name} ${v === 1 ? "eingeschaltet" : "ausgeblendet"}`,
+                )} />
+            </div>
+          </div>
+        ))}
+        <p style={{ margin: "14px 0 8px" }}><b>🪙 Spiele freischalten (erst üben, dann spielen)</b></p>
+        <p style={{ margin: "0 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          Ist die Freischaltung an, kostet jeder Spielbesuch <b>1 Münze</b> – verdient pro Übungsrunde.
+        </p>
+        <Seg test="muenzen-aktiv" werte={[{ v: 1, label: "An" }, { v: 0, label: "Aus" }]}
+          aktiv={data.einstellungen.muenzenAktiv ? 1 : 0}
+          auf={(v) => einstellung({ muenzenAktiv: v === 1 }, `Münz-Freischaltung ${v === 1 ? "an" : "aus"}`)} />
+        <button data-test="muenz-geschenk" style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}
+          onClick={() => logChange(
+            { ...data, lernstand: { ...data.lernstand, muenzen: data.lernstand.muenzen + 3 } },
+            "spiele", "geaendert", "3 Münzen geschenkt",
+          )}>
+          🎁 3 Münzen schenken (jetzt {data.lernstand.muenzen})
+        </button>
+        <p style={{ margin: "14px 0 8px" }}><b>⏰ Lernzeit pro Tag (Time-Boxing)</b></p>
+        <p style={{ margin: "0 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          Ist die Zeit um, zeigt die App einen freundlichen Stopp-Bildschirm. Gezählt wird nur,
+          solange die App sichtbar ist. Empfohlen: <b>20 Minuten</b>.
+        </p>
+        <Seg test="zeit-limit" werte={ZEIT_STUFEN.map((v) => ({ v, label: v === 0 ? "Aus" : `${v}` }))}
+          aktiv={data.einstellungen.zeitLimit}
+          auf={(v) => einstellung({ zeitLimit: v }, `Tageslimit: ${v === 0 ? "aus" : v + " Minuten"}`)} />
+        <p data-test="zeit-verbraucht" style={{ margin: "8px 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          Heute verbraucht: <b>{Math.floor(zeitHeute(data.lernstand.zeit, heute).sek / 60)} Min</b>
+          {data.einstellungen.zeitLimit > 0 ? ` von ${data.einstellungen.zeitLimit} Min` : ""}.
+        </p>
+        <button data-test="zeit-frei" style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}
+          onClick={() => logChange(
+            { ...data, lernstand: { ...data.lernstand, zeit: { tag: heute, sek: 0 } } },
+            "einstellungen", "geaendert", "Lernzeit für heute wieder freigegeben",
+          )}>
+          🔓 Heute wieder freigeben (Zähler auf 0)
+        </button>
+      </Karte>
+
+      <Karte test="eltern-gespraech">
+        <b>💬 Gesprächsimpulse</b>
+        <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          Das sind keine Tests, sondern <b>Tür-Öffner</b> – Gespräche, die prägen, lange bevor es
+          darauf ankommt. Sie passen gut zu dem, was Ihr Kind in „💪 Stark mit Leo“ übt.
+        </p>
+        <p data-test="gespraech-tages" style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px" }}>
+          🌟 <b>Frage des Tages</b> ({gespraechDesTages(heute).bereich}):<br />„{gespraechDesTages(heute).frage}“
+        </p>
+        <p style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px", fontSize: "var(--schrift-klein)" }}>
+          💡 <b>So klappt es am besten:</b> nebenbei fragen (Auto, Abendessen, Zähneputzen) statt im
+          Verhör-Modus · selbst zuerst etwas Eigenes erzählen · Antworten stehen lassen, nicht sofort
+          verbessern oder trösten · eine Frage pro Tag reicht völlig.
+        </p>
+        {GESPRAECH_BEREICHE.map((b) => (
+          <details key={b.titel} data-test="gespraech-bereich" style={{ marginTop: 6 }}>
+            <summary style={{ cursor: "pointer", fontWeight: 700 }}>{b.emoji} {b.titel}</summary>
+            <ol style={{ margin: "6px 0 6px 18px", padding: 0 }}>
+              {b.fragen.map((f, i) => <li key={i} style={{ marginBottom: 8 }}>{f}</li>)}
+            </ol>
+          </details>
+        ))}
+        <p style={{ marginTop: 8, color: T.textLeise, fontSize: "12.5px" }}>
+          Alles bleibt im verschlüsselten Tresor – die App speichert keine Antworten. Die Fragen sind
+          an eine Coaching-Fragensammlung angelehnt und für 8–10 Jahre übersetzt.
+        </p>
       </Karte>
 
       <Karte test="eltern-sync">

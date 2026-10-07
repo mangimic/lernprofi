@@ -1,5 +1,6 @@
 import { useApp } from "../appContext.jsx";
 import { heutigerTag, lernspur } from "../calc/lerntage.js";
+import { zeitUebrigMin } from "../calc/elternWerkzeuge.js";
 import { STARK_SAETZE } from "../calc/aufgaben/stark.js";
 
 /* Startseite: Begrüßung, Tages-Stand (Münzen, Missionen, Lernspur),
@@ -38,6 +39,7 @@ export default function Start() {
           heute {tag.missionen} Mini-Mission{tag.missionen === 1 ? "" : "en"}
           {tag.zielErreicht ? " · 🎯 Tagesziel geschafft!" : ""}
           {spur > 1 ? ` · 🛤️ ${spur} Tage Lernspur` : ""}
+          {data.einstellungen.zeitLimit > 0 ? ` · ⏰ noch ${zeitUebrigMin(data.lernstand.zeit, data.einstellungen.zeitLimit, heute)} Min` : ""}
         </p>
         <button data-test="zum-ueben" onClick={() => navTo("ueben")}
           style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>

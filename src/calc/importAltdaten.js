@@ -10,8 +10,7 @@
    Gruppen werden zu EINEM gws-Feld zusammengefasst), Lerntage,
    Rekorde (Zahlenkette, Blitzlesen), Missionsziel.
    Bewusst verworfen (laut Architektur-Entscheid): Stimmen/Vorlesen,
-   Sommer-Reise, Fit-für-4-Programm, Themen-Wahl, Zeitlimit (kommt
-   später mit dem neuen Elternbereich), Lese-Check-Modus.
+   Sommer-Reise, Fit-für-4-Programm, Themen-Wahl, Lese-Check-Modus.
    ============================================================ */
 import { migrateData } from "./migrateData.js";
 
@@ -149,6 +148,25 @@ export function importAltdaten(roh, heute) {
     dokument.einstellungen.missionsZiel = Math.min(6, alt.missionsZiel);
     hinzu("Tagesziel", "übernommen", `${dokument.einstellungen.missionsZiel} Mini-Missionen`);
   }
+  if ("zeitLimit" in alt) {
+    const limit = parseInt(alt.zeitLimit, 10);
+    if (Number.isInteger(limit) && limit >= 0 && limit <= 180) {
+      dokument.einstellungen.zeitLimit = limit;
+      hinzu("Lernzeit-Limit", "übernommen", limit === 0 ? "ausgeschaltet" : `${limit} Minuten pro Tag`);
+    }
+  }
+  if (typeof alt.muenzenAktiv === "boolean") {
+    dokument.einstellungen.muenzenAktiv = alt.muenzenAktiv;
+    hinzu("Münz-Freischaltung", "übernommen", alt.muenzenAktiv ? "an" : "aus");
+  }
+  if (alt.spieleAktiv && typeof alt.spieleAktiv === "object") {
+    // Alt-Schlüssel "spiel" = See-Abenteuer; die übrigen heißen gleich
+    const namen = { spiel: "see", tennis: "tennis", fussball: "fussball", schach: "schach", blockwelt: "blockwelt" };
+    for (const [altKey, neuKey] of Object.entries(namen)) {
+      if (alt.spieleAktiv[altKey] === false) dokument.einstellungen.spieleAktiv[neuKey] = false;
+    }
+    hinzu("Spiele-Schalter", "übernommen", "An/Aus je Spiel bleibt wie eingestellt");
+  }
 
   // Bewusst verworfen (Architektur-Entscheidungen)
   const verworfen = [
@@ -157,7 +175,6 @@ export function importAltdaten(roh, heute) {
     ["fit4", "Fit-für-4-Programm ist abgeschlossen"],
     ["thema", "Themen-Wahl gibt es im Neubau (noch) nicht"],
     ["leseKontrolle", "Lese-Check gibt es im Neubau (noch) nicht"],
-    ["zeitLimit", "Zeitlimit folgt mit dem neuen Elternbereich"],
   ];
   for (const [feld, grund] of verworfen) {
     if (feld in alt) hinzu(feld, "verworfen", grund);

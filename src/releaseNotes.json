@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-020",
+    "version": "0.17.0",
+    "datum": "2026-10-07",
+    "titel": "Eltern-Werkzeuge: Lernzeit, Spiele-Schalter, Gespräche",
+    "entries": [
+      { "type": "neu", "text": "⏰ Lernzeit pro Tag (Time-Boxing) ist zurück: Eltern stellen das Tageslimit ein (Aus/10/15/20/30/45/60 Minuten, Empfehlung 20). Ist die Zeit um, zeigt die App den freundlichen Stopp-Bildschirm („Dein Kopf darf sich jetzt ausruhen“) – gezählt wird nur, solange die App sichtbar ist, und Eltern können den Tag jederzeit wieder freigeben." },
+      { "type": "neu", "text": "🎮 Spiele-Steuerung im Elternbereich: See-Abenteuer, Blockwelt, Tennis, Fußball und Schach lassen sich einzeln ausblenden; die Münz-Freischaltung (erst üben, dann spielen) ist abschaltbar, und es gibt den 🎁 „3 Münzen schenken“-Knopf." },
+      { "type": "neu", "text": "💬 Neuer Eltern-Abschnitt „Gesprächsimpulse“: 20 offene Fragen in 4 Bereichen (🚧 Grenzen · 💪 Stehauf-Kraft · 🧠 Denkweise · 🔍 Probleme lösen) mit täglich wechselnder Frage des Tages und Tipps, wie das Gespräch gelingt (nebenbei fragen, selbst zuerst erzählen, nicht sofort trösten)." },
+      { "type": "verbessert", "text": "Die Startseite zeigt die verbleibende Lernzeit („⏰ noch X Min“); die Datenübernahme bringt Zeitlimit, Münz-Freischaltung und Spiele-Schalter jetzt aus der Alt-App mit." }
+    ]
+  },
+  {
     "id": "rn-019",
     "version": "0.16.0",
     "datum": "2026-10-07",

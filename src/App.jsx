@@ -1,4 +1,5 @@
 import { useApp } from "./appContext.jsx";
+import { zeitAbgelaufen } from "./calc/elternWerkzeuge.js";
 import releaseNotes from "./releaseNotes.json";
 import Start from "./features/Start.jsx";
 import Ueben from "./features/Ueben.jsx";
@@ -8,7 +9,7 @@ import Eltern from "./features/Eltern.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.16.0";
+export const APP_VERSION = "0.17.0";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -47,9 +48,35 @@ function WasIstNeu() {
 }
 
 export default function App() {
-  const { T, route, navTo, isMobile, tresor } = useApp();
+  const { T, route, navTo, isMobile, tresor, data, heute } = useApp();
   if (tresor.status === "laden") return null; // kurzer Moment beim Start
   if (tresor.status !== "offen") return <VaultGate />;
+
+  // ⏰ Time-Boxing: Ist die Lernzeit um, zeigt die App einen freundlichen
+  // Stopp-Bildschirm (wie im Original). Der Eltern-Modus bleibt frei,
+  // damit Eltern das Limit ändern oder den Tag freigeben können.
+  if (!tresor.elternModus && zeitAbgelaufen(data.lernstand.zeit, data.einstellungen.zeitLimit, heute)) {
+    return (
+      <div data-test="zeit-sperre" style={{
+        position: "fixed", inset: 0, zIndex: 900, background: "rgba(38, 50, 72, 0.94)",
+        display: "flex", alignItems: "center", justifyContent: "center", padding: 18,
+      }}>
+        <div style={{ maxWidth: 420, width: "100%", textAlign: "center", background: T.karte, borderRadius: T.radius, padding: T.abstand }}>
+          <div style={{ fontSize: 56 }}>⏰🌙</div>
+          <h2 style={{ margin: "6px 0" }}>Deine Lernzeit für heute ist geschafft!</h2>
+          <p>
+            Super gemacht{data.profil.name ? `, ${data.profil.name}` : ""}! Du hast heute{" "}
+            <b>{data.einstellungen.zeitLimit} Minuten</b> geübt. Dein Kopf darf sich jetzt
+            ausruhen – morgen geht es weiter. 🎉
+          </p>
+          <button data-test="zeit-eltern" onClick={tresor.sperren}
+            style={{ background: T.weich, color: T.text, fontWeight: 700 }}>
+            🔧 Für Eltern: mit Passwort anmelden
+          </button>
+        </div>
+      </div>
+    );
+  }
   const tabs = [
     { id: "start", label: "🏠 Start", test: "nav-start" },
     { id: "ueben", label: "✏️ Üben", test: "nav-ueben" },

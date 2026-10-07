@@ -403,3 +403,47 @@ describe("vorgangsbeschreibung (Daten + Logik)", () => {
     }
   });
 });
+
+describe("elternWerkzeuge (Zeitlimit, Spiele-Schalter, Gespräche)", () => {
+  it("Zeit: Tageswechsel setzt auf 0, abgelaufen/übrig rechnen richtig", async () => {
+    const E = await import("./elternWerkzeuge.js");
+    expect(E.zeitHeute(null, HEUTE)).toEqual({ tag: HEUTE, sek: 0 });
+    expect(E.zeitHeute({ tag: "2026-01-14", sek: 900 }, HEUTE)).toEqual({ tag: HEUTE, sek: 0 });
+    expect(E.zeitHeute({ tag: HEUTE, sek: 300 }, HEUTE).sek).toBe(300);
+    expect(E.zeitAbgelaufen({ tag: HEUTE, sek: 1200 }, 20, HEUTE)).toBe(true);
+    expect(E.zeitAbgelaufen({ tag: HEUTE, sek: 1199 }, 20, HEUTE)).toBe(false);
+    expect(E.zeitAbgelaufen({ tag: HEUTE, sek: 99999 }, 0, HEUTE)).toBe(false); // 0 = aus
+    expect(E.zeitUebrigMin({ tag: HEUTE, sek: 600 }, 20, HEUTE)).toBe(10);
+    expect(E.ZEIT_STUFEN).toEqual([0, 10, 15, 20, 30, 45, 60]);
+  });
+
+  it("Spiele-Schalter: Standard an, nur ausdrückliches false blendet aus", async () => {
+    const E = await import("./elternWerkzeuge.js");
+    expect(E.spielAktiv({}, "see")).toBe(true);
+    expect(E.spielAktiv({ spieleAktiv: {} }, "see")).toBe(true);
+    expect(E.spielAktiv({ spieleAktiv: { see: false } }, "see")).toBe(false);
+    expect(E.spielAktiv({ spieleAktiv: { see: true } }, "see")).toBe(true);
+    expect(E.SPIELE_SCHALTER.map((s) => s.id)).toEqual(["see", "blockwelt", "tennis", "fussball", "schach"]);
+  });
+
+  it("Gesprächsimpulse: 20 Fragen, Frage des Tages determiniert und täglich anders", async () => {
+    const E = await import("./elternWerkzeuge.js");
+    expect(E.GESPRAECH_BEREICHE.flatMap((b) => b.fragen).length).toBe(20);
+    const a = E.gespraechDesTages("2026-01-15");
+    expect(a).toEqual(E.gespraechDesTages("2026-01-15"));
+    expect(a.frage).not.toBe(E.gespraechDesTages("2026-01-16").frage);
+    expect(a.bereich).toMatch(/Grenzen|Stehauf|Denkweise|Probleme/);
+  });
+
+  it("Alt-Übernahme bringt Zeitlimit, Münz-Schalter und Spiele-Schalter mit", async () => {
+    const { importAltdaten } = await import("./importAltdaten.js");
+    const { dokument, bericht } = importAltdaten(
+      { progress: {}, zeitLimit: 30, muenzenAktiv: false, spieleAktiv: { spiel: false, schach: true, tennis: false } },
+      HEUTE,
+    );
+    expect(dokument.einstellungen.zeitLimit).toBe(30);
+    expect(dokument.einstellungen.muenzenAktiv).toBe(false);
+    expect(dokument.einstellungen.spieleAktiv).toEqual({ see: false, tennis: false });
+    expect(bericht.some((b) => b.feld === "Lernzeit-Limit")).toBe(true);
+  });
+});

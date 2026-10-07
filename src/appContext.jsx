@@ -1,5 +1,6 @@
 import { createContext, useContext, useMemo, useRef, useState, useEffect } from "react";
 import { migrateData } from "./calc/migrateData.js";
+import { zeitHeute } from "./calc/elternWerkzeuge.js";
 import { importAltdaten, istAltExport } from "./calc/importAltdaten.js";
 import { idbStorage } from "./idbShim.js";
 import {
@@ -70,6 +71,28 @@ export function AppProvider({ children }) {
       .then((ja) => setTresorStatus(ja ? "gesperrt" : "neu"))
       .catch(() => setTresorStatus("neu"));
   }, []);
+
+  // ⏰ Lernzeit zählen (Time-Boxing): alle 5 s, nur bei offenem Tresor,
+  // sichtbarer App und aktivem Limit. __ZEIT_SCHNELL__ ist der
+  // Test-Zeitraffer (größere Schritte, kürzeres Intervall).
+  const zaehlRef = useRef(null);
+  const zaehlDataRef = useRef(data);
+  zaehlDataRef.current = data;
+  useEffect(() => {
+    if (tresorStatus !== "offen") return;
+    const schnell = typeof window !== "undefined" && window.__ZEIT_SCHNELL__;
+    const schritt = schnell ? 300 : 5;
+    const takt = schnell ? 400 : 5000;
+    zaehlRef.current = setInterval(() => {
+      if (document.visibilityState === "hidden") return;
+      const d = zaehlDataRef.current;
+      if (!(d.einstellungen.zeitLimit > 0)) return;
+      const z = zeitHeute(d.lernstand.zeit, heute);
+      update({ ...d, lernstand: { ...d.lernstand, zeit: { tag: z.tag, sek: z.sek + schritt } } });
+    }, takt);
+    return () => clearInterval(zaehlRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tresorStatus]);
 
   // Hell/Dunkel über data-theme am <html>
   useEffect(() => {

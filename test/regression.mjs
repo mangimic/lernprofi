@@ -36,6 +36,40 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.17: Eltern-Werkzeuge ----------
+console.log("== v0.17: Eltern-Werkzeuge ==");
+test("v0.17: APP_VERSION mindestens 0.17.0", versionMindestens("0.17.0"));
+test("v0.17: rn-020 vorhanden", releaseNoteVorhanden("rn-020"));
+test("v0.17: Zeitlimit-Logik rein (Stufen wie im Original, 0 = aus)", (() => {
+  const q = quelle("src/calc/elternWerkzeuge.js");
+  return q.includes("ZEIT_STUFEN = [0, 10, 15, 20, 30, 45, 60]")
+    && q.includes("zeitAbgelaufen") && q.includes("zeitUebrigMin")
+    && !/Date\.now\(|Math\.random/.test(q);
+})());
+test("v0.17: Stopp-Bildschirm wie im Original, Eltern-Modus bleibt frei", (() => {
+  const a = quelle("src/App.jsx");
+  return a.includes('data-test="zeit-sperre"') && a.includes("Deine Lernzeit für heute ist geschafft")
+    && a.includes("!tresor.elternModus && zeitAbgelaufen");
+})());
+test("v0.17: Spiele-Schalter + Münz-Freischaltung + Geschenk im Elternbereich", (() => {
+  const e = quelle("src/features/Eltern.jsx");
+  return e.includes("SPIELE_SCHALTER") && e.includes("muenzen-aktiv")
+    && e.includes("muenz-geschenk") && e.includes("zeit-frei")
+    && quelle("src/features/Spielhalle.jsx").includes("spielAktiv(data.einstellungen")
+    && quelle("src/features/Spielhalle.jsx").includes("muenzenAktiv");
+})());
+test("v0.17: 20 Gesprächsimpulse in 4 Bereichen mit Frage des Tages", (() => {
+  const q = quelle("src/calc/elternWerkzeuge.js");
+  return ["Grenzen", "Stehauf-Kraft", "Denkweise", "Probleme lösen"].every((t) => q.includes(t))
+    && q.includes("gespraechDesTages")
+    && quelle("src/features/Eltern.jsx").includes("gespraech-tages");
+})());
+test("v0.17: Zeitzähler nur bei sichtbarer App, Test-Zeitraffer vorhanden", (() => {
+  const a = quelle("src/appContext.jsx");
+  return a.includes("visibilityState") && a.includes("__ZEIT_SCHNELL__")
+    && a.includes("zeitHeute");
+})());
+
 // ---------- v0.16: Vorgangsbeschreibung ----------
 console.log("== v0.16: Vorgangsbeschreibung ==");
 test("v0.16: APP_VERSION mindestens 0.16.0", versionMindestens("0.16.0"));

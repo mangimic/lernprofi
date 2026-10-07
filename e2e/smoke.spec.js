@@ -565,3 +565,53 @@ test("Vorgangsbeschreibung: Ablauf wählen, drei Spiele, Arbeitsblatt, Lösungs-
   await page.getByTestId("selbst-form").last().check();
   await expect(page.getByTestId("selbst-stand")).toContainText("2 von 12");
 });
+
+test("Eltern-Werkzeuge: Spiel ausblenden, Münzen aus, Zeitlimit sperrt freundlich", async ({ page }) => {
+  await tresorAnlegen(page); // nach der Einrichtung sind die Eltern angemeldet
+  await page.getByTestId("nav-eltern").click();
+
+  // ♟️ Schach ausblenden, 🪙 Münz-Freischaltung aus, 💬 Gespräche sichtbar
+  await page.getByTestId("spiel-an-schach-0").click();
+  await page.getByTestId("muenzen-aktiv-0").click();
+  await expect(page.getByTestId("gespraech-tages")).toContainText("Frage des Tages");
+  await expect(page.getByTestId("gespraech-bereich")).toHaveCount(4);
+
+  // Spielhalle: Schach ist weg, Tennis startet ohne Münze
+  await page.getByTestId("nav-spiele").click();
+  await expect(page.getByTestId("spiel-schach")).toHaveCount(0);
+  await expect(page.getByTestId("spielhalle")).toContainText("Freie Fahrt");
+  await page.getByTestId("spiel-tennis").click();
+  await expect(page.getByTestId("tennis-start")).toBeVisible();
+  await page.getByTestId("spiel-abbrechen").click();
+
+  // 🎁 3 Münzen schenken, ⏰ Tageslimit auf 10 Minuten
+  await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("muenz-geschenk").click();
+  await expect(page.getByTestId("muenz-geschenk")).toContainText("jetzt 3");
+  await page.getByTestId("zeit-limit-10").click();
+  await expect(page.getByTestId("zeit-verbraucht")).toContainText("von 10 Min");
+  await page.waitForTimeout(600); // der verschlüsselte Tresor-Schreibvorgang läuft asynchron
+
+  // Als Kind (PIN) mit Zeitraffer: nach „10 Minuten“ kommt der Stopp-Bildschirm
+  await page.reload();
+  await page.evaluate(() => { window.__ZEIT_SCHNELL__ = true; });
+  await page.getByTestId("pin-eingabe").fill(PIN);
+  await page.getByTestId("pin-ok").click();
+  await expect(page.getByTestId("start-seite")).toBeVisible();
+  await expect(page.getByTestId("tages-stand")).toContainText("⏰ noch");
+  await expect(page.getByTestId("zeit-sperre")).toBeVisible({ timeout: 15000 });
+  await expect(page.getByTestId("zeit-sperre")).toContainText("Lernzeit für heute ist geschafft");
+
+  // Eltern melden sich mit Passwort an (kein Sperr-Schirm) und geben den Tag frei
+  await page.getByTestId("zeit-eltern").click();
+  await expect(page.getByTestId("gate-entsperren")).toBeVisible();
+  await page.evaluate(() => { window.__ZEIT_SCHNELL__ = false; });
+  await page.getByTestId("eltern-zugang").click();
+  await page.getByTestId("pw-eingabe").fill(PW);
+  await page.getByTestId("pw-ok").click();
+  await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
+  await expect(page.getByTestId("zeit-sperre")).toHaveCount(0);
+  await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("zeit-frei").click();
+  await expect(page.getByTestId("zeit-verbraucht")).toContainText("0 Min von 10 Min");
+});

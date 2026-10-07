@@ -26,11 +26,15 @@ export function leeresDokument(heute) {
       konzentration: null, // Zahlenkette, ABC-Bestwerte, Blitzlese-Runden
       mutSatz: { tag: "", idx: 0 }, // Mut-Satz des Tages (Stark mit Leo)
       vorgang: null,       // Vorgangsbeschreibung: gewählter Ablauf + Selbst-Check
+      zeit: { tag: "", sek: 0 }, // heute verbrauchte Lernzeit (Time-Boxing)
     },
     einstellungen: {
       thema: "hell",   // "hell" | "dunkel"
       missionsZiel: 4,
       stufenVorgabe: { global: 0, felder: {} }, // 0 = automatisch, 1-3 = fest (Eltern)
+      zeitLimit: 20,       // Lernzeit pro Tag in Minuten (0 = aus); Empfehlung 20
+      spieleAktiv: {},     // je Spiel: false = in der Spielhalle ausgeblendet
+      muenzenAktiv: true,  // Münz-Freischaltung (erst üben, dann spielen)
     },
     protokoll: [],     // Änderungsprotokoll: { zeit, bereich, art, text }
   };
@@ -61,6 +65,11 @@ export function migrateData(alt, heute) {
   if (!istObjekt(d.lernstand.blockwelt)) d.lernstand.blockwelt = null;
   if (!istObjekt(d.lernstand.konzentration)) d.lernstand.konzentration = null;
   if (!istObjekt(d.lernstand.vorgang)) d.lernstand.vorgang = null;
+  const zeit = istObjekt(d.lernstand.zeit) ? d.lernstand.zeit : {};
+  d.lernstand.zeit = {
+    tag: typeof zeit.tag === "string" ? zeit.tag : "",
+    sek: Number.isFinite(zeit.sek) && zeit.sek >= 0 ? Math.floor(zeit.sek) : 0,
+  };
   const mut = istObjekt(d.lernstand.mutSatz) ? d.lernstand.mutSatz : {};
   d.lernstand.mutSatz = {
     tag: typeof mut.tag === "string" ? mut.tag : "",
@@ -77,6 +86,11 @@ export function migrateData(alt, heute) {
     global: [0, 1, 2, 3].includes(vorgabe.global) ? vorgabe.global : 0,
     felder: istObjekt(vorgabe.felder) ? vorgabe.felder : {},
   };
+  if (!Number.isInteger(d.einstellungen.zeitLimit) || d.einstellungen.zeitLimit < 0 || d.einstellungen.zeitLimit > 180) {
+    d.einstellungen.zeitLimit = 20;
+  }
+  if (!istObjekt(d.einstellungen.spieleAktiv)) d.einstellungen.spieleAktiv = {};
+  if (typeof d.einstellungen.muenzenAktiv !== "boolean") d.einstellungen.muenzenAktiv = true;
 
   if (!Array.isArray(d.protokoll)) d.protokoll = [];
 
