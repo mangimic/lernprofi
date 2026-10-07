@@ -141,3 +141,25 @@ test("Deutsch: dass/das-Frage hat genau 2 Antworten, Stark mit Leo ist da", asyn
   await page.getByTestId("bereich-stark").click();
   await expect(page.getByTestId("frage-karte")).toBeVisible();
 });
+
+test("Wörter antippen: Subjekt finden, Lösung wird markiert", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("zum-ueben").click();
+  await page.getByTestId("bereich-subj").click();
+  await expect(page.getByTestId("frage-karte")).toBeVisible();
+  await expect(page.getByTestId("frage-text")).toContainText(/Wer oder was/);
+
+  // Richtig: alle Ziel-Wörter antippen → Prüfen → Richtig
+  const ziele = page.locator('[data-test="wort-chip"][data-ziel="1"]');
+  const n = await ziele.count();
+  expect(n).toBeGreaterThanOrEqual(1);
+  for (let i = 0; i < n; i++) await ziele.nth(i).click();
+  await page.getByTestId("pruefen-knopf").click();
+  await expect(page.getByTestId("feedback")).toContainText("Richtig");
+  await page.getByTestId("weiter-knopf").click();
+
+  // Falsch: nur ein Nicht-Ziel-Wort antippen → Lösung mit Tipp
+  await page.locator('[data-test="wort-chip"]:not([data-ziel])').first().click();
+  await page.getByTestId("pruefen-knopf").click();
+  await expect(page.getByTestId("feedback")).toContainText("Die Lösung ist");
+});

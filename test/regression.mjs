@@ -36,6 +36,27 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.5: Wörter antippen ----------
+console.log("== v0.5: Wörter antippen ==");
+test("v0.5: APP_VERSION mindestens 0.5.0", versionMindestens("0.5.0"));
+test("v0.5: rn-007 vorhanden", releaseNoteVorhanden("rn-007"));
+test("v0.5: Satz-Pools mit Normalisierern (subjekt/praedikat/gk)", (() => {
+  const s = quelle("src/calc/aufgaben/saetze.js");
+  return ["subjektPool", "praedikatPool", "gkPool"].every((f) => s.includes(`export function ${f}`))
+    && s.includes("SUBJ_K4") && s.includes("PRAED_K4");
+})());
+test("v0.5: reine Prüf-Logik auswahlPruefen + Pool-Gesundheit", (() => {
+  const w = quelle("src/calc/wortTippen.js");
+  return w.includes("export function auswahlPruefen") && w.includes("tippenPoolGesund")
+    && !/document\.|window\.|fetch\(|Math\.random/.test(w);
+})());
+test("v0.5: Üben kennt den Tippen-Typ (wort-chip, pruefen-knopf)", (() => {
+  const u = quelle("src/features/Ueben.jsx");
+  return u.includes("\"tippen\"") && u.includes("\"wort-chip\"") && u.includes("\"pruefen-knopf\"")
+    && u.includes("auswahlPruefen");
+})());
+
+
 // ---------- v0.4: Deutsch + Stark mit Leo ----------
 console.log("== v0.4: Deutsch + Stark mit Leo ==");
 test("v0.4: APP_VERSION mindestens 0.4.0", versionMindestens("0.4.0"));

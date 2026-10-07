@@ -7,6 +7,8 @@ import { MATHE_DATEN, MATHE_BEREICHE } from "./aufgaben/mathe.js";
 import { SACH_DATEN, SACH_BEREICHE } from "./aufgaben/sachkunde.js";
 import { GESCH_DATEN, ddPool, doppelPool, DEUTSCH_BEREICHE } from "./aufgaben/deutsch.js";
 import { STARK_DATEN, STARK_SAETZE } from "./aufgaben/stark.js";
+import { subjektPool, praedikatPool, gkPool } from "./aufgaben/saetze.js";
+import { auswahlPruefen, tippenPoolGesund } from "./wortTippen.js";
 
 // Fiktive Fixtures – niemals echte Daten.
 const HEUTE = "2026-01-15";
@@ -125,6 +127,36 @@ describe("aufgabenRunde", () => {
     expect(STARK_DATEN.easy.length).toBe(17);
     expect(STARK_DATEN.hard.length).toBe(24);
     expect(STARK_SAETZE.length).toBe(16);
+  });
+});
+
+describe("wortTippen", () => {
+  const AUFGABE = { woerter: ["Der", "Hund", "bellt", "laut."], ziel: [0, 1], frage: "Subjekt?", loesung: "Der Hund", tipp: "Wer oder was?" };
+
+  it("auswahlPruefen erkennt richtig, fehlend und zu viel", () => {
+    expect(auswahlPruefen(AUFGABE, [0, 1]).richtig).toBe(true);
+    expect(auswahlPruefen(AUFGABE, [1, 0]).richtig).toBe(true); // Reihenfolge egal
+    const fehlt = auswahlPruefen(AUFGABE, [0]);
+    expect(fehlt.richtig).toBe(false);
+    expect(fehlt.fehlend).toEqual([1]);
+    const zuViel = auswahlPruefen(AUFGABE, [0, 1, 2]);
+    expect(zuViel.richtig).toBe(false);
+    expect(zuViel.zuviel).toEqual([2]);
+    expect(auswahlPruefen(AUFGABE, []).richtig).toBe(false);
+  });
+
+  it("die echten Satz-Pools sind gesund (Ziel-Indizes gültig, Lösungen da)", () => {
+    const subj = subjektPool(), praed = praedikatPool(), gk = gkPool();
+    expect(tippenPoolGesund(subj)).toBe(true);
+    expect(tippenPoolGesund(praed)).toBe(true);
+    expect(tippenPoolGesund(gk)).toBe(true);
+    expect(subj.easy.length).toBeGreaterThanOrEqual(30);
+    expect(subj.hard.length).toBeGreaterThanOrEqual(16);
+    expect(praed.hard.length).toBeGreaterThanOrEqual(16);
+    expect(gk.easy.length).toBeGreaterThanOrEqual(20);
+    // Lösungstext passt zu den Ziel-Wörtern (Stichprobe über alle Subjekte)
+    expect(subj.easy.concat(subj.hard).every((a) =>
+      a.loesung.toLowerCase().includes(a.woerter[a.ziel[0]].toLowerCase().replace(/[.,!?]/g, "")))).toBe(true);
   });
 });
 

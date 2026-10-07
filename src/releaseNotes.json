@@ -1,5 +1,16 @@
 [
   {
+    "id": "rn-007",
+    "version": "0.5.0",
+    "datum": "2026-10-07",
+    "titel": "Wörter antippen: Subjekte, Prädikate, Groß & Klein",
+    "entries": [
+      { "type": "neu", "text": "Der zweite Übungstyp ist da: Wörter im Satz antippen! 🔎 Subjekte (mit der Wer-oder-was-Frage), 🧲 Prädikate (auch zweiteilige wie „räumt … ab“) und 🔠 Groß & Klein – zusammen 136 Sätze aus der bisherigen App." },
+      { "type": "verbessert", "text": "Nach dem Prüfen zeigt die Übung die Lösung farbig im Satz: richtige Wörter grün, zu viel angetippte orange – mit Erklär-Tipp." },
+      { "type": "technik", "text": "Die Prüf-Logik (auswahlPruefen) ist ein reines, getestetes Modul; die Satz-Pools laufen über Normalisierer auf ein gemeinsames Tippen-Format." }
+    ]
+  },
+  {
     "id": "rn-006",
     "version": "0.4.0",
     "datum": "2026-10-07",
