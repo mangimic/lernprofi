@@ -1,5 +1,15 @@
 [
   {
+    "id": "rn-009",
+    "version": "0.6.0",
+    "datum": "2026-10-07",
+    "titel": "Deutsch ist (fast) komplett",
+    "entries": [
+      { "type": "neu", "text": "5 neue Deutsch-Bereiche mit 386 Aufgaben: 💬 Wörtliche Rede (antippen, was gesprochen wird) · ⏳ Zeitformen bestimmen (Präsens bis Futur) · 🏷️ Wortarten (Nomen/Verb/Adjektiv mit Proben als Tipp) · 🎯 Die 4 Fälle (mit Fragewort-Trick) · 📖 Grundwortschatz: alle 12 Regelgruppen mit 246 Wörtern, jede Frage zeigt die passende Regel." },
+      { "type": "hinweis", "text": "Damit sind 11 Deutsch-Bereiche spielbar – insgesamt über 800 Aufgaben in der neuen App. Es fehlt aus der alten App noch: Satzglieder umstellen (braucht eine eigene Schiebe-Oberfläche), Vorgangsbeschreibung und die Spiele." }
+    ]
+  },
+  {
     "id": "rn-008",
     "version": "0.5.1",
     "datum": "2026-10-07",

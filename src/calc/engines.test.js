@@ -8,6 +8,7 @@ import { SACH_DATEN, SACH_BEREICHE } from "./aufgaben/sachkunde.js";
 import { GESCH_DATEN, ddPool, doppelPool, DEUTSCH_BEREICHE } from "./aufgaben/deutsch.js";
 import { STARK_DATEN, STARK_SAETZE } from "./aufgaben/stark.js";
 import { subjektPool, praedikatPool, gkPool } from "./aufgaben/saetze.js";
+import { zeitPool, wortartenPool, faellePool, redePool, gwsPool, ZEIT_NAMEN, FALL_NAMEN } from "./aufgaben/deutschKonverter.js";
 import { auswahlPruefen, tippenPoolGesund } from "./wortTippen.js";
 
 // Fiktive Fixtures – niemals echte Daten.
@@ -157,6 +158,40 @@ describe("wortTippen", () => {
     // Lösungstext passt zu den Ziel-Wörtern (Stichprobe über alle Subjekte)
     expect(subj.easy.concat(subj.hard).every((a) =>
       a.loesung.toLowerCase().includes(a.woerter[a.ziel[0]].toLowerCase().replace(/[.,!?]/g, "")))).toBe(true);
+  });
+
+  it("wörtliche Rede: Tippen-Pool gesund, Lösung = gesprochene Wörter", () => {
+    const rede = redePool();
+    expect(tippenPoolGesund(rede)).toBe(true);
+    expect(rede.easy.length).toBeGreaterThanOrEqual(16);
+    expect(rede.hard.length).toBeGreaterThanOrEqual(12);
+    expect(rede.easy.every((a) => a.loesung === a.ziel.map((i) => a.woerter[i]).join(" "))).toBe(true);
+  });
+});
+
+describe("deutschKonverter (MC)", () => {
+  it("Zeitformen: easy = Präsens/Präteritum, hard = Perfekt/Futur, Optionen eindeutig", () => {
+    const z = zeitPool();
+    expect(poolGesund(z)).toBe(true);
+    expect(z.easy.every((a) => [ZEIT_NAMEN.praesens, ZEIT_NAMEN.praeteritum].includes(a.r))).toBe(true);
+    expect(z.hard.every((a) => [ZEIT_NAMEN.perfekt, ZEIT_NAMEN.futur].includes(a.r))).toBe(true);
+    expect(z.easy.concat(z.hard).every((a) => new Set([a.r, ...a.x]).size === 3)).toBe(true);
+  });
+
+  it("Wortarten und Fälle: markierte Wörter im Kontext, 3 eindeutige Optionen", () => {
+    const w = wortartenPool(), f = faellePool();
+    expect(poolGesund(w)).toBe(true);
+    expect(poolGesund(f)).toBe(true);
+    expect(w.easy.concat(w.hard).every((a) => a.kontext && a.f.includes("„"))).toBe(true);
+    expect(f.easy.every((a) => Object.values(FALL_NAMEN).includes(a.r) && a.tipp.includes("Frage"))).toBe(true);
+  });
+
+  it("Grundwortschatz: alle 12 Regelgruppen vertreten, Regel steht im Kontext", () => {
+    const g = gwsPool();
+    expect(poolGesund(g)).toBe(true);
+    expect(g.easy.length).toBeGreaterThanOrEqual(80);
+    expect(g.hard.length).toBeGreaterThanOrEqual(120);
+    expect(g.easy.concat(g.hard).every((a) => a.kontext.includes("Regel:") && !/<[^>]+>/.test(a.kontext + a.tipp))).toBe(true);
   });
 });
 

@@ -163,3 +163,16 @@ test("Wörter antippen: Subjekt finden, Lösung wird markiert", async ({ page })
   await page.getByTestId("pruefen-knopf").click();
   await expect(page.getByTestId("feedback")).toContainText("Die Lösung ist");
 });
+
+test("Neue Deutsch-Bereiche: Zeitformen (3 Optionen) und Grundwortschatz mit Regel", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("zum-ueben").click();
+  await page.getByTestId("bereich-zeit").click();
+  await expect(page.getByTestId("frage-text")).toContainText("Zeitform");
+  await expect(page.locator('[data-test="antwort-opt"]')).toHaveCount(3);
+  await page.getByTestId("abbrechen").click();
+  await page.getByTestId("bereich-gws").click();
+  await expect(page.getByTestId("frage-karte")).toContainText("Regel:");
+  await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+  await expect(page.getByTestId("feedback")).toContainText("Richtig");
+});

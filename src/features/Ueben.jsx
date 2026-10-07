@@ -4,6 +4,7 @@ import { MATHE_DATEN, MATHE_BEREICHE } from "../calc/aufgaben/mathe.js";
 import { SACH_DATEN, SACH_BEREICHE } from "../calc/aufgaben/sachkunde.js";
 import { GESCH_DATEN, ddPool, doppelPool, DEUTSCH_BEREICHE } from "../calc/aufgaben/deutsch.js";
 import { subjektPool, praedikatPool, gkPool } from "../calc/aufgaben/saetze.js";
+import { zeitPool, wortartenPool, faellePool, redePool, gwsPool } from "../calc/aufgaben/deutschKonverter.js";
 import { STARK_DATEN, STARK_BEREICHE } from "../calc/aufgaben/stark.js";
 import { rngAusSeed } from "../calc/rng.js";
 import { aktiveStufe, leererFortschritt, rundeAbschliessen, STUFEN_NAMEN, stufenMax } from "../calc/stufen.js";
@@ -17,13 +18,19 @@ import { muenzenNachRunde, aufgabenZaehlen, heutigerTag, lernspur } from "../cal
    Feinschliff (Fokus-Modus, weitere Deutsch-Typen) folgt in Etappe 4. */
 
 const DEUTSCH_DATEN = {
-  subj: subjektPool(), praed: praedikatPool(), gk: gkPool(),
+  subj: subjektPool(), praed: praedikatPool(), gk: gkPool(), rede: redePool(),
+  zeit: zeitPool(), wa: wortartenPool(), faelle: faellePool(), gws: gwsPool(),
   gesch: GESCH_DATEN, dd: ddPool(), doppel: doppelPool(),
 };
 const DEUTSCH_LISTE = [
   { key: "subj", emoji: "🔎", name: "Subjekte", typ: "tippen" },
   { key: "praed", emoji: "🧲", name: "Prädikate", typ: "tippen" },
+  { key: "rede", emoji: "💬", name: "Wörtliche Rede", typ: "tippen" },
+  { key: "zeit", emoji: "⏳", name: "Zeitformen" },
+  { key: "wa", emoji: "🏷️", name: "Wortarten" },
+  { key: "faelle", emoji: "🎯", name: "Die 4 Fälle" },
   { key: "gk", emoji: "🔠", name: "Groß & Klein", typ: "tippen" },
+  { key: "gws", emoji: "📖", name: "Grundwortschatz" },
   ...DEUTSCH_BEREICHE,
 ];
 

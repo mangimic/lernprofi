@@ -36,6 +36,23 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.6: Deutsch komplett (Zeit, Wortarten, Fälle, Rede, GWS) ----------
+console.log("== v0.6: Deutsch komplett ==");
+test("v0.6: APP_VERSION mindestens 0.6.0", versionMindestens("0.6.0"));
+test("v0.6: rn-009 vorhanden", releaseNoteVorhanden("rn-009"));
+test("v0.6: Konverter-Modul mit allen 5 Pools", (() => {
+  const d = quelle("src/calc/aufgaben/deutschKonverter.js");
+  return ["zeitPool", "wortartenPool", "faellePool", "redePool", "gwsPool"].every((f) => d.includes(`export function ${f}`));
+})());
+test("v0.6: Üben listet 11 Deutsch-Bereiche (inkl. rede/zeit/wa/faelle/gws)", (() => {
+  const u = quelle("src/features/Ueben.jsx");
+  return ["\"subj\"", "\"praed\"", "\"rede\"", "\"zeit\"", "\"wa\"", "\"faelle\"", "\"gk\"", "\"gws\""].every((k) => u.includes(k));
+})());
+test("v0.6: Konverter bleiben rein (kein DOM, keine Uhr, kein Zufall)", (() => {
+  const d = quelle("src/calc/aufgaben/deutschKonverter.js");
+  return !/document\.|window\.|fetch\(|Math\.random|Date\.now\(/.test(d);
+})());
+
 // ---------- v0.5: Wörter antippen ----------
 console.log("== v0.5: Wörter antippen ==");
 test("v0.5: APP_VERSION mindestens 0.5.0", versionMindestens("0.5.0"));
