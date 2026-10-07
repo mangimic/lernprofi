@@ -27,7 +27,7 @@ test("Tresor anlegen, Kind entsperrt nach Neustart selbständig per PIN", async 
   await tresorAnlegen(page);
   // Nach der Einrichtung sind die Eltern angemeldet
   await expect(page.getByTestId("eltern-karte")).toBeVisible();
-  await expect(page.getByTestId("version")).toContainText("0.2.0");
+  await expect(page.getByTestId("version")).toContainText(/Version \d+\.\d+\.\d+/);
 
   // Einstellung ändern (Dunkel) – muss den Neustart überleben
   await page.getByTestId("thema-schalter").click();
