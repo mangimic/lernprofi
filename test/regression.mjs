@@ -36,6 +36,28 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.7: Elternbereich + Alt-App-Übernahme ----------
+console.log("== v0.7: Elternbereich + Alt-App-Übernahme ==");
+test("v0.7: APP_VERSION mindestens 0.7.0", versionMindestens("0.7.0"));
+test("v0.7: rn-010 vorhanden", releaseNoteVorhanden("rn-010"));
+test("v0.7: Übernahme-Konverter mit Bericht und Alt-Erkennung", (() => {
+  const i = quelle("src/calc/importAltdaten.js");
+  return i.includes("export function importAltdaten") && i.includes("export function istAltExport")
+    && i.includes("bericht") && i.includes("verworfen") && i.includes("gws:");
+})());
+test("v0.7: Stufen-Vorgabe im Datenmodell und in den Übungen", (() => {
+  return quelle("src/calc/migrateData.js").includes("stufenVorgabe")
+    && quelle("src/calc/stufen.js").includes("export function stufenVorgabe")
+    && quelle("src/features/Ueben.jsx").includes("stufenVorgabe(data.einstellungen");
+})());
+test("v0.7: Eltern-Tab nur im Eltern-Modus, mit Stufen/Ziel/Übersicht/Daten", (() => {
+  const a = quelle("src/App.jsx"), e = quelle("src/features/Eltern.jsx");
+  return a.includes("tresor.elternModus ? [{ id: \"eltern\"")
+    && ["eltern-stufen", "eltern-ziel", "eltern-uebersicht", "eltern-daten", "import-bericht"].every((t) => e.includes(`"${t}"`));
+})());
+test("v0.7: Import versteht Alt-Export (istAltExport-Weiche im Kontext)", quelle("src/appContext.jsx").includes("istAltExport(roh)"));
+
+
 // ---------- v0.6: Deutsch komplett (Zeit, Wortarten, Fälle, Rede, GWS) ----------
 console.log("== v0.6: Deutsch komplett ==");
 test("v0.6: APP_VERSION mindestens 0.6.0", versionMindestens("0.6.0"));

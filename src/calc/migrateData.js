@@ -24,6 +24,7 @@ export function leeresDokument(heute) {
     einstellungen: {
       thema: "hell",   // "hell" | "dunkel"
       missionsZiel: 4,
+      stufenVorgabe: { global: 0, felder: {} }, // 0 = automatisch, 1-3 = fest (Eltern)
     },
     protokoll: [],     // Änderungsprotokoll: { zeit, bereich, art, text }
   };
@@ -57,6 +58,11 @@ export function migrateData(alt, heute) {
   if (!Number.isInteger(d.einstellungen.missionsZiel) || d.einstellungen.missionsZiel < 1) {
     d.einstellungen.missionsZiel = 4;
   }
+  const vorgabe = istObjekt(d.einstellungen.stufenVorgabe) ? d.einstellungen.stufenVorgabe : {};
+  d.einstellungen.stufenVorgabe = {
+    global: [0, 1, 2, 3].includes(vorgabe.global) ? vorgabe.global : 0,
+    felder: istObjekt(vorgabe.felder) ? vorgabe.felder : {},
+  };
 
   if (!Array.isArray(d.protokoll)) d.protokoll = [];
 

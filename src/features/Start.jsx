@@ -1,10 +1,9 @@
 import { useApp } from "../appContext.jsx";
-import ElternKarte from "./Eltern.jsx";
 import { heutigerTag, lernspur } from "../calc/lerntage.js";
 
 /* Startseite: Begrüßung, Tages-Stand (Münzen, Missionen, Lernspur),
-   Einstieg ins Üben, Hell/Dunkel – und nach Eltern-Entsperrung der
-   Elternbereich. */
+   Einstieg ins Üben, Hell/Dunkel. Der Elternbereich hat (nach
+   Passwort-Entsperrung) seinen eigenen Tab. */
 export default function Start() {
   const { data, logChange, T, tresor, navTo, heute } = useApp();
   const dunkel = data.einstellungen.thema === "dunkel";
@@ -47,7 +46,12 @@ export default function Start() {
           {dunkel ? "☀️ Hell einschalten" : "🌙 Dunkel einschalten"}
         </button>
       </div>
-      {tresor.elternModus && <ElternKarte />}
+      {tresor.elternModus && (
+        <button data-test="zum-eltern" onClick={() => navTo("eltern")}
+          style={{ width: "100%", marginTop: T.abstand, background: T.weich, color: T.text, fontWeight: 700 }}>
+          🔧 Zum Elternbereich
+        </button>
+      )}
     </div>
   );
 }

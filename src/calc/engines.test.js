@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { rngAusSeed, mischen } from "./rng.js";
-import { STUFEN_NAMEN, leererFortschritt, stufenMax, stufenStart, aktiveStufe, rundeAbschliessen } from "./stufen.js";
+import { STUFEN_NAMEN, leererFortschritt, stufenMax, stufenStart, aktiveStufe, rundeAbschliessen, stufenVorgabe } from "./stufen.js";
 import { PAKET_GROESSE, paketWaehlen, antwortOptionen, antwortRichtig, poolGesund, stufenListe } from "./aufgabenRunde.js";
 import { muenzenNachRunde, aufgabenZaehlen, heutigerTag, lernspur, MISSIONS_LAENGE } from "./lerntage.js";
 import { MATHE_DATEN, MATHE_BEREICHE } from "./aufgaben/mathe.js";
@@ -61,6 +61,14 @@ describe("stufen", () => {
     expect(aktiveStufe(leererFortschritt(), 3, POOL, 3)).toBe(3);
     expect(aktiveStufe(leererFortschritt(), 3, POOL_OHNE_HARD, 3)).toBe(2);
     expect(STUFEN_NAMEN[1]).toBe("Aufwärmen");
+  });
+
+  it("stufenVorgabe: Feld schlägt Global, 0 heißt automatisch", () => {
+    const e = { stufenVorgabe: { global: 2, felder: { subj: 1 } } };
+    expect(stufenVorgabe(e, "subj")).toBe(1);
+    expect(stufenVorgabe(e, "praed")).toBe(2);
+    expect(stufenVorgabe({ stufenVorgabe: { global: 0, felder: {} } }, "subj")).toBe(0);
+    expect(stufenVorgabe(undefined, "subj")).toBe(0);
   });
 });
 

@@ -25,8 +25,8 @@ test("Tresor anlegen, Kind entsperrt nach Neustart selbständig per PIN", async 
   page.on("pageerror", (e) => fehler.push(String(e)));
 
   await tresorAnlegen(page);
-  // Nach der Einrichtung sind die Eltern angemeldet
-  await expect(page.getByTestId("eltern-karte")).toBeVisible();
+  // Nach der Einrichtung sind die Eltern angemeldet (eigener Eltern-Tab)
+  await expect(page.getByTestId("nav-eltern")).toBeVisible();
   await expect(page.getByTestId("version")).toContainText(/Version \d+\.\d+\.\d+/);
 
   // Einstellung ändern (Dunkel) – muss den Neustart überleben
@@ -46,7 +46,7 @@ test("Tresor anlegen, Kind entsperrt nach Neustart selbständig per PIN", async 
   await page.getByTestId("pin-eingabe").fill(PIN);
   await page.getByTestId("pin-ok").click();
   await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
-  await expect(page.getByTestId("eltern-karte")).toHaveCount(0);
+  await expect(page.getByTestId("nav-eltern")).toHaveCount(0);
   await expect
     .poll(async () => page.evaluate(() => document.documentElement.dataset.theme))
     .toBe("dark");
@@ -56,7 +56,7 @@ test("Tresor anlegen, Kind entsperrt nach Neustart selbständig per PIN", async 
   expect(fehler).toEqual([]);
 });
 
-test("Eltern-Zugang mit Passwort: Elternbereich sichtbar, Sperren sperrt", async ({ page }) => {
+test("Eltern-Zugang mit Passwort: Eltern-Tab, Import aus der Alt-App, Sperren", async ({ page }) => {
   await tresorAnlegen(page);
   await page.reload();
   await expect(page.getByTestId("gate-entsperren")).toBeVisible();
@@ -64,10 +64,31 @@ test("Eltern-Zugang mit Passwort: Elternbereich sichtbar, Sperren sperrt", async
   await page.getByTestId("pw-eingabe").fill(PW);
   await page.getByTestId("pw-ok").click();
   await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
+
+  // Eltern-Tab öffnen, Tagesziel umstellen
+  await page.getByTestId("nav-eltern").click();
   await expect(page.getByTestId("eltern-karte")).toBeVisible();
-  await expect(page.getByTestId("export-knopf")).toBeVisible();
+  await page.getByTestId("ziel-3").click();
+
+  // Alt-App-Export einspielen → Bericht + übernommene Werte
+  const dateiWahl = page.waitForEvent("filechooser");
+  await page.getByTestId("import-knopf").click();
+  (await dateiWahl).setFiles("e2e/fixtures/alt-export.json");
+  await expect(page.getByTestId("import-bericht")).toBeVisible();
+  await expect(page.getByTestId("import-bericht")).toContainText("Münzen");
+  await expect(page.getByTestId("import-bericht")).toContainText("stimmPaket");
+  await page.getByTestId("nav-start").click();
+  await expect(page.getByTestId("tages-stand")).toContainText("7 Münzen");
+
+  // Sperren → Gate; Kind-Entsperrung sieht KEINEN Eltern-Tab, Daten sind da
+  await page.getByTestId("nav-eltern").click();
   await page.getByTestId("sperren-knopf").click();
   await expect(page.getByTestId("gate-entsperren")).toBeVisible();
+  await page.getByTestId("pin-eingabe").fill(PIN);
+  await page.getByTestId("pin-ok").click();
+  await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
+  await expect(page.getByTestId("nav-eltern")).toHaveCount(0);
+  await expect(page.getByTestId("tages-stand")).toContainText("7 Münzen");
 });
 
 test("Release-Notes öffnen und zurück", async ({ page }) => {

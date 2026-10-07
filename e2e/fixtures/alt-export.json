@@ -1,0 +1,25 @@
+{
+  "app": "lernprofi",
+  "version": "1.86.0",
+  "exportiert": "2026-10-07T10:00:00.000Z",
+  "daten": {
+    "name": "Testkind",
+    "level": 3,
+    "thema": "fussball",
+    "muenzen": 7,
+    "missionsZiel": 3,
+    "leseKontrolle": "mix",
+    "stimmPaket": { "geladen": true, "aktiv": true },
+    "progress": {
+      "subj": { "unlocked": 3, "runs": 9, "crown": true },
+      "mrechnen": { "unlocked": 2, "runs": 4, "crown": false },
+      "gws:dopp": { "unlocked": 2, "runs": 3, "crown": false }
+    },
+    "lerntage": [
+      { "t": "2026-10-05", "m": "gruen", "mi": 4, "bo": 1, "z": 1 },
+      { "t": "2026-10-06", "m": "gelb", "mi": 2, "z": 0 }
+    ],
+    "kette": { "zahlen": [3, 7, 1], "rekord": 6 },
+    "blitz": { "runden": [40, 44], "best": 44 }
+  }
+}

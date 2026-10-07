@@ -1,5 +1,6 @@
 import { createContext, useContext, useMemo, useRef, useState, useEffect } from "react";
 import { migrateData } from "./calc/migrateData.js";
+import { importAltdaten, istAltExport } from "./calc/importAltdaten.js";
 import { idbStorage } from "./idbShim.js";
 import {
   tresorVorhanden, tresorAnlegen, entsperrenMitPasswort, entsperrenMitPin,
@@ -140,8 +141,15 @@ export function AppProvider({ children }) {
       JSON.stringify({ app: "lernprofi", exportiert: new Date().toISOString(), daten: data }, null, 2),
     importJson: (text) => {
       const roh = JSON.parse(text);
+      // Alt-App-Export? → über den geprüften Übernahme-Konverter, mit Bericht.
+      if (istAltExport(roh)) {
+        const { dokument, bericht } = importAltdaten(roh, heute);
+        logChange(dokument, "daten", "geaendert", "Lernstand aus der Alt-App übernommen");
+        return bericht;
+      }
       const dokument = roh && typeof roh === "object" && "daten" in roh ? roh.daten : roh;
       logChange(migrateData(dokument, heute), "daten", "geaendert", "Lernstand aus Datei übernommen");
+      return [{ feld: "Backup", status: "übernommen", detail: "Neubau-Backup eingespielt" }];
     },
   };
 

@@ -7,7 +7,7 @@ import { subjektPool, praedikatPool, gkPool } from "../calc/aufgaben/saetze.js";
 import { zeitPool, wortartenPool, faellePool, redePool, gwsPool } from "../calc/aufgaben/deutschKonverter.js";
 import { STARK_DATEN, STARK_BEREICHE } from "../calc/aufgaben/stark.js";
 import { rngAusSeed } from "../calc/rng.js";
-import { aktiveStufe, leererFortschritt, rundeAbschliessen, STUFEN_NAMEN, stufenMax } from "../calc/stufen.js";
+import { aktiveStufe, leererFortschritt, rundeAbschliessen, STUFEN_NAMEN, stufenMax, stufenVorgabe } from "../calc/stufen.js";
 import { paketWaehlen, antwortOptionen, antwortRichtig } from "../calc/aufgabenRunde.js";
 import { auswahlPruefen } from "../calc/wortTippen.js";
 import { muenzenNachRunde, aufgabenZaehlen, heutigerTag, lernspur } from "../calc/lerntage.js";
@@ -53,7 +53,7 @@ export default function Ueben() {
   const starten = (b) => {
     const pool = fach.daten[b.key];
     const fortschritt = data.lernstand.stufen[b.key] || leererFortschritt();
-    const stufe = aktiveStufe(fortschritt, data.profil.klasse, pool);
+    const stufe = aktiveStufe(fortschritt, data.profil.klasse, pool, stufenVorgabe(data.einstellungen, b.key));
     const paket = paketWaehlen(pool, stufe, fortschritt.runden);
     const rng = rngAusSeed(`${heute}:${b.key}:${fortschritt.runden}`);
     setRunde({
@@ -239,7 +239,7 @@ export default function Ueben() {
       </div>
       {fach.bereiche.map((b) => {
         const fortschritt = data.lernstand.stufen[b.key];
-        const stufe = aktiveStufe(fortschritt, data.profil.klasse, fach.daten[b.key]);
+        const stufe = aktiveStufe(fortschritt, data.profil.klasse, fach.daten[b.key], stufenVorgabe(data.einstellungen, b.key));
         return (
           <button key={b.key} data-test={`bereich-${b.key}`} onClick={() => starten(b)}
             style={{ ...karte, width: "100%", textAlign: "left", display: "block", border: `1px solid ${T.rand}` }}>

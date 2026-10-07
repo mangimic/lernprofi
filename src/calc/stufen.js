@@ -20,6 +20,12 @@ export function stufenStart(klasse, pool) {
   return klasse === 4 && pool.hard && pool.hard.length ? 2 : 1;
 }
 
+/** Eltern-Vorgabe aus den Einstellungen: Feld vor Global, 0 = automatisch. */
+export function stufenVorgabe(einstellungen, key) {
+  const v = einstellungen?.stufenVorgabe || {};
+  return (v.felder || {})[key] || v.global || 0;
+}
+
 /** Aktive Stufe aus Fortschritt, Klassenstufe und (später) Eltern-Vorgabe. */
 export function aktiveStufe(fortschritt, klasse, pool, vorgabe = 0) {
   const max = stufenMax(pool);

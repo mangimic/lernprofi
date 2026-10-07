@@ -1,5 +1,16 @@
 [
   {
+    "id": "rn-010",
+    "version": "0.7.0",
+    "datum": "2026-10-07",
+    "titel": "Elternbereich + Umzug aus der alten App",
+    "entries": [
+      { "type": "neu", "text": "Der Elternbereich ist jetzt ein eigener Tab (nach Entsperren mit dem Eltern-Passwort): Profil, Tagesziel (2–6 Missionen), Stufen-Steuerung (Auto oder fest, global und je Lernfeld) und die neutrale Lern-Übersicht der letzten 14 Tage." },
+      { "type": "neu", "text": "Der große Umzug ist bereit: „Lernstand aus Datei übernehmen“ versteht den Export der bisherigen App („Lernstand sichern“) – Münzen, alle Stufen (inkl. Grundwortschatz), Lerntage, Lernspur, Rekorde und Tagesziel wandern mit. Ein Bericht zeigt genau, was übernommen und was bewusst zurückgelassen wurde." },
+      { "type": "technik", "text": "Übernahme-Konverter als reines Modul mit 5 Tests (inkl. kaputter Eingaben); Stufen-Vorgabe der Eltern greift in allen Übungen." }
+    ]
+  },
+  {
     "id": "rn-009",
     "version": "0.6.0",
     "datum": "2026-10-07",
