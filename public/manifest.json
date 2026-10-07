@@ -1,0 +1,13 @@
+{
+  "name": "Lernprofi",
+  "short_name": "Lernprofi",
+  "description": "Deine Lern-App für Deutsch, Mathe und Sachkunde (Klasse 4)",
+  "lang": "de",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#eef4fb",
+  "theme_color": "#2f6fde",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

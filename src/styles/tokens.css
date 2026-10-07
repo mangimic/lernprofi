@@ -1,0 +1,63 @@
+/* ============================================================
+   Design-Tokens – die einzige Quelle für Farben und Maße.
+   Komponenten verwenden NUR diese Variablen, keine Hex-Werte.
+   Hell ist Standard; Dunkel kommt über <html data-theme="dark">.
+   Kindgerecht: Touch-Ziele mind. 44 px, große klare Schrift.
+   ============================================================ */
+:root {
+  /* Farben hell */
+  --grund: #eef4fb;          /* Seiten-Hintergrund */
+  --karte: #ffffff;          /* Karten/Flächen */
+  --text: #1c3a63;           /* Haupttext */
+  --text-leise: #5d7390;     /* Nebentext */
+  --primaer: #2f6fde;        /* Hauptfarbe (Knöpfe, aktiv) */
+  --primaer-text: #ffffff;   /* Text auf Hauptfarbe */
+  --weich: #dbe7f6;          /* sanfte Flächen (inaktive Knöpfe) */
+  --akzent: #ffd34d;         /* Belohnung/Hervorhebung */
+  --ok: #2e9e52;             /* richtig/erledigt */
+  --warn: #d9822b;           /* Hinweis */
+  --rand: #c9d8ec;           /* Trennlinien */
+
+  /* Maße */
+  --radius: 16px;
+  --radius-klein: 10px;
+  --abstand: 14px;
+  --touch: 44px;             /* Mindestgröße für Touch-Ziele */
+  --schrift: 17px;
+  --schrift-klein: 14px;
+  --schrift-gross: 22px;
+  --breite-max: 760px;       /* Inhaltsbreite auf dem iPad */
+}
+
+[data-theme="dark"] {
+  --grund: #101a28;
+  --karte: #1a2738;
+  --text: #e7eefb;
+  --text-leise: #9db1cc;
+  --primaer: #4a86ec;
+  --primaer-text: #ffffff;
+  --weich: #24354c;
+  --akzent: #ffd34d;
+  --ok: #46bd6f;
+  --warn: #e99a4d;
+  --rand: #2e4058;
+}
+
+/* Grundgerüst */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--grund);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: var(--schrift);
+  line-height: 1.45;
+}
+button {
+  min-height: var(--touch);
+  font-size: var(--schrift);
+  font-family: inherit;
+  border: none;
+  border-radius: var(--radius-klein);
+  cursor: pointer;
+}

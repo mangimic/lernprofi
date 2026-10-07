@@ -1,0 +1,13 @@
+[
+  {
+    "id": "rn-001",
+    "version": "0.1.0",
+    "datum": "2026-10-07",
+    "titel": "Das Gerüst steht",
+    "entries": [
+      { "type": "neu", "text": "Die neue Lernprofi-App ist geboren: Startseite, Navigation und „Was ist neu?“ funktionieren." },
+      { "type": "technik", "text": "Fundament nach dem Familien-Bauplan: React 19 + Vite, Design-Tokens (hell/dunkel), ein Datendokument mit Schemaversion und Migration, Qualitätsgates (Lint, Unit-Tests, Regression, Smoke-Test auf iPad und iPhone)." },
+      { "type": "hinweis", "text": "Übungen, Tresor und Geräte-Abgleich folgen in den nächsten Etappen – bis dahin bleibt die bisherige App im Einsatz." }
+    ]
+  }
+]
