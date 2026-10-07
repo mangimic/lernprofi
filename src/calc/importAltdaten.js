@@ -89,6 +89,16 @@ export function importAltdaten(roh, heute) {
   }
 
   // Rekorde
+  if (alt.blockwelt && typeof alt.blockwelt === "object") {
+    dokument.lernstand.blockwelt = {
+      welt: Array.isArray(alt.blockwelt.welt) ? alt.blockwelt.welt : null,
+      inv: alt.blockwelt.inv && typeof alt.blockwelt.inv === "object" ? alt.blockwelt.inv : null,
+      verdient: Math.max(0, parseInt(alt.blockwelt.verdient, 10) || 0),
+      zaehler: Math.max(0, parseInt(alt.blockwelt.zaehler, 10) || 0),
+      sicherung: alt.blockwelt.sicherung || null,
+    };
+    hinzu("Blockwelt", "übernommen", `Welt, Inventar und ${dokument.lernstand.blockwelt.verdient} 🎁 verdiente Blöcke`);
+  }
   if (alt.kette && Number.isFinite(alt.kette.rekord) && alt.kette.rekord > 0) {
     dokument.lernstand.rekorde.zahlenkette = alt.kette.rekord;
     hinzu("Zahlenketten-Rekord", "übernommen", String(alt.kette.rekord));

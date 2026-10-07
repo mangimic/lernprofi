@@ -82,3 +82,26 @@ button {
 .spiel-feedback.tip { background: color-mix(in srgb, var(--warn) 14%, var(--karte)); }
 .spiel-weiter { width: 100%; margin-top: 8px; background: var(--primaer); color: var(--primaer-text); font-weight: 700; }
 .spiel-weiter:disabled { opacity: 0.6; }
+.spiel-side { min-width: 0; }
+
+/* ⛏️ Blockwelt (aus der Alt-App übernommen) */
+.bw-grid { display: grid; gap: 1px; width: min(100%, 560px); margin: 0 auto;
+  background: var(--rand); border: 3px solid var(--text-leise); border-radius: 10px; overflow: hidden;
+  touch-action: manipulation; user-select: none; }
+.bw-zelle { aspect-ratio: 1; background: var(--grund); display: flex; align-items: center; justify-content: center;
+  font-size: clamp(9px, 2.4vw, 16px); line-height: 1; cursor: pointer; }
+.bw-palette { display: flex; gap: 6px; flex-wrap: wrap; }
+.bw-pal { display: flex; align-items: center; gap: 5px; min-height: auto; padding: 6px 9px; border-radius: 10px;
+  background: var(--weich); color: var(--text); font-size: 14px; font-weight: 700; border: 2px solid transparent; }
+.bw-pal.on { border-color: var(--primaer); background: var(--grund); }
+.bw-farbe { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px;
+  border-radius: 5px; border: 1px solid rgba(0, 0, 0, 0.15); font-size: 12px; }
+.bw-knopf { background: var(--weich); color: var(--text); font-weight: 700; font-size: var(--schrift-klein); padding: 0 8px; }
+.bw-knopf.on { background: var(--primaer); color: var(--primaer-text); }
+.bw-rezept { display: flex; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--rand); }
+.bw-rezept.zu { opacity: 0.55; }
+.bw-confirm { position: fixed; inset: 0; z-index: 900; background: rgba(38, 50, 72, 0.92);
+  display: flex; align-items: center; justify-content: center; padding: 18px; }
+.bw-confirm-karte { max-width: 340px; width: 100%; text-align: center; background: var(--karte);
+  border-radius: var(--radius); padding: var(--abstand); }
+.bw-confirm-karte button { background: var(--weich); color: var(--text); font-weight: 700; }

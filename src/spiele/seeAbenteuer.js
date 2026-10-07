@@ -16,8 +16,7 @@
 import welten from "./welten.json";
 import fische from "./fische.json";
 import { spielFischBild } from "./fischBilder.js";
-import { MATHE_DATEN } from "../calc/aufgaben/mathe.js";
-import { gwsPool } from "../calc/aufgaben/deutschKonverter.js";
+import { spielFrage, spielFrageText, spielOptionenHTML } from "./fragen.js";
 
 const WELT = welten.welten[0];
 const SPIEL_W = WELT.feld.breite, SPIEL_H = WELT.feld.hoehe;
@@ -26,13 +25,6 @@ const SPIEL_SPOTS = WELT.spots;
 const WELT_FOTO = "/spiel/see.jpg"; // aus data/spiel/bilder der Alt-App
 const fisch = (id) => fische.fische.find((f) => f.id === id);
 
-// Wort-Fragen aus dem Grundwortschatz (leicht = Aufwärm-Pool, schwer = Klasse-4-Pool)
-const GWS = gwsPool();
-const WORT_POOL = {
-  leicht: GWS.easy.map((a) => ({ w: { richtig: a.r, falsch: a.x[0] }, tipp: a.tipp })),
-  schwer: GWS.hard.map((a) => ({ w: { richtig: a.r, falsch: a.x[0] }, tipp: a.tipp })),
-};
-
 function vgShuffle(liste) {
   const k = liste.slice();
   for (let i = k.length - 1; i > 0; i--) {
@@ -40,54 +32,6 @@ function vgShuffle(liste) {
     [k[i], k[j]] = [k[j], k[i]];
   }
   return k;
-}
-
-/* Spiele mischen Deutsch- und Mathe-Fragen (etwa jede zweite ist Mathe).
-   Für das Spieltempo nur KOMPAKTE Mathe-Aufgaben. */
-function spielMatheFrage(schwer) {
-  const kandidaten = ["mrechnen", "mzahlen"].flatMap((k) =>
-    (schwer ? MATHE_DATEN[k].hard : MATHE_DATEN[k].easy))
-    .filter((a) => a.f.length <= 80 && [a.r].concat(a.x).every((o) => o.length <= 16));
-  if (!kandidaten.length) return null;
-  const a = kandidaten[Math.floor(Math.random() * kandidaten.length)];
-  return { w: { richtig: a.r, falsch: a.x[0], dritte: a.x[1] }, tipp: a.tipp, schwer: !!schwer, mathe: true, frage: a.f };
-}
-function spielFrage(schwer) {
-  if (Math.random() < 0.5) { const m = spielMatheFrage(schwer); if (m) return m; }
-  const pool = schwer ? WORT_POOL.schwer : WORT_POOL.leicht;
-  const t = pool[Math.floor(Math.random() * pool.length)];
-  return { w: t.w, tipp: t.tipp, schwer: !!schwer };
-}
-function spielFrageText(q) {
-  return q.mathe ? ("🔢 <b>" + q.frage + "</b>") : "Welches Wort ist <b>richtig</b> geschrieben?";
-}
-/* Gegen das Raten: dritte falsche Schreibweise aus typischen
-   Fehlermustern der Grundschule (Original-Logik der Alt-App). */
-function drittesFalsch(w) {
-  const r = w.richtig, f = w.falsch, kand = [];
-  const push = (v) => { if (v && v !== r && v !== f && !kand.includes(v)) kand.push(v); };
-  if (r.includes("ie")) { push(r.replace("ie", "i")); push(r.replace("ie", "ieh")); }
-  const dm = r.match(/(mm|nn|ll|tt|pp|ff|rr|dd|bb|gg)/); if (dm) push(r.replace(dm[1], dm[1][0]));
-  push(r.replace(/([aeiouäöü])h(?=[lmnrt])/, "$1"));
-  push(r.replace("ck", "k"));
-  push(r.replace("tz", "z"));
-  push(r.replace("ß", "ss"));
-  push(r.replace("ss", "ß"));
-  push(r.replace(/([^aeiouäöü])i([^aeiouäöü])/, "$1ie$2"));
-  const art = r.match(/^((?:der|die|das) )([A-ZÄÖÜ])(.*)$/);
-  if (art) push(art[1] + art[2].toLowerCase() + art[3]);
-  else if (/^[A-ZÄÖÜ]/.test(r) && !/en$/.test(r)) push(r.charAt(0).toLowerCase() + r.slice(1));
-  return kand.length ? kand[0] : null;
-}
-function spielOptionen(w) {
-  const opts = [w.richtig, w.falsch];
-  const d = w.dritte || drittesFalsch(w); if (d) opts.push(d);
-  for (let i = opts.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = opts[i]; opts[i] = opts[j]; opts[j] = t; }
-  return opts;
-}
-function spielOptionenHTML(w) {
-  return spielOptionen(w).map((o) =>
-    `<button class="spiel-opt" data-test="spiel-opt" data-w="${o}" ${o === w.richtig ? 'data-richtig="1"' : ""}>${o}</button>`).join("");
 }
 
 export function seeAbenteuerStart(host, hooks = {}) {

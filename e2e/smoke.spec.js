@@ -247,3 +247,47 @@ test("Spielhalle: Münze einlösen und im echten See-Abenteuer einen Fisch fange
   await expect(page.getByTestId("spielhalle-muenzen")).toHaveText("0");
   await expect(page.getByTestId("spiel-see")).toBeDisabled();
 });
+
+test("Blockwelt: Block verdienen (streng bei Fehlern), setzen und abbauen", async ({ page }) => {
+  await tresorAnlegen(page);
+  // 1 Münze verdienen
+  await page.getByTestId("zum-ueben").click();
+  await page.getByTestId("bereich-dd").click();
+  for (let i = 0; i < 10; i++) {
+    await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+    await page.getByTestId("weiter-knopf").click();
+  }
+  await expect(page.getByTestId("runde-ergebnis")).toBeVisible();
+  await page.getByTestId("nav-spiele").click();
+  await page.getByTestId("spiel-blockwelt").click();
+  await expect(page.getByTestId("blockwelt")).toBeVisible();
+  await page.evaluate(() => { window.__SPIEL_SCHNELL__ = true; });
+
+  // Falsche Antwort: alle gesperrt + Countdown (Anti-Schummel wie im Original)
+  await page.getByTestId("bw-verdienen").click();
+  await expect(page.getByTestId("bw-frage")).toBeVisible();
+  await page.locator('[data-test="spiel-opt"]:not([data-richtig])').first().click();
+  await expect(page.getByTestId("bw-feedback")).toContainText("Noch nicht");
+  await expect(page.locator('[data-test="spiel-opt"]').first()).toBeDisabled();
+  const weiter = page.getByTestId("bw-weiter");
+  await expect(weiter).toBeEnabled({ timeout: 10000 }); // Countdown läuft im Zeitraffer ab
+  await weiter.click();
+
+  // Richtige Antwort: Blöcke ins Inventar, Zähler steigt
+  await page.locator('[data-test="spiel-opt"][data-richtig="1"]').click();
+  await expect(page.getByTestId("bw-feedback")).toContainText("Du bekommst");
+  await expect(page.getByTestId("bw-verdient")).toContainText("3 Blöcke verdient");
+  await page.getByTestId("bw-weiter").click();
+
+  // Block setzen (erste freie Zelle) und wieder abbauen
+  const volleVorher = await page.locator(".bw-zelle.voll").count();
+  await page.locator(".bw-zelle:not(.voll)").first().click();
+  await expect(page.locator(".bw-zelle.voll")).toHaveCount(volleVorher + 1);
+  await page.locator("#bwAbbau").click();
+  await page.locator(".bw-zelle.voll").first().click();
+  await expect(page.locator(".bw-zelle.voll")).toHaveCount(volleVorher);
+
+  // Werkstatt öffnet mit Meilenstein-Hinweis
+  await page.getByTestId("bw-werkstatt-auf").click();
+  await expect(page.getByTestId("bw-werkstatt")).toContainText("Werkstatt");
+});

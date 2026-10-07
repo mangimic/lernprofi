@@ -20,6 +20,7 @@ export function leeresDokument(heute) {
       muenzen: 0,
       lerntage: [],    // { tag, missionen, zielErreicht }
       rekorde: {},
+      blockwelt: null, // dauerhafte Spiel-Welt (Raster, Inventar, Meilensteine)
     },
     einstellungen: {
       thema: "hell",   // "hell" | "dunkel"
@@ -52,6 +53,7 @@ export function migrateData(alt, heute) {
   if (!Number.isFinite(d.lernstand.muenzen) || d.lernstand.muenzen < 0) d.lernstand.muenzen = 0;
   if (!Array.isArray(d.lernstand.lerntage)) d.lernstand.lerntage = [];
   if (!istObjekt(d.lernstand.rekorde)) d.lernstand.rekorde = {};
+  if (!istObjekt(d.lernstand.blockwelt)) d.lernstand.blockwelt = null;
 
   d.einstellungen = { ...basis.einstellungen, ...(istObjekt(quelle.einstellungen) ? quelle.einstellungen : {}) };
   if (!["hell", "dunkel"].includes(d.einstellungen.thema)) d.einstellungen.thema = "hell";

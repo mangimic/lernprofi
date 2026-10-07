@@ -1,5 +1,16 @@
 [
   {
+    "id": "rn-014",
+    "version": "0.11.0",
+    "datum": "2026-10-07",
+    "titel": "Die Blockwelt ist da",
+    "entries": [
+      { "type": "neu", "text": "⛏️ Die Blockwelt ist originalgetreu umgezogen: Bau deine Welt auf dem Raster, verdiene Blöcke mit Wörter- und Mathe-Fragen (jede 3. Frage ist schwer und bringt einen seltenen Block wie 💎), bau in der Werkstatt Tiere, Möbel und 💥 TNT – mit Meilenstein-Freischaltungen, Welt-Sicherung und Neu-Anfangen (Fortschritt bleibt!)." },
+      { "type": "verbessert", "text": "Deine Blockwelt liegt jetzt im verschlüsselten Tresor – sie überlebt Neustarts und wandert beim Geräte-Abgleich mit auf iPad, Laptop und Handy." },
+      { "type": "technik", "text": "Gemeinsames Fragen-Modul für alle Spiele (Mathe-Mix, dritte Falsch-Schreibweise); Anti-Schummel-Denk-Pause (3 s, nach 3 Fehlern 8 s) wie im Original." }
+    ]
+  },
+  {
     "id": "rn-013",
     "version": "0.10.0",
     "datum": "2026-10-07",

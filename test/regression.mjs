@@ -36,6 +36,28 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.11: Blockwelt ----------
+console.log("== v0.11: Blockwelt ==");
+test("v0.11: APP_VERSION mindestens 0.11.0", versionMindestens("0.11.0"));
+test("v0.11: rn-014 vorhanden", releaseNoteVorhanden("rn-014"));
+test("v0.11: Original-Mechaniken portiert (Werkstatt, TNT 3x3, Sicherung, Denk-Pause 3/8s)", (() => {
+  const b = quelle("src/spiele/blockwelt.js");
+  return ["bwWerkstatt", "bwCraft", "bwSichern", "bwSicherungLaden", "bwNeuAnfangen"].every((f) => b.includes(`function ${f}`))
+    && b.includes("sprengt") && b.includes("fehlSerie >= 3 ? 8 : 3") && b.includes("Nächster Versuch (");
+})());
+test("v0.11: Blockwelt-Stand liegt im Tresor-Dokument (migrateData + Spielhalle-Hook)", (() => {
+  return quelle("src/calc/migrateData.js").includes("blockwelt")
+    && quelle("src/features/Spielhalle.jsx").includes("lernstand.blockwelt")
+    && quelle("src/features/Spielhalle.jsx").includes("blockweltStart(host.current");
+})());
+test("v0.11: gemeinsames Fragen-Modul für die Spiele", (() => {
+  const f = quelle("src/spiele/fragen.js");
+  return f.includes("export function spielFrage") && f.includes("export function drittesFalsch")
+    && quelle("src/spiele/seeAbenteuer.js").includes("from \"./fragen.js\"")
+    && quelle("src/spiele/blockwelt.js").includes("from \"./fragen.js\"");
+})());
+test("v0.11: Alt-Übernahme bringt die Blockwelt mit", quelle("src/calc/importAltdaten.js").includes("Blockwelt"));
+
 // ---------- v0.10: Geräte-Abgleich ----------
 console.log("== v0.10: Geräte-Abgleich ==");
 test("v0.10: APP_VERSION mindestens 0.10.0", versionMindestens("0.10.0"));
@@ -68,7 +90,7 @@ console.log("== v0.9: See-Abenteuer originalgetreu ==");
 test("v0.9: APP_VERSION mindestens 0.9.0", versionMindestens("0.9.0"));
 test("v0.9: rn-012 vorhanden", releaseNoteVorhanden("rn-012"));
 test("v0.9: Original-Mechaniken portiert (Wegfindung um den See, Angelwurf, Heranziehen, Denk-Pause)", (() => {
-  const s = quelle("src/spiele/seeAbenteuer.js");
+  const s = quelle("src/spiele/seeAbenteuer.js") + quelle("src/spiele/fragen.js");
   return ["spielWegpunkte", "spielWerfen", "spielZiehen", "drittesFalsch"].every((f) => s.includes(`function ${f}`))
     && s.includes("Nächster Versuch (") && s.includes("steigerung");
 })());
@@ -94,7 +116,7 @@ test("v0.8: Spiel-Logik rein (Münz-Regel, Blitz-Fragen, Serien-Fische)", (() =>
     && !/document\.|window\.|fetch\(|Math\.random|Date\.now\(/.test(s);
 })());
 test("v0.8: Spielhalle gated über Münzen und löst genau 1 Münze ein", (() => {
-  const h = quelle("src/features/Spielhalle.jsx") + quelle("src/spiele/seeAbenteuer.js");
+  const h = quelle("src/features/Spielhalle.jsx") + quelle("src/spiele/seeAbenteuer.js") + quelle("src/spiele/fragen.js");
   return h.includes("spielStartbar(muenzen)") && h.includes("muenzeEinloesen(muenzen)")
     && ["spielhalle", "spiel-see", "spiel-opt", "see-ergebnis"].every((t) => h.includes(`"${t}"`));
 })());
