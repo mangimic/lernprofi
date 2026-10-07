@@ -1,0 +1,10 @@
+// Cloudflare-Worker-Konfiguration: statische Assets aus dist/.
+// Wird vom automatischen Build (Workers Builds) und von
+// `npx wrangler deploy` gelesen. Keine Secrets hier ablegen!
+{
+  "name": "lernprofi",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist"
+  }
+}
