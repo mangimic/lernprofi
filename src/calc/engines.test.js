@@ -286,3 +286,72 @@ describe("konzentration (Engine-Daten)", () => {
     expect(leer.blitz).toEqual({ runden: [], best: 0 });
   });
 });
+
+describe("schachLogik (echte Regeln)", () => {
+  it("Startstellung: 20 Züge, kein Schach; Schäfermatt wird als Matt erkannt", async () => {
+    const L = await import("../spiele/schachLogik.js");
+    const start = L.schFen(L.SCH_START);
+    expect(L.schZuege(start).length).toBe(20);
+    expect(L.schImSchach(start, true)).toBe(false);
+    // Schäfermatt-Stellung: Dame auf f7, von Läufer c4 gedeckt → Schwarz ist matt
+    const matt = L.schFen("r1bqkbnr/pppp1Qpp/2n5/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq -");
+    expect(L.schZuege(matt).length).toBe(0);
+    expect(L.schImSchach(matt, false)).toBe(true);
+  });
+
+  it("Rochade und en passant sind möglich, Umwandlung macht eine Dame", async () => {
+    const L = await import("../spiele/schachLogik.js");
+    // Weiß kann kurz rochieren (f1/g1 frei, Turm h1)
+    const ro = L.schFen("r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPPBPPP/RNBQK2R w KQkq -");
+    const rochade = L.schZuege(ro).find((z) => z.roch === "k");
+    expect(rochade).toBeTruthy();
+    const nachRo = L.schZug(ro, rochade);
+    expect(nachRo.b[L.schFeldIdx("g1")]).toBe("K");
+    expect(nachRo.b[L.schFeldIdx("f1")]).toBe("R");
+    // En passant: schwarzer Bauer zog gerade d7–d5, weißer Bauer auf e5
+    const ep = L.schFen("rnbqkbnr/ppp1pppp/8/3pP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6");
+    const schlag = L.schZuege(ep).find((z) => z.ep);
+    expect(schlag).toBeTruthy();
+    const nachEp = L.schZug(ep, schlag);
+    expect(nachEp.b[L.schFeldIdx("d5")]).toBe(""); // geschlagener Bauer ist weg
+    // Umwandlung auf der letzten Reihe
+    const umw = L.schFen("8/P7/8/8/8/8/7k/K7 w - -");
+    const zuUmw = L.schZuege(umw).find((z) => z.umw);
+    expect(L.schZug(umw, zuUmw).b[L.schFeldIdx("a8")]).toBe("Q");
+  });
+
+  it("KI liefert immer einen legalen Zug und schlägt eine hängende Dame", async () => {
+    const L = await import("../spiele/schachLogik.js");
+    // Schwarze Dame hängt auf d4 – die KI (Schwarz am Zug ist hier Weiß dran? Nein: Weiß zieht) muss sie schlagen
+    const st = L.schFen("rnb1kbnr/pppppppp/8/8/3q4/4P3/PPPP1PPP/RNBQKBNR w KQkq -");
+    for (let i = 0; i < 5; i++) {
+      const z = L.schKI(st);
+      expect(L.schZuege(st).some((x) => x.von === z.von && x.nach === z.nach)).toBe(true);
+      expect(z.nach).toBe(L.schFeldIdx("d4")); // Dame schlagen ist klar der beste Zug
+    }
+  });
+
+  it("Schach-Daten sind gesund (6 Lektionen, 10 Aufgaben, Züge/Ziele gültig)", async () => {
+    const L = await import("../spiele/schachLogik.js");
+    const { default: SCHACH } = await import("../spiele/schach.json");
+    expect(SCHACH.lektionen.length).toBe(6);
+    expect(SCHACH.aufgaben.length).toBe(10);
+    // Jede Lektion ist nachspielbar: alle Schritte sind legale Züge
+    for (const lek of SCHACH.lektionen) {
+      let st = L.schFen(lek.fen || L.SCH_START);
+      for (const schritt of lek.schritte) {
+        const von = L.schFeldIdx(schritt.zug.slice(0, 2)), nach = L.schFeldIdx(schritt.zug.slice(2, 4));
+        const z = L.schZuege(st).find((x) => x.von === von && x.nach === nach);
+        expect(z, `${lek.id}: Zug ${schritt.zug} muss legal sein`).toBeTruthy();
+        st = L.schZug(st, z);
+      }
+    }
+    // Jede Aufgabe hat gültige FEN, Zielfeld, Tipp und Erfolgstext
+    for (const a of SCHACH.aufgaben) {
+      expect(L.schFen(a.fen).b.filter(Boolean).length).toBeGreaterThan(2);
+      expect(a.ziel).toMatch(/^[a-h][1-8]$/);
+      expect(a.tipp.length).toBeGreaterThan(3);
+      expect(a.erfolg.length).toBeGreaterThan(3);
+    }
+  });
+});

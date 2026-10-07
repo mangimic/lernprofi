@@ -6,6 +6,7 @@ import { seeAbenteuerStart } from "../spiele/seeAbenteuer.js";
 import { blockweltStart } from "../spiele/blockwelt.js";
 import { tennisMatchStart } from "../spiele/tennisMatch.js";
 import { fussballMatchStart } from "../spiele/fussballMatch.js";
+import { schachStart } from "../spiele/schach.js";
 
 /* 🎮 Spielhalle: Ein Spielbesuch kostet 1 Münze (verdient beim Üben).
    🎣 See-Abenteuer, ⛏️ Blockwelt, 🎾 Tennis- und ⚽ Fußball-Match sind
@@ -60,6 +61,19 @@ export default function Spielhalle() {
         runden: dataRef.current.lernstand.stufen[modus]?.runden || 0,
         onFertig: (erg) => { setErgebnis({ typ: modus, ...erg }); setModus("fertig"); },
       });
+    } else if (modus === "schach") {
+      engine.current = schachStart(host.current, {
+        aufgabeGeloest: () => {
+          const d = dataRef.current;
+          update({
+            ...d,
+            lernstand: {
+              ...d.lernstand,
+              lerntage: aufgabenZaehlen(d.lernstand.lerntage, heute, 1, { missionsZiel: d.einstellungen.missionsZiel }),
+            },
+          });
+        },
+      });
     } else { return; }
     return () => engine.current?.stop();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -101,7 +115,7 @@ export default function Spielhalle() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modus]);
 
-  if (modus === "see" || modus === "blockwelt" || modus === "tennis" || modus === "fussball") {
+  if (modus === "see" || modus === "blockwelt" || modus === "tennis" || modus === "fussball" || modus === "schach") {
     return (
       <div style={karte}>
         <div ref={host} />
@@ -212,14 +226,22 @@ export default function Spielhalle() {
           bei Gleichstand entscheidet ein Elfmeter!
         </p>
       </button>
+      <button data-test="spiel-schach" onClick={() => starten("schach", "Schach")} disabled={!spielStartbar(muenzen)}
+        style={{ ...karte, width: "100%", textAlign: "left", display: "block", border: `1px solid ${T.rand}`, opacity: spielStartbar(muenzen) ? 1 : 0.6 }}>
+        <b>♟️ Schach</b>
+        <span style={{ float: "right", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          {spielStartbar(muenzen) ? "🪙 1 Münze einlösen" : "🔒 Übe für 1 Münze"}
+        </span>
+        <p style={{ margin: "6px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          Schach-Schule mit deinen Eröffnungen, Taktik-Aufgaben zum Antippen
+          und echtes Schach gegen den Computer – mit Tipp und Zug-Zurück.
+        </p>
+      </button>
       {!spielStartbar(muenzen) && (
         <button data-test="zum-ueben-aus-halle" onClick={() => navTo("ueben")} style={primaer}>
           ✏️ Erst eine Runde üben
         </button>
       )}
-      <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-        ♟️ Schach zieht als Nächstes ein.
-      </p>
     </div>
   );
 }

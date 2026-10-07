@@ -1,5 +1,16 @@
 [
   {
+    "id": "rn-017",
+    "version": "0.14.0",
+    "datum": "2026-10-07",
+    "titel": "Schach ist eingezogen",
+    "entries": [
+      { "type": "neu", "text": "♟️ Schach mit allen drei Bereichen aus der Alt-App: 🎓 Schach-Schule (6 Lektionen Schritt für Schritt – von deiner Spanischen Eröffnung über die Italienische, die 3 goldenen Regeln und die Rochade bis zu Gabel, Fesselung und Schäfermatt-Abwehr), 🧩 10 Taktik-Aufgaben zum Antippen und 🤖 echtes Schach gegen den Computer." },
+      { "type": "neu", "text": "Der Computer spielt mit allen Regeln (Rochade, en passant, Umwandlung, Matt & Patt), ist aber kindgerecht schwach – mit 💡 Tipp-Knopf (zeigt einen starken Zug in Gelb) und ↩️ Zug-Zurücknehmen." },
+      { "type": "verbessert", "text": "Das Brett hat die Feldnummerierung a–h und 1–8; auf dem Handy stehen Frage und Knöpfe über dem Brett, das Brett richtet sich nach der Bildschirmhöhe. Gelöste Taktik-Aufgaben zählen für deine Mini-Missionen." }
+    ]
+  },
+  {
     "id": "rn-016",
     "version": "0.13.0",
     "datum": "2026-10-07",

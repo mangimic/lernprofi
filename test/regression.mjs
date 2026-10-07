@@ -36,6 +36,33 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.14: Schach ----------
+console.log("== v0.14: Schach ==");
+test("v0.14: APP_VERSION mindestens 0.14.0", versionMindestens("0.14.0"));
+test("v0.14: rn-017 vorhanden", releaseNoteVorhanden("rn-017"));
+test("v0.14: echte Regeln (Rochade, en passant, Umwandlung, Matt/Patt, Negamax-KI)", (() => {
+  const l = quelle("src/spiele/schachLogik.js");
+  return l.includes("roch: \"k\"") && l.includes("ep: true") && l.includes("umw:")
+    && l.includes("schImSchach") && l.includes("Negamax") && l.includes("-1000 - t");
+})());
+test("v0.14: drei Bereiche (Schule, Aufgaben, Spielen) mit Tipp und Zug-Zurück", (() => {
+  const u = quelle("src/spiele/schach.js");
+  return u.includes('data-test="sch-tab-') && ["schule", "aufgaben", "spielen"].every((t) => u.includes(`"${t}"`))
+    && u.includes("sch-tipp") && u.includes("sch-undo") && u.includes("spiel.verlauf.pop()")
+    && u.includes("Der Computer denkt");
+})());
+test("v0.14: Brett mit Feldnummerierung a-h und 1-8 (wie im Original)", (() => {
+  const u = quelle("src/spiele/schach.js");
+  return u.includes("sch-kor") && u.includes("sch-kof")
+    && quelle("src/styles/tokens.css").includes(".sch-brett");
+})());
+test("v0.14: Schach-Daten kopiert und in der Spielhalle angebunden (Münz-Gate, Missionen)", (() => {
+  const d = JSON.parse(quelle("src/spiele/schach.json"));
+  const s2 = quelle("src/features/Spielhalle.jsx");
+  return d.lektionen.length === 6 && d.aufgaben.length === 10
+    && s2.includes("schachStart") && s2.includes('data-test="spiel-schach"');
+})());
+
 // ---------- v0.13: Tennis- und Fußball-Match ----------
 console.log("== v0.13: Tennis- und Fußball-Match ==");
 test("v0.13: APP_VERSION mindestens 0.13.0", versionMindestens("0.13.0"));

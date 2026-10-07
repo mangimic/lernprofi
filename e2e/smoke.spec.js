@@ -433,3 +433,41 @@ test("Fußball-Match: Konter bei Fehler, Halbzeit, Match-Ende mit Auswertung", a
   await page.getByTestId("fb-fertig").click();
   await expect(page.getByTestId("match-ergebnis")).toContainText("9 von 10");
 });
+
+test("Schach: Schule spielt Züge vor, Taktik-Aufgabe, echter Zug gegen den Computer", async ({ page }) => {
+  await tresorAnlegen(page);
+  await muenzeVerdienen(page);
+  await page.evaluate(() => { window.__SPIEL_SCHNELL__ = true; });
+  await page.getByTestId("spiel-schach").click();
+
+  // 🎓 Schule: Lektion 1 (Spanische Eröffnung) Schritt für Schritt
+  await expect(page.getByTestId("sch-lek-text")).toBeVisible();
+  await page.getByTestId("sch-lek-weiter").click();
+  await expect(page.getByTestId("sch-lek-text")).toContainText("e4");
+  await page.getByTestId("sch-lek-weiter").click();
+
+  // 🧩 Aufgaben: falsches Feld → Tipp, richtiges Feld (b5) → weiter zu 2/10
+  await page.getByTestId("sch-tab-aufgaben").click();
+  await expect(page.getByTestId("sch-auf-stand")).toContainText("1 / 10");
+  await page.locator('[data-feld="0"]').click();
+  await expect(page.getByTestId("sch-auf-tipp")).toBeVisible();
+  await page.locator('[data-feld="25"]').click(); // b5
+  await expect(page.getByTestId("sch-auf-ok")).toBeVisible();
+  await page.getByTestId("sch-auf-weiter").click();
+  await expect(page.getByTestId("sch-auf-stand")).toContainText("2 / 10");
+
+  // 🤖 Spielen: e2–e4, der Computer antwortet (im Zeitraffer)
+  await page.getByTestId("sch-tab-spielen").click();
+  await expect(page.getByTestId("sch-status")).toContainText("Du bist dran");
+  await page.locator('[data-feld="52"]').click(); // Bauer e2 wählen
+  await expect(page.locator('[data-feld="36"].ziel')).toBeVisible(); // e4 als Ziel markiert
+  await page.locator('[data-feld="36"]').click();
+  await expect(page.getByTestId("sch-status")).toContainText("Du bist dran", { timeout: 10000 });
+  await expect(page.getByTestId("sch-undo")).toBeEnabled();
+
+  // 💡 Tipp markiert einen Zug, ↩️ Zug zurück stellt die Startstellung wieder her
+  await page.getByTestId("sch-tipp").click();
+  await expect(page.locator(".sch-feld.mark").first()).toBeVisible();
+  await page.getByTestId("sch-undo").click();
+  await expect(page.locator('[data-feld="52"]')).toHaveText(/♙/);
+});
