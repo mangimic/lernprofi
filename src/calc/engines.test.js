@@ -268,3 +268,21 @@ describe("lerntage", () => {
     expect(lernspur([], HEUTE)).toBe(0);
   });
 });
+
+describe("konzentration (Engine-Daten)", () => {
+  it("ABC-Folgen stimmen (vorwärts/rückwärts, jeder 2./3.), Pools gesund", async () => {
+    const { ABC_STUFEN, abcFolge, BLITZ_TIERE, KETTE_ZIEL, leererKonzStand } = await import("../spiele/konzentration.js");
+    expect(KETTE_ZIEL).toBe(7);
+    expect(ABC_STUFEN.map((s) => s.id)).toEqual(["v2", "v3", "r2", "r3"]);
+    const v2 = abcFolge(ABC_STUFEN[0]);
+    expect(v2.slice(0, 4)).toEqual(["A", "C", "E", "G"]);
+    expect(v2.length).toBe(13);
+    const r3 = abcFolge(ABC_STUFEN[3]);
+    expect(r3.slice(0, 3)).toEqual(["Z", "W", "T"]);
+    expect(BLITZ_TIERE.length).toBe(80);
+    expect(new Set(BLITZ_TIERE).size).toBe(80); // keine Doppelten
+    const leer = leererKonzStand();
+    expect(leer.kette).toEqual({ zahlen: [], erweitertAm: "", rekord: 0 });
+    expect(leer.blitz).toEqual({ runden: [], best: 0 });
+  });
+});

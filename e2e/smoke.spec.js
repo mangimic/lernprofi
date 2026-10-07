@@ -291,3 +291,68 @@ test("Blockwelt: Block verdienen (streng bei Fehlern), setzen und abbauen", asyn
   await page.getByTestId("bw-werkstatt-auf").click();
   await expect(page.getByTestId("bw-werkstatt")).toContainText("Werkstatt");
 });
+
+test("Konzentration: Zahlenkette wächst nach fehlerfreiem Aufsagen, ABC zählt Stolperer", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("zum-konz").click();
+  await expect(page.getByTestId("konz")).toBeVisible();
+
+  // 🔢 Zahlenkette: Merkphase in Echtzeit (2 Zahlen), dann korrekt eintippen
+  await page.getByTestId("konz-tab-zahlen").click();
+  await expect(page.getByTestId("kette-stand")).toContainText("2 von 7");
+  await page.getByTestId("kette-start").click();
+  await expect(page.getByTestId("konz")).toContainText("Zahl 1 von 2");
+  const z1 = (await page.getByTestId("kette-zahl").innerText()).trim();
+  await expect(page.getByTestId("konz")).toContainText("Zahl 2 von 2", { timeout: 6000 });
+  const z2 = (await page.getByTestId("kette-zahl").innerText()).trim();
+  await expect(page.getByTestId("kette-ok")).toBeVisible({ timeout: 6000 });
+  for (const zahl of [z1, z2]) {
+    for (const ziffer of zahl) await page.getByTestId(`kette-z-${ziffer}`).click();
+    await page.getByTestId("kette-ok").click();
+  }
+  // Fehlerfrei → Kette wächst heute um eine Zahl (3 von 7)
+  await expect(page.getByTestId("kette-gewachsen")).toContainText("3 von 7");
+
+  // 🔤 Alphabet-Sprünge (jeder 2. vorwärts): 1 falscher Tipp, dann alle 13 richtig
+  await page.getByTestId("konz-tab-abc").click();
+  await expect(page.getByTestId("abc-info")).toContainText("Der erste Buchstabe ist");
+  const taste = (b) => page.locator(`[data-test="abc-taste"][data-b="${b}"]`);
+  await taste("B").click(); // falsch – zählt als Stolperer
+  await expect(page.getByTestId("abc-info")).toContainText("jeder 2.");
+  for (const b of "ACEGIKMOQSUWY") await taste(b).click();
+  await expect(page.getByTestId("abc-fertig")).toContainText("alle 13 Buchstaben");
+  await expect(page.getByTestId("abc-fertig")).toContainText("1 kleinen Stolperern");
+});
+
+test("Konzentration: Blitzlesen-Runde im Zeitraffer + Mut-Satz des Tages bleibt", async ({ page }) => {
+  await tresorAnlegen(page);
+
+  // 🦁 Mut-Satz wählen: danach gehört er dem Tag (keine Auswahl mehr)
+  await expect(page.getByTestId("mut-satz-wahl").first()).toBeVisible();
+  await page.getByTestId("mut-satz-wahl").nth(2).click();
+  await expect(page.getByTestId("mut-satz-heute")).toContainText("Fehler machen");
+  await expect(page.getByTestId("mut-satz-wahl")).toHaveCount(0);
+
+  // ⚡ Blitzlesen: 60 Sekunden laufen im Zeitraffer ab, letztes Wort antippen
+  await page.getByTestId("zum-konz").click();
+  await page.evaluate(() => { window.__SPIEL_SCHNELL__ = true; });
+  await page.getByTestId("konz-tab-blitz").click();
+  await page.getByTestId("blitz-start").click();
+  await expect(page.getByTestId("blitz-uhr")).toBeVisible();
+  await expect(page.getByTestId("blitz-stopp")).toBeVisible({ timeout: 20000 });
+  await page.locator('button[data-test="blitz-wort"]').nth(24).click();
+  await expect(page.getByTestId("blitz-ergebnis")).toContainText("25 Wörter in 1 Minute");
+  await page.locator("#blitzWeiter").click();
+  await expect(page.getByTestId("konz")).toContainText("Runde 1: 25");
+
+  // Neustart: PIN entsperren – Mut-Satz und Blitz-Runde liegen im Tresor
+  await page.reload();
+  await page.getByTestId("pin-eingabe").fill(PIN);
+  await page.getByTestId("pin-ok").click();
+  await expect(page.getByTestId("mut-satz-heute")).toContainText("Fehler machen");
+  await page.getByTestId("zum-konz").click();
+  await page.getByTestId("konz-tab-blitz").click();
+  await expect(page.getByTestId("konz")).toContainText("Runde 1: 25");
+  await page.getByTestId("konz-zurueck").click();
+  await expect(page.getByTestId("start-seite")).toBeVisible();
+});

@@ -108,6 +108,35 @@ export function importAltdaten(roh, heute) {
     hinzu("Blitzlesen-Rekord", "übernommen", `${alt.blitz.best} Wörter`);
   }
 
+  // Konzentrations-Training: Kette, ABC-Bestwerte und Blitz-Runden 1:1
+  const konzObjekt = (x) => (x && typeof x === "object" && !Array.isArray(x) ? x : null);
+  if (konzObjekt(alt.kette) || konzObjekt(alt.abcBest) || konzObjekt(alt.blitz)) {
+    const kette = konzObjekt(alt.kette) || {};
+    const blitz = konzObjekt(alt.blitz) || {};
+    dokument.lernstand.konzentration = {
+      kette: {
+        zahlen: Array.isArray(kette.zahlen) ? kette.zahlen.filter((z) => Number.isFinite(z)) : [],
+        erweitertAm: typeof kette.erweitertAm === "string" ? kette.erweitertAm : "",
+        rekord: Math.max(0, parseInt(kette.rekord, 10) || 0),
+      },
+      abcBest: konzObjekt(alt.abcBest) || {},
+      blitz: {
+        runden: Array.isArray(blitz.runden) ? blitz.runden.filter((r) => Number.isFinite(r)).slice(0, 5) : [],
+        best: Math.max(0, parseInt(blitz.best, 10) || 0),
+      },
+    };
+    hinzu("Konzentrations-Training", "übernommen", "Zahlenkette, ABC-Bestwerte und Blitzlese-Runden");
+  }
+
+  // Mut-Satz des Tages
+  if (alt.mutSatz && typeof alt.mutSatz === "object" && typeof alt.mutSatz.tag === "string") {
+    dokument.lernstand.mutSatz = {
+      tag: alt.mutSatz.tag,
+      idx: Math.max(0, parseInt(alt.mutSatz.idx, 10) || 0),
+    };
+    hinzu("Mut-Satz", "übernommen", "Der heutige Mut-Satz bleibt deiner");
+  }
+
   // Einstellungen
   if (Number.isInteger(alt.missionsZiel) && alt.missionsZiel >= 1) {
     dokument.einstellungen.missionsZiel = Math.min(6, alt.missionsZiel);

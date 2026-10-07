@@ -44,6 +44,31 @@ describe("migrateData", () => {
     expect(d.profil.spitzname).toBe("Blitz");
   });
 
+  it("konzentration und mutSatz: Standardwerte, Reparatur, Erhalt", () => {
+    const leer = migrateData(null, HEUTE);
+    expect(leer.lernstand.konzentration).toBe(null);
+    expect(leer.lernstand.mutSatz).toEqual({ tag: "", idx: 0 });
+
+    const kaputt = migrateData(
+      { lernstand: { konzentration: "quatsch", mutSatz: { tag: 7, idx: 999 } } },
+      HEUTE,
+    );
+    expect(kaputt.lernstand.konzentration).toBe(null);
+    expect(kaputt.lernstand.mutSatz).toEqual({ tag: "", idx: 0 });
+
+    const gut = migrateData(
+      {
+        lernstand: {
+          konzentration: { kette: { zahlen: [3, 9], erweitertAm: HEUTE, rekord: 5 }, abcBest: { v2: 0 }, blitz: { runden: [30], best: 30 } },
+          mutSatz: { tag: HEUTE, idx: 2 },
+        },
+      },
+      HEUTE,
+    );
+    expect(gut.lernstand.konzentration.kette.zahlen).toEqual([3, 9]);
+    expect(gut.lernstand.mutSatz).toEqual({ tag: HEUTE, idx: 2 });
+  });
+
   it("leeresDokument ist bereits migriert", () => {
     const leer = leeresDokument(HEUTE);
     expect(migrateData(leer, HEUTE)).toEqual(leer);

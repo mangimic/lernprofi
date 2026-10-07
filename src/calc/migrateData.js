@@ -7,6 +7,8 @@
    bekannte Felder werden geprüft/ergänzt, unbekannte bleiben
    unangetastet erhalten.
    ============================================================ */
+import { STARK_SAETZE } from "./aufgaben/stark.js";
+
 export const SCHEMA_VERSION = 1;
 
 /** Leeres, gültiges Dokument (Startzustand eines neuen Profils). */
@@ -20,7 +22,9 @@ export function leeresDokument(heute) {
       muenzen: 0,
       lerntage: [],    // { tag, missionen, zielErreicht }
       rekorde: {},
-      blockwelt: null, // dauerhafte Spiel-Welt (Raster, Inventar, Meilensteine)
+      blockwelt: null,     // dauerhafte Spiel-Welt (Raster, Inventar, Meilensteine)
+      konzentration: null, // Zahlenkette, ABC-Bestwerte, Blitzlese-Runden
+      mutSatz: { tag: "", idx: 0 }, // Mut-Satz des Tages (Stark mit Leo)
     },
     einstellungen: {
       thema: "hell",   // "hell" | "dunkel"
@@ -54,6 +58,12 @@ export function migrateData(alt, heute) {
   if (!Array.isArray(d.lernstand.lerntage)) d.lernstand.lerntage = [];
   if (!istObjekt(d.lernstand.rekorde)) d.lernstand.rekorde = {};
   if (!istObjekt(d.lernstand.blockwelt)) d.lernstand.blockwelt = null;
+  if (!istObjekt(d.lernstand.konzentration)) d.lernstand.konzentration = null;
+  const mut = istObjekt(d.lernstand.mutSatz) ? d.lernstand.mutSatz : {};
+  d.lernstand.mutSatz = {
+    tag: typeof mut.tag === "string" ? mut.tag : "",
+    idx: Number.isInteger(mut.idx) && mut.idx >= 0 && mut.idx < STARK_SAETZE.length ? mut.idx : 0,
+  };
 
   d.einstellungen = { ...basis.einstellungen, ...(istObjekt(quelle.einstellungen) ? quelle.einstellungen : {}) };
   if (!["hell", "dunkel"].includes(d.einstellungen.thema)) d.einstellungen.thema = "hell";

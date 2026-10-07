@@ -28,8 +28,10 @@ const ALT_EXPORT = {
       { t: "2026-10-05", m: "gruen", mi: 4, bo: 1, z: 1 },
       { t: "2026-10-06", m: "gelb", mi: 2, z: 0 },
     ],
-    kette: { zahlen: [3, 7, 1], rekord: 6 },
+    kette: { zahlen: [3, 7, 1], erweitertAm: "2026-10-06", rekord: 6 },
+    abcBest: { v2: 0, r2: 3 },
     blitz: { runden: [40, 44], best: 44 },
+    mutSatz: { tag: "2026-10-07", idx: 4 },
   },
 };
 
@@ -55,6 +57,18 @@ describe("importAltdaten", () => {
     ]);
     expect(dokument.lernstand.rekorde).toEqual({ zahlenkette: 6, blitzlesen: 44 });
     expect(dokument.einstellungen.missionsZiel).toBe(3);
+  });
+
+  it("übernimmt Konzentrations-Training und Mut-Satz vollständig", () => {
+    const { dokument, bericht } = importAltdaten(ALT_EXPORT, HEUTE);
+    expect(dokument.lernstand.konzentration).toEqual({
+      kette: { zahlen: [3, 7, 1], erweitertAm: "2026-10-06", rekord: 6 },
+      abcBest: { v2: 0, r2: 3 },
+      blitz: { runden: [40, 44], best: 44 },
+    });
+    expect(dokument.lernstand.mutSatz).toEqual({ tag: "2026-10-07", idx: 4 });
+    expect(bericht.some((b) => b.feld === "Konzentrations-Training" && b.status === "übernommen")).toBe(true);
+    expect(bericht.some((b) => b.feld === "Mut-Satz" && b.status === "übernommen")).toBe(true);
   });
 
   it("fasst Grundwortschatz-Gruppen zusammen (beste Stufe, Runden summiert)", () => {

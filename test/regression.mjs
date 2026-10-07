@@ -36,6 +36,43 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.12: Konzentrations-Training & Mut-Satz ----------
+console.log("== v0.12: Konzentrations-Training & Mut-Satz ==");
+test("v0.12: APP_VERSION mindestens 0.12.0", versionMindestens("0.12.0"));
+test("v0.12: rn-015 vorhanden", releaseNoteVorhanden("rn-015"));
+test("v0.12: alle drei Trainings originalgetreu (Kette 7, ABC 4 Stufen, Blitz 80 Tiere)", (() => {
+  const k = quelle("src/spiele/konzentration.js");
+  return k.includes("export const KETTE_ZIEL = 7")
+    && ["v2", "v3", "r2", "r3"].every((id) => k.includes(`id: "${id}"`))
+    && k.includes("export const BLITZ_TIERE") && k.includes("BLITZ_SEK = 60, BLITZ_RUNDEN = 5")
+    && k.includes("erweitertAm") && k.includes("konzKetteGeschafft") && k.includes("blitzAuswahl");
+})());
+test("v0.12: Training zählt für Mini-Missionen und speichert im Tresor", (() => {
+  const w = quelle("src/features/Konzentration.jsx");
+  return w.includes("aufgabenZaehlen") && w.includes("lernstand.konzentration")
+    && w.includes("konzentrationStart(host.current")
+    && quelle("src/calc/migrateData.js").includes("konzentration");
+})());
+test("v0.12: Mut-Satz des Tages auf der Startseite (einer pro Tag, Original-Sätze)", (() => {
+  const s2 = quelle("src/features/Start.jsx");
+  return s2.includes("STARK_SAETZE") && s2.includes("mutSatz") && s2.includes("mut-satz-wahl")
+    && s2.includes("Er gehört heute dir")
+    && quelle("src/calc/migrateData.js").includes("mutSatz");
+})());
+test("v0.12: Einstieg über die Startseite, Route ohne 6. Nav-Tab", (() => {
+  return quelle("src/features/Start.jsx").includes('data-test="zum-konz"')
+    && quelle("src/App.jsx").includes('route === "konz"')
+    && !quelle("src/App.jsx").includes('id: "konz"');
+})());
+test("v0.12: Alt-Übernahme bringt Konzentration und Mut-Satz mit", (() => {
+  const i = quelle("src/calc/importAltdaten.js");
+  return i.includes("Konzentrations-Training") && i.includes("Mut-Satz");
+})());
+test("v0.12: kein Vorlesen im Training (Entscheid: kein TTS)", (() => {
+  const k = quelle("src/spiele/konzentration.js");
+  return !k.includes("speechSynthesis") && !k.includes("speak(");
+})());
+
 // ---------- v0.11: Blockwelt ----------
 console.log("== v0.11: Blockwelt ==");
 test("v0.11: APP_VERSION mindestens 0.11.0", versionMindestens("0.11.0"));

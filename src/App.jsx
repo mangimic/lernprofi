@@ -3,11 +3,12 @@ import releaseNotes from "./releaseNotes.json";
 import Start from "./features/Start.jsx";
 import Ueben from "./features/Ueben.jsx";
 import Spielhalle from "./features/Spielhalle.jsx";
+import Konzentration from "./features/Konzentration.jsx";
 import Eltern from "./features/Eltern.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.11.0";
+export const APP_VERSION = "0.12.0";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -75,6 +76,7 @@ export default function App() {
       <main>
         {route === "neu" ? <WasIstNeu /> : route === "ueben" ? <Ueben /> :
          route === "spiele" ? <Spielhalle /> :
+         route === "konz" ? <Konzentration /> :
          route === "eltern" && tresor.elternModus ? <Eltern /> : <Start />}
       </main>
 

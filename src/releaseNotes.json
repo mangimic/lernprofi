@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-015",
+    "version": "0.12.0",
+    "datum": "2026-10-07",
+    "titel": "Konzentrations-Training & Mut-Satz",
+    "entries": [
+      { "type": "neu", "text": "🧠 Das Konzentrations-Training ist umgezogen – mit allen drei Übungen: 🔢 Zahlenkette (jeden Tag fehlerfrei aufsagen → eine Zahl mehr, bei 7 die große Feier + Rekord), 🔤 Alphabet-Sprünge (jeden 2./3. Buchstaben, vorwärts und rückwärts, mit Bestwert je Stufe) und ⚡ Blitzlesen „Tiere“ (1 Minute laut lesen, 5 Runden, Rekord). Einstieg direkt auf der Startseite." },
+      { "type": "neu", "text": "🦁 Der Mut-Satz des Tages ist zurück: Jeden Tag einen starken Satz aussuchen – er gehört dir bis morgen und steht gut sichtbar auf der Startseite." },
+      { "type": "verbessert", "text": "Jede geschaffte Trainings-Runde zählt für deine Mini-Missionen; Kette, Bestwerte und Blitz-Runden liegen im verschlüsselten Tresor und wandern beim Geräte-Abgleich mit." },
+      { "type": "technik", "text": "Datenübernahme aus der Alt-App bringt Zahlenkette, ABC-Bestwerte, Blitz-Runden und den heutigen Mut-Satz jetzt vollständig mit." }
+    ]
+  },
+  {
     "id": "rn-014",
     "version": "0.11.0",
     "datum": "2026-10-07",
