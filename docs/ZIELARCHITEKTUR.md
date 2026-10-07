@@ -121,6 +121,7 @@ Cloud-Konfiguration; verzichtet zunächst auf Geräte-Sync.
 | 5 – Datenübernahme-Konverter (Import-Knopf + Bericht) | ✅ Code fertig; Durchführung bewusst verschoben |
 | 6 – Sync (Worker-API + KV, Eltern-Karte ☁️) | ✅ Code fertig; beim User offen: KV-Namespace + Access |
 | Spiele-Migration: See-Abenteuer (v0.9), Blockwelt (v0.11), Konzentration + Mut-Satz (v0.12), Tennis + Fußball (v0.13), Schach (v0.14) | ✅ abgeschlossen |
-| Rest-Features: Satzglieder-Umstellen, Vorgangsbeschreibung, Gesprächsimpulse, Zeitlimit/Spiele-Schalter, Tagesform | ⏳ offen |
+| Satzglieder umstellen + Zeit/Ort (v0.15), Vorgangsbeschreibung (v0.16) | ✅ abgeschlossen |
+| Rest-Features: Eltern-Gesprächsimpulse, Zeitlimit/Spiele-Schalter, Tagesform/Fokus-Pausen | ⏳ offen |
 | 7 – KI-Funktionen (5-€-Deckel, Freigabe je Zweck) | ⏳ offen |
 | 8 – Parallelbetrieb + Umstellung | ⏳ offen |
