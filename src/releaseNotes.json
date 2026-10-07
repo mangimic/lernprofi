@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-002",
+    "version": "0.2.0",
+    "datum": "2026-10-08",
+    "titel": "Der Tresor ist da",
+    "entries": [
+      { "type": "neu", "text": "Alle Lerndaten liegen jetzt in einem verschlüsselten Tresor auf dem Gerät. Das Kind startet selbständig mit seiner 4-stelligen Lern-PIN – Einstellungen und Backups öffnen die Eltern mit ihrem Passwort." },
+      { "type": "neu", "text": "Elternbereich: Backup als Datei sichern, Lernstand aus Datei übernehmen, Lern-PIN ändern, Tresor sperren." },
+      { "type": "hinweis", "text": "Es gibt keine Passwort-Wiederherstellung – bitte das Eltern-Passwort gut aufbewahren und regelmäßig ein Backup exportieren. Nach 5 falschen PIN-Eingaben hilft einmal das Eltern-Passwort." },
+      { "type": "technik", "text": "Verschlüsselung im Browser: PBKDF2 (SHA-256, 310.000 Iterationen, zufälliges Salt) und AES-256-GCM; gespeichert wird ausschließlich Chiffrat (IndexedDB). 8 neue Unit-Tests." }
+    ]
+  },
+  {
     "id": "rn-001",
     "version": "0.1.0",
     "datum": "2026-10-07",

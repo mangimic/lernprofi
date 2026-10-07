@@ -23,6 +23,43 @@ function test(name, ok) {
   }
 }
 
+// ---------- v0.2: Tresor ----------
+console.log("== v0.2: Tresor ==");
+test("v0.2: APP_VERSION auf 0.2.0", /export const APP_VERSION = "0\.2\.0"/.test(quelle("src/App.jsx")));
+test("v0.2: rn-002 steht an Index 0", JSON.parse(quelle("src/releaseNotes.json"))[0].id === "rn-002");
+test("v0.2: PBKDF2 mit SHA-256 und ≥ 250.000 Iterationen", (() => {
+  const c = quelle("src/crypto.js");
+  const n = parseInt(c.match(/PBKDF2_ITERATIONEN = (\d+)/)?.[1] || "0", 10);
+  return n >= 250000 && c.includes('"SHA-256"') && c.includes("PBKDF2");
+})());
+test("v0.2: AES-256-GCM mit zufälliger IV", (() => {
+  const c = quelle("src/crypto.js");
+  return c.includes("AES-GCM") && c.includes("length: 256") && c.includes("zufallsBytes(12)");
+})());
+test("v0.2: Tresor speichert nur Chiffrat (datenSpeichern verschlüsselt immer)", (() => {
+  const v = quelle("src/vault.js");
+  return /datenSpeichern[\s\S]{0,200}verschluesseln\(/.test(v) && !/set\(DATEN_SCHLUESSEL, dokument/.test(v);
+})());
+test("v0.2: PIN-Sperre nach Fehlversuchen + Eltern setzen zurück", (() => {
+  const v = quelle("src/vault.js");
+  return v.includes("MAX_PIN_VERSUCHE") && v.includes("pinVersuche = 0");
+})());
+test("v0.2: Einrichtung verlangt Passwort ≥ 8 Zeichen und 4-stellige PIN", (() => {
+  const v = quelle("src/vault.js");
+  return v.includes("length < 8") && v.includes("\\d{4}");
+})());
+test("v0.2: Sperrbildschirm nennt „keine Passwort-Wiederherstellung“", quelle("src/features/VaultGate.jsx").includes("keine Passwort-Wiederherstellung"));
+test("v0.2: data-test-Attribute am Gate und Elternbereich", (() => {
+  const a = quelle("src/features/VaultGate.jsx") + quelle("src/features/Eltern.jsx");
+  return ["gate-einrichten", "gate-entsperren", "pin-eingabe", "pin-ok", "eltern-zugang",
+    "pw-eingabe", "pw-ok", "einr-ok", "eltern-karte", "export-knopf", "sperren-knopf"]
+    .every((t) => a.includes(`"${t}"`));
+})());
+test("v0.2: keine Daten in localStorage (nur Tresor/IndexedDB)", (() => {
+  const a = quelle("src/appContext.jsx") + quelle("src/features/Start.jsx") + quelle("src/features/Eltern.jsx");
+  return !a.includes("localStorage");
+})());
+
 // ---------- v0.1: Gerüst ----------
 console.log("== v0.1: Gerüst ==");
 test("v0.1: APP_VERSION in App.jsx gepflegt", /export const APP_VERSION = "\d+\.\d+\.\d+"/.test(quelle("src/App.jsx")));

@@ -1,11 +1,11 @@
 import { useApp } from "../appContext.jsx";
+import ElternKarte from "./Eltern.jsx";
 
-/* Startseite (Platzhalter der Etappe 1): begrüßt das Kind, zeigt den
-   Stand des Dokuments und den Hell/Dunkel-Schalter – als Beweis, dass
-   Kontext, Tokens und logChange zusammenspielen. Die echten Lernfelder
-   ziehen in Etappe 3/4 ein. */
+/* Startseite (Platzhalter der Etappe 1/2): begrüßt das Kind, zeigt den
+   Hell/Dunkel-Schalter – und nach Eltern-Entsperrung den Elternbereich.
+   Die echten Lernfelder ziehen in Etappe 3/4 ein. */
 export default function Start() {
-  const { data, logChange, T } = useApp();
+  const { data, logChange, T, tresor } = useApp();
   const dunkel = data.einstellungen.thema === "dunkel";
 
   const themaWechseln = () => {
@@ -39,6 +39,7 @@ export default function Start() {
           {dunkel ? "☀️ Hell einschalten" : "🌙 Dunkel einschalten"}
         </button>
       </div>
+      {tresor.elternModus && <ElternKarte />}
     </div>
   );
 }

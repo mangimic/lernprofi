@@ -1,9 +1,10 @@
 import { useApp } from "./appContext.jsx";
 import releaseNotes from "./releaseNotes.json";
 import Start from "./features/Start.jsx";
+import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.1.0";
+export const APP_VERSION = "0.2.0";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -42,7 +43,9 @@ function WasIstNeu() {
 }
 
 export default function App() {
-  const { T, route, navTo, isMobile } = useApp();
+  const { T, route, navTo, isMobile, tresor } = useApp();
+  if (tresor.status === "laden") return null; // kurzer Moment beim Start
+  if (tresor.status !== "offen") return <VaultGate />;
   const tabs = [
     { id: "start", label: "🏠 Start", test: "nav-start" },
     { id: "neu", label: "✨ Was ist neu?", test: "nav-neu" },
