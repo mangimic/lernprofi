@@ -1,12 +1,15 @@
 import { useApp } from "../appContext.jsx";
 import ElternKarte from "./Eltern.jsx";
+import { heutigerTag, lernspur } from "../calc/lerntage.js";
 
-/* Startseite (Platzhalter der Etappe 1/2): begrüßt das Kind, zeigt den
-   Hell/Dunkel-Schalter – und nach Eltern-Entsperrung den Elternbereich.
-   Die echten Lernfelder ziehen in Etappe 3/4 ein. */
+/* Startseite: Begrüßung, Tages-Stand (Münzen, Missionen, Lernspur),
+   Einstieg ins Üben, Hell/Dunkel – und nach Eltern-Entsperrung der
+   Elternbereich. */
 export default function Start() {
-  const { data, logChange, T, tresor } = useApp();
+  const { data, logChange, T, tresor, navTo, heute } = useApp();
   const dunkel = data.einstellungen.thema === "dunkel";
+  const tag = heutigerTag(data.lernstand.lerntage, heute);
+  const spur = lernspur(data.lernstand.lerntage, heute);
 
   const themaWechseln = () => {
     const neu = {
@@ -20,11 +23,16 @@ export default function Start() {
     <div data-test="start-seite">
       <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
         <h2 style={{ margin: "0 0 6px" }}>Hallo! 👋</h2>
-        <p style={{ margin: 0, color: T.textLeise }}>
-          Hier entsteht die neue Lernprofi-App für die 4. Klasse. Deine Übungen,
-          Münzen und Stufen ziehen Etappe für Etappe hier ein – bis dahin lernst
-          du in der bisherigen App weiter.
+        <p data-test="tages-stand" style={{ margin: "0 0 10px", color: T.textLeise }}>
+          🪙 {data.lernstand.muenzen} Münze{data.lernstand.muenzen === 1 ? "" : "n"} ·
+          heute {tag.missionen} Mini-Mission{tag.missionen === 1 ? "" : "en"}
+          {tag.zielErreicht ? " · 🎯 Tagesziel geschafft!" : ""}
+          {spur > 1 ? ` · 🛤️ ${spur} Tage Lernspur` : ""}
         </p>
+        <button data-test="zum-ueben" onClick={() => navTo("ueben")}
+          style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+          ✏️ Jetzt üben (Mathe & Sachkunde)
+        </button>
       </div>
       <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand }}>
         <b>Darstellung</b>

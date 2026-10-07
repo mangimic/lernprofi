@@ -74,7 +74,51 @@ test("Release-Notes öffnen und zurück", async ({ page }) => {
   await tresorAnlegen(page);
   await page.getByTestId("nav-neu").click();
   await expect(page.getByTestId("rn-liste")).toBeVisible();
-  await expect(page.getByTestId("rn-liste")).toContainText("Der Tresor ist da");
+  await expect(page.getByTestId("rn-liste")).toContainText("Üben ist da");
   await page.getByTestId("nav-start").click();
   await expect(page.getByTestId("start-seite")).toBeVisible();
+});
+
+test("Übungsrunde Mathe: 10 Aufgaben, Münze, Stufe 2 freigeschaltet", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("zum-ueben").click();
+  await expect(page.getByTestId("ueben-bereiche")).toBeVisible();
+  await page.getByTestId("bereich-mrechnen").click();
+  await expect(page.getByTestId("frage-karte")).toBeVisible();
+
+  // 10 Aufgaben richtig beantworten (fehlerfreie Runde)
+  for (let i = 0; i < 10; i++) {
+    await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+    await expect(page.getByTestId("feedback")).toContainText("Richtig");
+    await page.getByTestId("weiter-knopf").click();
+  }
+  await expect(page.getByTestId("runde-ergebnis")).toBeVisible();
+  await expect(page.getByTestId("runde-ergebnis")).toContainText("10 von 10");
+  // Klasse 4 ist Standard und startet auf Stufe 2 → fehlerfrei schaltet Stufe 3 frei
+  await expect(page.getByTestId("runde-ergebnis")).toContainText("Stufe 3 ist freigeschaltet");
+
+  // Start zeigt den neuen Stand (1 Münze, 2 Missionen)
+  await page.getByTestId("nav-start").click();
+  await expect(page.getByTestId("tages-stand")).toContainText("1 Münze");
+  await expect(page.getByTestId("tages-stand")).toContainText("2 Mini-Missionen");
+});
+
+test("Sachkunde-Runde zählt falsch beantwortete Aufgaben nicht als gelöst", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("zum-ueben").click();
+  await page.getByTestId("ueben-fach-sachkunde").click();
+  await page.getByTestId("bereich-srad").click();
+  await expect(page.getByTestId("frage-karte")).toBeVisible();
+  // Erste Aufgabe absichtlich falsch, Rest richtig
+  await page.locator('[data-test="antwort-opt"]:not([data-richtig])').first().click();
+  await expect(page.getByTestId("feedback")).toContainText("Richtig ist");
+  await page.getByTestId("weiter-knopf").click();
+  for (let i = 0; i < 9; i++) {
+    await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+    await page.getByTestId("weiter-knopf").click();
+  }
+  await expect(page.getByTestId("runde-ergebnis")).toContainText("9 von 10");
+  // mit Fehler: keine neue Stufe, aber die Münze für die Runde gibt es
+  await expect(page.getByTestId("runde-ergebnis")).not.toContainText("freigeschaltet");
+  await expect(page.getByTestId("runde-ergebnis")).toContainText("+1 Münze");
 });

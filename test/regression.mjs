@@ -23,10 +23,62 @@ function test(name, ok) {
   }
 }
 
+// APP_VERSION einmal lesen; Versions-Checks prüfen „mindestens x.y.z",
+// damit alte Blöcke bei jedem Bump gültig bleiben (erweitern, nie löschen).
+const appVersion = (quelle("src/App.jsx").match(/APP_VERSION = "(\d+)\.(\d+)\.(\d+)"/) || [0, 0, 0, 0]).slice(1).map(Number);
+function versionMindestens(v) {
+  const ziel = v.split(".").map(Number);
+  for (let i = 0; i < 3; i++) {
+    if (appVersion[i] > ziel[i]) return true;
+    if (appVersion[i] < ziel[i]) return false;
+  }
+  return true;
+}
+const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
+
+// ---------- v0.3: Fachlogik Mathe + Sachkunde ----------
+console.log("== v0.3: Fachlogik Mathe + Sachkunde ==");
+test("v0.3: APP_VERSION mindestens 0.3.0", versionMindestens("0.3.0"));
+test("v0.3: rn-004 vorhanden (bei v0.3.0 an Index 0)", releaseNoteVorhanden("rn-004"));
+test("v0.3: Pools als reine Daten-Module vorhanden", (() => {
+  const m = quelle("src/calc/aufgaben/mathe.js"), s = quelle("src/calc/aufgaben/sachkunde.js");
+  return m.includes("export const MATHE_DATEN") && m.includes("MATHE_BEREICHE")
+    && s.includes("export const SACH_DATEN") && s.includes("SACH_BEREICHE");
+})());
+test("v0.3: calc-Module bleiben rein (kein DOM, keine eingebaute Uhr, kein fetch, kein ungeseedeter Zufall)", (() => {
+  const dateien = ["src/calc/rng.js", "src/calc/stufen.js", "src/calc/aufgabenRunde.js", "src/calc/lerntage.js", "src/calc/migrateData.js"];
+  return dateien.every((d) => {
+    const c = quelle(d);
+    const mathRandomErlaubt = d.endsWith("rng.js"); // einzige Stelle wäre verboten – rng nutzt mulberry32
+    return !/document\.|window\.|fetch\(/.test(c)
+      && !/Date\.now\(/.test(c)
+      && (mathRandomErlaubt || !/Math\.random/.test(c));
+  });
+})());
+test("v0.3: Stufen-Regeln im Code (fehlerfrei schaltet frei, Klasse 4 startet höher, Krone)", (() => {
+  const c = quelle("src/calc/stufen.js");
+  return c.includes("fehler === 0") && c.includes("klasse === 4") && c.includes("krone");
+})());
+test("v0.3: Runde = 1 Münze, Missionen und Lernspur mit 3-Tage-Brücke", (() => {
+  const c = quelle("src/calc/lerntage.js");
+  return c.includes("muenzenNachRunde") && c.includes("MISSIONS_LAENGE") && c.includes("<= 3");
+})());
+test("v0.3: Üben-Ansicht nutzt calc-Module (keine eigene Fachlogik-Kopie)", (() => {
+  const c = quelle("src/features/Ueben.jsx");
+  return c.includes("from \"../calc/stufen.js\"") && c.includes("from \"../calc/aufgabenRunde.js\"")
+    && c.includes("from \"../calc/lerntage.js\"") && c.includes("rngAusSeed");
+})());
+test("v0.3: data-test-Attribute der Üben-Ansicht", (() => {
+  const c = quelle("src/features/Ueben.jsx");
+  return ["ueben-bereiche", "frage-karte", "frage-text", "antwort-opt", "weiter-knopf", "runde-ergebnis", "nochmal-knopf"]
+    .every((t) => c.includes(`"${t}"`));
+})());
+
+
 // ---------- v0.2.1: _headers-Format ----------
 console.log("== v0.2.1: _headers-Format ==");
-test("v0.2.1: APP_VERSION auf 0.2.1", /export const APP_VERSION = "0\.2\.1"/.test(quelle("src/App.jsx")));
-test("v0.2.1: rn-003 steht an Index 0", JSON.parse(quelle("src/releaseNotes.json"))[0].id === "rn-003");
+test("v0.2.1: APP_VERSION mindestens 0.2.1", versionMindestens("0.2.1"));
+test("v0.2.1: rn-003 vorhanden", releaseNoteVorhanden("rn-003"));
 test("v0.2.1: _headers im Cloudflare-Format (keine Kommentar-Blöcke, jede eingerückte Zeile ist Name: Wert)", (() => {
   const zeilen = quelle("public/_headers").split("\n");
   if (zeilen.some((z) => z.includes("*/") || z.trim().startsWith("#"))) return false;
@@ -41,8 +93,8 @@ test("v0.2.1: _headers im Cloudflare-Format (keine Kommentar-Blöcke, jede einge
 
 // ---------- v0.2: Tresor ----------
 console.log("== v0.2: Tresor ==");
-test("v0.2: APP_VERSION auf 0.2.x", /export const APP_VERSION = "0\.2\.(0|1)"/.test(quelle("src/App.jsx")));
-test("v0.2: rn-002 vorhanden (bei v0.2.0 an Index 0)", JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === "rn-002"));
+test("v0.2: APP_VERSION mindestens 0.2.0", versionMindestens("0.2.0"));
+test("v0.2: rn-002 vorhanden (bei v0.2.0 an Index 0)", releaseNoteVorhanden("rn-002"));
 test("v0.2: PBKDF2 mit SHA-256 und ≥ 250.000 Iterationen", (() => {
   const c = quelle("src/crypto.js");
   const n = parseInt(c.match(/PBKDF2_ITERATIONEN = (\d+)/)?.[1] || "0", 10);

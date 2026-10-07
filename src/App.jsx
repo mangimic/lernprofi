@@ -1,10 +1,11 @@
 import { useApp } from "./appContext.jsx";
 import releaseNotes from "./releaseNotes.json";
 import Start from "./features/Start.jsx";
+import Ueben from "./features/Ueben.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.2.1";
+export const APP_VERSION = "0.3.0";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -48,7 +49,8 @@ export default function App() {
   if (tresor.status !== "offen") return <VaultGate />;
   const tabs = [
     { id: "start", label: "🏠 Start", test: "nav-start" },
-    { id: "neu", label: "✨ Was ist neu?", test: "nav-neu" },
+    { id: "ueben", label: "✏️ Üben", test: "nav-ueben" },
+    { id: "neu", label: "✨ Neu?", test: "nav-neu" },
   ];
   return (
     <div
@@ -66,7 +68,7 @@ export default function App() {
         </div>
       </header>
 
-      <main>{route === "neu" ? <WasIstNeu /> : <Start />}</main>
+      <main>{route === "neu" ? <WasIstNeu /> : route === "ueben" ? <Ueben /> : <Start />}</main>
 
       <nav
         style={{

@@ -1,5 +1,16 @@
 [
   {
+    "id": "rn-004",
+    "version": "0.3.0",
+    "datum": "2026-10-07",
+    "titel": "Üben ist da: Mathe & Sachkunde",
+    "entries": [
+      { "type": "neu", "text": "Der Üben-Tab ist eröffnet! Alle 5 Mathe-Bereiche (Rechnen, Zahlen-Profi, Formen, Größen, Daten & Zufall) und alle 6 Sachkunde-Bereiche (Strom, Radfahrprüfung, Karten & BW, Gemeinde, Körper, Zeit) mit 244 Frage-Karten aus der bisherigen App." },
+      { "type": "neu", "text": "Das bekannte Regelwerk ist mit umgezogen: Stufen (Aufwärmen → Profi, Klasse 4 startet auf Stufe 2), fehlerfreie Runde schaltet frei, Krone auf der höchsten Stufe, 1 Münze pro Runde, Mini-Missionen, Tagesziel und Lernspur." },
+      { "type": "technik", "text": "Die komplette Fachlogik liegt als reine, seedbare Module in src/calc/* (Zufall und Datum kommen als Parameter) – mit 12 neuen Unit-Tests. Deutsch, Spiele und Feinschliff folgen in den nächsten Etappen." }
+    ]
+  },
+  {
     "id": "rn-003",
     "version": "0.2.1",
     "datum": "2026-10-07",
