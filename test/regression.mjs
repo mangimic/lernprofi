@@ -36,6 +36,21 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.8: Spielhalle + See-Abenteuer ----------
+console.log("== v0.8: Spielhalle + See-Abenteuer ==");
+test("v0.8: APP_VERSION mindestens 0.8.0", versionMindestens("0.8.0"));
+test("v0.8: rn-011 vorhanden", releaseNoteVorhanden("rn-011"));
+test("v0.8: Spiel-Logik rein (Münz-Regel, Blitz-Fragen, Serien-Fische)", (() => {
+  const s = quelle("src/calc/spiele.js");
+  return ["spielStartbar", "muenzeEinloesen", "blitzFragen", "wurfWerten"].every((f) => s.includes(`export function ${f}`))
+    && !/document\.|window\.|fetch\(|Math\.random|Date\.now\(/.test(s);
+})());
+test("v0.8: Spielhalle gated über Münzen und löst genau 1 Münze ein", (() => {
+  const h = quelle("src/features/Spielhalle.jsx");
+  return h.includes("spielStartbar(muenzen)") && h.includes("muenzeEinloesen(muenzen)")
+    && ["spielhalle", "spiel-see", "spiel-opt", "see-ergebnis"].every((t) => h.includes(`"${t}"`));
+})());
+
 // ---------- v0.7: Elternbereich + Alt-App-Übernahme ----------
 console.log("== v0.7: Elternbereich + Alt-App-Übernahme ==");
 test("v0.7: APP_VERSION mindestens 0.7.0", versionMindestens("0.7.0"));

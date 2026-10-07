@@ -1,5 +1,16 @@
 [
   {
+    "id": "rn-011",
+    "version": "0.8.0",
+    "datum": "2026-10-07",
+    "titel": "Die Spielhalle öffnet: See-Abenteuer",
+    "entries": [
+      { "type": "neu", "text": "🎮 Der Spiele-Tab ist da! Wie gewohnt gilt: 1 Übungsrunde = 1 Münze, 1 Spielbesuch = 1 Münze. Ohne Münze bleibt die Angel eingepackt – erst üben, dann spielen." },
+      { "type": "neu", "text": "🎣 See-Abenteuer: 10 Würfe, Frage richtig = Fisch gefangen. Wer eine Serie schafft, zieht dicke Brocken an Land (🐟 → 🐠 → 🦈 → 🐋) – bei einem Fehler entwischt der Fisch und die Serie reißt. Mit Punkte-Rekord!" },
+      { "type": "technik", "text": "Blitz-Fragen mischen Deutsch und Mathe aus den vorhandenen Pools (kurz, seedbar, getestet). Blockwelt, Tennis, Fußball und Schach folgen." }
+    ]
+  },
+  {
     "id": "rn-010",
     "version": "0.7.0",
     "datum": "2026-10-07",

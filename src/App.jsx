@@ -2,11 +2,12 @@ import { useApp } from "./appContext.jsx";
 import releaseNotes from "./releaseNotes.json";
 import Start from "./features/Start.jsx";
 import Ueben from "./features/Ueben.jsx";
+import Spielhalle from "./features/Spielhalle.jsx";
 import Eltern from "./features/Eltern.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.7.0";
+export const APP_VERSION = "0.8.0";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -51,6 +52,7 @@ export default function App() {
   const tabs = [
     { id: "start", label: "🏠 Start", test: "nav-start" },
     { id: "ueben", label: "✏️ Üben", test: "nav-ueben" },
+    { id: "spiele", label: "🎮 Spiele", test: "nav-spiele" },
     ...(tresor.elternModus ? [{ id: "eltern", label: "🔧 Eltern", test: "nav-eltern" }] : []),
     { id: "neu", label: "✨ Neu?", test: "nav-neu" },
   ];
@@ -72,6 +74,7 @@ export default function App() {
 
       <main>
         {route === "neu" ? <WasIstNeu /> : route === "ueben" ? <Ueben /> :
+         route === "spiele" ? <Spielhalle /> :
          route === "eltern" && tresor.elternModus ? <Eltern /> : <Start />}
       </main>
 

@@ -10,6 +10,7 @@ import { STARK_DATEN, STARK_SAETZE } from "./aufgaben/stark.js";
 import { subjektPool, praedikatPool, gkPool } from "./aufgaben/saetze.js";
 import { zeitPool, wortartenPool, faellePool, redePool, gwsPool, ZEIT_NAMEN, FALL_NAMEN } from "./aufgaben/deutschKonverter.js";
 import { auswahlPruefen, tippenPoolGesund } from "./wortTippen.js";
+import { spielStartbar, muenzeEinloesen, blitzFragen, wurfWerten, fischFuerSerie, SEE_WUERFE } from "./spiele.js";
 
 // Fiktive Fixtures – niemals echte Daten.
 const HEUTE = "2026-01-15";
@@ -200,6 +201,45 @@ describe("deutschKonverter (MC)", () => {
     expect(g.easy.length).toBeGreaterThanOrEqual(80);
     expect(g.hard.length).toBeGreaterThanOrEqual(120);
     expect(g.easy.concat(g.hard).every((a) => a.kontext.includes("Regel:") && !/<[^>]+>/.test(a.kontext + a.tipp))).toBe(true);
+  });
+});
+
+describe("spiele", () => {
+  it("Münz-Regel: Start nur mit Münze, Besuch kostet genau eine", () => {
+    expect(spielStartbar(0)).toBe(false);
+    expect(spielStartbar(1)).toBe(true);
+    expect(muenzeEinloesen(3)).toBe(2);
+    expect(muenzeEinloesen(0)).toBe(0);
+  });
+
+  it("Blitz-Fragen: kurz, eindeutige Optionen, deterministisch je Seed, Deutsch+Mathe gemischt", () => {
+    const a = blitzFragen(SEE_WUERFE, "test-seed");
+    const b = blitzFragen(SEE_WUERFE, "test-seed");
+    const c = blitzFragen(SEE_WUERFE, "anderer-seed");
+    expect(a.length).toBe(SEE_WUERFE);
+    expect(a.map((q) => q.f)).toEqual(b.map((q) => q.f));
+    expect(a.map((q) => q.f)).not.toEqual(c.map((q) => q.f));
+    expect(a.every((q) => !q.kontext && q.f.length <= 90
+      && q.optionen.includes(q.r)
+      && q.optionen.every((o) => o.length <= 16)
+      && new Set(q.optionen).size === q.optionen.length)).toBe(true);
+    // gerade Positionen Deutsch, ungerade Mathe (Mathe: Ziffern in Frage oder Antworten)
+    expect(a.filter((_, i) => i % 2 === 1).every((q) => /\d/.test(q.f + q.optionen.join("")))).toBe(true);
+  });
+
+  it("See-Abenteuer: Serie macht dicke Fische, Fehler reißt die Serie", () => {
+    let s = wurfWerten(null, true);
+    s = wurfWerten(s, true);
+    expect(s.serie).toBe(2);
+    expect(s.fang[1].emoji).toBe("🐠");
+    s = wurfWerten(s, false);
+    expect(s.serie).toBe(0);
+    expect(s.fang[2].punkte).toBe(0);
+    for (let i = 0; i < 5; i++) s = wurfWerten(s, true);
+    expect(s.fang[s.fang.length - 1].emoji).toBe("🐋");
+    expect(fischFuerSerie(1).punkte).toBe(1);
+    // Würfe: 1✓(1) 2✓(2) ✗(0) dann Serien 1-5 → 1+2+2+3+4
+    expect(s.punkte).toBe(1 + 2 + 0 + 1 + 2 + 2 + 3 + 4);
   });
 });
 

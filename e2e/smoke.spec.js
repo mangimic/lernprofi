@@ -197,3 +197,36 @@ test("Neue Deutsch-Bereiche: Zeitformen (3 Optionen) und Grundwortschatz mit Reg
   await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
   await expect(page.getByTestId("feedback")).toContainText("Richtig");
 });
+
+test("Spielhalle: ohne Münze gesperrt, mit Münze kostet der Besuch genau eine", async ({ page }) => {
+  await tresorAnlegen(page);
+  // Ohne Münze: Spiel gesperrt
+  await page.getByTestId("nav-spiele").click();
+  await expect(page.getByTestId("spielhalle-muenzen")).toHaveText("0");
+  await expect(page.getByTestId("spiel-see")).toBeDisabled();
+
+  // Eine Übungsrunde → 1 Münze (schnellste: dass/das mit 10 Fragen)
+  await page.getByTestId("nav-ueben").click();
+  await page.getByTestId("bereich-dd").click();
+  for (let i = 0; i < 10; i++) {
+    await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+    await page.getByTestId("weiter-knopf").click();
+  }
+  await expect(page.getByTestId("runde-ergebnis")).toBeVisible();
+
+  // Spielbesuch: Münze wird eingelöst, Spiel läuft, Ergebnis mit Punkten
+  await page.getByTestId("nav-spiele").click();
+  await expect(page.getByTestId("spielhalle-muenzen")).toHaveText("1");
+  await page.getByTestId("spiel-see").click();
+  await expect(page.getByTestId("see-spiel")).toBeVisible();
+  for (let i = 0; i < 10; i++) {
+    await page.locator('[data-test="spiel-opt"][data-richtig="1"]').click();
+    await expect(page.getByTestId("spiel-feedback")).toContainText("gefangen");
+    await page.getByTestId("spiel-weiter").click();
+  }
+  await expect(page.getByTestId("see-ergebnis")).toBeVisible();
+  await expect(page.getByTestId("see-ergebnis")).toContainText("Neuer Rekord");
+  await page.getByTestId("spiel-nochmal").click();
+  await expect(page.getByTestId("spielhalle-muenzen")).toHaveText("0");
+  await expect(page.getByTestId("spiel-see")).toBeDisabled();
+});
