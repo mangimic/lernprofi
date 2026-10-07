@@ -23,10 +23,26 @@ function test(name, ok) {
   }
 }
 
+// ---------- v0.2.1: _headers-Format ----------
+console.log("== v0.2.1: _headers-Format ==");
+test("v0.2.1: APP_VERSION auf 0.2.1", /export const APP_VERSION = "0\.2\.1"/.test(quelle("src/App.jsx")));
+test("v0.2.1: rn-003 steht an Index 0", JSON.parse(quelle("src/releaseNotes.json"))[0].id === "rn-003");
+test("v0.2.1: _headers im Cloudflare-Format (keine Kommentar-Blöcke, jede eingerückte Zeile ist Name: Wert)", (() => {
+  const zeilen = quelle("public/_headers").split("\n");
+  if (zeilen.some((z) => z.includes("*/") || z.trim().startsWith("#"))) return false;
+  if (zeilen[0].trim() !== "/*") return false; // erste Regel: alle Pfade
+  return zeilen.every((z) => {
+    const t = z.trim();
+    if (t === "") return true;
+    if (!z.startsWith(" ")) return t.startsWith("/"); // URL-Muster
+    return /^[A-Za-z-]+: .+/.test(t); // Header-Paar
+  });
+})());
+
 // ---------- v0.2: Tresor ----------
 console.log("== v0.2: Tresor ==");
-test("v0.2: APP_VERSION auf 0.2.0", /export const APP_VERSION = "0\.2\.0"/.test(quelle("src/App.jsx")));
-test("v0.2: rn-002 steht an Index 0", JSON.parse(quelle("src/releaseNotes.json"))[0].id === "rn-002");
+test("v0.2: APP_VERSION auf 0.2.x", /export const APP_VERSION = "0\.2\.(0|1)"/.test(quelle("src/App.jsx")));
+test("v0.2: rn-002 vorhanden (bei v0.2.0 an Index 0)", JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === "rn-002"));
 test("v0.2: PBKDF2 mit SHA-256 und ≥ 250.000 Iterationen", (() => {
   const c = quelle("src/crypto.js");
   const n = parseInt(c.match(/PBKDF2_ITERATIONEN = (\d+)/)?.[1] || "0", 10);

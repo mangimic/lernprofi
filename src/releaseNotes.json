@@ -1,5 +1,14 @@
 [
   {
+    "id": "rn-003",
+    "version": "0.2.1",
+    "datum": "2026-10-07",
+    "titel": "Erster Cloudflare-Deploy repariert",
+    "entries": [
+      { "type": "fix", "text": "Die Sicherheits-Header-Datei enthielt Kommentarzeilen, die Cloudflare Pages nicht versteht – der allererste Deploy brach deshalb ab. Jetzt ist die Datei im korrekten Format und der Deploy läuft durch." }
+    ]
+  },
+  {
     "id": "rn-002",
     "version": "0.2.0",
     "datum": "2026-10-08",
