@@ -113,6 +113,14 @@ Cloud-Konfiguration; verzichtet zunächst auf Geräte-Sync.
 | Etappe | Status |
 |---|---|
 | 0 – Bestandsaufnahme + Zielarchitektur | ✅ abgeschlossen |
-| 0.5 – Export-Knopf in der Alt-App (v1.86) | 🔨 in Arbeit |
-| 1 – Gerüst im neuen Repo `lernprofi` | 🔨 in Arbeit |
-| 2–8 | ⏳ offen |
+| 0.5 – Export-Knopf in der Alt-App (v1.86) | ✅ abgeschlossen |
+| 1 – Gerüst im neuen Repo `lernprofi` (v0.1–v0.5: Vite, Worker-Deploy, Gates) | ✅ abgeschlossen |
+| 2 – Tresor (Zero-Knowledge, PIN + Eltern-Passwort) | ✅ abgeschlossen (v0.6) |
+| 3 – Üben: Mathe, Sachkunde, Deutsch (11 Bereiche), Stark | ✅ abgeschlossen (v0.7) |
+| 4 – Elternbereich (Profil, Ziel, Stufen, Übersicht, Daten) | ✅ abgeschlossen (v0.7) |
+| 5 – Datenübernahme-Konverter (Import-Knopf + Bericht) | ✅ Code fertig; Durchführung bewusst verschoben |
+| 6 – Sync (Worker-API + KV, Eltern-Karte ☁️) | ✅ Code fertig; beim User offen: KV-Namespace + Access |
+| Spiele-Migration: See-Abenteuer (v0.9), Blockwelt (v0.11), Konzentration + Mut-Satz (v0.12), Tennis + Fußball (v0.13), Schach (v0.14) | ✅ abgeschlossen |
+| Rest-Features: Satzglieder-Umstellen, Vorgangsbeschreibung, Gesprächsimpulse, Zeitlimit/Spiele-Schalter, Tagesform | ⏳ offen |
+| 7 – KI-Funktionen (5-€-Deckel, Freigabe je Zweck) | ⏳ offen |
+| 8 – Parallelbetrieb + Umstellung | ⏳ offen |
