@@ -4,7 +4,7 @@ import { useApp } from "../appContext.jsx";
 import {
   WOCHENTAGE, BAUSTEINE, TERMIN_ARTEN, LERN_MINUTEN, tagesStunden, uhr, bausteinInfo,
   wochenMontag, tagDatum, planFuerWoche, leererPlan, blockHinzu, blockWeg, slotBelegt,
-  termineDerWoche, planPruefung, wochenBilanz, festerTermin, SCHULE,
+  termineDerWoche, planPruefung, wochenBilanz, festerTermin, SCHULE, auffrischungen,
   kalenderWoche, routineAusPlan, routineAnwenden, schulZeilen, blockNotiz,
   istAusgefallen, ausfallSetzen, ausfallAufheben, blockVerschieben, wocheKopieren,
   blockDauer, blockDauerVon, slotBelegt as slotBelegtCalc,
@@ -113,7 +113,7 @@ function StundenSlot({ tagIdx, slot, block, blockStart, fest, wahlAktiv, aufTipp
   );
 }
 
-function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, ausfaelle, pruefung, wahlAktiv, schuleAuf, aufTipp, aufWeg, aufEdit, aufFest, aufTermin }) {
+function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, ausfaelle, pruefung, wahlAktiv, schuleAuf, auffrischen, aufTipp, aufWeg, aufEdit, aufFest, aufTermin }) {
   const { T } = useApp();
   const p = pruefung.tage[idx];
   const ampel = p.status === "voll" ? "🔴" : p.status === "einseitig" || p.status === "reihenfolge" ? "🟡" : p.lern + p.frei > 0 ? "🟢" : "";
@@ -142,6 +142,14 @@ function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, ausfaelle, pruefung
           ))}
         </div>
       )}
+      {auffrischen.map((a) => (
+        <div key={`auf-${a.id}`} data-test={`auffrischung-${idx}`} style={{
+          background: "color-mix(in srgb, var(--akzent) 30%, var(--karte))",
+          borderRadius: 6, padding: "3px 6px", fontSize: "12px", fontWeight: 700, marginBottom: 4,
+        }}>
+          🌅 {schule ? "Vor der Schule" : "Morgens"}: {a.emoji} {a.text}
+        </div>
+      ))}
       {termine.map((t) => {
         const art = TERMIN_ARTEN[t.art];
         return (
@@ -346,6 +354,7 @@ export default function Wochenplan() {
                 ausfaelle={plan.ausfaelle}
                 aufFest={(f) => setFestDialog(f)}
                 aufTermin={(t) => setTerminDialog(t)}
+                auffrischen={auffrischungen(data.einstellungen.termine, montag, i)}
                 aufZurueck={(f) => speichern(ausfallAufheben(plan, f.tag, f.beginn, f.dauer), `${f.name} ist doch wieder da`)}
                 termine={termineJe[i]} bloecke={plan.bloecke.filter((b) => b.tag === i)}
                 pruefung={pruefung} aufTipp={slotGetippt}

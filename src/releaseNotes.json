@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-050",
+    "version": "0.38.0",
+    "datum": "2026-10-08",
+    "titel": "Morgen-Auffrischung am Testtag",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🌅 Steht ein Test an (Klassenarbeit, Kompass-Test, Wörter der Woche), zeigt der Plan am Testtag eine eigene Morgen-Zeile: „Vor der Schule: Mathe kurz auffrischen (5 Min)“. Auch die Heute-Ansicht erinnert daran – bestärkend: „Du hast verteilt geübt, du kannst das!“"
+      }
+    ]
+  },
+  {
     "id": "rn-049",
     "version": "0.37.0",
     "datum": "2026-10-08",

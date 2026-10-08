@@ -36,6 +36,17 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.38: Morgen-Auffrischung am Testtag ----------
+console.log("== v0.38: Auffrischung ==");
+test("v0.38: Auffrisch-Zeile im Plan-Tageskopf und in der Heute-Ansicht", (() => {
+  return quelle("src/calc/wochenplan.js").includes("auffrischungen")
+    && quelle("src/calc/wochenplan.js").includes("kurz auffrischen (5 Min)")
+    && quelle("src/features/Wochenplan.jsx").includes("auffrischung-")
+    && quelle("src/features/Wochenplan.jsx").includes("Vor der Schule")
+    && quelle("src/features/Start.jsx").includes('data-test="heute-auffrischung"')
+    && releaseNoteVorhanden("rn-050");
+})());
+
 // ---------- v0.37: Auto-Sicherung + Auto-Abholen ----------
 console.log("== v0.37: Auto-Sync ==");
 test("v0.37: Autosave entprellt im Hintergrund, Konflikt nie still überschrieben", (() => {

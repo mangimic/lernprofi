@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   BAUSTEINE, TERMIN_ARTEN, FESTE_TERMINE_STANDARD, festerTermin, blockNotiz, schulZeilen,
   istAusgefallen, ausfallSetzen, ausfallAufheben, blockVerschieben, wocheKopieren, blockUnfertig,
-  blockDauer, blockDauerVon, spanFrei,
+  blockDauer, blockDauerVon, spanFrei, auffrischungen,
   kalenderWoche, routineAusPlan, routineAnwenden, schulStunden, schulFaecher,
   wochenMontag, tagDatum, leererPlan, planFuerWoche,
   blockHinzu, blockWeg, blockFertig, tagGeschafft, heuteBelohnt, belohnungEintragen,
@@ -287,6 +287,19 @@ describe("wochenplan – Wochen-Rechnung", () => {
       naechste: { montag: "2026-10-05", bloecke: [], ausfaelle: [{ tag: 3, beginn: 1020 }] },
     };
     expect(istAusgefallen(planFuerWoche(alt, "2026-10-05"), 3, 1020)).toBe(true);
+  });
+
+  it("Auffrischung: am Testtag gibt es die Morgen-Zeile mit Fach (oder Art)", () => {
+    const termine = [
+      { id: 1, tag: "2026-10-09", art: "ka", fach: "Mathe" },
+      { id: 2, tag: "2026-10-09", art: "wdw", fach: "" },
+      { id: 3, tag: "2026-10-12", art: "ka", fach: "Deutsch" }, // nächste Woche
+    ];
+    const fr = auffrischungen(termine, "2026-10-05", 4);
+    expect(fr.length).toBe(2);
+    expect(fr[0]).toMatchObject({ emoji: "📝", text: "Mathe kurz auffrischen (5 Min)" });
+    expect(fr[1].text).toBe("Wörter der Woche kurz auffrischen (5 Min)"); // ohne Fach: Art-Name
+    expect(auffrischungen(termine, "2026-10-05", 3)).toEqual([]);
   });
 
   it("termineDerWoche gruppiert nur Termine dieser Woche; Stammdaten vollständig", () => {

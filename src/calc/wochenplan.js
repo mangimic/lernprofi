@@ -350,6 +350,21 @@ export function termineDerWoche(termine, montag) {
   return je;
 }
 
+/* 🌅 Auffrischung: Steht an einem Tag ein Test (Klassenarbeit, Kompass,
+   Wörter der Woche), gehört morgens VOR der Schule ein kurzer
+   Auffrisch-Moment in den Plan – 5 Minuten anschauen reicht, geübt
+   wurde ja verteilt an den Tagen davor. */
+export function auffrischungen(termine, montag, tag) {
+  return termineDerWoche(termine, montag)[tag].map((t) => {
+    const art = TERMIN_ARTEN[t.art] || { name: "Test", emoji: "📝" };
+    return {
+      id: t.id,
+      emoji: art.emoji,
+      text: `${t.fach || art.name} kurz auffrischen (5 Min)`,
+    };
+  });
+}
+
 /* 🦁 ADHS-Wächter: prüft den Plan und gibt je Tag eine Ampel plus
    höchstens EINEN freundlichen Hinweis (nie eine Fehlerliste). */
 export function planPruefung(plan, termine, zeitLimit, feste = []) {

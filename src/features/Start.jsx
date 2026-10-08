@@ -6,7 +6,7 @@ import { EINSTUFUNG_FELDER } from "../calc/einstufung.js";
 import { STARK_SAETZE } from "../calc/aufgaben/stark.js";
 import {
   wochenMontag, tagDatum, planFuerWoche, bausteinInfo, blockFertig, blockUnfertig,
-  tagGeschafft, heuteBelohnt, belohnungEintragen, WOCHENTAGE, slotLabel, schulFaecher, istAusgefallen, blockDauerVon, uhr,
+  tagGeschafft, heuteBelohnt, belohnungEintragen, WOCHENTAGE, slotLabel, schulFaecher, istAusgefallen, blockDauerVon, uhr, auffrischungen,
 } from "../calc/wochenplan.js";
 
 /* Startseite: Begrüßung, Tages-Stand (Münzen, Missionen, Lernspur),
@@ -101,6 +101,14 @@ export default function Start() {
       {(heutePlan.length > 0 || heuteFeste.length > 0) && (
         <div data-test="heute-plan" style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
           <b>🗓️ Heute auf deinem Plan</b>
+          {auffrischungen(data.einstellungen.termine, montag, heuteIdx).map((a) => (
+            <p key={`auf-${a.id}`} data-test="heute-auffrischung" style={{
+              margin: "6px 0 0", fontWeight: 700, borderRadius: T.radiusKlein, padding: "6px 10px",
+              background: "color-mix(in srgb, var(--akzent) 30%, var(--karte))",
+            }}>
+              🌅 Heute: {a.emoji} {a.text} – du hast verteilt geübt, du kannst das! 💪
+            </p>
+          ))}
           {schulFaecher(heuteIdx).length > 0 && (
             <p data-test="heute-schule" style={{ margin: "6px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
               🏫 Heute in der Schule: {schulFaecher(heuteIdx).join(" · ")}

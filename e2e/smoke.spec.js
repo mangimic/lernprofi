@@ -958,6 +958,8 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await page.getByTestId("schule-zeigen").click();
   await expect(page.getByTestId("schule-3")).toHaveCount(0);
   await expect(page.getByTestId("plan-hinweise")).toContainText("Klassenarbeit");
+  await expect(page.getByTestId("auffrischung-4")).toContainText("Vor der Schule"); // 🌅 Morgen-Auffrischung am Testtag
+  await expect(page.getByTestId("auffrischung-4")).toContainText("Mathe kurz auffrischen");
 
   // Antippen: Baustein → freies 30-Minuten-Fenster. Samstag ab 9 Uhr; 3 Lernboxen überladen (Limit 2 bei 20 Min)
   const bausteinZu = async (typ, tag, slot) => {
