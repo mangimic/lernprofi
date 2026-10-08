@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-039",
+    "version": "0.30.0",
+    "datum": "2026-10-08",
+    "titel": "Bausteine mit Notiz – „Freunde · Emil“",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "✏️ Jeder Baustein im Wochenplan ist jetzt antippbar und bekommt eine Notiz: Bei Freunde-Zeit fragt die App beim Platzieren direkt „Mit wem triffst du dich?“ – der Name steht dann am Baustein und in der Heute-Ansicht. Auch Üben-Boxen können eine Notiz tragen (z. B. „Mathe für die KA“)."
+      },
+      {
+        "type": "verbessert",
+        "text": "Im Notiz-Fenster lässt sich der Baustein auch gleich entfernen; Enter speichert. Notizen bleiben beim Übernehmen in die Routine außen vor – die Routine merkt sich nur den Rhythmus."
+      }
+    ]
+  },
+  {
     "id": "rn-038",
     "version": "0.29.0",
     "datum": "2026-10-08",

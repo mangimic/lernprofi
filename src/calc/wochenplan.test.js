@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
-  BAUSTEINE, TERMIN_ARTEN, FESTE_TERMINE_STANDARD, festerTermin,
+  BAUSTEINE, TERMIN_ARTEN, FESTE_TERMINE_STANDARD, festerTermin, blockNotiz,
   kalenderWoche, routineAusPlan, routineAnwenden, schulStunden, schulFaecher,
   wochenMontag, tagDatum, leererPlan, planFuerWoche,
   blockHinzu, blockWeg, blockFertig, tagGeschafft, heuteBelohnt, belohnungEintragen,
@@ -48,6 +48,11 @@ describe("wochenplan – Wochen-Rechnung", () => {
     const ohne = blockWeg(p, 1);
     expect(ohne.bloecke.map((b) => b.typ)).toEqual(["sport"]);
     expect(p.bloecke.length).toBe(2); // Original unangetastet
+    // Notiz: trimmen, auf 24 Zeichen kürzen, Original bleibt unberührt
+    const mitNotiz = blockNotiz(p, 1, "  mit dem Nachbarsjungen vom Spielplatz  ");
+    expect(mitNotiz.bloecke[0].notiz).toBe("mit dem Nachbarsjungen v");
+    expect(blockNotiz(p, 1, "").bloecke[0].notiz).toBe("");
+    expect(p.bloecke[0].notiz).toBeUndefined();
   });
 
   it("Wächter: zu viele Lernboxen → voll; nur Lernen → einseitig; sonst ok", () => {

@@ -978,8 +978,18 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await expect(page.getByTestId("plan-hinweise")).toHaveCount(0);
   await expect(page.getByTestId("plan-ok")).toBeVisible();
 
-  // 🔁 Routine: Üben wiederholt sich – Freunde-Zeit wird sonntags neu verabredet
+  // 🔁 Routine: Üben wiederholt sich – Freunde-Zeit wird sonntags neu verabredet.
+  // Beim Platzieren fragt die App direkt, MIT WEM – der Name steht dann am Baustein.
   await bausteinZu("freunde", 2, 870);
+  await expect(page.getByTestId("block-editor")).toBeVisible();
+  await page.getByTestId("notiz-feld").fill("Emil");
+  await page.getByTestId("notiz-ok").click();
+  await expect(page.getByTestId("tag-2")).toContainText("Freunde · Emil");
+  // Baustein antippen → Notiz ändern; „entfernen" im Editor funktioniert auch
+  await page.getByTestId("slot-2-870").click();
+  await page.getByTestId("notiz-feld").fill("Emil + Ole");
+  await page.getByTestId("notiz-ok").click();
+  await expect(page.getByTestId("tag-2")).toContainText("Freunde · Emil + Ole");
   await page.getByTestId("routine-speichern").click();
   await page.getByTestId("woche-naechste").click();
   await expect(page.getByTestId("plan-block")).toHaveCount(0);

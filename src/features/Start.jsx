@@ -127,7 +127,7 @@ export default function Start() {
                   opacity: b.fertig ? 0.65 : 1,
                 }}>
                   <span style={{ flex: 1, fontWeight: 700, textDecoration: b.fertig ? "line-through" : "none" }}>
-                    {info.emoji} {info.name}
+                    {info.emoji} {info.name}{b.notiz ? ` · ${b.notiz}` : ""}
                     <span style={{ color: T.textLeise, fontWeight: 400 }}>
                       {Number.isInteger(b.slot) ? ` · ${slotLabel(b.slot)}` : ""}{info.lern && info.box !== false ? " · 10+5 Min" : ""}
                     </span>

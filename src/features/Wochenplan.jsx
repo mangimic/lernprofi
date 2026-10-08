@@ -5,7 +5,7 @@ import {
   WOCHENTAGE, BAUSTEINE, TERMIN_ARTEN, LERN_MINUTEN, tagesStunden, uhr, bausteinInfo,
   wochenMontag, tagDatum, planFuerWoche, leererPlan, blockHinzu, blockWeg, slotBelegt,
   termineDerWoche, planPruefung, wochenBilanz, festerTermin, SCHULE,
-  kalenderWoche, routineAusPlan, routineAnwenden, schulStunden,
+  kalenderWoche, routineAusPlan, routineAnwenden, schulStunden, blockNotiz,
 } from "../calc/wochenplan.js";
 
 /* 🗓️ MEIN WOCHENPLAN (Etappe 9): Felix setzt sein Pensum selbst.
@@ -37,7 +37,7 @@ function PaletteBaustein({ b, gewaehlt, aufTipp }) {
 
 /* Eine Stunde (14-19 Uhr) an einem Tag: leer = Ablagefläche (tippen
    oder hineinziehen), belegt = Baustein-Kärtchen mit ✖. */
-function StundenSlot({ tagIdx, slot, block, fest, wahlAktiv, aufTipp, aufWeg }) {
+function StundenSlot({ tagIdx, slot, block, fest, wahlAktiv, aufTipp, aufWeg, aufEdit }) {
   const { T } = useApp();
   const { setNodeRef, isOver } = useDroppable({ id: `slot-${tagIdx}-${slot}`, disabled: !!fest });
   const info = block ? bausteinInfo(block.typ) : null;
@@ -60,14 +60,15 @@ function StundenSlot({ tagIdx, slot, block, fest, wahlAktiv, aufTipp, aufWeg }) 
     );
   }
   return (
-    <div ref={setNodeRef} data-test={`slot-${tagIdx}-${slot}`} onClick={() => !block && aufTipp(tagIdx, slot)}
+    <div ref={setNodeRef} data-test={`slot-${tagIdx}-${slot}`}
+      onClick={() => (block ? aufEdit(block) : aufTipp(tagIdx, slot))}
       style={{
         display: "flex", alignItems: "center", gap: 6, minHeight: 34, marginBottom: 3,
         borderRadius: 6, padding: "2px 6px",
         background: block ? (info.lern ? T.primaer : T.weich) : isOver || wahlAktiv ? T.weich : "transparent",
         color: block ? (info.lern ? T.primaerText : T.text) : T.textLeise,
         border: block ? "none" : `1.5px dashed ${isOver || wahlAktiv ? T.primaer : T.rand}`,
-        cursor: block ? "default" : "pointer",
+        cursor: "pointer",
         opacity: block?.fertig ? 0.65 : 1,
       }}>
       <span style={{ fontSize: "11px", fontWeight: 700, minWidth: 34, opacity: 0.8 }}>{uhr(slot)}</span>
@@ -78,6 +79,7 @@ function StundenSlot({ tagIdx, slot, block, fest, wahlAktiv, aufTipp, aufWeg }) 
             textDecoration: block.fertig ? "line-through" : "none",
           }}>
             {block.fertig ? "✓ " : ""}{info.emoji} {info.name}
+            {block.notiz && <span style={{ fontWeight: 400, opacity: 0.85 }}> · {block.notiz}</span>}
           </span>
           <button data-test="block-weg" onClick={(ev) => { ev.stopPropagation(); aufWeg(block.id); }}
             aria-label="Baustein entfernen"
@@ -92,7 +94,7 @@ function StundenSlot({ tagIdx, slot, block, fest, wahlAktiv, aufTipp, aufWeg }) 
   );
 }
 
-function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, pruefung, wahlAktiv, schuleAuf, aufTipp, aufWeg }) {
+function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, pruefung, wahlAktiv, schuleAuf, aufTipp, aufWeg, aufEdit }) {
   const { T } = useApp();
   const p = pruefung.tage[idx];
   const ampel = p.status === "voll" ? "🔴" : p.status === "einseitig" ? "🟡" : p.lern + p.frei > 0 ? "🟢" : "";
@@ -135,7 +137,7 @@ function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, pruefung, wahlAktiv
       {tagesStunden(idx).map((s) => (
         <StundenSlot key={s} tagIdx={idx} slot={s} wahlAktiv={wahlAktiv}
           fest={festerTermin(feste, idx, s)}
-          block={bloecke.find((b) => b.slot === s)} aufTipp={aufTipp} aufWeg={aufWeg} />
+          block={bloecke.find((b) => b.slot === s)} aufTipp={aufTipp} aufWeg={aufWeg} aufEdit={aufEdit} />
       ))}
       {p.lern > 0 && (
         <div style={{ color: T.textLeise, fontSize: "12.5px" }}>⏱️ {p.lernMin} Min Lernen (10+5-Takt)</div>
@@ -159,6 +161,7 @@ export default function Wochenplan() {
 
   const [woche, setWoche] = useState("diese"); // Sonntags wird die NÄCHSTE Woche besprochen
   const [schuleAuf, setSchuleAuf] = useState(false); // 🏫 Vormittags-Stunden ein-/ausklappen
+  const [editor, setEditor] = useState(null); // ✏️ Baustein-Notiz: { id, notiz }
   const montagAktiv = wochenMontag(heute);
   const aktiv = planFuerWoche(data.lernstand.wochenplan, montagAktiv);
   const naechsteW = woche === "naechste";
@@ -184,7 +187,11 @@ export default function Wochenplan() {
   };
   const hinzu = (tagIdx, slot, typ) => {
     const neu = blockHinzu(plan, tagIdx, typ, slot);
-    if (neu !== plan) speichern(neu, `Baustein ${typ} am ${WOCHENTAGE[tagIdx]} um ${uhr(slot)} Uhr eingeplant`);
+    if (neu !== plan) {
+      speichern(neu, `Baustein ${typ} am ${WOCHENTAGE[tagIdx]} um ${uhr(slot)} Uhr eingeplant`);
+      // Freunde-Zeit lebt von der Verabredung: direkt fragen, mit wem.
+      if (typ === "freunde") setEditor({ id: neu.bloecke[neu.bloecke.length - 1].id, notiz: "" });
+    }
   };
   const slotGetippt = (tagIdx, slot) => {
     if (festerTermin(feste, tagIdx, slot)) return; // feste Stunde ist tabu
@@ -260,6 +267,7 @@ export default function Wochenplan() {
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "stretch", background: T.grund, borderRadius: T.radiusKlein, padding: 8 }}>
             {WOCHENTAGE.map((_, i) => (
               <TagSpalte key={i} idx={i} heuteIdx={heuteIdx} wahlAktiv={!!wahl} feste={feste} schuleAuf={schuleAuf}
+                aufEdit={(b) => setEditor({ id: b.id, notiz: b.notiz || "" })}
                 termine={termineJe[i]} bloecke={plan.bloecke.filter((b) => b.tag === i)}
                 pruefung={pruefung} aufTipp={slotGetippt}
                 aufWeg={(id) => speichern(blockWeg(plan, id), "Baustein entfernt")} />
@@ -289,6 +297,46 @@ export default function Wochenplan() {
           );
         })()}
       </div>
+      {editor && (() => {
+        const block = plan.bloecke.find((b) => b.id === editor.id);
+        if (!block) return null;
+        const info = bausteinInfo(block.typ);
+        const zu = () => setEditor(null);
+        return (
+          <div data-test="block-editor" onClick={zu} style={{
+            position: "fixed", inset: 0, zIndex: 900, background: "rgba(38, 50, 72, 0.94)",
+            display: "flex", alignItems: "center", justifyContent: "center", padding: 18,
+          }}>
+            <div onClick={(ev) => ev.stopPropagation()} style={{ maxWidth: 380, width: "100%", background: T.karte, borderRadius: T.radius, padding: T.abstand }}>
+              <h3 style={{ margin: "0 0 2px" }}>{info.emoji} {info.name}</h3>
+              <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+                {WOCHENTAGE[block.tag]} · {uhr(block.slot)} Uhr
+              </p>
+              <input data-test="notiz-feld" type="text" maxLength={24} autoFocus
+                value={editor.notiz} onChange={(e) => setEditor({ ...editor, notiz: e.target.value })}
+                onKeyDown={(e) => { if (e.key === "Enter") { speichern(blockNotiz(plan, block.id, editor.notiz), "Baustein-Notiz geändert"); zu(); } }}
+                placeholder={block.typ === "freunde" ? "Mit wem triffst du dich?" : "Notiz (z. B. was genau?)"}
+                style={{ width: "100%", boxSizing: "border-box", minHeight: "var(--touch)", borderRadius: T.radiusKlein, border: `1px solid ${T.rand}`, padding: "0 12px", background: T.grund, color: T.text }} />
+              <button data-test="notiz-ok"
+                onClick={() => { speichern(blockNotiz(plan, block.id, editor.notiz), "Baustein-Notiz geändert"); zu(); }}
+                style={{ width: "100%", marginTop: 10, background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+                ✓ Speichern
+              </button>
+              <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+                <button data-test="notiz-weg" onClick={() => { speichern(blockWeg(plan, block.id), "Baustein entfernt"); zu(); }}
+                  style={{ flex: 1, background: T.weich, color: T.text, fontWeight: 700 }}>
+                  🗑️ Baustein entfernen
+                </button>
+                <button data-test="notiz-abbrechen" onClick={zu}
+                  style={{ flex: 1, background: "transparent", color: T.textLeise }}>
+                  Abbrechen
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       <button data-test="plan-zurueck" onClick={() => navTo("start")}
         style={{ background: "transparent", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
         ← Zurück zur Startseite

@@ -201,6 +201,12 @@ export function routineAnwenden(plan, routine) {
   return p;
 }
 
+/** Notiz an einem Baustein (z. B. der Name des Freundes, das Übe-Thema). */
+export function blockNotiz(plan, id, notiz) {
+  const t = String(notiz || "").trim().slice(0, 24);
+  return { ...plan, bloecke: plan.bloecke.map((b) => (b.id === id ? { ...b, notiz: t } : b)) };
+}
+
 /** Haken dran: Baustein ist geschafft (bleibt im Plan, wird durchgestrichen). */
 export function blockFertig(plan, id) {
   return { ...plan, bloecke: plan.bloecke.map((b) => (b.id === id ? { ...b, fertig: true } : b)) };

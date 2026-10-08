@@ -36,6 +36,20 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.30: Baustein-Notizen ----------
+console.log("== v0.30: Baustein-Notizen ==");
+test("v0.30: APP_VERSION mindestens 0.30.0", versionMindestens("0.30.0"));
+test("v0.30: Release-Note rn-039 vorhanden", releaseNoteVorhanden("rn-039"));
+test("v0.30: blockNotiz (trimmen/kürzen) + Editor mit Freunde-Frage + Anzeige", (() => {
+  const w = quelle("src/calc/wochenplan.js");
+  const f = quelle("src/features/Wochenplan.jsx");
+  return w.includes("blockNotiz") && w.includes("slice(0, 24)")
+    && f.includes('data-test="block-editor"') && f.includes('data-test="notiz-feld"')
+    && f.includes('data-test="notiz-ok"') && f.includes('data-test="notiz-weg"')
+    && f.includes("Mit wem triffst du dich?") && f.includes("block.notiz &&")
+    && quelle("src/features/Start.jsx").includes("b.notiz");
+})());
+
 // ---------- v0.29: Schul-Vormittag im Plan ----------
 console.log("== v0.29: Schul-Vormittag ==");
 test("v0.29: APP_VERSION mindestens 0.29.0", versionMindestens("0.29.0"));
