@@ -20,6 +20,8 @@
           → { blasen: [≤2], mach, kostenCent, verbrauchtCent, deckelCent }
      POST /api/ki/schrift  { bild, satz, typ?, modell? }     → { sterne, uebe, mach, … }
      POST /api/ki/aufsatz  { bild, textart, typ?, modell? }  → { sterne, tipp, mach, … }
+     POST /api/ki/bericht  { daten, modell? }                → { gut, beobachtung, tipps, … }
+     POST /api/ki/saetze   { woerter, modell? }              → { saetze, … }
    ============================================================ */
 import { zugriffErlaubt } from "./vaultApi.js";
 
@@ -180,6 +182,65 @@ export function aufsatzZurechtstutzen(rohText) {
     };
   }
   return { sterne, tipp: { stelle, blase }, mach, ersetzt: false };
+}
+
+/* 📊 Wochenbericht: Leo fasst anonyme Lerndaten für die ELTERN zusammen –
+   bestärkend, konkret, ohne Noten-Sprache. Es kommen nur Zähler an. */
+const LEO_BERICHT = `Du schreibst für ELTERN eines Kindes (Klasse 4, Deutschland) einen kurzen Wochenbericht
+aus anonymen Lerndaten einer Lern-App (Missionen = kleine Übungs-Einheiten; Stufen 1-3 je Lernfeld;
+Tagesform: gruen=fit, gelb=normal, rot=schwerer Tag; "geschrieben" = Handschrift-Blätter).
+REGELN (alle verbindlich):
+- Antworte NUR mit JSON: {"gut":["…","…"],"beobachtung":"…","tipps":["…","…"]}.
+- "gut": 2-3 konkrete Lichtblicke aus DIESEN Daten, je höchstens 20 Wörter.
+- "beobachtung": 1-2 Sätze, was auffällt (Muster, nicht Einzeltage), höchstens 40 Wörter.
+- "tipps": 2-3 umsetzbare Ideen für die nächste Woche, je höchstens 20 Wörter –
+  immer positiv formuliert (mehr von etwas Gutem, kleine Rituale, Bewegung, Lob für Anstrengung).
+- NIEMALS Diagnose-Wörter, niemals Druck, keine Noten, kein Vergleich mit anderen Kindern.
+- Sind kaum Daten da, sage das freundlich und schlage einen sanften Einstieg vor.`;
+
+export function berichtZurechtstutzen(rohText) {
+  let geparst = null;
+  const treffer = String(rohText || "").match(/\{[\s\S]*\}/);
+  if (treffer) { try { geparst = JSON.parse(treffer[0]); } catch { geparst = null; } }
+  const kuerzen = (satz, max) => {
+    const w = String(satz || "").trim().split(/\s+/).filter(Boolean);
+    return w.length <= max + 3 ? w.join(" ") : w.slice(0, max).join(" ") + " …";
+  };
+  const gut = (Array.isArray(geparst?.gut) ? geparst.gut : []).map((x) => kuerzen(x, 20)).filter(Boolean).slice(0, 3);
+  const beobachtung = kuerzen(geparst?.beobachtung || "", 40);
+  const tipps = (Array.isArray(geparst?.tipps) ? geparst.tipps : []).map((x) => kuerzen(x, 20)).filter(Boolean).slice(0, 3);
+  if (!gut.length || wortProblem([...gut, beobachtung, ...tipps].join(" "))) {
+    return { gut: [], beobachtung: "", tipps: [], ersetzt: true };
+  }
+  return { gut, beobachtung, tipps, ersetzt: false };
+}
+
+/* 🔤 Persönliche Übungssätze: Leo baut Abschreib-Sätze aus den
+   Interessen des Kindes – die Eltern sehen sie VOR dem Einspielen. */
+const LEO_SAETZE = `Du baust Abschreib-Sätze für ein Kind (Klasse 4, Deutschland), das Handschrift übt.
+Die Eltern nennen dir Interessen des Kindes. REGELN (alle verbindlich):
+- Antworte NUR mit JSON: {"saetze":["…","…","…","…","…","…","…","…"]}.
+- GENAU 8 Sätze, jeder höchstens 8 Wörter, jeder endet mit Punkt oder Ausrufezeichen.
+- Jeder Satz greift eines der genannten Interessen auf – konkret und freundlich.
+- Perfekte Rechtschreibung und Zeichensetzung (die Sätze werden abgeschrieben!).
+- Gern Wörter mit typischen Lern-Stellen (ie, Doppelkonsonant, groß/klein) einbauen.
+- Keine Markennamen-Häufung, keine Gewalt, niemals Diagnose-Wörter oder Druck.`;
+
+export function saetzeZurechtstutzen(rohText) {
+  let geparst = null;
+  const treffer = String(rohText || "").match(/\{[\s\S]*\}/);
+  if (treffer) { try { geparst = JSON.parse(treffer[0]); } catch { geparst = null; } }
+  const roh = Array.isArray(geparst?.saetze) ? geparst.saetze : [];
+  const saetze = [];
+  for (const s of roh) {
+    const t = String(s || "").trim();
+    const woerter = t.split(/\s+/).filter(Boolean);
+    if (!t || t.length > 80 || woerter.length > 8) continue; // zu lang → weglassen, nie abschneiden
+    if (wortProblem(t) || saetze.includes(t)) continue;
+    saetze.push(woerter.join(" "));
+    if (saetze.length >= 10) break;
+  }
+  return saetze.length >= 3 ? { saetze, ersetzt: false } : { saetze: [], ersetzt: true };
 }
 
 /** Schrift-Antwort in die feste Form bringen (2 Sterne, 1 Übe-Buchstabe, Mach-Aufgabe). */
@@ -420,6 +481,95 @@ export async function kiApi(request, env, jetzt = new Date()) {
     const sauber = aufsatzZurechtstutzen(roh.text);
     return json(200, {
       sterne: sauber.sterne, tipp: sauber.tipp, mach: sauber.mach,
+      kostenCent: mikroZuCent(mikro),
+      verbrauchtCent: mikroZuCent(stand.mikro + mikro),
+      deckelCent,
+    });
+  }
+
+  if (url.pathname === "/api/ki/bericht" && request.method === "POST") {
+    if (!kv) return json(503, { grund: "kein-kv", fehler: "KV-Namespace fehlt." });
+    if (!schluesselDa) return json(503, { grund: "kein-schluessel", fehler: "API-Schlüssel fehlt (docs/DEPLOY-CLOUDFLARE.md)." });
+    let eingabe;
+    try { eingabe = await request.json(); } catch { return json(400, { fehler: "Kein gültiges JSON." }); }
+    if (!eingabe?.daten || typeof eingabe.daten !== "object") {
+      return json(400, { fehler: "Erwartet { daten } (anonyme Wochen-Zusammenfassung)." });
+    }
+
+    const deckelCent = await deckelLesen();
+    const stand = await standLesen();
+    if (stand.mikro >= deckelCent * 10000) {
+      return json(402, { grund: "deckel", deckelCent, verbrauchtCent: mikroZuCent(stand.mikro) });
+    }
+
+    const wahl = modellWahl(eingabe?.modell);
+    const konfig = MODELL_KONFIG[wahl];
+    let roh;
+    try {
+      roh = await claudeAnfragen(env, {
+        konfig, system: LEO_BERICHT,
+        prompt: `Lerndaten der letzten 7 Tage:\n${JSON.stringify(eingabe.daten).slice(0, 4000)}`,
+      });
+    } catch (e) {
+      const detail = await fehlerMerken("bericht", e);
+      return json(502, { grund: "ki-fehler", fehler: "Die KI hat gerade nicht geantwortet – später nochmal.", detail });
+    }
+    await fehlerLoeschen();
+
+    const mikro = kostenMikro(konfig.id, roh.usage);
+    const posten = [...(stand.posten || []), { zeit: jetzt.toISOString(), zweck: "bericht", modell: wahl, mikro }].slice(-20);
+    await kv.put(`ki:monat:${monat}`, JSON.stringify({ mikro: stand.mikro + mikro, posten }));
+
+    const sauber = berichtZurechtstutzen(roh.text);
+    if (sauber.ersetzt) {
+      return json(502, { grund: "ki-format", fehler: "Die Antwort war unbrauchbar – bitte nochmal versuchen." });
+    }
+    return json(200, {
+      gut: sauber.gut, beobachtung: sauber.beobachtung, tipps: sauber.tipps,
+      kostenCent: mikroZuCent(mikro),
+      verbrauchtCent: mikroZuCent(stand.mikro + mikro),
+      deckelCent,
+    });
+  }
+
+  if (url.pathname === "/api/ki/saetze" && request.method === "POST") {
+    if (!kv) return json(503, { grund: "kein-kv", fehler: "KV-Namespace fehlt." });
+    if (!schluesselDa) return json(503, { grund: "kein-schluessel", fehler: "API-Schlüssel fehlt (docs/DEPLOY-CLOUDFLARE.md)." });
+    let eingabe;
+    try { eingabe = await request.json(); } catch { return json(400, { fehler: "Kein gültiges JSON." }); }
+    const woerter = String(eingabe?.woerter || "").trim().slice(0, 200);
+    if (woerter.length < 2) return json(400, { fehler: "Erwartet { woerter } (Interessen des Kindes, z. B. „Dinos, Schwimmbad“)." });
+
+    const deckelCent = await deckelLesen();
+    const stand = await standLesen();
+    if (stand.mikro >= deckelCent * 10000) {
+      return json(402, { grund: "deckel", deckelCent, verbrauchtCent: mikroZuCent(stand.mikro) });
+    }
+
+    const wahl = modellWahl(eingabe?.modell);
+    const konfig = MODELL_KONFIG[wahl];
+    let roh;
+    try {
+      roh = await claudeAnfragen(env, {
+        konfig, system: LEO_SAETZE,
+        prompt: `Interessen des Kindes: ${woerter}`,
+      });
+    } catch (e) {
+      const detail = await fehlerMerken("saetze", e);
+      return json(502, { grund: "ki-fehler", fehler: "Die KI hat gerade nicht geantwortet – später nochmal.", detail });
+    }
+    await fehlerLoeschen();
+
+    const mikro = kostenMikro(konfig.id, roh.usage);
+    const posten = [...(stand.posten || []), { zeit: jetzt.toISOString(), zweck: "saetze", modell: wahl, mikro }].slice(-20);
+    await kv.put(`ki:monat:${monat}`, JSON.stringify({ mikro: stand.mikro + mikro, posten }));
+
+    const sauber = saetzeZurechtstutzen(roh.text);
+    if (sauber.ersetzt) {
+      return json(502, { grund: "ki-format", fehler: "Die Vorschläge waren unbrauchbar – bitte nochmal versuchen." });
+    }
+    return json(200, {
+      saetze: sauber.saetze,
       kostenCent: mikroZuCent(mikro),
       verbrauchtCent: mikroZuCent(stand.mikro + mikro),
       deckelCent,

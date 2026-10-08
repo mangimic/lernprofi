@@ -36,6 +36,37 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.25: Wochenbericht + persönliche Übungssätze ----------
+console.log("== v0.25: Wochenbericht + Übungssätze ==");
+test("v0.25: APP_VERSION mindestens 0.25.0", versionMindestens("0.25.0"));
+test("v0.25: Release-Note rn-034 vorhanden", releaseNoteVorhanden("rn-034"));
+test("v0.25: Server-Endpunkte bericht + saetze mit strengen Stutzern", (() => {
+  const k = quelle("server/_lib/kiApi.js");
+  return k.includes("/api/ki/bericht") && k.includes("/api/ki/saetze")
+    && k.includes("berichtZurechtstutzen") && k.includes("saetzeZurechtstutzen")
+    && k.includes('zweck: "bericht"') && k.includes('zweck: "saetze"')
+    && k.includes("weglassen, nie abschneiden") && k.includes("LEO_BERICHT") && k.includes("LEO_SAETZE");
+})());
+test("v0.25: Berichtsdaten anonym (kein Name) und nur 7 Tage", (() => {
+  const b = quelle("src/calc/bericht.js");
+  return b.includes("berichtDaten") && b.includes("isoMinusTage") && !b.includes("profil.name")
+    && quelle("src/calc/bericht.test.js").includes('not.toContain("Geheim")');
+})());
+test("v0.25: Eltern prüfen Satz-Vorschläge VOR dem Einspielen; Schreib-Training nutzt eigene Sätze", (() => {
+  const e = quelle("src/features/Eltern.jsx");
+  return e.includes('data-test="saetze-woerter"') && e.includes('data-test="satz-vorschlag"')
+    && e.includes('data-test="saetze-einspielen"') && e.includes('data-test="saetze-leeren"')
+    && e.includes('data-test="bericht-knopf"') && e.includes('data-test="bericht-ansicht"')
+    && quelle("src/calc/schrift.js").includes("eigene")
+    && quelle("src/features/Schrift.jsx").includes('data-test="schrift-eigene"')
+    && quelle("src/calc/migrateData.js").includes("eigeneSaetze");
+})());
+test("v0.25: alle 5 KI-Freigaben scharf (keine „bald“-Zeile mehr)", (() => {
+  const e = quelle("src/features/Eltern.jsx");
+  return ["erklaeren", "schrift", "aufsatz", "bericht", "saetze"]
+    .every((k) => new RegExp('\\{ key: "' + k + '",[^\\n]*da: true').test(e));
+})());
+
 // ---------- v0.24: Aufsatz-Check + Blatt-Anzeige ----------
 console.log("== v0.24: Aufsatz-Check ==");
 test("v0.24: APP_VERSION mindestens 0.24.0", versionMindestens("0.24.0"));

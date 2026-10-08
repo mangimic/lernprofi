@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   kiApi, kostenMikro, mikroZuCent, monatsKey, antwortZurechtstutzen, schriftZurechtstutzen,
-  aufsatzZurechtstutzen, wortProblem, MAX_BLASEN, MAX_WOERTER,
+  aufsatzZurechtstutzen, berichtZurechtstutzen, saetzeZurechtstutzen,
+  wortProblem, MAX_BLASEN, MAX_WOERTER,
 } from "./kiApi.js";
 
 // Mini-Mocks wie bei der vaultApi: KV als Map, echte Request-Objekte.
@@ -265,6 +266,58 @@ describe("kiApi – Routen", () => {
     expect(aufsatzZurechtstutzen("Geplauder").ersetzt).toBe(true);
     const boese = aufsatzZurechtstutzen('{"sterne":["Sei nicht so faul.","x"],"tipp":{"stelle":"a","blase":"b"},"mach":"c"}');
     expect(boese.ersetzt).toBe(true);
+  });
+
+  it("bericht: schickt anonyme Daten, bucht „bericht“; Stutzer blockt Diagnose-Sprache", async () => {
+    const env = mockEnv();
+    const fetchMock = claudeMock({
+      text: '{"gut":["4 von 5 Tagen das Tagesziel geschafft – stark!","Die 4 Fälle sind auf Stufe 2 geklettert."],' +
+        '"beobachtung":"An roten Tagen liefen kurze Missionen besser als lange.",' +
+        '"tipps":["Nach 2 Missionen eine Bewegungspause einbauen.","Das Schreib-Training am Morgen probieren."]}',
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const r = await kiApi(anfrage("POST", "/api/ki/bericht", {
+      daten: { klasse: 4, tage: [{ tag: "2026-10-07", missionen: 4, ziel: true, form: "gruen" }], fokusRekord: 7 },
+    }), env, JETZT);
+    expect(r.status).toBe(200);
+    const d = await r.json();
+    expect(d.gut.length).toBe(2);
+    expect(d.tipps[0]).toContain("Bewegungspause");
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.messages[0].content).toContain("fokusRekord");
+    expect(body.system).toContain("ELTERN");
+    const s = await (await kiApi(anfrage("GET", "/api/ki/status"), env, JETZT)).json();
+    expect(s.posten[0]).toMatchObject({ zweck: "bericht" });
+    expect((await kiApi(anfrage("POST", "/api/ki/bericht", {}), env, JETZT)).status).toBe(400);
+    // Stutzer: Diagnose-Wort → ersetzt, Route würde 502 liefern
+    expect(berichtZurechtstutzen('{"gut":["Trotz ADHS lief es gut."],"beobachtung":"x","tipps":["y"]}').ersetzt).toBe(true);
+    expect(berichtZurechtstutzen("kein json").ersetzt).toBe(true);
+  });
+
+  it("saetze: filtert zu lange/problematische Sätze, bucht „saetze“, braucht woerter", async () => {
+    const env = mockEnv();
+    const fetchMock = claudeMock({
+      text: '{"saetze":["Der Dino stapft durch den Garten.","Im Schwimmbad springe ich vom Rand!",' +
+        '"Dieser Satz ist leider viel zu lang und fliegt deshalb ganz sicher raus.",' +
+        '"Sei nicht so faul beim Üben.","Der Dino stapft durch den Garten.","Mein Handstand klappt immer besser."]}',
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const r = await kiApi(anfrage("POST", "/api/ki/saetze", { woerter: "Dinos, Schwimmbad, Turnen" }), env, JETZT);
+    expect(r.status).toBe(200);
+    const d = await r.json();
+    expect(d.saetze).toEqual([
+      "Der Dino stapft durch den Garten.",
+      "Im Schwimmbad springe ich vom Rand!",
+      "Mein Handstand klappt immer besser.",
+    ]); // zu lang raus, Wort-Wächter raus, Dublette raus
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.messages[0].content).toContain("Dinos, Schwimmbad");
+    expect(body.system).toContain("GENAU 8");
+    const s = await (await kiApi(anfrage("GET", "/api/ki/status"), env, JETZT)).json();
+    expect(s.posten[0]).toMatchObject({ zweck: "saetze" });
+    expect((await kiApi(anfrage("POST", "/api/ki/saetze", { woerter: "" }), env, JETZT)).status).toBe(400);
+    // unter 3 brauchbaren Sätzen → ersetzt (Route: 502)
+    expect(saetzeZurechtstutzen('{"saetze":["Nur einer bleibt übrig."]}').ersetzt).toBe(true);
   });
 
   it("ohne Schlüssel 503; KI-Fehler → 502 und nichts gebucht", async () => {

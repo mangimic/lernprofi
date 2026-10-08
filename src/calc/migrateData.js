@@ -48,6 +48,7 @@ export function leeresDokument(heute) {
         modell: "sonnet",  // Leo-Modell: haiku (günstig) | sonnet (empfohlen) | opus (Premium)
       },
       uebungsThema: "alltag", // Übungs-Welt der Satz-Übungen (Kind wählt selbst)
+      eigeneSaetze: [],    // von den Eltern freigegebene Schreib-Sätze (max 12)
     },
     protokoll: [],     // Änderungsprotokoll: { zeit, bereich, art, text }
   };
@@ -122,6 +123,9 @@ export function migrateData(alt, heute) {
   if (!["alltag", "angeln", "tennis", "fussball"].includes(d.einstellungen.uebungsThema)) {
     d.einstellungen.uebungsThema = "alltag";
   }
+  d.einstellungen.eigeneSaetze = (Array.isArray(d.einstellungen.eigeneSaetze) ? d.einstellungen.eigeneSaetze : [])
+    .filter((s) => typeof s === "string" && s.trim().length >= 1 && s.length <= 80)
+    .map((s) => s.trim()).slice(0, 12);
   const ki = istObjekt(d.einstellungen.ki) ? d.einstellungen.ki : {};
   d.einstellungen.ki = {
     erklaeren: ki.erklaeren === true, schrift: ki.schrift === true, aufsatz: ki.aufsatz === true,

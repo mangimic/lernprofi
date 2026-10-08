@@ -66,6 +66,34 @@ export async function kiAufsatz(daten) {
   }
 }
 
+/** 📊 Wochenbericht (Eltern): anonyme Wochen-Daten → gut/beobachtung/tipps. */
+export async function kiBericht(daten) {
+  try {
+    const { status, daten: d } = await anfrage("/api/ki/bericht", {
+      method: "POST", body: JSON.stringify(daten),
+    });
+    if (status === 200 && d?.gut?.length) return { ok: true, ...d };
+    if (status === 402) return { ok: false, grund: "deckel" };
+    return { ok: false, grund: d?.grund || "fehler", detail: d?.detail };
+  } catch {
+    return { ok: false, grund: "offline" };
+  }
+}
+
+/** 🔤 Persönliche Übungssätze (Eltern): Interessen → Vorschläge zum Freigeben. */
+export async function kiSaetze(daten) {
+  try {
+    const { status, daten: d } = await anfrage("/api/ki/saetze", {
+      method: "POST", body: JSON.stringify(daten),
+    });
+    if (status === 200 && d?.saetze?.length) return { ok: true, ...d };
+    if (status === 402) return { ok: false, grund: "deckel" };
+    return { ok: false, grund: d?.grund || "fehler", detail: d?.detail };
+  } catch {
+    return { ok: false, grund: "offline" };
+  }
+}
+
 /** 🦁 „Erklär es mir anders“: holt 1-2 Blasen + Mach-Aufgabe.
     aufgabe.modell: "haiku" | "sonnet" | "opus" (Eltern-Wahl). */
 export async function kiErklaeren(aufgabe) {

@@ -868,6 +868,55 @@ test("Aufsatz-Check: Textart wählen, Foto → 2 Sterne + markierte Stelle + Mac
   await expect(page.getByTestId("tages-stand")).toContainText("🪙 1 Münze");
 });
 
+test("Wochenbericht + persönliche Übungssätze: Eltern geben frei, prüfen und spielen ein", async ({ page }) => {
+  await page.route("**/api/ki/status", (route) => route.fulfill({ json: {
+    verfuegbar: true, grund: null, monat: "2026-10", deckelCent: 500, maxDeckelCent: 1000,
+    verbrauchtCent: 0, posten: [],
+  } }));
+  await page.route("**/api/ki/bericht", (route) => route.fulfill({ json: {
+    gut: ["4 von 5 Tagen das Tagesziel geschafft!", "Die 4 Fälle sind auf Stufe 2 geklettert."],
+    beobachtung: "An roten Tagen liefen kurze Missionen besser.",
+    tipps: ["Nach 2 Missionen eine Bewegungspause einbauen."],
+    kostenCent: 0.5, verbrauchtCent: 0.5, deckelCent: 500,
+  } }));
+  await page.route("**/api/ki/saetze", (route) => route.fulfill({ json: {
+    saetze: ["Mein Schlagzeug wummert durch das Haus.", "Die Pfadfinder bauen ein hohes Zelt.", "Beim Angeln bleibe ich ganz ruhig."],
+    kostenCent: 0.3, verbrauchtCent: 0.8, deckelCent: 500,
+  } }));
+
+  await tresorAnlegen(page);
+  await page.getByTestId("nav-eltern").click();
+  // Ohne Freigabe nur Hinweise
+  await expect(page.getByTestId("bericht-hinweis")).toBeVisible();
+  await expect(page.getByTestId("saetze-hinweis")).toBeVisible();
+  await page.getByTestId("ki-bericht-1").click();
+  await page.getByTestId("ki-saetze-1").click();
+
+  // 📊 Wochenbericht erstellen
+  await page.getByTestId("bericht-knopf").click();
+  await expect(page.getByTestId("bericht-ansicht")).toContainText("Tagesziel geschafft");
+  await expect(page.getByTestId("bericht-ansicht")).toContainText("Bewegungspause");
+
+  // 🔤 Sätze holen, einen abwählen, einspielen
+  await page.getByTestId("saetze-woerter").fill("Schlagzeug, Pfadfinder, Angeln");
+  await page.getByTestId("saetze-holen").click();
+  await expect(page.getByTestId("satz-vorschlag")).toHaveCount(3);
+  await page.getByTestId("satz-vorschlag").nth(2).locator("input").uncheck();
+  await page.getByTestId("saetze-einspielen").click();
+  await expect(page.getByTestId("eigene-saetze")).toContainText("Aktiv im Schreib-Training (2)");
+
+  // Das Schreib-Training nutzt jetzt einen eigenen Satz
+  await page.getByTestId("nav-start").click();
+  await page.getByTestId("zum-schrift").click();
+  await expect(page.getByTestId("schrift-eigene")).toBeVisible();
+  await expect(page.getByTestId("schrift-satz")).toContainText(/Schlagzeug|Pfadfinder/);
+
+  // Entfernen bringt die Welt-Sätze zurück
+  await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("saetze-leeren").click();
+  await expect(page.getByTestId("eigene-saetze")).toHaveCount(0);
+});
+
 test("KI-Karte ohne Server: ehrliche Meldung statt Absturz, Schalter bleiben bedienbar", async ({ page }) => {
   await tresorAnlegen(page);
   await page.getByTestId("nav-eltern").click();

@@ -5,7 +5,8 @@ import { ZEIT_STUFEN, SPIELE_SCHALTER, spielAktiv, zeitHeute, GESPRAECH_BEREICHE
 import { PAUSEN_INTERVALLE, TAGESFORM_MODI } from "../calc/tagesform.js";
 import { idbStorage } from "../idbShim.js";
 import { syncStatus, hochladen, herunterladen, konfliktUeberschreiben } from "../sync.js";
-import { kiStatus, kiDeckelSetzen, kiErklaeren } from "../ki.js";
+import { kiStatus, kiDeckelSetzen, kiErklaeren, kiBericht, kiSaetze } from "../ki.js";
+import { berichtDaten } from "../calc/bericht.js";
 
 /* Elternbereich (eigener Tab, nur nach Entsperren mit dem Eltern-Passwort):
    Profil · Tagesziel · Stufen-Steuerung · neutrale Lern-Übersicht ·
@@ -126,6 +127,9 @@ export default function Eltern() {
   // 🤖 KI-Status (Deckel, Verbrauch)
   const [ki, setKi] = useState(null);
   const [kiTest, setKiTest] = useState(null); // 🧪 Verbindungstest: null | {laden} | {ok,…} | {grund, detail}
+  const [wBericht, setWBericht] = useState(null); // 📊 Wochenbericht: null | {laden} | {ok, gut, beobachtung, tipps} | {grund}
+  const [saetzeWoerter, setSaetzeWoerter] = useState("");
+  const [vorschlaege, setVorschlaege] = useState(null); // 🔤 null | {laden} | {saetze, auswahl} | {grund}
   useEffect(() => { kiStatus().then(setKi); }, []);
   const syncAktion = async (arbeit, erfolgsText) => {
     setSyncMeldung("⏳ Einen Moment …"); setFrage(null);
@@ -331,8 +335,8 @@ export default function Eltern() {
           { key: "erklaeren", name: "🦁 „Erklär es mir anders“ (nach Fehlversuchen)", da: true },
           { key: "schrift", name: "🖐️ Schrift-Blick (Foto vom Blatt prüfen)", da: true },
           { key: "aufsatz", name: "✍️ Aufsatz-Check (Foto vom Text)", da: true },
-          { key: "bericht", name: "📊 Wochenbericht", da: false },
-          { key: "saetze", name: "🔤 Persönliche Übungssätze", da: false },
+          { key: "bericht", name: "📊 Wochenbericht", da: true },
+          { key: "saetze", name: "🔤 Persönliche Übungssätze", da: true },
         ].map((f) => (
           <div key={f.key} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, opacity: f.da ? 1 : 0.55 }}>
             <span style={{ flex: 1, fontSize: "var(--schrift-klein)" }}>{f.name}{f.da ? "" : " · kommt als Nächstes"}</span>
@@ -418,6 +422,118 @@ export default function Eltern() {
             </>
           )}
         </div>
+      </Karte>
+
+      <Karte test="eltern-bericht">
+        <b>📊 Leos Wochenbericht</b>
+        <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          Leo fasst die letzten 7 Tage zusammen: Lichtblicke, eine Beobachtung, 2-3 Tipps.
+          Es gehen nur anonyme Zähler zum Server – nie der Name, nie Texte des Kindes.
+        </p>
+        {!data.einstellungen.ki.bericht ? (
+          <p data-test="bericht-hinweis" style={{ margin: 0, color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+            Oben bei den KI-Funktionen „📊 Wochenbericht“ freigeben, dann geht es hier los.
+          </p>
+        ) : (
+          <>
+            <button data-test="bericht-knopf" disabled={!!wBericht?.laden || !ki?.verfuegbar}
+              onClick={async () => {
+                setWBericht({ laden: true });
+                setWBericht(await kiBericht({ daten: berichtDaten(data, heute), modell: data.einstellungen.ki.modell }));
+              }}
+              style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
+              {wBericht?.laden ? "📊 Leo schaut auf die Woche …" : "📊 Wochenbericht erstellen"}
+            </button>
+            {wBericht && !wBericht.laden && (wBericht.ok ? (
+              <div data-test="bericht-ansicht" style={{ marginTop: 10, background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px" }}>
+                {wBericht.gut.map((g, i) => <p key={i} style={{ margin: "0 0 6px" }}>⭐ {g}</p>)}
+                <p style={{ margin: "0 0 6px" }}>👀 {wBericht.beobachtung}</p>
+                {wBericht.tipps.map((t2, i) => <p key={i} style={{ margin: "0 0 6px" }}>💡 {t2}</p>)}
+                <p style={{ margin: 0, color: T.textLeise, fontSize: "12.5px" }}>
+                  Kosten: {String(wBericht.kostenCent).replace(".", ",")} ct · Der Bericht wird nicht gespeichert.
+                </p>
+              </div>
+            ) : (
+              <p data-test="bericht-fehler" style={{ margin: "8px 0 0", color: "var(--warn)", fontSize: "var(--schrift-klein)" }}>
+                {wBericht.grund === "deckel" ? "⚠️ Der Monatsdeckel ist erreicht."
+                  : "⚠️ Das hat gerade nicht geklappt – bitte nochmal versuchen."}
+              </p>
+            ))}
+          </>
+        )}
+      </Karte>
+
+      <Karte test="eltern-saetze">
+        <b>🔤 Persönliche Übungssätze</b>
+        <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          Leo baut Abschreib-Sätze aus den Interessen Ihres Kindes fürs 🖐️ Schreib-Training.
+          Sie sehen jeden Satz <b>vor</b> dem Einspielen und wählen aus – nichts landet ungeprüft beim Kind.
+        </p>
+        {data.einstellungen.eigeneSaetze.length > 0 && (
+          <div data-test="eigene-saetze" style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "8px 12px", marginBottom: 8 }}>
+            <p style={{ margin: "0 0 4px", fontSize: "var(--schrift-klein)" }}>
+              <b>Aktiv im Schreib-Training ({data.einstellungen.eigeneSaetze.length}):</b>
+            </p>
+            {data.einstellungen.eigeneSaetze.map((s, i) => (
+              <p key={i} style={{ margin: "0 0 2px", fontSize: "var(--schrift-klein)" }}>✍️ {s}</p>
+            ))}
+            <button data-test="saetze-leeren"
+              onClick={() => einstellung({ eigeneSaetze: [] }, "Eigene Übungssätze entfernt")}
+              style={{ marginTop: 4, background: "transparent", color: T.textLeise, fontSize: "12.5px", height: "auto", minHeight: 0, padding: 0 }}>
+              ✖️ Entfernen (zurück zu den Welt-Sätzen)
+            </button>
+          </div>
+        )}
+        {!data.einstellungen.ki.saetze ? (
+          <p data-test="saetze-hinweis" style={{ margin: 0, color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+            Oben bei den KI-Funktionen „🔤 Persönliche Übungssätze“ freigeben, dann geht es hier los.
+          </p>
+        ) : (
+          <>
+            <input data-test="saetze-woerter" type="text" value={saetzeWoerter}
+              onChange={(e) => setSaetzeWoerter(e.target.value)} maxLength={200}
+              placeholder="Interessen, z. B.: Schlagzeug, Angeln, Pfadfinder"
+              style={{ width: "100%", boxSizing: "border-box", minHeight: "var(--touch)", borderRadius: T.radiusKlein, border: `1px solid ${T.rand}`, padding: "0 12px", background: T.grund, color: T.text }} />
+            <button data-test="saetze-holen" disabled={!!vorschlaege?.laden || saetzeWoerter.trim().length < 2 || !ki?.verfuegbar}
+              onClick={async () => {
+                setVorschlaege({ laden: true });
+                const e = await kiSaetze({ woerter: saetzeWoerter.trim(), modell: data.einstellungen.ki.modell });
+                setVorschlaege(e.ok ? { saetze: e.saetze, auswahl: e.saetze.map(() => true), kostenCent: e.kostenCent } : { grund: e.grund });
+              }}
+              style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
+              {vorschlaege?.laden ? "🔤 Leo denkt sich Sätze aus …" : "🔤 Vorschläge holen"}
+            </button>
+            {vorschlaege && !vorschlaege.laden && (vorschlaege.saetze ? (
+              <div data-test="saetze-vorschlaege" style={{ marginTop: 10 }}>
+                {vorschlaege.saetze.map((s, i) => (
+                  <label key={i} data-test="satz-vorschlag" style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, fontSize: "var(--schrift-klein)" }}>
+                    <input type="checkbox" checked={vorschlaege.auswahl[i]}
+                      onChange={() => setVorschlaege({ ...vorschlaege, auswahl: vorschlaege.auswahl.map((a, j) => (j === i ? !a : a)) })} />
+                    {s}
+                  </label>
+                ))}
+                <button data-test="saetze-einspielen" disabled={!vorschlaege.auswahl.some(Boolean)}
+                  onClick={() => {
+                    const gewaehlt = vorschlaege.saetze.filter((_, i) => vorschlaege.auswahl[i]).slice(0, 12);
+                    einstellung({ eigeneSaetze: gewaehlt }, `${gewaehlt.length} eigene Übungssätze freigegeben`);
+                    setVorschlaege(null);
+                    setSaetzeWoerter("");
+                  }}
+                  style={{ width: "100%", marginTop: 6, background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+                  ✓ Ausgewählte freigeben und einspielen
+                </button>
+                <p style={{ margin: "6px 0 0", color: T.textLeise, fontSize: "12.5px" }}>
+                  Kosten: {String(vorschlaege.kostenCent).replace(".", ",")} ct · Ersetzt die bisherigen eigenen Sätze.
+                </p>
+              </div>
+            ) : (
+              <p data-test="saetze-fehler" style={{ margin: "8px 0 0", color: "var(--warn)", fontSize: "var(--schrift-klein)" }}>
+                {vorschlaege.grund === "deckel" ? "⚠️ Der Monatsdeckel ist erreicht."
+                  : "⚠️ Das hat gerade nicht geklappt – bitte nochmal versuchen."}
+              </p>
+            ))}
+          </>
+        )}
       </Karte>
 
       <Karte test="eltern-sync">

@@ -31,6 +31,14 @@ describe("schrift – Schreib-Satz des Tages", () => {
     expect(typeof schreibSatz("kein-datum", "alltag")).toBe("string");
   });
 
+  it("eigene (von Eltern freigegebene) Sätze haben Vorrang vor der Welt", () => {
+    const eigene = ["Der Dino stapft durch den Garten.", "Im Schwimmbad springe ich rein!"];
+    expect(eigene).toContain(schreibSatz("2026-10-08", "angeln", eigene));
+    expect(schreibSatz("2026-10-08", "angeln", eigene)).not.toBe(schreibSatz("2026-10-09", "angeln", eigene));
+    // leere Liste zählt nicht als eigene Sätze
+    expect(SCHREIB_SAETZE.angeln).toContain(schreibSatz("2026-10-08", "angeln", []));
+  });
+
   it("reiseEintragen: ersetzt den Tages-Eintrag, hält höchstens 30, mutiert nicht", () => {
     const leer = leererSchriftStand();
     const e1 = { tag: "2026-10-08", satz: "A.", buchstabe: "e", thumb: "x" };

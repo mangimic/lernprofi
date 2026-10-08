@@ -1,5 +1,25 @@
 [
   {
+    "id": "rn-034",
+    "version": "0.25.0",
+    "datum": "2026-10-08",
+    "titel": "Wochenbericht + persönliche Übungssätze",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "📊 Leos Wochenbericht (Eltern): Ein Knopf fasst die letzten 7 Tage zusammen – 2-3 Lichtblicke, eine Beobachtung, 2-3 umsetzbare Tipps. Es gehen nur anonyme Zähler zum Server (Missionen, Stufen, Tagesformen, Fokus-Rekord) – nie der Name, nie Texte des Kindes. Der Bericht wird nicht gespeichert."
+      },
+      {
+        "type": "neu",
+        "text": "🔤 Persönliche Übungssätze (Eltern): Interessen eingeben (z. B. „Schlagzeug, Pfadfinder, Angeln“), Leo schlägt 8 Abschreib-Sätze vor – die Eltern prüfen jeden Satz, wählen aus und spielen erst dann ein. Das 🖐️ Schreib-Training nutzt diese Sätze ab sofort statt der Welt-Rotation („✨ Extra für dich gemacht!“); ein Klick entfernt sie wieder."
+      },
+      {
+        "type": "technik",
+        "text": "Neue Endpunkte /api/ki/bericht und /api/ki/saetze mit eigenen Format-Stutzern (zu lange Satz-Vorschläge werden verworfen statt abgeschnitten, Dubletten und Wächter-Treffer gefiltert); damit ist KI-Etappe 7 komplett – alle 5 Funktionen sind freigeschaltet."
+      }
+    ]
+  },
+  {
     "id": "rn-033",
     "version": "0.24.0",
     "datum": "2026-10-08",

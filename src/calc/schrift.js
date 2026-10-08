@@ -56,9 +56,12 @@ function tagNr(heute) {
   return Number.isFinite(j) ? Math.floor(Date.UTC(j, (m || 1) - 1, t || 1) / 86400000) : 0;
 }
 
-/** Der Schreib-Satz des Tages aus der Übungs-Welt. */
-export function schreibSatz(heute, thema) {
-  const liste = SCHREIB_SAETZE[thema] || SCHREIB_SAETZE.alltag;
+/** Der Schreib-Satz des Tages: eigene (von den Eltern freigegebene)
+    Sätze haben Vorrang vor der Übungs-Welt. */
+export function schreibSatz(heute, thema, eigene) {
+  const liste = Array.isArray(eigene) && eigene.length
+    ? eigene
+    : SCHREIB_SAETZE[thema] || SCHREIB_SAETZE.alltag;
   const n = tagNr(heute);
   return liste[((n % liste.length) + liste.length) % liste.length];
 }

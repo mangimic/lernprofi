@@ -25,7 +25,8 @@ export default function Schrift() {
   // Schreibaufgabe (doppelt wirksam) – sonst rotiert die Übungs-Welt.
   const mut = data.lernstand.mutSatz;
   const mutHeute = mut.tag === heute;
-  const satz = mutHeute ? STARK_SAETZE[mut.idx] : schreibSatz(heute, data.einstellungen.uebungsThema);
+  const eigene = data.einstellungen.eigeneSaetze;
+  const satz = mutHeute ? STARK_SAETZE[mut.idx] : schreibSatz(heute, data.einstellungen.uebungsThema, eigene);
 
   const stand = data.lernstand.schrift || leererSchriftStand();
   const schonHeute = heuteGeschrieben(stand, heute);
@@ -85,9 +86,13 @@ export default function Schrift() {
         }}>
           ✍️ „{satz}“
         </p>
-        {mutHeute && (
+        {mutHeute ? (
           <p data-test="schrift-mut" style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
             🦁 Das ist dein Mut-Satz von heute – schreiben macht ihn doppelt stark!
+          </p>
+        ) : eigene.length > 0 && (
+          <p data-test="schrift-eigene" style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+            ✨ Dieser Satz wurde extra für dich gemacht!
           </p>
         )}
         <ol style={{ margin: "0 0 12px", paddingLeft: 22, lineHeight: 1.7 }}>
