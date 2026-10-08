@@ -127,5 +127,6 @@ Cloud-Konfiguration; verzichtet zunächst auf Geräte-Sync.
 | **Migration der Alt-App-Funktionen: vollständig** | ✅ |
 | 7a/7b – KI-Fundament (Worker-Route, harter Deckel, Eltern-Freigaben) + 🦁 Erklärer (v0.21) | ✅ komplett: Secret „lernprofiapi“ gesetzt |
 | 7c – 🖐️ Schreib-Training (Satz des Tages, Foto → Schrift-Blick, Schrift-Reise) (v0.23) | ✅ komplett |
-| 7d/7e – ✍️ Aufsatz-Feedback · 📊 Wochenbericht + 🔤 Übungssätze | ⏳ offen |
+| 7d – ✍️ Aufsatz-Check (Textart, Foto, 1 markierte Stelle) (v0.24) | ✅ komplett |
+| 7e – 📊 Wochenbericht + 🔤 Übungssätze | ⏳ offen |
 | 8 – Parallelbetrieb + Umstellung | ⏳ offen |
