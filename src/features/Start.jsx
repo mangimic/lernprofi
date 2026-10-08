@@ -5,7 +5,7 @@ import { zeitUebrigMin } from "../calc/elternWerkzeuge.js";
 import { EINSTUFUNG_FELDER } from "../calc/einstufung.js";
 import { STARK_SAETZE } from "../calc/aufgaben/stark.js";
 import {
-  wochenMontag, tagDatum, planFuerWoche, bausteinInfo, blockFertig,
+  wochenMontag, tagDatum, planFuerWoche, bausteinInfo, blockFertig, blockUnfertig,
   tagGeschafft, heuteBelohnt, belohnungEintragen, WOCHENTAGE, slotLabel, schulFaecher, istAusgefallen,
 } from "../calc/wochenplan.js";
 
@@ -38,7 +38,8 @@ export default function Start() {
     if (!block || block.fertig) return;
     let neuPlan = blockFertig(plan, id);
     const lernstand = { ...data.lernstand };
-    if (bausteinInfo(block.typ).lern) {
+    // Mission zählt nur beim ERSTEN Abhaken (nach „rückgängig" nicht nochmal).
+    if (bausteinInfo(block.typ).lern && !block.gezaehlt) {
       lernstand.lerntage = aufgabenZaehlen(lernstand.lerntage, heute, 1, missionsOpts(data.einstellungen, data.lernstand.tagesform, heute));
     }
     if (tagGeschafft(neuPlan, heuteIdx) && !heuteBelohnt(neuPlan, heute)) {
@@ -48,7 +49,7 @@ export default function Start() {
     lernstand.wochenplan = neuPlan;
     logChange({ ...data, lernstand }, "wochenplan", "neu", `Plan-Baustein „${block.typ}“ abgehakt`);
   };
-  const planZiel = { lernen: "ueben", schrift: "schrift", konz: "konz" };
+  const planZiel = { mathe: "ueben", deutsch: "ueben", lernen: "ueben", schrift: "schrift", konz: "konz" };
 
   const mutWaehlen = (idx) => {
     logChange(
@@ -134,7 +135,11 @@ export default function Start() {
                     </span>
                   </span>
                   {b.fertig ? (
-                    <span style={{ color: T.ok, fontWeight: 800 }}>✓</span>
+                    <button data-test="heute-unhaken" title="Doch nicht fertig? Haken entfernen"
+                      onClick={() => logChange({ ...data, lernstand: { ...data.lernstand, wochenplan: blockUnfertig(plan, b.id) } }, "wochenplan", "geaendert", "Haken entfernt")}
+                      style={{ background: "transparent", color: T.ok, fontWeight: 800, height: "auto", minHeight: 0, padding: "0 6px" }}>
+                      ✓ <span style={{ fontSize: "12px", fontWeight: 400, color: T.textLeise }}>↩︎</span>
+                    </button>
                   ) : (
                     <>
                       {ziel && (

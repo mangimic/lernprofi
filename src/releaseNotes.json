@@ -1,5 +1,25 @@
 [
   {
+    "id": "rn-046",
+    "version": "0.34.0",
+    "datum": "2026-10-08",
+    "titel": "Haken zurücknehmen, Mathe & Deutsch, eigene Termine",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "↩︎ Abhaken lässt sich rückgängig machen: In der Heute-Ansicht den grünen Haken antippen – der Baustein ist wieder offen. Schon vergebene Münzen und Missionen bleiben (und kommen beim erneuten Abhaken nicht doppelt)."
+      },
+      {
+        "type": "geaendert",
+        "text": "🔢📖 Die Üben-Box heißt jetzt ausgeschrieben „Mathe üben“ und „Deutsch üben“ – zwei eigene Bausteine statt eines unklaren Symbols. Alte Pläne mit dem bisherigen „Üben“-Baustein funktionieren weiter."
+      },
+      {
+        "type": "neu",
+        "text": "📝 Das Kind trägt Klassenarbeiten, Kompass-Tests und Wörter der Woche jetzt selbst im Plan ein: „Termin eintragen“ → Art, Wochentag und Fach wählen. Ein Tipp auf das Termin-Kärtchen zeigt es groß und kann es wieder entfernen. (Die Eltern-Verwaltung bleibt zusätzlich bestehen.)"
+      }
+    ]
+  },
+  {
     "id": "rn-045",
     "version": "0.33.0",
     "datum": "2026-10-08",

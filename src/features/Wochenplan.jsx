@@ -109,7 +109,7 @@ function StundenSlot({ tagIdx, slot, block, fest, wahlAktiv, aufTipp, aufWeg, au
   );
 }
 
-function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, ausfaelle, pruefung, wahlAktiv, schuleAuf, aufTipp, aufWeg, aufEdit, aufFest }) {
+function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, ausfaelle, pruefung, wahlAktiv, schuleAuf, aufTipp, aufWeg, aufEdit, aufFest, aufTermin }) {
   const { T } = useApp();
   const p = pruefung.tage[idx];
   const ampel = p.status === "voll" ? "🔴" : p.status === "einseitig" || p.status === "reihenfolge" ? "🟡" : p.lern + p.frei > 0 ? "🟢" : "";
@@ -141,9 +141,9 @@ function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, ausfaelle, pruefung
       {termine.map((t) => {
         const art = TERMIN_ARTEN[t.art];
         return (
-          <div key={t.id} data-test="termin-chip" style={{
+          <div key={t.id} data-test="termin-chip" onClick={() => aufTermin(t)} style={{
             background: "var(--warn-weich, #ffe9b3)", color: "#5b4300", borderRadius: 6,
-            padding: "3px 6px", fontSize: "12.5px", fontWeight: 700, marginBottom: 4,
+            padding: "3px 6px", fontSize: "12.5px", fontWeight: 700, marginBottom: 4, cursor: "pointer",
           }}>
             {art.emoji} {art.name}{t.fach ? ` ${t.fach}` : ""}
           </div>
@@ -184,6 +184,8 @@ export default function Wochenplan() {
   const [editor, setEditor] = useState(null); // ✏️ Baustein-Notiz: { id, notiz }
   const [festDialog, setFestDialog] = useState(null); // ❌ Ausfall-Frage für einen festen Termin
   const [verschieben, setVerschieben] = useState(null); // 📍 Baustein-Id, die ein neues Fenster sucht
+  const [kindTermin, setKindTermin] = useState(null); // 📝 Eingabe: { art, fach, tag }
+  const [terminDialog, setTerminDialog] = useState(null); // eingetragenen Termin ansehen/entfernen
   const montagAktiv = wochenMontag(heute);
   const aktiv = planFuerWoche(data.lernstand.wochenplan, montagAktiv);
   const naechsteW = woche === "naechste";
@@ -293,6 +295,10 @@ export default function Wochenplan() {
               ➡️ Für nächste Woche übernehmen
             </button>
           )}
+          <button data-test="kind-termin" onClick={() => setKindTermin({ art: "ka", fach: "", tag: null })}
+            style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: T.weich, color: T.text }}>
+            📝 Termin eintragen
+          </button>
           <button data-test="schule-zeigen" onClick={() => setSchuleAuf(!schuleAuf)}
             style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: schuleAuf ? T.primaer : T.weich, color: schuleAuf ? T.primaerText : T.text }}>
             🏫 Schulstunden
@@ -308,7 +314,7 @@ export default function Wochenplan() {
         </p>
         <DndContext sensors={sensoren} onDragEnd={ziehenEnde}>
           <div data-test="plan-palette" style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
-            {BAUSTEINE.map((b) => (
+            {BAUSTEINE.filter((b) => !b.verborgen).map((b) => (
               <PaletteBaustein key={b.typ} b={b} gewaehlt={wahl === b.typ} aufTipp={(typ) => setWahl(wahl === typ ? null : typ)} />
             ))}
           </div>
@@ -332,6 +338,7 @@ export default function Wochenplan() {
                 aufEdit={(b) => setEditor({ id: b.id, notiz: b.notiz || "" })}
                 ausfaelle={plan.ausfaelle}
                 aufFest={(f) => setFestDialog(f)}
+                aufTermin={(t) => setTerminDialog(t)}
                 aufZurueck={(f) => speichern(ausfallAufheben(plan, f.tag, f.beginn, f.dauer), `${f.name} ist doch wieder da`)}
                 termine={termineJe[i]} bloecke={plan.bloecke.filter((b) => b.tag === i)}
                 pruefung={pruefung} aufTipp={slotGetippt}
@@ -390,6 +397,81 @@ export default function Wochenplan() {
           );
         })()}
       </div>
+      {kindTermin && (
+        <div data-test="kind-termin-dialog" onClick={() => setKindTermin(null)} style={{
+          position: "fixed", inset: 0, zIndex: 900, background: "rgba(38, 50, 72, 0.94)",
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 18,
+        }}>
+          <div onClick={(ev) => ev.stopPropagation()} style={{ maxWidth: 420, width: "100%", background: T.karte, borderRadius: T.radius, padding: T.abstand }}>
+            <h3 style={{ margin: "0 0 8px" }}>📝 Termin eintragen</h3>
+            <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+              {Object.entries(TERMIN_ARTEN).map(([k, art]) => (
+                <button key={k} data-test={`kt-art-${k}`} onClick={() => setKindTermin({ ...kindTermin, art: k })}
+                  style={{ flex: 1, height: "auto", minHeight: 0, padding: "8px 4px", fontWeight: 700, fontSize: "var(--schrift-klein)",
+                    background: kindTermin.art === k ? T.primaer : T.weich, color: kindTermin.art === k ? T.primaerText : T.text }}>
+                  {art.emoji} {art.name}
+                </button>
+              ))}
+            </div>
+            <p style={{ margin: "0 0 4px", fontSize: "var(--schrift-klein)", color: T.textLeise }}>An welchem Tag? (Woche vom {plan.montag.split("-").reverse().join(".")})</p>
+            <div style={{ display: "flex", gap: 4, marginBottom: 8 }}>
+              {WOCHENTAGE.map((w, i) => (
+                <button key={i} data-test={`kt-tag-${i}`} onClick={() => setKindTermin({ ...kindTermin, tag: i })}
+                  style={{ flex: 1, height: "auto", minHeight: 0, padding: "8px 2px", fontWeight: 700,
+                    background: kindTermin.tag === i ? T.primaer : T.weich, color: kindTermin.tag === i ? T.primaerText : T.text }}>
+                  {w}<span style={{ display: "block", fontSize: "11px", fontWeight: 400 }}>{tagDatum(plan.montag, i).slice(8)}.</span>
+                </button>
+              ))}
+            </div>
+            <input data-test="kt-fach" type="text" maxLength={40} placeholder="Fach oder Thema (z. B. Mathe)"
+              value={kindTermin.fach} onChange={(e) => setKindTermin({ ...kindTermin, fach: e.target.value })}
+              style={{ width: "100%", boxSizing: "border-box", minHeight: "var(--touch)", borderRadius: T.radiusKlein, border: `1px solid ${T.rand}`, padding: "0 12px", background: T.grund, color: T.text }} />
+            <button data-test="kt-ok" disabled={kindTermin.tag === null}
+              onClick={() => {
+                const id = data.einstellungen.termine.reduce((m, t) => Math.max(m, t.id), 0) + 1;
+                const neu = [...data.einstellungen.termine, { id, tag: tagDatum(plan.montag, kindTermin.tag), art: kindTermin.art, fach: kindTermin.fach.trim() }].slice(0, 20);
+                logChange({ ...data, einstellungen: { ...data.einstellungen, termine: neu } }, "wochenplan", "neu", "Termin selbst eingetragen");
+                setKindTermin(null);
+              }}
+              style={{ width: "100%", marginTop: 10, background: T.primaer, color: T.primaerText, fontWeight: 700, opacity: kindTermin.tag === null ? 0.5 : 1 }}>
+              ✓ Eintragen
+            </button>
+            <button onClick={() => setKindTermin(null)}
+              style={{ width: "100%", marginTop: 6, background: "transparent", color: T.textLeise }}>
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      )}
+
+      {terminDialog && (
+        <div data-test="termin-dialog" onClick={() => setTerminDialog(null)} style={{
+          position: "fixed", inset: 0, zIndex: 900, background: "rgba(38, 50, 72, 0.94)",
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 18,
+        }}>
+          <div onClick={(ev) => ev.stopPropagation()} style={{ maxWidth: 380, width: "100%", background: T.karte, borderRadius: T.radius, padding: T.abstand }}>
+            <h3 style={{ margin: "0 0 2px" }}>
+              {TERMIN_ARTEN[terminDialog.art]?.emoji} {TERMIN_ARTEN[terminDialog.art]?.name}{terminDialog.fach ? ` · ${terminDialog.fach}` : ""}
+            </h3>
+            <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+              am {terminDialog.tag.split("-").reverse().join(".")}
+            </p>
+            <button data-test="termin-entfernen"
+              onClick={() => {
+                logChange({ ...data, einstellungen: { ...data.einstellungen, termine: data.einstellungen.termine.filter((x) => x.id !== terminDialog.id) } }, "wochenplan", "geaendert", "Termin entfernt");
+                setTerminDialog(null);
+              }}
+              style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
+              🗑️ Termin entfernen
+            </button>
+            <button onClick={() => setTerminDialog(null)}
+              style={{ width: "100%", marginTop: 6, background: "transparent", color: T.textLeise }}>
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      )}
+
       {festDialog && (
         <div data-test="fest-dialog" onClick={() => setFestDialog(null)} style={{
           position: "fixed", inset: 0, zIndex: 900, background: "rgba(38, 50, 72, 0.94)",

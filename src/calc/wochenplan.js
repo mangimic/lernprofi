@@ -14,7 +14,11 @@ export const WOCHENTAGE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
 /** Bausteine der Palette. lern=true → zählt als 10-Minuten-Lernbox. */
 export const BAUSTEINE = [
-  { typ: "lernen", name: "Üben", emoji: "✏️", lern: true },
+  { typ: "mathe", name: "Mathe üben", emoji: "🔢", lern: true },
+  { typ: "deutsch", name: "Deutsch üben", emoji: "📖", lern: true },
+  // Alt-Typ aus früheren Plänen/Routinen – bleibt gültig, taucht aber
+  // nicht mehr in der Palette auf (verborgen).
+  { typ: "lernen", name: "Üben", emoji: "✏️", lern: true, verborgen: true },
   { typ: "schrift", name: "Schreiben", emoji: "🖐️", lern: true },
   { typ: "konz", name: "Konzentration", emoji: "🧠", lern: true },
   // Hausaufgaben: Pflicht-Lernzeit (zählt beim Wächter mit), aber keine 10-Minuten-Box.
@@ -272,7 +276,14 @@ export function blockNotiz(plan, id, notiz) {
 
 /** Haken dran: Baustein ist geschafft (bleibt im Plan, wird durchgestrichen). */
 export function blockFertig(plan, id) {
-  return { ...plan, bloecke: plan.bloecke.map((b) => (b.id === id ? { ...b, fertig: true } : b)) };
+  return { ...plan, bloecke: plan.bloecke.map((b) => (b.id === id ? { ...b, fertig: true, gezaehlt: true } : b)) };
+}
+
+/** Haken wieder weg (Verklickt? Doch nicht fertig?). Der gezaehlt-Merker
+    bleibt: Die Mission/Münze wurde schon vergeben und kommt beim erneuten
+    Abhaken nicht doppelt. */
+export function blockUnfertig(plan, id) {
+  return { ...plan, bloecke: plan.bloecke.map((b) => (b.id === id ? { ...b, fertig: false } : b)) };
 }
 
 /** Alle Bausteine eines Tages geschafft (und es gibt welche)? */
@@ -325,7 +336,7 @@ export function planPruefung(plan, termine, zeitLimit, feste = []) {
     const frei = am.filter((b) => { const i = bausteinInfo(b.typ); return !i.lern && i.ausgleich !== false; }).length
       + (feste || []).filter((f) => f.tag === i && f.aktiv && !istAusgefallen(plan, i, f.beginn)).length;
     // 🥁📚 Familienregel: VOR dem Üben kommen Hausaufgaben und Schlagzeug.
-    const uebenSlots = am.filter((b) => ["lernen", "schrift", "konz"].includes(b.typ)).map((b) => b.slot);
+    const uebenSlots = am.filter((b) => ["mathe", "deutsch", "lernen", "schrift", "konz"].includes(b.typ)).map((b) => b.slot);
     const ersterUeben = uebenSlots.length ? Math.min(...uebenSlots) : null;
     let reihenfolge = "";
     if (ersterUeben !== null) {

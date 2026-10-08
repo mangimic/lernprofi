@@ -965,10 +965,10 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
     await expect(page.getByTestId("plan-wahl-hinweis")).toBeVisible();
     await page.getByTestId(`slot-${tag}-${slot}`).click();
   };
-  await bausteinZu("lernen", 5, 660);
-  await bausteinZu("lernen", 5, 690);
+  await bausteinZu("mathe", 5, 660);
+  await bausteinZu("mathe", 5, 690);
   await expect(page.getByTestId("plan-block")).toHaveCount(2);
-  await bausteinZu("lernen", 5, 720);
+  await bausteinZu("mathe", 5, 720);
   await expect(page.getByTestId("ampel-5")).toHaveText("🔴");
   await expect(page.getByTestId("tag-hinweis-5")).toContainText("Schieb");
 
@@ -983,10 +983,22 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await expect(page.getByTestId("ampel-5")).toHaveText("🟢");
 
   // Übungstage Di + Mi (freie Fenster neben den festen Terminen) → Wächter zufrieden
-  await bausteinZu("lernen", 1, 900);
-  await bausteinZu("lernen", 2, 840);
+  await bausteinZu("mathe", 1, 900);
+  await bausteinZu("deutsch", 2, 840);
   await expect(page.getByTestId("plan-hinweise")).toHaveCount(0);
   await expect(page.getByTestId("plan-ok")).toBeVisible();
+
+  // 📝 Felix trägt selbst einen Termin ein (Wörter der Woche, Montag) – und entfernt ihn wieder
+  await page.getByTestId("kind-termin").click();
+  await page.getByTestId("kt-art-wdw").click();
+  await page.getByTestId("kt-tag-0").click();
+  await page.getByTestId("kt-fach").fill("Herbstwörter");
+  await page.getByTestId("kt-ok").click();
+  await expect(page.getByTestId("tag-0")).toContainText("Wörter der Woche Herbstwörter");
+  await page.getByTestId("tag-0").getByTestId("termin-chip").click();
+  await expect(page.getByTestId("termin-dialog")).toContainText("Herbstwörter");
+  await page.getByTestId("termin-entfernen").click();
+  await expect(page.getByTestId("tag-0").getByTestId("termin-chip")).toHaveCount(0);
 
   // ❌ Ausfall: fester Termin antippen → fällt diese Woche aus → Fenster wird frei → ↩️ holt ihn zurück
   await page.getByTestId("fest-1-1020").click();
@@ -1063,6 +1075,12 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
     await page.getByTestId("heute-haken").first().click();
   }
   await expect(page.getByTestId("heute-geschafft")).toContainText("Münze");
+  await expect(page.getByTestId("tages-stand")).toContainText("🪙 1 Münze");
+  // ↩︎ Abhaken rückgängig: Haken weg, „geschafft" verschwindet – erneutes Haken gibt KEINE zweite Münze/Mission
+  await page.getByTestId("heute-unhaken").first().click();
+  await expect(page.getByTestId("heute-geschafft")).toHaveCount(0);
+  await page.getByTestId("heute-haken").first().click();
+  await expect(page.getByTestId("heute-geschafft")).toBeVisible();
   await expect(page.getByTestId("tages-stand")).toContainText("🪙 1 Münze");
   await page.getByTestId("nav-plan").click();
   await expect(page.getByTestId("plan-bilanz")).toBeVisible();

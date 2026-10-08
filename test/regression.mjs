@@ -36,6 +36,25 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.34: Haken zurück, Mathe/Deutsch, Kind-Termine ----------
+console.log("== v0.34: Haken zurück + eigene Termine ==");
+test("v0.34: APP_VERSION mindestens 0.34.0", versionMindestens("0.34.0"));
+test("v0.34: blockUnfertig mit gezaehlt-Merker; Mathe/Deutsch ausgeschrieben, lernen verborgen", (() => {
+  const w = quelle("src/calc/wochenplan.js");
+  return w.includes("blockUnfertig") && w.includes("gezaehlt: true")
+    && w.includes('typ: "mathe", name: "Mathe üben"') && w.includes('typ: "deutsch", name: "Deutsch üben"')
+    && w.includes("verborgen: true")
+    && quelle("src/features/Start.jsx").includes('data-test="heute-unhaken"')
+    && quelle("src/features/Start.jsx").includes("!block.gezaehlt")
+    && releaseNoteVorhanden("rn-046");
+})());
+test("v0.34: Kind trägt Termine selbst ein und entfernt sie per Kärtchen-Dialog", (() => {
+  const f = quelle("src/features/Wochenplan.jsx");
+  return f.includes('data-test="kind-termin"') && f.includes("kt-art-") && f.includes("kt-tag-")
+    && f.includes('data-test="kt-ok"') && f.includes('data-test="termin-dialog"')
+    && f.includes('data-test="termin-entfernen"') && f.includes("verborgen");
+})());
+
 // ---------- v0.33: Verschieben, Familienregel, Ausfall-Liste, Vorlage ----------
 console.log("== v0.33: Verschieben + Familienregel ==");
 test("v0.33: APP_VERSION mindestens 0.33.0", versionMindestens("0.33.0"));

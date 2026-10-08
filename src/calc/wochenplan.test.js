@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   BAUSTEINE, TERMIN_ARTEN, FESTE_TERMINE_STANDARD, festerTermin, blockNotiz, schulZeilen,
-  istAusgefallen, ausfallSetzen, ausfallAufheben, blockVerschieben, wocheKopieren,
+  istAusgefallen, ausfallSetzen, ausfallAufheben, blockVerschieben, wocheKopieren, blockUnfertig,
   kalenderWoche, routineAusPlan, routineAnwenden, schulStunden, schulFaecher,
   wochenMontag, tagDatum, leererPlan, planFuerWoche,
   blockHinzu, blockWeg, blockFertig, tagGeschafft, heuteBelohnt, belohnungEintragen,
@@ -160,6 +160,10 @@ describe("wochenplan – Wochen-Rechnung", () => {
     expect(tagGeschafft(p, 3)).toBe(false);
     p = blockFertig(p, 2);
     expect(tagGeschafft(p, 3)).toBe(true);
+    // ↩︎ Haken rückgängig: fertig weg, gezaehlt-Merker bleibt (keine Doppel-Mission)
+    const zurueckgenommen = blockUnfertig(p, 2);
+    expect(zurueckgenommen.bloecke[1]).toMatchObject({ fertig: false, gezaehlt: true });
+    expect(tagGeschafft(zurueckgenommen, 3)).toBe(false);
     expect(wochenBilanz(p)).toEqual({ gesamt: 2, fertig: 2, lernFertig: 1, alles: true });
     // Belohnung idempotent
     expect(heuteBelohnt(p, "2026-10-08")).toBe(false);
@@ -273,7 +277,8 @@ describe("wochenplan – Wochen-Rechnung", () => {
     expect(je[6].length).toBe(1);
     expect(je.flat().length).toBe(2);
     expect(Object.keys(TERMIN_ARTEN)).toEqual(["ka", "kompass", "wdw"]);
-    expect(BAUSTEINE.filter((b) => b.lern).map((b) => b.typ)).toEqual(["lernen", "schrift", "konz", "hausaufgaben"]);
+    expect(BAUSTEINE.filter((b) => b.lern).map((b) => b.typ)).toEqual(["mathe", "deutsch", "lernen", "schrift", "konz", "hausaufgaben"]);
+    expect(BAUSTEINE.find((b) => b.typ === "lernen").verborgen).toBe(true); // Alt-Typ nur noch intern
     expect(bausteinInfo("unbekannt").lern).toBe(false);
   });
 });
