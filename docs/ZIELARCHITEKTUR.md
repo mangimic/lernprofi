@@ -119,12 +119,12 @@ Cloud-Konfiguration; verzichtet zunächst auf Geräte-Sync.
 | 3 – Üben: Mathe, Sachkunde, Deutsch (11 Bereiche), Stark | ✅ abgeschlossen (v0.7) |
 | 4 – Elternbereich (Profil, Ziel, Stufen, Übersicht, Daten) | ✅ abgeschlossen (v0.7) |
 | 5 – Datenübernahme-Konverter (Import-Knopf + Bericht) | ✅ Code fertig; Durchführung bewusst verschoben |
-| 6 – Sync (Worker-API + KV, Eltern-Karte ☁️) | ✅ Code fertig; beim User offen: KV-Namespace + Access |
+| 6 – Sync (Worker-API + KV, Eltern-Karte ☁️) | ✅ komplett: KV verbunden, Cloudflare Access aktiv |
 | Spiele-Migration: See-Abenteuer (v0.9), Blockwelt (v0.11), Konzentration + Mut-Satz (v0.12), Tennis + Fußball (v0.13), Schach (v0.14) | ✅ abgeschlossen |
 | Satzglieder umstellen + Zeit/Ort (v0.15), Vorgangsbeschreibung (v0.16) | ✅ abgeschlossen |
 | Eltern-Werkzeuge: Zeitlimit, Spiele-Schalter, Münz-Freischaltung, Gesprächsimpulse (v0.17) | ✅ abgeschlossen |
 | Tagesform-Frage + Fokus-Paket (Bewegungspausen, Fokus-Serie) (v0.18) | ✅ abgeschlossen |
 | **Migration der Alt-App-Funktionen: vollständig** | ✅ |
-| 7a/7b – KI-Fundament (Worker-Route, harter Deckel, Eltern-Freigaben) + 🦁 Erklärer (v0.21) | ✅ abgeschlossen; beim User offen: `wrangler secret put ANTHROPIC_API_KEY` |
+| 7a/7b – KI-Fundament (Worker-Route, harter Deckel, Eltern-Freigaben) + 🦁 Erklärer (v0.21) | ✅ komplett: Secret „lernprofiapi“ gesetzt |
 | 7c–7e – 🖐️ Schreib-Training · ✍️ Aufsatz-Feedback · 📊 Wochenbericht + 🔤 Übungssätze | ⏳ offen |
 | 8 – Parallelbetrieb + Umstellung | ⏳ offen |
