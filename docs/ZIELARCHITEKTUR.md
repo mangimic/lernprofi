@@ -126,5 +126,6 @@ Cloud-Konfiguration; verzichtet zunächst auf Geräte-Sync.
 | Tagesform-Frage + Fokus-Paket (Bewegungspausen, Fokus-Serie) (v0.18) | ✅ abgeschlossen |
 | **Migration der Alt-App-Funktionen: vollständig** | ✅ |
 | 7a/7b – KI-Fundament (Worker-Route, harter Deckel, Eltern-Freigaben) + 🦁 Erklärer (v0.21) | ✅ komplett: Secret „lernprofiapi“ gesetzt |
-| 7c–7e – 🖐️ Schreib-Training · ✍️ Aufsatz-Feedback · 📊 Wochenbericht + 🔤 Übungssätze | ⏳ offen |
+| 7c – 🖐️ Schreib-Training (Satz des Tages, Foto → Schrift-Blick, Schrift-Reise) (v0.23) | ✅ komplett |
+| 7d/7e – ✍️ Aufsatz-Feedback · 📊 Wochenbericht + 🔤 Übungssätze | ⏳ offen |
 | 8 – Parallelbetrieb + Umstellung | ⏳ offen |
