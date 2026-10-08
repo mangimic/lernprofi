@@ -36,6 +36,15 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.22.4: Erklärer-Antworten repariert ----------
+console.log("== v0.22.4: Erklärer-Antworten repariert ==");
+test("v0.22.4: APP_VERSION mindestens 0.22.4", versionMindestens("0.22.4"));
+test("v0.22.4: kein Vordenken bei Kurzantworten + Wort-Wächter mit Wortgrenzen", (() => {
+  const k = quelle("server/_lib/kiApi.js");
+  return k.includes('thinking: { type: "disabled" }') && k.includes("maxTokens: 500")
+    && k.includes("VERBOTEN_MUSTER") && k.includes("BEISPIEL");
+})());
+
 // ---------- v0.22.3: klare Schlüssel-Meldung ----------
 console.log("== v0.22.3: klare Schlüssel-Meldung ==");
 test("v0.22.3: APP_VERSION mindestens 0.22.3", versionMindestens("0.22.3"));

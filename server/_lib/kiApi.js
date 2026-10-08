@@ -39,7 +39,9 @@ export const PREISE_USD_MTOK = {
 export const MAX_BLASEN = 2;
 export const MAX_WOERTER = 12;
 
-const VERBOTEN = ["adhs", "störung", "stoerung", "diagnose", "defizit", "unmotiviert", "versager", "dumm", "faul", "zappel", "krank"];
+// Diagnose-/Druck-Wörter: immer verboten als Teilwort; Alltagswörter wie
+// dumm/faul/krank nur als GANZES Wort (sonst träfe es „Krankenwagen").
+const VERBOTEN_MUSTER = /\b(dumm|faul|krank)\b|adhs|störung|stoerung|diagnose|defizit|unmotiviert|versager|zappel/i;
 
 function json(status, body) {
   return new Response(JSON.stringify(body), {
@@ -65,8 +67,7 @@ export const mikroZuCent = (mikro) => Math.round(mikro / 100) / 100; // 1 Cent =
 
 /** Wort-Wächter: dieselbe Sprachregel wie im Rest der App. */
 export function wortProblem(text) {
-  const t = String(text || "").toLowerCase();
-  return VERBOTEN.some((w) => t.includes(w));
+  return VERBOTEN_MUSTER.test(String(text || ""));
 }
 
 function woerterKuerzen(satz, max = MAX_WOERTER) {
@@ -102,7 +103,9 @@ REGELN (alle verbindlich):
 - Nutze ein Bild aus der Kinderwelt: Fußball, Angeln, Tennis, Pausenhof oder Familie. Gern 1-2 Emojis.
 - "mach" ist eine kleine Mach-Aufgabe mit Körper oder Stimme (laut sagen, mit dem Finger zeigen, in die Luft schreiben) – höchstens 14 Wörter.
 - Verrate NIEMALS die Lösung und nenne sie nicht wörtlich.
-- Immer freundlich und bestärkend. Niemals Diagnose-Wörter, niemals Druck, keine Noten.`;
+- Immer freundlich und bestärkend. Niemals Diagnose-Wörter, niemals Druck, keine Noten.
+BEISPIEL (für eine Dativ-Aufgabe):
+{"blasen":["⚽ Beim Training gibst du den Ball – aber WEM?","Die Frage „wem?“ ist dein Spürhund für diesen Fall."],"mach":"Frag LAUT: Wem gibt er den Ball? Zeig auf die Antwort!"}`;
 
 async function claudeAnfragen(env, { modell, system, prompt, maxTokens }) {
   const antwort = await fetch(ANTHROPIC_URL, {
@@ -115,6 +118,9 @@ async function claudeAnfragen(env, { modell, system, prompt, maxTokens }) {
     body: JSON.stringify({
       model: modell,
       max_tokens: maxTokens,
+      // Kein internes Vordenken: Bei so kleinen Antworten frisst es sonst
+      // das Token-Budget, und es kommt gar kein Text an (→ Ersatztext).
+      thinking: { type: "disabled" },
       system,
       messages: [{ role: "user", content: prompt }],
     }),
@@ -197,7 +203,7 @@ export async function kiApi(request, env, jetzt = new Date()) {
     const modell = KI_MODELLE.erklaeren;
     let roh;
     try {
-      roh = await claudeAnfragen(env, { modell, system: LEO_SYSTEM, prompt: teile, maxTokens: 300 });
+      roh = await claudeAnfragen(env, { modell, system: LEO_SYSTEM, prompt: teile, maxTokens: 500 });
     } catch {
       return json(502, { grund: "ki-fehler", fehler: "Die KI hat gerade nicht geantwortet – später nochmal." });
     }

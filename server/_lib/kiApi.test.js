@@ -61,6 +61,8 @@ describe("kiApi – reine Helfer", () => {
   it("Wort-Wächter ersetzt Antworten mit Diagnose-/Druck-Wörtern komplett", () => {
     expect(wortProblem("Du bist doch nicht dumm!")).toBe(true);
     expect(wortProblem("Frag dich: wem gehört der Ball?")).toBe(false);
+    expect(wortProblem("Der Krankenwagen kommt schnell.")).toBe(false); // ganzes Wort zählt, Teilwort nicht
+    expect(wortProblem("Sei nicht so faul.")).toBe(true);
     const s = antwortZurechtstutzen('{"blasen":["Das liegt an deiner Störung."],"mach":"Üb halt mehr."}');
     expect(s.ersetzt).toBe(true);
     expect(s.blasen.join(" ")).not.toMatch(/Störung/);
@@ -124,6 +126,8 @@ describe("kiApi – Routen", () => {
     expect(init.headers["x-api-key"]).toBe("test-schluessel");
     const body = JSON.parse(init.body);
     expect(body.model).toBe("claude-haiku-5-5");
+    expect(body.thinking).toEqual({ type: "disabled" }); // sonst frisst Vordenken das Budget
+    expect(body.max_tokens).toBeGreaterThanOrEqual(400);
     expect(body.messages[0].content).toContain("NICHT verraten");
     // Status zeigt den Posten
     const s = await (await kiApi(anfrage("GET", "/api/ki/status"), env, JETZT)).json();

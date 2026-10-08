@@ -1,5 +1,15 @@
 [
   {
+    "id": "rn-029",
+    "version": "0.22.4",
+    "datum": "2026-10-08",
+    "titel": "Leo antwortet jetzt wirklich",
+    "entries": [
+      { "type": "fix", "text": "🦁 Der Erklärer lieferte oft nur den Notfall-Ersatztext: Das interne Vordenken des KI-Modells fraß das knappe Antwort-Budget auf, bevor Text ankam. Jetzt ist das Vordenken für diese Kurzantworten abgeschaltet und das Budget größer – Leo antwortet mit echten Erklärungen." },
+      { "type": "verbessert", "text": "Der Leo-Prompt enthält ein Musterbeispiel (bessere, konkretere Erklärungen), und der Wort-Wächter blockt Alltagswörter wie „krank“ nur noch als ganzes Wort – „Krankenwagen“ in einer Sachkunde-Erklärung ist kein Fehlalarm mehr." }
+    ]
+  },
+  {
     "id": "rn-028",
     "version": "0.22.3",
     "datum": "2026-10-08",
