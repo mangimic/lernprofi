@@ -1,5 +1,33 @@
 [
   {
+    "id": "rn-045",
+    "version": "0.33.0",
+    "datum": "2026-10-08",
+    "titel": "Verschieben, Familienregel, Ausfall-Liste, Wochen-Vorlage",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "📍 Bausteine lassen sich jetzt IM Plan umziehen: einfach in ein anderes freies Fenster ziehen – oder antippen → „Verschieben“ → Ziel-Fenster antippen."
+      },
+      {
+        "type": "neu",
+        "text": "🥁📚 Familienregel im Wächter: Vor dem Üben gehören Hausaufgaben UND Schlagzeug in den Plan (die feste Schlagzeug-Stunde am Dienstag zählt mit). Fehlt etwas davor, zeigt der Tag eine gelbe Ampel mit Hinweis. Hausaufgaben verdrängen das Üben dabei nicht mehr – gegen das Tages-Limit zählen nur die 10-Minuten-Boxen."
+      },
+      {
+        "type": "neu",
+        "text": "📋 „Für nächste Woche übernehmen“: kopiert die ganze Woche als Vorlage in die Folgewoche (nur in freie Fenster, Notizen wandern mit, Haken nicht) – perfekt als Start fürs Sonntags-Gespräch, zusätzlich zur Routine."
+      },
+      {
+        "type": "geaendert",
+        "text": "❌ Ausgefallene Termine stehen jetzt als Liste UNTER dem Board („Diese Woche fällt aus: …“ mit ↩️ zum Zurückholen) – die freien Fenster im Plan sehen aus wie jedes andere freie Fenster."
+      },
+      {
+        "type": "fix",
+        "text": "📱 Die untere Leiste blendet sich jetzt zuverlässig beim Scrollen aus (robusterer Scroll-Fühler, der auch innere Bereiche und alle Browser abdeckt) – mit automatischem Test, der das echte Scrollverhalten prüft."
+      }
+    ]
+  },
+  {
     "id": "rn-044",
     "version": "0.32.0",
     "datum": "2026-10-08",

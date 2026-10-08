@@ -6,7 +6,7 @@ import {
   wochenMontag, tagDatum, planFuerWoche, leererPlan, blockHinzu, blockWeg, slotBelegt,
   termineDerWoche, planPruefung, wochenBilanz, festerTermin, SCHULE,
   kalenderWoche, routineAusPlan, routineAnwenden, schulZeilen, blockNotiz,
-  istAusgefallen, ausfallSetzen, ausfallAufheben,
+  istAusgefallen, ausfallSetzen, ausfallAufheben, blockVerschieben, wocheKopieren,
 } from "../calc/wochenplan.js";
 
 /* 🗓️ MEIN WOCHENPLAN (Etappe 9): Felix setzt sein Pensum selbst.
@@ -38,9 +38,11 @@ function PaletteBaustein({ b, gewaehlt, aufTipp }) {
 
 /* Eine Stunde (14-19 Uhr) an einem Tag: leer = Ablagefläche (tippen
    oder hineinziehen), belegt = Baustein-Kärtchen mit ✖. */
-function StundenSlot({ tagIdx, slot, block, fest, ausfall, wahlAktiv, aufTipp, aufWeg, aufEdit, aufFest, aufZurueck }) {
+function StundenSlot({ tagIdx, slot, block, fest, wahlAktiv, aufTipp, aufWeg, aufEdit, aufFest }) {
   const { T } = useApp();
   const { setNodeRef, isOver } = useDroppable({ id: `slot-${tagIdx}-${slot}`, disabled: !!fest });
+  // Platzierte Bausteine sind selbst ziehbar (umplanen ohne Löschen).
+  const zieh = useDraggable({ id: `block-${block?.id ?? `leer-${tagIdx}-${slot}`}`, disabled: !block });
   const info = block ? bausteinInfo(block.typ) : null;
   if (fest) {
     const fortsetzung = fest.beginn !== slot;
@@ -82,10 +84,15 @@ function StundenSlot({ tagIdx, slot, block, fest, ausfall, wahlAktiv, aufTipp, a
       <span style={{ fontSize: "11px", fontWeight: 700, minWidth: 34, opacity: 0.8 }}>{uhr(slot)}</span>
       {block ? (
         <>
-          <span data-test="plan-block" data-typ={block.typ} style={{
-            flex: 1, fontWeight: 700, fontSize: "var(--schrift-klein)",
-            textDecoration: block.fertig ? "line-through" : "none",
-          }}>
+          <span data-test="plan-block" data-typ={block.typ}
+            ref={zieh.setNodeRef} {...zieh.listeners} {...zieh.attributes}
+            style={{
+              flex: 1, fontWeight: 700, fontSize: "var(--schrift-klein)",
+              textDecoration: block.fertig ? "line-through" : "none",
+              touchAction: "none", position: "relative",
+              opacity: zieh.isDragging ? 0.4 : 1, zIndex: zieh.isDragging ? 50 : undefined,
+              transform: zieh.transform ? `translate(${zieh.transform.x}px, ${zieh.transform.y}px)` : undefined,
+            }}>
             {block.fertig ? "✓ " : ""}{info.emoji} {info.name}
             {block.notiz && <span style={{ fontWeight: 400, opacity: 0.85 }}> · {block.notiz}</span>}
           </span>
@@ -95,19 +102,6 @@ function StundenSlot({ tagIdx, slot, block, fest, ausfall, wahlAktiv, aufTipp, a
             ✖
           </button>
         </>
-      ) : ausfall ? (
-        <>
-          <span style={{ flex: 1, fontSize: "11.5px" }}>
-            frei · <s style={{ opacity: 0.75, color: "var(--text-leise)" }}>{ausfall.fest.emoji} {ausfall.fest.name} fällt aus</s>
-          </span>
-          {ausfall.istBeginn && (
-            <button data-test="ausfall-zurueck" onClick={(ev) => { ev.stopPropagation(); aufZurueck(ausfall.fest); }}
-              aria-label="Termin wieder einplanen" title="Doch nicht ausgefallen"
-              style={{ background: "transparent", color: "inherit", padding: 0, minHeight: 0, height: "auto", fontSize: 14 }}>
-              ↩️
-            </button>
-          )}
-        </>
       ) : (
         <span style={{ fontSize: "11.5px" }}>frei</span>
       )}
@@ -115,10 +109,10 @@ function StundenSlot({ tagIdx, slot, block, fest, ausfall, wahlAktiv, aufTipp, a
   );
 }
 
-function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, ausfaelle, pruefung, wahlAktiv, schuleAuf, aufTipp, aufWeg, aufEdit, aufFest, aufZurueck }) {
+function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, ausfaelle, pruefung, wahlAktiv, schuleAuf, aufTipp, aufWeg, aufEdit, aufFest }) {
   const { T } = useApp();
   const p = pruefung.tage[idx];
-  const ampel = p.status === "voll" ? "🔴" : p.status === "einseitig" ? "🟡" : p.lern + p.frei > 0 ? "🟢" : "";
+  const ampel = p.status === "voll" ? "🔴" : p.status === "einseitig" || p.status === "reihenfolge" ? "🟡" : p.lern + p.frei > 0 ? "🟢" : "";
   const schule = SCHULE.tage.includes(idx);
   return (
     <div data-test={`tag-${idx}`} style={{
@@ -161,9 +155,8 @@ function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, ausfaelle, pruefung
         return (
           <StundenSlot key={s} tagIdx={idx} slot={s} wahlAktiv={wahlAktiv}
             fest={weg ? null : f}
-            ausfall={weg ? { fest: f, istBeginn: f.beginn === s } : null}
             block={bloecke.find((b) => b.slot === s)}
-            aufTipp={aufTipp} aufWeg={aufWeg} aufEdit={aufEdit} aufFest={aufFest} aufZurueck={aufZurueck} />
+            aufTipp={aufTipp} aufWeg={aufWeg} aufEdit={aufEdit} aufFest={aufFest} />
         );
       })}
       {p.lern > 0 && (
@@ -190,6 +183,7 @@ export default function Wochenplan() {
   const [schuleAuf, setSchuleAuf] = useState(false); // 🏫 Vormittags-Stunden ein-/ausklappen
   const [editor, setEditor] = useState(null); // ✏️ Baustein-Notiz: { id, notiz }
   const [festDialog, setFestDialog] = useState(null); // ❌ Ausfall-Frage für einen festen Termin
+  const [verschieben, setVerschieben] = useState(null); // 📍 Baustein-Id, die ein neues Fenster sucht
   const montagAktiv = wochenMontag(heute);
   const aktiv = planFuerWoche(data.lernstand.wochenplan, montagAktiv);
   const naechsteW = woche === "naechste";
@@ -224,6 +218,11 @@ export default function Wochenplan() {
   const slotGetippt = (tagIdx, slot) => {
     const f = festerTermin(feste, tagIdx, slot);
     if (f && !istAusgefallen(plan, tagIdx, f.beginn)) return; // feste Stunde ist tabu – außer sie fällt aus
+    if (verschieben) {
+      const neu = blockVerschieben(plan, verschieben, tagIdx, slot);
+      if (neu !== plan) { speichern(neu, "Baustein verschoben"); setVerschieben(null); }
+      return;
+    }
     if (wahl && !slotBelegt(plan, tagIdx, slot)) { hinzu(tagIdx, slot, wahl); setWahl(null); }
   };
   const routineSpeichern = () => {
@@ -238,9 +237,16 @@ export default function Wochenplan() {
   };
   const ziehenEnde = ({ active, over }) => {
     if (!over) return;
-    const typ = String(active.id).replace("baustein-", "");
-    const [, tagIdx, slot] = String(over.id).split("-").map((x) => parseInt(x, 10) ?? x);
-    if (Number.isInteger(tagIdx) && Number.isInteger(slot)) hinzu(tagIdx, slot, typ);
+    const [, tagIdx, slot] = String(over.id).split("-").map((x) => parseInt(x, 10));
+    if (!Number.isInteger(tagIdx) || !Number.isInteger(slot)) return;
+    const aktivId = String(active.id);
+    if (aktivId.startsWith("baustein-")) {
+      hinzu(tagIdx, slot, aktivId.replace("baustein-", ""));
+    } else if (aktivId.startsWith("block-")) {
+      const id = parseInt(aktivId.replace("block-", ""), 10);
+      const neu = blockVerschieben(plan, id, tagIdx, slot);
+      if (neu !== plan) speichern(neu, "Baustein verschoben");
+    }
   };
 
   return (
@@ -269,6 +275,24 @@ export default function Wochenplan() {
             style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: T.weich, color: T.text }}>
             💾 Als Routine speichern
           </button>
+          {!naechsteW && plan.bloecke.length > 0 && (
+            <button data-test="plan-kopieren"
+              onClick={() => {
+                const zielMontag = tagDatum(montagAktiv, 7);
+                const ziel = aktiv.naechste?.montag === zielMontag
+                  ? { montag: zielMontag, bloecke: aktiv.naechste.bloecke, belohnt: [], naechste: null, ausfaelle: aktiv.naechste.ausfaelle || [] }
+                  : leererPlan(zielMontag);
+                const neu = wocheKopieren(ziel, plan);
+                logChange(
+                  { ...data, lernstand: { ...data.lernstand, wochenplan: { ...aktiv, naechste: { montag: zielMontag, bloecke: neu.bloecke, ausfaelle: ziel.ausfaelle || [] } } } },
+                  "wochenplan", "geaendert", "Woche als Vorlage in die nächste Woche kopiert",
+                );
+                setWoche("naechste");
+              }}
+              style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: T.weich, color: T.text }}>
+              ➡️ Für nächste Woche übernehmen
+            </button>
+          )}
           <button data-test="schule-zeigen" onClick={() => setSchuleAuf(!schuleAuf)}
             style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: schuleAuf ? T.primaer : T.weich, color: schuleAuf ? T.primaerText : T.text }}>
             🏫 Schulstunden
@@ -288,6 +312,15 @@ export default function Wochenplan() {
               <PaletteBaustein key={b.typ} b={b} gewaehlt={wahl === b.typ} aufTipp={(typ) => setWahl(wahl === typ ? null : typ)} />
             ))}
           </div>
+          {verschieben && (
+            <p data-test="verschieb-hinweis" style={{ margin: "0 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+              📍 Tipp auf ein freies Fenster – dahin wandert der Baustein.{" "}
+              <button data-test="verschieb-abbrechen" onClick={() => setVerschieben(null)}
+                style={{ background: "transparent", color: T.textLeise, padding: 0, minHeight: 0, height: "auto", textDecoration: "underline" }}>
+                Abbrechen
+              </button>
+            </p>
+          )}
           {wahl && (
             <p data-test="plan-wahl-hinweis" style={{ margin: "0 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
               👆 Und jetzt: Tipp auf eine freie Stunde, in der „{bausteinInfo(wahl).name}“ stattfinden soll!
@@ -306,6 +339,28 @@ export default function Wochenplan() {
             ))}
           </div>
         </DndContext>
+        {(plan.ausfaelle || []).length > 0 && (
+          <div data-test="ausfall-liste" style={{ marginTop: 10, background: "color-mix(in srgb, var(--warn) 10%, var(--karte))", borderRadius: T.radiusKlein, padding: "8px 12px" }}>
+            <b style={{ fontSize: "var(--schrift-klein)" }}>Diese Woche fällt aus:</b>
+            {plan.ausfaelle.map((a, i) => {
+              const f = festerTermin(feste, a.tag, a.beginn);
+              return (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4, fontSize: "var(--schrift-klein)" }}>
+                  <span style={{ flex: 1 }}>
+                    <s>{f ? `${f.emoji} ${f.name}` : "Termin"}</s> · {WOCHENTAGE[a.tag]} {uhr(a.beginn)} Uhr
+                  </span>
+                  {f && (
+                    <button data-test="ausfall-zurueck"
+                      onClick={() => speichern(ausfallAufheben(plan, f.tag, f.beginn, f.dauer), `${f.name} ist doch wieder da`)}
+                      style={{ background: "transparent", color: T.text, padding: 0, minHeight: 0, height: "auto" }}>
+                      ↩️ doch wieder da
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
         <p data-test="plan-legende" style={{ margin: "8px 0 0", color: T.textLeise, fontSize: "12.5px" }}>
           <span style={{ background: "color-mix(in srgb, var(--ok) 7%, var(--karte))", border: "1.5px dashed color-mix(in srgb, var(--ok) 40%, var(--karte))", borderRadius: 4, padding: "1px 7px", color: "var(--ok)" }}>frei</span>
           {" "}· <span style={{ background: "color-mix(in srgb, var(--warn) 16%, var(--karte))", border: "1.5px solid color-mix(in srgb, var(--warn) 45%, var(--karte))", borderRadius: 4, padding: "1px 7px" }}>🔒 blockiert</span>
@@ -383,6 +438,11 @@ export default function Wochenplan() {
                 onClick={() => { speichern(blockNotiz(plan, block.id, editor.notiz), "Baustein-Notiz geändert"); zu(); }}
                 style={{ width: "100%", marginTop: 10, background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
                 ✓ Speichern
+              </button>
+              <button data-test="block-verschieben"
+                onClick={() => { setVerschieben(block.id); zu(); }}
+                style={{ width: "100%", marginTop: 6, background: T.weich, color: T.text, fontWeight: 700 }}>
+                📍 Verschieben (dann freies Fenster antippen)
               </button>
               <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
                 <button data-test="notiz-weg" onClick={() => { speichern(blockWeg(plan, block.id), "Baustein entfernt"); zu(); }}

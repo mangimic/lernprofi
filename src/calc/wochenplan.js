@@ -244,6 +244,26 @@ export function routineAnwenden(plan, routine) {
   return p;
 }
 
+/** Baustein in ein anderes freies Fenster schieben (gleicher oder anderer Tag). */
+export function blockVerschieben(plan, id, tag, slot) {
+  const block = plan.bloecke.find((b) => b.id === id);
+  if (!block || !tagesStunden(tag).includes(slot)) return plan;
+  if (plan.bloecke.some((b) => b.id !== id && b.tag === tag && b.slot === slot)) return plan;
+  return { ...plan, bloecke: plan.bloecke.map((b) => (b.id === id ? { ...b, tag, slot } : b)) };
+}
+
+/** 📋 Ganze Woche als Vorlage übernehmen: Bausteine (ohne Haken, mit
+    Notizen) in die freien Fenster des Ziel-Plans legen. */
+export function wocheKopieren(ziel, quelle) {
+  let p = ziel;
+  for (const b of quelle.bloecke) {
+    const vorher = p.bloecke.length;
+    p = blockHinzu(p, b.tag, b.typ, b.slot);
+    if (p.bloecke.length > vorher && b.notiz) p = blockNotiz(p, p.bloecke[p.bloecke.length - 1].id, b.notiz);
+  }
+  return p;
+}
+
 /** Notiz an einem Baustein (z. B. der Name des Freundes, das Übe-Thema). */
 export function blockNotiz(plan, id, notiz) {
   const t = String(notiz || "").trim().slice(0, 24);
@@ -297,20 +317,39 @@ export function planPruefung(plan, termine, zeitLimit, feste = []) {
   const tage = WOCHENTAGE.map((_, i) => {
     const am = plan.bloecke.filter((b) => b.tag === i);
     const lern = am.filter((b) => bausteinInfo(b.typ).lern).length;
+    // Gegen das Tages-Limit zählen nur echte 10-Minuten-Boxen –
+    // Hausaufgaben sind Pflicht und dürfen das Üben nicht verdrängen.
+    const boxen = am.filter((b) => { const inf = bausteinInfo(b.typ); return inf.lern && inf.box !== false; }).length;
     // Feste Aktiv-Termine zählen als Ausgleich – außer sie fallen diese Woche aus.
     // Pflicht-Bausteine ohne Ausgleichswert (Arzttermin) zählen ebenfalls nicht.
     const frei = am.filter((b) => { const i = bausteinInfo(b.typ); return !i.lern && i.ausgleich !== false; }).length
       + (feste || []).filter((f) => f.tag === i && f.aktiv && !istAusgefallen(plan, i, f.beginn)).length;
+    // 🥁📚 Familienregel: VOR dem Üben kommen Hausaufgaben und Schlagzeug.
+    const uebenSlots = am.filter((b) => ["lernen", "schrift", "konz"].includes(b.typ)).map((b) => b.slot);
+    const ersterUeben = uebenSlots.length ? Math.min(...uebenSlots) : null;
+    let reihenfolge = "";
+    if (ersterUeben !== null) {
+      const hausVorher = am.some((b) => b.typ === "hausaufgaben" && b.slot < ersterUeben);
+      const schlagzeugVorher = am.some((b) => b.typ === "schlagzeug" && b.slot < ersterUeben)
+        || (feste || []).some((f) => f.tag === i && f.name.includes("Schlagzeug")
+          && f.beginn < ersterUeben && !istAusgefallen(plan, i, f.beginn));
+      if (!hausVorher && !schlagzeugVorher) reihenfolge = "Erst 📚 Hausaufgaben und 🥁 Schlagzeug, dann Üben – schieb sie vor die Lernboxen!";
+      else if (!hausVorher) reihenfolge = "Erst 📚 Hausaufgaben, dann Üben – schieb sie vor die Lernboxen!";
+      else if (!schlagzeugVorher) reihenfolge = "Erst 🥁 Schlagzeug, dann Üben – schieb es vor die Lernboxen!";
+    }
     let status = "ok";
     let hinweis = "";
-    if (lern > maxLern) {
+    if (boxen > maxLern) {
       status = "voll";
-      hinweis = `Puh, ${lern} Lernboxen – mehr als ${maxLern} schafft kein Kopf gut. Schieb eine auf einen anderen Tag!`;
+      hinweis = `Puh, ${boxen} Lernboxen – mehr als ${maxLern} schafft kein Kopf gut. Schieb eine auf einen anderen Tag!`;
+    } else if (reihenfolge) {
+      status = "reihenfolge";
+      hinweis = reihenfolge;
     } else if (lern > 0 && frei === 0) {
       status = "einseitig";
       hinweis = "Nur Lernen geplant – pack noch etwas Schönes dazu (Sport, Freunde, draußen)!";
     }
-    return { lern, frei, lernMin: lern * LERN_MINUTEN, status, hinweis };
+    return { lern, frei, lernMin: boxen * LERN_MINUTEN, status, hinweis };
   });
 
   // Vor einem Termin lieber VERTEILEN als am Vorabend pauken.

@@ -15,7 +15,7 @@ import Eltern from "./features/Eltern.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.32.0";
+export const APP_VERSION = "0.33.0";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -81,10 +81,13 @@ export default function App() {
   // beim Hochscrollen oder oben ist sie sofort wieder da.
   const [navWeg, setNavWeg] = useState(false);
   useEffect(() => {
-    let letztesY = window.scrollY;
+    // capture:true fängt auch Scrollen in inneren Containern; scrollingElement
+    // deckt Browser ab, bei denen window.scrollY nicht mitläuft.
+    const leseY = () => window.scrollY || (document.scrollingElement || document.documentElement).scrollTop || 0;
+    let letztesY = leseY();
     let timer = null;
     const beimScrollen = () => {
-      const y = window.scrollY;
+      const y = leseY();
       if (y > letztesY + 4 && y > 80) {
         setNavWeg(true); // beim Runterscrollen Platz machen …
         clearTimeout(timer);
@@ -95,8 +98,8 @@ export default function App() {
       }
       letztesY = y;
     };
-    window.addEventListener("scroll", beimScrollen, { passive: true });
-    return () => { clearTimeout(timer); window.removeEventListener("scroll", beimScrollen); };
+    window.addEventListener("scroll", beimScrollen, { passive: true, capture: true });
+    return () => { clearTimeout(timer); window.removeEventListener("scroll", beimScrollen, { capture: true }); };
   }, []);
   if (tresor.status === "laden") return null; // kurzer Moment beim Start
   if (tresor.status !== "offen") return <VaultGate />;

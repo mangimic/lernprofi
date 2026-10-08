@@ -965,17 +965,21 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
     await expect(page.getByTestId("plan-wahl-hinweis")).toBeVisible();
     await page.getByTestId(`slot-${tag}-${slot}`).click();
   };
-  await bausteinZu("lernen", 5, 540);
-  await bausteinZu("lernen", 5, 570);
+  await bausteinZu("lernen", 5, 660);
+  await bausteinZu("lernen", 5, 690);
   await expect(page.getByTestId("plan-block")).toHaveCount(2);
-  await bausteinZu("lernen", 5, 600);
+  await bausteinZu("lernen", 5, 720);
   await expect(page.getByTestId("ampel-5")).toHaveText("🔴");
   await expect(page.getByTestId("tag-hinweis-5")).toContainText("Schieb");
 
-  // Eine Box wieder weg → gelb (nur Lernen); Sport dazu → grün
+  // Eine Box weg → gelb; Familienregel: erst 📚 Hausaufgaben + 🥁 Schlagzeug, dann Üben → grün
   await page.getByTestId("block-weg").first().click();
   await expect(page.getByTestId("ampel-5")).toHaveText("🟡");
   await bausteinZu("sport", 5, 540);
+  await expect(page.getByTestId("ampel-5")).toHaveText("🟡"); // Sport reicht nicht – Reihenfolge fehlt
+  await expect(page.getByTestId("tag-hinweis-5")).toContainText("Hausaufgaben");
+  await bausteinZu("hausaufgaben", 5, 570);
+  await bausteinZu("schlagzeug", 5, 600);
   await expect(page.getByTestId("ampel-5")).toHaveText("🟢");
 
   // Übungstage Di + Mi (freie Fenster neben den festen Terminen) → Wächter zufrieden
@@ -989,18 +993,25 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await expect(page.getByTestId("fest-dialog")).toContainText("Sport");
   await page.getByTestId("fest-ausfall").click();
   await expect(page.getByTestId("fest-1-1020")).toHaveCount(0);
-  await expect(page.getByTestId("slot-1-1020")).toContainText("Sport fällt aus");
-  await expect(page.getByTestId("slot-1-1050")).toBeVisible(); // zweites Fenster auch frei
+  await expect(page.getByTestId("slot-1-1020")).toContainText("frei"); // Fenster ist einfach frei …
+  await expect(page.getByTestId("ausfall-liste")).toContainText("Sport"); // … der Ausfall steht unterm Board
   // das freie Fenster lässt sich sofort neu verplanen
   await page.getByTestId("baustein-freunde").click();
   await page.getByTestId("slot-1-1050").click();
   await page.getByTestId("notiz-feld").fill("Oma");
   await page.getByTestId("notiz-ok").click();
   await expect(page.getByTestId("slot-1-1050")).toContainText("Freunde · Oma");
-  // Zurückholen bringt den Sport zurück und räumt NUR das Fenster wieder frei
+  // 📍 Verschieben: Baustein antippen → freies Fenster antippen
+  await page.getByTestId("slot-1-1050").click();
+  await page.getByTestId("block-verschieben").click();
+  await expect(page.getByTestId("verschieb-hinweis")).toBeVisible();
+  await page.getByTestId("slot-1-1020").click();
+  await expect(page.getByTestId("slot-1-1020")).toContainText("Freunde · Oma");
+  // Zurückholen (aus der Liste) bringt den Sport zurück und räumt NUR sein Fenster
   await page.getByTestId("ausfall-zurueck").click();
   await expect(page.getByTestId("fest-1-1020")).toContainText("Sport");
-  await expect(page.getByTestId("plan-block")).toHaveCount(5); // die 5 geplanten Bausteine bleiben
+  await expect(page.getByTestId("ausfall-liste")).toHaveCount(0);
+  await expect(page.getByTestId("plan-block")).toHaveCount(7); // die 7 geplanten Bausteine bleiben
 
   // 🔁 Routine: Üben wiederholt sich – Freunde-Zeit wird sonntags neu verabredet.
   // Beim Platzieren fragt die App direkt, MIT WEM – der Name steht dann am Baustein.
@@ -1018,9 +1029,15 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await page.getByTestId("woche-naechste").click();
   await expect(page.getByTestId("plan-block")).toHaveCount(0);
   await page.getByTestId("routine-uebernehmen").click();
-  await expect(page.getByTestId("plan-block")).toHaveCount(5); // alles außer Freunde-Zeit
+  await expect(page.getByTestId("plan-block")).toHaveCount(7); // alles außer Freunde-Zeit
   await page.getByTestId("woche-diese").click();
-  await expect(page.getByTestId("plan-block")).toHaveCount(6);
+  await expect(page.getByTestId("plan-block")).toHaveCount(8);
+
+  // 📋 Als Vorlage: diese Woche in die nächste kopieren – füllt nur freie Fenster
+  await page.getByTestId("plan-kopieren").click();
+  await expect(page.getByTestId("plan-block")).toHaveCount(8); // 7 Routine + kopierte Freunde-Zeit
+  await expect(page.getByTestId("tag-2")).toContainText("Emil + Ole"); // Notiz wandert mit
+  await page.getByTestId("woche-diese").click();
 
   // Plan (beide Wochen) überlebt den Neustart
   await page.waitForTimeout(600);
@@ -1029,9 +1046,9 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await page.getByTestId("pin-ok").click();
   await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
   await page.getByTestId("nav-plan").click();
-  await expect(page.getByTestId("plan-block")).toHaveCount(6);
+  await expect(page.getByTestId("plan-block")).toHaveCount(8);
   await page.getByTestId("woche-naechste").click();
-  await expect(page.getByTestId("plan-block")).toHaveCount(5);
+  await expect(page.getByTestId("plan-block")).toHaveCount(8);
   await page.getByTestId("woche-diese").click();
 
   // 9d: Heute-Baustein einplanen, auf der Startseite abhaken → Tag geschafft + Münze
@@ -1049,6 +1066,17 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await expect(page.getByTestId("tages-stand")).toContainText("🪙 1 Münze");
   await page.getByTestId("nav-plan").click();
   await expect(page.getByTestId("plan-bilanz")).toBeVisible();
+});
+
+test("Untere Leiste macht beim Scrollen Platz und kommt nach dem Stopp zurück", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("nav-neu").click(); // lange Seite (Release-Notes)
+  await expect(page.getByTestId("nav-leiste")).toBeInViewport();
+  await page.mouse.wheel(0, 1500);
+  await expect(page.getByTestId("nav-leiste")).not.toBeInViewport(); // beim Scrollen weg …
+  await expect(page.getByTestId("nav-leiste")).toBeInViewport({ timeout: 3000 }); // … nach dem Stopp zurück
+  await page.mouse.wheel(0, -300);
+  await expect(page.getByTestId("nav-leiste")).toBeInViewport(); // hochscrollen: sofort da
 });
 
 test("KI-Karte ohne Server: ehrliche Meldung statt Absturz, Schalter bleiben bedienbar", async ({ page }) => {

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   BAUSTEINE, TERMIN_ARTEN, FESTE_TERMINE_STANDARD, festerTermin, blockNotiz, schulZeilen,
-  istAusgefallen, ausfallSetzen, ausfallAufheben,
+  istAusgefallen, ausfallSetzen, ausfallAufheben, blockVerschieben, wocheKopieren,
   kalenderWoche, routineAusPlan, routineAnwenden, schulStunden, schulFaecher,
   wochenMontag, tagDatum, leererPlan, planFuerWoche,
   blockHinzu, blockWeg, blockFertig, tagGeschafft, heuteBelohnt, belohnungEintragen,
@@ -67,17 +67,20 @@ describe("wochenplan – Wochen-Rechnung", () => {
     expect(voll.tage[0].status).toBe("voll");
     expect(voll.tage[0].hinweis).toContain("Schieb");
     expect(voll.ok).toBe(false);
-    // 2 Lernboxen ohne Ausgleich → einseitig, mit Sport → ok
+    // 2 Lernboxen ohne HA/Schlagzeug davor → Reihenfolge-Hinweis, danach ok
     let p2 = leererPlan("2026-10-05");
     p2 = blockHinzu(p2, 1, "lernen", 900);
     p2 = blockHinzu(p2, 1, "schrift", 930);
-    expect(planPruefung(p2, [], 20).tage[1].status).toBe("einseitig");
-    // Ein Arzttermin ist kein Ausgleich – der Tag bleibt einseitig
-    const mitArzt = blockHinzu(p2, 1, "arzt", 1080);
-    expect(planPruefung(mitArzt, [], 20).tage[1].status).toBe("einseitig");
+    expect(planPruefung(p2, [], 20).tage[1].status).toBe("reihenfolge");
+    p2 = blockHinzu(p2, 1, "hausaufgaben", 840);
+    expect(planPruefung(p2, [], 20).tage[1].hinweis).toContain("Schlagzeug");
+    p2 = blockHinzu(p2, 1, "schlagzeug", 870);
+    // Ein Arzttermin zählt nicht als Ausgleich (frei bleibt gleich)
+    expect(planPruefung(blockHinzu(p2, 1, "arzt", 1080), [], 20).tage[1].frei)
+      .toBe(planPruefung(p2, [], 20).tage[1].frei);
     p2 = blockHinzu(p2, 1, "sport", 990);
     const ok = planPruefung(p2, [], 20);
-    expect(ok.tage[1]).toMatchObject({ status: "ok", lern: 2, frei: 1, lernMin: 20 });
+    expect(ok.tage[1]).toMatchObject({ status: "ok", lern: 3, frei: 2, lernMin: 20 }); // HA zählt als Lernzeit, nicht als Box
     expect(ok.ok).toBe(true);
   });
 
@@ -182,12 +185,50 @@ describe("wochenplan – Wochen-Rechnung", () => {
       expect(festerTermin(FESTE_TERMINE_STANDARD, t, 810)?.name).toBe("Mittag & Spielzeit");
     }
     expect(festerTermin(FESTE_TERMINE_STANDARD, 4, 840)).toBeNull();
-    // 2 Lernboxen am Montag: ohne feste Termine „einseitig", MIT Bandprobe & Co. ok
+    // Lernzeit am Montag: ohne feste Termine „einseitig", MIT Bandprobe & Co. ok
     let p = leererPlan("2026-10-05");
-    p = blockHinzu(p, 0, "lernen", 840);
-    p = blockHinzu(p, 0, "schrift", 870);
+    p = blockHinzu(p, 0, "hausaufgaben", 840);
     expect(planPruefung(p, [], 20).tage[0].status).toBe("einseitig");
     expect(planPruefung(p, [], 20, FESTE_TERMINE_STANDARD).tage[0].status).toBe("ok");
+  });
+
+  it("Verschieben, Woche kopieren und die Familienregel (erst HA & Schlagzeug, dann Üben)", () => {
+    // Verschieben: nur in freie, gültige Fenster; mutiert nicht
+    let p = leererPlan("2026-10-05");
+    p = blockHinzu(p, 0, "lernen", 840);
+    p = blockHinzu(p, 0, "sport", 870);
+    const bewegt = blockVerschieben(p, 1, 2, 900);
+    expect(bewegt.bloecke[0]).toMatchObject({ id: 1, tag: 2, slot: 900 });
+    expect(blockVerschieben(p, 1, 0, 870)).toBe(p);  // Ziel belegt
+    expect(blockVerschieben(p, 1, 0, 855)).toBe(p);  // kein gültiges Fenster
+    expect(blockVerschieben(p, 9, 0, 900)).toBe(p);  // unbekannte Id
+    expect(p.bloecke[0].tag).toBe(0);
+    // Woche kopieren: ohne Haken, mit Notizen, nur in freie Fenster
+    let quelle = blockHinzu(leererPlan("2026-10-05"), 2, "freunde", 870);
+    quelle = blockNotiz(quelle, 1, "Emil");
+    quelle = { ...quelle, bloecke: quelle.bloecke.map((b) => ({ ...b, fertig: true })) };
+    quelle = blockHinzu(quelle, 1, "lernen", 900);
+    let ziel = blockHinzu(leererPlan("2026-10-12"), 1, "sport", 900); // 900 belegt
+    ziel = wocheKopieren(ziel, quelle);
+    expect(ziel.bloecke.length).toBe(2); // freunde kam dazu, lernen nicht (belegt)
+    const kopie = ziel.bloecke.find((b) => b.typ === "freunde");
+    expect(kopie.notiz).toBe("Emil");
+    expect(kopie.fertig).toBeUndefined(); // Haken wandern nicht mit
+    // Familienregel: Üben ohne HA/Schlagzeug davor → gelber Reihenfolge-Hinweis
+    let r = blockHinzu(leererPlan("2026-10-05"), 5, "lernen", 660);
+    expect(planPruefung(r, [], 20, FESTE_TERMINE_STANDARD).tage[5].status).toBe("reihenfolge");
+    r = blockHinzu(r, 5, "hausaufgaben", 570);
+    expect(planPruefung(r, [], 20, FESTE_TERMINE_STANDARD).tage[5].hinweis).toContain("Schlagzeug");
+    r = blockHinzu(r, 5, "schlagzeug", 600);
+    expect(planPruefung(r, [], 20, FESTE_TERMINE_STANDARD).tage[5].status).toBe("ok");
+    // Dienstag reicht die feste Schlagzeug-Stunde (16:00) als Schlagzeug vor dem Üben um 16:30
+    let di = blockHinzu(leererPlan("2026-10-05"), 1, "hausaufgaben", 900);
+    di = blockHinzu(di, 1, "lernen", 990);
+    expect(planPruefung(di, [], 20, FESTE_TERMINE_STANDARD).tage[1].status).toBe("ok");
+    // Hausaufgaben verdrängen das Üben NICHT: HA + 2 Boxen ist kein „voll"
+    expect(planPruefung(r, [], 20, FESTE_TERMINE_STANDARD).tage[5].lernMin).toBe(10); // nur die Box zählt
+    let voll = blockHinzu(r, 5, "lernen", 690);
+    expect(planPruefung(voll, [], 20, FESTE_TERMINE_STANDARD).tage[5].status).toBe("ok"); // HA + 2 Boxen
   });
 
   it("Ausfälle: Termin fällt nur diese Woche aus, Wächter rechnet ohne ihn", () => {
@@ -205,7 +246,7 @@ describe("wochenplan – Wochen-Rechnung", () => {
     expect(planPruefung(zurueck, [], 20, FESTE_TERMINE_STANDARD).tage[1].frei).toBe(2); // + Sport
     // Fallen ALLE Aktiv-Termine des Tages aus, wird ein reiner Lerntag „einseitig"
     let nurLernen = ausfallSetzen(ausfallSetzen(leererPlan("2026-10-05"), 1, 960), 1, 1020);
-    nurLernen = blockHinzu(nurLernen, 1, "lernen", 900);
+    nurLernen = blockHinzu(nurLernen, 1, "hausaufgaben", 900);
     expect(planPruefung(nurLernen, [], 20, FESTE_TERMINE_STANDARD).tage[1].status).toBe("einseitig");
     // Zurückholen räumt Bausteine aus dem Termin-Fenster (mit Dauer)
     let belegt = ausfallSetzen(leererPlan("2026-10-05"), 1, 1020);

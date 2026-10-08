@@ -36,6 +36,25 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.33: Verschieben, Familienregel, Ausfall-Liste, Vorlage ----------
+console.log("== v0.33: Verschieben + Familienregel ==");
+test("v0.33: APP_VERSION mindestens 0.33.0", versionMindestens("0.33.0"));
+test("v0.33: blockVerschieben + wocheKopieren + Reihenfolge-Regel in der Logik", (() => {
+  const w = quelle("src/calc/wochenplan.js");
+  return w.includes("blockVerschieben") && w.includes("wocheKopieren")
+    && w.includes('"reihenfolge"') && w.includes("hausVorher") && w.includes("schlagzeugVorher")
+    && w.includes("boxen > maxLern") // HA verdrängt das Üben nicht
+    && releaseNoteVorhanden("rn-045");
+})());
+test("v0.33: UI – Ziehen platzierter Bausteine, Verschieb-Modus, Ausfall-Liste, Kopier-Knopf, Scroll-Fühler", (() => {
+  const f = quelle("src/features/Wochenplan.jsx");
+  const a = quelle("src/App.jsx");
+  return f.includes("block-${block?.id") && f.includes('data-test="block-verschieben"')
+    && f.includes('data-test="verschieb-hinweis"') && f.includes('data-test="ausfall-liste"')
+    && f.includes('data-test="plan-kopieren"')
+    && a.includes("capture: true") && a.includes("scrollingElement");
+})());
+
 // ---------- v0.32: Farben, Mittagsblock, Arzttermin, Nav-Ausblenden ----------
 console.log("== v0.32: Farben + Mittagsblock ==");
 test("v0.32: APP_VERSION mindestens 0.32.0", versionMindestens("0.32.0"));
