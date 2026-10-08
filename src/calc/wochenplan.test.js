@@ -127,7 +127,7 @@ describe("wochenplan – Wochen-Rechnung", () => {
       }
     }
     expect(schulStunden(5)).toEqual([]);
-    expect(schulFaecher(0)).toEqual(["Deutsch", "Französisch", "Mathe", "SU"]); // Doppelstunde nur 1×, AG raus
+    expect(schulFaecher(0)).toEqual(["Deutsch", "Französisch", "Mathe", "SU", "Italienisch"]); // Doppelstunde nur 1×
     expect(schulFaecher(3)).toEqual(["Mathe", "KoKo", "KuW"]);
     expect(schulFaecher(4)).toContain("Musik");
     expect(schulFaecher(1).join(" ")).not.toContain("Chor"); // AG ist freiwillig

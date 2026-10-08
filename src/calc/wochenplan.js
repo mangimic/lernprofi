@@ -102,7 +102,7 @@ export const SCHULE = { tage: [0, 1, 2, 3, 4], text: "7:50–13:00", jeTag: { 4:
    freiwillig?] in Minuten. AGs (Bläserklasse/Chor) sind freiwillig.
    Ohne Lehrkräfte-Namen (Datensparsamkeit). */
 export const SCHULSTUNDEN = {
-  0: [[470, 515, "Deutsch"], [515, 560, "Deutsch"], [580, 625, "Französisch"], [625, 670, "Mathe"], [690, 735, "SU"], [735, 780, "Bläserklasse (AG)", true]],
+  0: [[470, 515, "Deutsch"], [515, 560, "Deutsch"], [580, 625, "Französisch"], [625, 670, "Mathe"], [690, 735, "SU"], [735, 780, "Italienisch"]],
   1: [[470, 515, "Mathe"], [515, 560, "Deutsch · Leseband"], [580, 625, "D1 / It2"], [625, 670, "D2 / It1"], [690, 735, "SU"], [735, 780, "Chor (AG)", true]],
   2: [[470, 515, "Deutsch"], [515, 560, "Französisch"], [580, 625, "Mathe"], [625, 670, "Mathe"], [690, 735, "Deutsch · Leseband"], [735, 780, "BSS (Sport)"]],
   3: [[470, 515, "Mathe"], [515, 560, "Mathe"], [580, 625, "KoKo"], [625, 670, "KoKo"], [690, 735, "KuW"], [735, 780, "KuW"]],

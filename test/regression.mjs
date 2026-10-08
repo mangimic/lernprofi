@@ -36,6 +36,13 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.30.1: Stundenplan-Korrektur Montag ----------
+console.log("== v0.30.1: Stundenplan-Korrektur ==");
+test("v0.30.1: Montag 12:15 ist Italienisch (regulär)", (() => {
+  const w = quelle("src/calc/wochenplan.js");
+  return /0: \[.*\[735, 780, "Italienisch"\]\]/.test(w) && releaseNoteVorhanden("rn-040");
+})());
+
 // ---------- v0.30: Baustein-Notizen ----------
 console.log("== v0.30: Baustein-Notizen ==");
 test("v0.30: APP_VERSION mindestens 0.30.0", versionMindestens("0.30.0"));
@@ -57,7 +64,7 @@ test("v0.29: Release-Note rn-038 vorhanden", releaseNoteVorhanden("rn-038"));
 test("v0.29: Stundenplan hinterlegt – 5 Tage, AG-Kennzeichnung, keine Lehrkraft-Namen", (() => {
   const w = quelle("src/calc/wochenplan.js");
   return w.includes("SCHULSTUNDEN") && w.includes("schulFaecher") && w.includes("KoKo")
-    && w.includes("Leseband") && w.includes("Bläserklasse (AG)")
+    && w.includes("Leseband") && (w.includes("Bläserklasse (AG)") || w.includes("Chor (AG)")) // Mo-AG wurde Okt 2026 zu Italienisch
     && !/Häußler|Weinmann|Kemper|Cecere|Lindinger|Hanser|gsakb/i.test(w)
     && w.includes('jeTag: { 4: "7:50–12:15" }');
 })());

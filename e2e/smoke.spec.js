@@ -948,7 +948,8 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   // 🏫 Vormittag aufklappen: Stundenplan je Tag, AGs als freiwillig
   await page.getByTestId("schule-zeigen").click();
   await expect(page.getByTestId("schule-3")).toContainText("KoKo");
-  await expect(page.getByTestId("schule-0")).toContainText("freiwillig"); // Bläserklasse-AG
+  await expect(page.getByTestId("schule-0")).toContainText("Italienisch"); // Mo 12:15 (Änderung Okt 2026)
+  await expect(page.getByTestId("schule-1")).toContainText("freiwillig"); // Chor-AG
   await page.getByTestId("schule-zeigen").click();
   await expect(page.getByTestId("schule-3")).toHaveCount(0);
   await expect(page.getByTestId("plan-hinweise")).toContainText("Klassenarbeit");

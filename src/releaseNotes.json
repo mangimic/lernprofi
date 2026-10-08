@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-040",
+    "version": "0.30.1",
+    "datum": "2026-10-08",
+    "titel": "Stundenplan-Änderung Montag",
+    "entries": [
+      {
+        "type": "geaendert",
+        "text": "🏫 Montag 12:15–13:00 ist jetzt Italienisch-Unterricht (regulär) – vorher stand dort die freiwillige Bläserklassen-AG. Die Montags-Fächerfolge in der Heute-Ansicht zeigt Italienisch mit an."
+      }
+    ]
+  },
+  {
     "id": "rn-039",
     "version": "0.30.0",
     "datum": "2026-10-08",
