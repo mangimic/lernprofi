@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
-  BAUSTEINE, TERMIN_ARTEN, FESTE_TERMINE_STANDARD, festerTermin, blockNotiz,
+  BAUSTEINE, TERMIN_ARTEN, FESTE_TERMINE_STANDARD, festerTermin, blockNotiz, schulZeilen,
   kalenderWoche, routineAusPlan, routineAnwenden, schulStunden, schulFaecher,
   wochenMontag, tagDatum, leererPlan, planFuerWoche,
   blockHinzu, blockWeg, blockFertig, tagGeschafft, heuteBelohnt, belohnungEintragen,
@@ -132,6 +132,13 @@ describe("wochenplan – Wochen-Rechnung", () => {
     expect(schulFaecher(4)).toContain("Musik");
     expect(schulFaecher(1).join(" ")).not.toContain("Chor"); // AG ist freiwillig
     expect(schulFaecher(6)).toEqual([]);
+    // Anzeige-Zeilen: exakt die Zeitfenster vom Blatt, Pausen einsortiert
+    const mo = schulZeilen(0);
+    expect(mo[0]).toMatchObject({ von: 470, bis: 515, fach: "Deutsch" }); // 7:50-8:35
+    expect(mo[2]).toMatchObject({ von: 560, bis: 575, pause: true });     // 9:20-9:35 Pause
+    expect(mo[5]).toMatchObject({ von: 670, bis: 685, pause: true });     // 11:10-11:25 Pause
+    expect(mo.map((z) => z.von)).toEqual([...mo.map((z) => z.von)].sort((a, b) => a - b));
+    expect(schulZeilen(6)).toEqual([]); // Wochenende: keine Zeilen, keine Pausen
   });
 
   it("Durchführung: abhaken, Tag geschafft, Belohnung nur 1× je Datum, Bilanz", () => {

@@ -5,7 +5,7 @@ import {
   WOCHENTAGE, BAUSTEINE, TERMIN_ARTEN, LERN_MINUTEN, tagesStunden, uhr, bausteinInfo,
   wochenMontag, tagDatum, planFuerWoche, leererPlan, blockHinzu, blockWeg, slotBelegt,
   termineDerWoche, planPruefung, wochenBilanz, festerTermin, SCHULE,
-  kalenderWoche, routineAusPlan, routineAnwenden, schulStunden, blockNotiz,
+  kalenderWoche, routineAusPlan, routineAnwenden, schulZeilen, blockNotiz,
 } from "../calc/wochenplan.js";
 
 /* 🗓️ MEIN WOCHENPLAN (Etappe 9): Felix setzt sein Pensum selbst.
@@ -116,9 +116,9 @@ function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, pruefung, wahlAktiv
           background: T.grund, borderRadius: 6, padding: "4px 6px", marginBottom: 4,
           fontSize: "11px", lineHeight: 1.5, color: T.textLeise,
         }}>
-          {schulStunden(idx).map(([von, , fach, ag], i) => (
-            <div key={i} style={{ opacity: ag ? 0.65 : 1 }}>
-              <b>{uhr(von)}</b> {fach}{ag ? " · freiwillig" : ""}
+          {schulZeilen(idx).map((z, i) => (
+            <div key={i} style={{ opacity: z.ag || z.pause ? 0.65 : 1, fontStyle: z.pause ? "italic" : "normal" }}>
+              <b>{uhr(z.von)}–{uhr(z.bis)}</b> {z.fach}{z.ag ? " · freiwillig" : ""}
             </div>
           ))}
         </div>

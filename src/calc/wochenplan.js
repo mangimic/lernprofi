@@ -111,6 +111,17 @@ export const SCHULSTUNDEN = {
 export function schulStunden(tag) {
   return SCHULSTUNDEN[tag] || [];
 }
+/** Schul-Pausen laut Stundenplan (werden mit angezeigt). */
+export const SCHUL_PAUSEN = [[560, 575], [670, 685]]; // 9:20-9:35 · 11:10-11:25
+
+/** Anzeige-Zeilen eines Schultags: Stunden + Pausen, nach Uhrzeit sortiert. */
+export function schulZeilen(tag) {
+  const zeilen = schulStunden(tag).map(([von, bis, fach, ag]) => ({ von, bis, fach, ag: !!ag, pause: false }));
+  if (!zeilen.length) return [];
+  for (const [von, bis] of SCHUL_PAUSEN) zeilen.push({ von, bis, fach: "Pause", ag: false, pause: true });
+  return zeilen.sort((a, b) => a.von - b.von);
+}
+
 /** Fächerfolge des Tages fürs Kind (ohne freiwillige AGs, ohne Dubletten). */
 export function schulFaecher(tag) {
   const liste = [];

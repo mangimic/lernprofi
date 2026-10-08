@@ -36,6 +36,16 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.30.2: Schulstunden mit Zeitfenstern ----------
+console.log("== v0.30.2: Schul-Zeitfenster ==");
+test("v0.30.2: Anzeige-Zeilen mit von-bis und einsortierten Pausen", (() => {
+  const w = quelle("src/calc/wochenplan.js");
+  return w.includes("SCHUL_PAUSEN") && w.includes("schulZeilen")
+    && w.includes("[560, 575], [670, 685]")
+    && quelle("src/features/Wochenplan.jsx").includes("uhr(z.von)}–{uhr(z.bis)")
+    && releaseNoteVorhanden("rn-041");
+})());
+
 // ---------- v0.30.1: Stundenplan-Korrektur Montag ----------
 console.log("== v0.30.1: Stundenplan-Korrektur ==");
 test("v0.30.1: Montag 12:15 ist Italienisch (regulär)", (() => {
@@ -70,7 +80,7 @@ test("v0.29: Stundenplan hinterlegt – 5 Tage, AG-Kennzeichnung, keine Lehrkraf
 })());
 test("v0.29: Schulstunden-Toggle im Plan + Heute-in-der-Schule-Zeile", (() => {
   return quelle("src/features/Wochenplan.jsx").includes('data-test="schule-zeigen"')
-    && quelle("src/features/Wochenplan.jsx").includes("schulStunden")
+    && /schulStunden|schulZeilen/.test(quelle("src/features/Wochenplan.jsx")) // seit v0.30.2 Zeilen mit Pausen
     && quelle("src/features/Start.jsx").includes('data-test="heute-schule"');
 })());
 

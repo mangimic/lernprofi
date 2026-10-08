@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-041",
+    "version": "0.30.2",
+    "datum": "2026-10-08",
+    "titel": "Schulstunden mit echten Zeitfenstern",
+    "entries": [
+      {
+        "type": "verbessert",
+        "text": "🏫 Die aufgeklappten Schulstunden zeigen jetzt die Zeitfenster exakt wie auf dem Stundenplan-Blatt (7:50–8:35, 8:35–9:20 …) – inklusive der beiden Pausen (9:20–9:35 und 11:10–11:25), kursiv und gedimmt dargestellt."
+      }
+    ]
+  },
+  {
     "id": "rn-040",
     "version": "0.30.1",
     "datum": "2026-10-08",
