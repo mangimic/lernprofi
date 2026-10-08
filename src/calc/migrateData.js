@@ -29,6 +29,7 @@ export function leeresDokument(heute) {
       zeit: { tag: "", sek: 0 }, // heute verbrauchte Lernzeit (Time-Boxing)
       tagesform: { tag: "", modus: "" }, // NUR heutige Tagesform – keine Fähigkeitseinstufung
       fokusRekord: 0,            // längste Fokus-Serie (Aufgaben am Stück)
+      einstufung: null,          // letzter Einstufungstest: { tag, ergebnisse, empfehlung }
     },
     einstellungen: {
       thema: "hell",   // "hell" | "dunkel"
@@ -83,6 +84,7 @@ export function migrateData(alt, heute) {
   if (!Number.isInteger(d.lernstand.fokusRekord) || d.lernstand.fokusRekord < 0 || d.lernstand.fokusRekord > 999) {
     d.lernstand.fokusRekord = 0;
   }
+  if (!istObjekt(d.lernstand.einstufung)) d.lernstand.einstufung = null;
   const mut = istObjekt(d.lernstand.mutSatz) ? d.lernstand.mutSatz : {};
   d.lernstand.mutSatz = {
     tag: typeof mut.tag === "string" ? mut.tag : "",

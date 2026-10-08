@@ -1,5 +1,16 @@
 [
   {
+    "id": "rn-023",
+    "version": "0.20.0",
+    "datum": "2026-10-08",
+    "titel": "Einstufungstest & Trainingsplan",
+    "entries": [
+      { "type": "neu", "text": "🧪 Neuer Einstufungstest: In 6 Kern-Bereichen (Grundwortschatz, das/dass, Zeitformen, die 4 Fälle, Rechnen, Zahlen-Profi) löst du erst 2 leichte Aufgaben – schaffst du beide, kommen adaptiv 2 schwere dazu. Keine Noten, keine Münzen: Fehler zeigen nur, wo wir üben." },
+      { "type": "neu", "text": "🎯 Das Ergebnis stellt die Stufen ALLER getesteten Bereiche genau auf dich ein (auch nach unten – dafür ist der Test da) und legt deinen Trainingsplan auf die Startseite: die schwächsten Bereiche zuerst, mit Direkt-Knopf in die passende Übung." },
+      { "type": "verbessert", "text": "Im Üben-Bereich tragen empfohlene Bereiche das 🎯-empfohlen-Abzeichen; der Test lässt sich jederzeit von der Startseite aus wiederholen. Deine Runden-Historie und Kronen bleiben bei der Einstufung erhalten." }
+    ]
+  },
+  {
     "id": "rn-022",
     "version": "0.19.0",
     "datum": "2026-10-08",

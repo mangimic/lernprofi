@@ -1,6 +1,7 @@
 import { useApp } from "../appContext.jsx";
 import { heutigerTag, lernspur } from "../calc/lerntage.js";
 import { zeitUebrigMin } from "../calc/elternWerkzeuge.js";
+import { EINSTUFUNG_FELDER } from "../calc/einstufung.js";
 import { STARK_SAETZE } from "../calc/aufgaben/stark.js";
 
 /* Startseite: Begrüßung, Tages-Stand (Münzen, Missionen, Lernspur),
@@ -8,7 +9,9 @@ import { STARK_SAETZE } from "../calc/aufgaben/stark.js";
    Hell/Dunkel. Der Elternbereich hat (nach Passwort-Entsperrung)
    seinen eigenen Tab. */
 export default function Start() {
-  const { data, logChange, T, tresor, navTo, heute } = useApp();
+  const { data, logChange, T, tresor, navTo, heute, uebenZielSetzen } = useApp();
+  const einstufung = data.lernstand.einstufung;
+  const feldName = (key) => EINSTUFUNG_FELDER.find((f) => f.key === key) || { emoji: "✏️", name: key };
   const dunkel = data.einstellungen.thema === "dunkel";
   const tag = heutigerTag(data.lernstand.lerntage, heute);
   const spur = lernspur(data.lernstand.lerntage, heute);
@@ -50,6 +53,39 @@ export default function Start() {
           🧠 Konzentrations-Training (Zahlen · ABC · Blitzlesen)
         </button>
       </div>
+      {!einstufung ? (
+        <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
+          <b>🧪 Einstufungstest</b>
+          <p style={{ margin: "4px 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+            Finde deinen Start: ein paar Aufgaben aus Deutsch und Mathe – danach stellt
+            die App die Stufen genau auf dich ein und baut deinen Trainingsplan.
+          </p>
+          <button data-test="einstufung-start" onClick={() => navTo("einstufung")}
+            style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
+            🧪 Einstufungstest machen
+          </button>
+        </div>
+      ) : (
+        <div data-test="trainingsplan" style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
+          <b>🎯 Dein Trainingsplan</b>
+          <p style={{ margin: "4px 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+            Aus deinem Einstufungstest vom {einstufung.tag} – übe am besten zuerst hier:
+          </p>
+          {einstufung.empfehlung.length ? einstufung.empfehlung.map((key) => (
+            <button key={key} data-test="plan-feld" data-key={key}
+              onClick={() => { uebenZielSetzen(key); navTo("ueben"); }}
+              style={{ width: "100%", marginBottom: 8, background: T.weich, color: T.text, fontWeight: 700, textAlign: "left", padding: "0 14px" }}>
+              {feldName(key).emoji} {feldName(key).name} üben
+            </button>
+          )) : (
+            <p style={{ margin: 0 }}>🌟 Alles auf Profi-Stufe – stark! Übe frei, worauf du Lust hast.</p>
+          )}
+          <button data-test="einstufung-nochmal" onClick={() => navTo("einstufung")}
+            style={{ background: "transparent", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+            🧪 Einstufungstest wiederholen
+          </button>
+        </div>
+      )}
       <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
         <b>🦁 Mut-Satz des Tages</b>
         {mutHeute ? (

@@ -679,3 +679,52 @@ test("Zahlenblöcke: Stellenwert-Aufgaben zeigen das Dienes-Material als Grafik"
   }
   await expect(page.getByTestId("runde-ergebnis")).toBeVisible();
 });
+
+test("Einstufungstest: adaptiv testen, Stufen einstellen, Trainingsplan führt zur Übung", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("einstufung-start").click();
+  await page.getByTestId("einstufung-los").click();
+
+  const richtig = async () => {
+    await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+    await page.getByTestId("weiter-knopf").click();
+  };
+  const falsch = async () => {
+    await page.locator('[data-test="antwort-opt"]:not([data-richtig])').first().click();
+    await page.getByTestId("weiter-knopf").click();
+  };
+
+  // Bereich 1 (Grundwortschatz): 2 leichte richtig → 2 schwere erscheinen; davon 1 falsch → Stufe 2
+  await expect(page.getByTestId("einstufung-frage")).toContainText("🌱 leicht");
+  await richtig(); await richtig();
+  await expect(page.getByTestId("einstufung-frage")).toContainText("🔥 schwer");
+  await richtig(); await falsch();
+  // Bereich 2 (das/dass): 1 Fehler bei den leichten → Stufe 1, keine schweren
+  await expect(page.getByTestId("einstufung-frage")).toContainText("Bereich 2 von 6");
+  await falsch(); await richtig();
+  // Bereiche 3–6: alles richtig → höchste Stufe
+  for (let i = 0; i < 30; i++) {
+    if (await page.getByTestId("einstufung-ergebnis").count()) break;
+    await richtig();
+  }
+  await expect(page.getByTestId("einstufung-zeile")).toHaveCount(6);
+  await expect(page.getByTestId("einstufung-ergebnis")).toContainText("das oder dass?");
+  await expect(page.getByTestId("einstufung-ergebnis")).toContainText("Stufe 1 – hier zuerst üben");
+  await expect(page.getByTestId("einstufung-ergebnis")).toContainText("Stufe 3 – Profi");
+
+  // Übernehmen: Trainingsplan auf der Startseite, schwächstes Feld zuerst (dd vor gws)
+  await page.getByTestId("einstufung-uebernehmen").click();
+  await expect(page.getByTestId("trainingsplan")).toBeVisible();
+  await expect(page.getByTestId("plan-feld")).toHaveCount(2);
+  await expect(page.getByTestId("plan-feld").first()).toHaveAttribute("data-key", "dd");
+
+  // Direkt-Knopf startet sofort die richtige Übung (Stufe 1 nach Einstufung)
+  await page.getByTestId("plan-feld").first().click();
+  await expect(page.getByTestId("frage-karte")).toContainText("das oder dass?");
+  await expect(page.getByTestId("frage-karte")).toContainText("Stufe 1");
+  await page.getByTestId("abbrechen").click();
+  // 🎯-Abzeichen in der Bereichs-Wahl, Mathe nach Einstufung auf Stufe 3
+  await expect(page.getByTestId("bereich-dd")).toContainText("🎯 empfohlen");
+  await page.getByTestId("ueben-fach-mathe").click();
+  await expect(page.getByTestId("bereich-mzahlen")).toContainText("Stufe 3");
+});

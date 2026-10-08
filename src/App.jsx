@@ -6,11 +6,12 @@ import Start from "./features/Start.jsx";
 import Ueben from "./features/Ueben.jsx";
 import Spielhalle from "./features/Spielhalle.jsx";
 import Konzentration from "./features/Konzentration.jsx";
+import Einstufung from "./features/Einstufung.jsx";
 import Eltern from "./features/Eltern.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.19.0";
+export const APP_VERSION = "0.20.0";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -129,6 +130,7 @@ export default function App() {
         {route === "neu" ? <WasIstNeu /> : route === "ueben" ? <Ueben /> :
          route === "spiele" ? <Spielhalle /> :
          route === "konz" ? <Konzentration /> :
+         route === "einstufung" ? <Einstufung /> :
          route === "eltern" && tresor.elternModus ? <Eltern /> : <Start />}
       </main>
 

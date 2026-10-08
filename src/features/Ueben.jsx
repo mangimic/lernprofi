@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApp } from "../appContext.jsx";
 import { MATHE_DATEN, MATHE_BEREICHE } from "../calc/aufgaben/mathe.js";
 import { SACH_DATEN, SACH_BEREICHE } from "../calc/aufgaben/sachkunde.js";
@@ -117,7 +117,7 @@ const FAECHER = [
 ];
 
 export default function Ueben() {
-  const { data, logChange, T, heute, fokus } = useApp();
+  const { data, logChange, T, heute, fokus, uebenZiel, uebenZielSetzen } = useApp();
   const [fachId, setFachId] = useState("deutsch");
   const [runde, setRunde] = useState(null);
   const fach = FAECHER.find((f) => f.id === fachId);
@@ -125,9 +125,9 @@ export default function Ueben() {
   const karte = { background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand };
   const primaerKnopf = { width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 };
 
-  const starten = (b) => {
+  const starten = (b, f = fach) => {
     if (b.typ === "modul") { setRunde({ typ: "modul", key: b.key }); return; }
-    const pool = fach.daten[b.key];
+    const pool = f.daten[b.key];
     const fortschritt = data.lernstand.stufen[b.key] || leererFortschritt();
     const stufe = aktiveStufe(fortschritt, data.profil.klasse, pool, stufenVorgabe(data.einstellungen, b.key));
     const paket = paketWaehlen(pool, stufe, fortschritt.runden);
@@ -148,6 +148,17 @@ export default function Ueben() {
       ergebnis: null,
     });
   };
+
+  // 🎯 Trainingsplan-Deep-Link: Startseite wählt ein Lernfeld vor
+  useEffect(() => {
+    if (!uebenZiel || runde) return;
+    for (const f of FAECHER) {
+      const b = f.bereiche.find((x) => x.key === uebenZiel);
+      if (b) { setFachId(f.id); starten(b, f); break; }
+    }
+    uebenZielSetzen(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uebenZiel]);
 
   const beantwortet = runde
     ? (runde.typ === "mc" ? runde.gewaehlt !== null
@@ -488,6 +499,7 @@ export default function Ueben() {
             style={{ ...karte, width: "100%", textAlign: "left", display: "block", border: `1px solid ${T.rand}` }}>
             <b>{b.emoji} {b.name}</b>
             <span style={{ float: "right", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+              {data.lernstand.einstufung?.empfehlung?.includes(b.key) ? "🎯 empfohlen · " : ""}
               {stufe === null ? "✏️ Üben + Schreiben" : <>🎯 Stufe {stufe}{fortschritt?.krone ? " 👑" : ""}</>}
             </span>
           </button>

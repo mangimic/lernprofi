@@ -51,6 +51,7 @@ export function AppProvider({ children }) {
   const heute = useMemo(() => isoHeute(), []);
   const [data, setData] = useState(() => migrateData(null, heute));
   const [route, setRoute] = useState("start");
+  const [uebenZiel, setUebenZiel] = useState(null); // Lernfeld-Key: Üben startet direkt dort (Trainingsplan)
   const [tresorStatus, setTresorStatus] = useState("laden");
   const [elternModus, setElternModus] = useState(false);
   const master = useRef(null);
@@ -221,7 +222,10 @@ export function AppProvider({ children }) {
     },
   };
 
-  const wert = { data, update, logChange, rueckgaengig, T, heute, route, navTo: setRoute, isMobile, tresor, fokus };
+  const wert = {
+    data, update, logChange, rueckgaengig, T, heute, route, navTo: setRoute, isMobile, tresor, fokus,
+    uebenZiel, uebenZielSetzen: setUebenZiel,
+  };
   return <AppContext.Provider value={wert}>{children}</AppContext.Provider>;
 }
 

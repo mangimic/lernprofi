@@ -514,3 +514,44 @@ describe("zahlenblöcke (Dienes-Material)", () => {
     }
   });
 });
+
+describe("einstufung", () => {
+  it("Plan: 6 Felder, je 2 leichte (+2 schwere wo vorhanden), deterministisch", async () => {
+    const E = await import("./einstufung.js");
+    const pools = {
+      gws: { easy: POOL.easy, hard: POOL.hard.concat(POOL.hard) }, dd: { easy: POOL.easy, hard: [] },
+      zeit: { easy: POOL.easy, hard: POOL.hard.concat(POOL.hard) }, faelle: { easy: POOL.easy, hard: [] },
+      mrechnen: { easy: POOL.easy, hard: POOL.hard.concat(POOL.hard) }, mzahlen: { easy: POOL.easy, hard: POOL.hard.concat(POOL.hard) },
+    };
+    const plan = E.einstufungPlan(pools, rngAusSeed("t"));
+    expect(plan.length).toBe(6);
+    expect(plan[0].easy.length).toBe(2);
+    expect(plan.find((f) => f.key === "dd").hard.length).toBe(0);
+    expect(plan.find((f) => f.key === "dd").max).toBe(2);
+    const plan2 = E.einstufungPlan(pools, rngAusSeed("t"));
+    expect(plan2[0].easy.map((a) => a.f)).toEqual(plan[0].easy.map((a) => a.f));
+  });
+
+  it("Stufen-Logik: leicht unsicher → 1, leicht sicher → 2, schwer fehlerfrei → 3", async () => {
+    const E = await import("./einstufung.js");
+    expect(E.einstufungStufe({ easyOk: 1, hardOk: 0, hardGefragt: false, max: 3 })).toBe(1);
+    expect(E.einstufungStufe({ easyOk: 2, hardOk: 1, hardGefragt: true, max: 3 })).toBe(2);
+    expect(E.einstufungStufe({ easyOk: 2, hardOk: 2, hardGefragt: true, max: 3 })).toBe(3);
+    expect(E.einstufungStufe({ easyOk: 2, hardOk: 0, hardGefragt: false, max: 2 })).toBe(2);
+  });
+
+  it("Anwenden stellt Stufen exakt ein (auch runter), Empfehlung = schwächste zuerst, max 3", async () => {
+    const E = await import("./einstufung.js");
+    const stufen = { gws: { freigeschaltet: 3, runden: 7, krone: true } };
+    const ergebnisse = {
+      gws: { stufe: 1, max: 3, fehler: 3 }, dd: { stufe: 2, max: 2, fehler: 0 },
+      zeit: { stufe: 2, max: 3, fehler: 1 }, faelle: { stufe: 1, max: 2, fehler: 2 },
+      mrechnen: { stufe: 3, max: 3, fehler: 0 }, mzahlen: { stufe: 2, max: 3, fehler: 2 },
+    };
+    const neu = E.einstufungAnwenden(stufen, ergebnisse);
+    expect(neu.gws).toEqual({ freigeschaltet: 1, runden: 7, krone: true }); // runter, Historie bleibt
+    expect(neu.mrechnen.freigeschaltet).toBe(3);
+    // dd ist auf Höchststufe (max 2) → keine Empfehlung; Reihenfolge: Stufe 1 zuerst, mehr Fehler zuerst
+    expect(E.einstufungEmpfehlung(ergebnisse)).toEqual(["gws", "faelle", "mzahlen"]);
+  });
+});

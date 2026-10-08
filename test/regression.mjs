@@ -36,6 +36,33 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.20: Einstufungstest & Trainingsplan ----------
+console.log("== v0.20: Einstufungstest & Trainingsplan ==");
+test("v0.20: APP_VERSION mindestens 0.20.0", versionMindestens("0.20.0"));
+test("v0.20: rn-023 vorhanden", releaseNoteVorhanden("rn-023"));
+test("v0.20: adaptive Logik rein (2 leichte, bei Erfolg 2 schwere; Stufe 1/2/3)", (() => {
+  const q = quelle("src/calc/einstufung.js");
+  return q.includes("PRO_STUFE = 2") && q.includes("einstufungStufe")
+    && q.includes("einstufungAnwenden") && q.includes("einstufungEmpfehlung")
+    && q.includes("slice(0, 3)") && !/Date\.now\(|Math\.random/.test(q);
+})());
+test("v0.20: 6 Kern-Felder aus Deutsch und Mathe", (() => {
+  const q = quelle("src/calc/einstufung.js");
+  return ["gws", "dd", "zeit", "faelle", "mrechnen", "mzahlen"].every((k) => q.includes(`key: "${k}"`));
+})());
+test("v0.20: Test ist keine Übung (keine Münzen/Missionen) und stellt Stufen exakt ein", (() => {
+  const e = quelle("src/features/Einstufung.jsx");
+  return !e.includes("muenzenNachRunde") && !e.includes("aufgabenZaehlen")
+    && e.includes("einstufungAnwenden") && e.includes('data-test="einstufung-uebernehmen"')
+    && e.includes("Verwerfen");
+})());
+test("v0.20: Trainingsplan auf der Startseite mit Direkt-Knopf + 🎯-Abzeichen im Üben", (() => {
+  return quelle("src/features/Start.jsx").includes('data-test="trainingsplan"')
+    && quelle("src/features/Start.jsx").includes("uebenZielSetzen(key)")
+    && quelle("src/features/Ueben.jsx").includes("empfehlung?.includes(b.key)")
+    && quelle("src/appContext.jsx").includes("uebenZiel");
+})());
+
 // ---------- v0.19: Zahlenblöcke & Lesbarkeit ----------
 console.log("== v0.19: Zahlenblöcke & Lesbarkeit ==");
 test("v0.19: APP_VERSION mindestens 0.19.0", versionMindestens("0.19.0"));
