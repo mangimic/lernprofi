@@ -5,6 +5,9 @@
   "name": "lernprofi",
   "compatibility_date": "2026-10-01",
   "main": "server/index.js",
+  // ⚠️ Pflicht bei Git-Deploys: Ohne keep_vars räumt JEDER Deploy die im
+  // Dashboard angelegten Runtime-Variablen/Secrets ab (z. B. lernprofiapi)!
+  "keep_vars": true,
   // KI (Etappe 7): Schlüssel NIE hier eintragen, sondern einmalig als Secret:
   //   npx wrangler secret put ANTHROPIC_API_KEY
   // Optional: "vars": { "KI_DECKEL_MAX_CENT": "1000" }

@@ -70,9 +70,15 @@ der Anthropic-Schlüssel liegt NUR dort als Secret, nie in der App.
    (Wert einfügen, Enter.) Alternativ im Dashboard: Worker `lernprofi` →
    Settings → Kasten **„Variables and Secrets“** (die Worker-Runtime!) →
    „Add“ → Typ **Secret**.
-   ⚠️ Stolperstein: NICHT in den „Variables and secrets“ INNERHALB des
+   ⚠️ Stolperstein 1: NICHT in den „Variables and secrets“ INNERHALB des
    Build-Kastens anlegen (dort, wo Build command/Branch control stehen) –
    Build-Secrets sieht nur der Build, nie der laufende Worker.
+   ⚠️ Stolperstein 2 (gelöst, aber wichtig zu wissen): Bei Git-verbundenen
+   Workern führt jeder Push `wrangler deploy` aus, und Wrangler löscht dabei
+   alle NUR im Dashboard angelegten Runtime-Einträge – deshalb „verschwand“
+   das Secret nach jedem Deploy. Unsere wrangler.jsonc setzt darum
+   `"keep_vars": true`; diesen Eintrag nie entfernen. Beim Anlegen im
+   Dashboard den Tab **Production** wählen (nicht „Previews Base“).
 3. **Voraussetzung:** Der KV-Namespace aus Abschnitt „Geräte-Abgleich“ muss
    eingerichtet sein – dort zählt der Worker die Kosten mit (`ki:monat:*`).
 4. **Deckel:** Standard 5 €/Monat, im Elternbereich auf 3/5/10 € stellbar.
