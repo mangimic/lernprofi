@@ -123,6 +123,7 @@ Cloud-Konfiguration; verzichtet zunächst auf Geräte-Sync.
 | Spiele-Migration: See-Abenteuer (v0.9), Blockwelt (v0.11), Konzentration + Mut-Satz (v0.12), Tennis + Fußball (v0.13), Schach (v0.14) | ✅ abgeschlossen |
 | Satzglieder umstellen + Zeit/Ort (v0.15), Vorgangsbeschreibung (v0.16) | ✅ abgeschlossen |
 | Eltern-Werkzeuge: Zeitlimit, Spiele-Schalter, Münz-Freischaltung, Gesprächsimpulse (v0.17) | ✅ abgeschlossen |
-| Rest-Features: Tagesform-Frage, Fokus-/Bewegungspausen | ⏳ offen |
+| Tagesform-Frage + Fokus-Paket (Bewegungspausen, Fokus-Serie) (v0.18) | ✅ abgeschlossen |
+| **Migration der Alt-App-Funktionen: vollständig** | ✅ |
 | 7 – KI-Funktionen (5-€-Deckel, Freigabe je Zweck) | ⏳ offen |
 | 8 – Parallelbetrieb + Umstellung | ⏳ offen |
