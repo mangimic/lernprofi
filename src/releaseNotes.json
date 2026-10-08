@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-047",
+    "version": "0.35.0",
+    "datum": "2026-10-08",
+    "titel": "Fenster direkt antippen – mit Suche und Freitext",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🪟 Ein freies Zeitfenster lässt sich jetzt DIREKT antippen: Es öffnet sich eine Auswahl mit allen Bausteinen und einem Suchfeld – tippen filtert die Liste. Steht das Gewünschte nicht drin, wird der getippte Text einfach als eigener ⭐-Baustein eingetragen („Schwimmbad“, „Oma besuchen“ …). Enter trägt den Freitext direkt ein."
+      },
+      {
+        "type": "verbessert",
+        "text": "Eigene Freitext-Bausteine zeigen ihren Text als Namen und lassen sich wie alles andere korrigieren: antippen → Text ändern, verschieben oder entfernen. Die bisherige Bedienung (Baustein wählen → Fenster tippen, Ziehen) bleibt unverändert."
+      }
+    ]
+  },
+  {
     "id": "rn-046",
     "version": "0.34.0",
     "datum": "2026-10-08",

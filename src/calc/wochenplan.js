@@ -30,6 +30,9 @@ export const BAUSTEINE = [
   // Arzttermin: Pflicht, weder Lernen noch Ausgleich – der Wächter zählt ihn nicht als „etwas Schönes".
   { typ: "arzt", name: "Arzttermin", emoji: "🩺", lern: false, ausgleich: false },
   { typ: "frei", name: "Draußen & frei", emoji: "🌳", lern: false },
+  // Freitext-Baustein („Oma besuchen", „Schwimmbad" …): kommt über den
+  // Fenster-Dialog, der Text lebt in der Notiz. Zählt neutral.
+  { typ: "eigen", name: "Eigenes", emoji: "⭐", lern: false, ausgleich: false, verborgen: true },
 ];
 export const LERN_MINUTEN = 10; // eine Lernbox (danach 5 Minuten Pause)
 

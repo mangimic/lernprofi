@@ -93,8 +93,8 @@ function StundenSlot({ tagIdx, slot, block, fest, wahlAktiv, aufTipp, aufWeg, au
               opacity: zieh.isDragging ? 0.4 : 1, zIndex: zieh.isDragging ? 50 : undefined,
               transform: zieh.transform ? `translate(${zieh.transform.x}px, ${zieh.transform.y}px)` : undefined,
             }}>
-            {block.fertig ? "✓ " : ""}{info.emoji} {info.name}
-            {block.notiz && <span style={{ fontWeight: 400, opacity: 0.85 }}> · {block.notiz}</span>}
+            {block.fertig ? "✓ " : ""}{info.emoji} {block.typ === "eigen" ? (block.notiz || info.name) : info.name}
+            {block.typ !== "eigen" && block.notiz && <span style={{ fontWeight: 400, opacity: 0.85 }}> · {block.notiz}</span>}
           </span>
           <button data-test="block-weg" onClick={(ev) => { ev.stopPropagation(); aufWeg(block.id); }}
             aria-label="Baustein entfernen"
@@ -185,6 +185,7 @@ export default function Wochenplan() {
   const [festDialog, setFestDialog] = useState(null); // ❌ Ausfall-Frage für einen festen Termin
   const [verschieben, setVerschieben] = useState(null); // 📍 Baustein-Id, die ein neues Fenster sucht
   const [kindTermin, setKindTermin] = useState(null); // 📝 Eingabe: { art, fach, tag }
+  const [fenster, setFenster] = useState(null); // 🪟 Direkt-Wahl fürs Fenster: { tag, slot, suche }
   const [terminDialog, setTerminDialog] = useState(null); // eingetragenen Termin ansehen/entfernen
   const montagAktiv = wochenMontag(heute);
   const aktiv = planFuerWoche(data.lernstand.wochenplan, montagAktiv);
@@ -225,7 +226,8 @@ export default function Wochenplan() {
       if (neu !== plan) { speichern(neu, "Baustein verschoben"); setVerschieben(null); }
       return;
     }
-    if (wahl && !slotBelegt(plan, tagIdx, slot)) { hinzu(tagIdx, slot, wahl); setWahl(null); }
+    if (wahl && !slotBelegt(plan, tagIdx, slot)) { hinzu(tagIdx, slot, wahl); setWahl(null); return; }
+    if (!wahl && !slotBelegt(plan, tagIdx, slot)) setFenster({ tag: tagIdx, slot, suche: "" });
   };
   const routineSpeichern = () => {
     logChange(
@@ -306,7 +308,7 @@ export default function Wochenplan() {
         </div>
         <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           DU bestimmst dein Pensum – wochentags ab <b>13 Uhr</b> (🎲 erst Spielzeit nach dem Essen),
-          am Wochenende <b>ab 9 Uhr</b>. Tippe einen Baustein an und dann ein freies Fenster (je 30 Minuten),
+          am Wochenende <b>ab 9 Uhr</b>. Tippe ein freies Fenster direkt an (Auswahl mit Suche + eigener Text) – oder erst einen Baustein und dann ein Fenster (je 30 Minuten),
           oder zieh ihn rüber. Eine Lernbox = {LERN_MINUTEN} Minuten, danach 5 Minuten Pause
           (Trampolin, essen, trinken – keine Bildschirme).
           {" "}🦁 Tipp: Sonntags besprecht ihr die nächste Woche – das Üben bleibt Routine,
@@ -397,6 +399,58 @@ export default function Wochenplan() {
           );
         })()}
       </div>
+      {fenster && (() => {
+        const suche = fenster.suche.trim().toLowerCase();
+        const treffer = BAUSTEINE.filter((b) => !b.verborgen && (!suche || b.name.toLowerCase().includes(suche)));
+        const zu = () => setFenster(null);
+        const eigenesEintragen = () => {
+          const text = fenster.suche.trim();
+          if (!text) return;
+          let neu = blockHinzu(plan, fenster.tag, "eigen", fenster.slot);
+          if (neu !== plan) {
+            neu = blockNotiz(neu, neu.bloecke[neu.bloecke.length - 1].id, text);
+            speichern(neu, `„${text}“ eingeplant`);
+          }
+          zu();
+        };
+        return (
+          <div data-test="fenster-dialog" onClick={zu} style={{
+            position: "fixed", inset: 0, zIndex: 900, background: "rgba(38, 50, 72, 0.94)",
+            display: "flex", alignItems: "center", justifyContent: "center", padding: 18,
+          }}>
+            <div onClick={(ev) => ev.stopPropagation()} style={{ maxWidth: 420, width: "100%", background: T.karte, borderRadius: T.radius, padding: T.abstand }}>
+              <h3 style={{ margin: "0 0 2px" }}>🪟 {WOCHENTAGE[fenster.tag]} · {uhr(fenster.slot)} Uhr</h3>
+              <p style={{ margin: "0 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+                Was soll hier stattfinden? Suchen, antippen – oder einfach frei tippen.
+              </p>
+              <input data-test="fenster-suche" type="text" maxLength={24} autoFocus
+                value={fenster.suche} onChange={(e) => setFenster({ ...fenster, suche: e.target.value })}
+                onKeyDown={(e) => { if (e.key === "Enter" && fenster.suche.trim()) eigenesEintragen(); }}
+                placeholder="Suchen oder frei eintragen …"
+                style={{ width: "100%", boxSizing: "border-box", minHeight: "var(--touch)", borderRadius: T.radiusKlein, border: `1px solid ${T.rand}`, padding: "0 12px", background: T.grund, color: T.text }} />
+              <div style={{ display: "grid", gap: 6, marginTop: 8, maxHeight: "44vh", overflowY: "auto" }}>
+                {treffer.map((b) => (
+                  <button key={b.typ} data-test={`fenster-wahl-${b.typ}`}
+                    onClick={() => { hinzu(fenster.tag, fenster.slot, b.typ); zu(); }}
+                    style={{ textAlign: "left", height: "auto", minHeight: "var(--touch)", padding: "8px 12px", fontWeight: 700, background: T.weich, color: T.text }}>
+                    {b.emoji} {b.name}{b.lern && b.box !== false ? ` · ${LERN_MINUTEN} Min` : ""}
+                  </button>
+                ))}
+                {fenster.suche.trim() && (
+                  <button data-test="fenster-frei" onClick={eigenesEintragen}
+                    style={{ textAlign: "left", height: "auto", minHeight: "var(--touch)", padding: "8px 12px", fontWeight: 700, background: T.primaer, color: T.primaerText }}>
+                    ⭐ „{fenster.suche.trim()}“ eintragen
+                  </button>
+                )}
+              </div>
+              <button onClick={zu} style={{ width: "100%", marginTop: 8, background: "transparent", color: T.textLeise }}>
+                Abbrechen
+              </button>
+            </div>
+          </div>
+        );
+      })()}
+
       {kindTermin && (
         <div data-test="kind-termin-dialog" onClick={() => setKindTermin(null)} style={{
           position: "fixed", inset: 0, zIndex: 900, background: "rgba(38, 50, 72, 0.94)",

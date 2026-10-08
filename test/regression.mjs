@@ -36,6 +36,18 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.35: Fenster-Dialog mit Suche + Freitext ----------
+console.log("== v0.35: Fenster-Dialog ==");
+test("v0.35: Direkt-Tipp aufs Fenster – Suche, Vordefiniertes, Freitext als ⭐-Baustein", (() => {
+  const w = quelle("src/calc/wochenplan.js");
+  const f = quelle("src/features/Wochenplan.jsx");
+  return w.includes('typ: "eigen"') && f.includes('data-test="fenster-dialog"')
+    && f.includes('data-test="fenster-suche"') && f.includes("fenster-wahl-")
+    && f.includes('data-test="fenster-frei"') && f.includes('block.typ === "eigen"')
+    && quelle("src/features/Start.jsx").includes('b.typ === "eigen"')
+    && releaseNoteVorhanden("rn-047");
+})());
+
 // ---------- v0.34: Haken zurück, Mathe/Deutsch, Kind-Termine ----------
 console.log("== v0.34: Haken zurück + eigene Termine ==");
 test("v0.34: APP_VERSION mindestens 0.34.0", versionMindestens("0.34.0"));

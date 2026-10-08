@@ -1025,6 +1025,23 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await expect(page.getByTestId("ausfall-liste")).toHaveCount(0);
   await expect(page.getByTestId("plan-block")).toHaveCount(7); // die 7 geplanten Bausteine bleiben
 
+  // 🪟 Fenster direkt antippen: Freitext eintragen, korrigieren, per Suche Vordefiniertes wählen
+  await page.getByTestId("slot-4-840").click();
+  await expect(page.getByTestId("fenster-dialog")).toBeVisible();
+  await page.getByTestId("fenster-suche").fill("Schwimmbad mit Papa");
+  await page.getByTestId("fenster-frei").click();
+  await expect(page.getByTestId("tag-4")).toContainText("Schwimmbad mit Papa");
+  await page.getByTestId("slot-4-840").click(); // korrigieren über den Baustein-Editor
+  await page.getByTestId("notiz-feld").fill("Schwimmbad");
+  await page.getByTestId("notiz-ok").click();
+  await expect(page.getByTestId("tag-4")).not.toContainText("mit Papa");
+  await expect(page.getByTestId("tag-4")).toContainText("Schwimmbad");
+  await page.getByTestId("slot-4-870").click();
+  await page.getByTestId("fenster-suche").fill("deu"); // Suche filtert die Vorschläge
+  await expect(page.getByTestId("fenster-wahl-mathe")).toHaveCount(0);
+  await page.getByTestId("fenster-wahl-deutsch").click();
+  await expect(page.getByTestId("tag-4")).toContainText("Deutsch üben");
+
   // 🔁 Routine: Üben wiederholt sich – Freunde-Zeit wird sonntags neu verabredet.
   // Beim Platzieren fragt die App direkt, MIT WEM – der Name steht dann am Baustein.
   await bausteinZu("freunde", 2, 870);
@@ -1041,13 +1058,13 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await page.getByTestId("woche-naechste").click();
   await expect(page.getByTestId("plan-block")).toHaveCount(0);
   await page.getByTestId("routine-uebernehmen").click();
-  await expect(page.getByTestId("plan-block")).toHaveCount(7); // alles außer Freunde-Zeit
+  await expect(page.getByTestId("plan-block")).toHaveCount(9); // alles außer Freunde-Zeit
   await page.getByTestId("woche-diese").click();
-  await expect(page.getByTestId("plan-block")).toHaveCount(8);
+  await expect(page.getByTestId("plan-block")).toHaveCount(10);
 
   // 📋 Als Vorlage: diese Woche in die nächste kopieren – füllt nur freie Fenster
   await page.getByTestId("plan-kopieren").click();
-  await expect(page.getByTestId("plan-block")).toHaveCount(8); // 7 Routine + kopierte Freunde-Zeit
+  await expect(page.getByTestId("plan-block")).toHaveCount(10); // 9 Routine + kopierte Freunde-Zeit
   await expect(page.getByTestId("tag-2")).toContainText("Emil + Ole"); // Notiz wandert mit
   await page.getByTestId("woche-diese").click();
 
@@ -1058,14 +1075,14 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await page.getByTestId("pin-ok").click();
   await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
   await page.getByTestId("nav-plan").click();
-  await expect(page.getByTestId("plan-block")).toHaveCount(8);
+  await expect(page.getByTestId("plan-block")).toHaveCount(10);
   await page.getByTestId("woche-naechste").click();
-  await expect(page.getByTestId("plan-block")).toHaveCount(8);
+  await expect(page.getByTestId("plan-block")).toHaveCount(10);
   await page.getByTestId("woche-diese").click();
 
   // 9d: Heute-Baustein einplanen, auf der Startseite abhaken → Tag geschafft + Münze
   const heuteIdx = (new Date().getDay() + 6) % 7;
-  const slotFuerHeute = [840, 930, 960, 840, 840, 630, 540][heuteIdx]; // je Wochentag ein sicher freies Fenster
+  const slotFuerHeute = [840, 930, 960, 840, 900, 630, 540][heuteIdx]; // je Wochentag ein sicher freies Fenster
   await bausteinZu("schlagzeug", heuteIdx, slotFuerHeute);
   await page.getByTestId("plan-zurueck").click();
   await expect(page.getByTestId("heute-plan")).toBeVisible();
