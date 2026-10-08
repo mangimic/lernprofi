@@ -14,6 +14,7 @@ function mockEnv({ mitKv = true, mitSchluessel = true, maxDeckel } = {}) {
     TRESOR: mitKv ? {
       async get(k, art) { const v = m.get(k); return art === "json" && v ? JSON.parse(v) : v ?? null; },
       async put(k, v) { m.set(k, v); },
+      async delete(k) { m.delete(k); },
     } : undefined,
     _map: m,
   };
@@ -243,5 +244,21 @@ describe("kiApi – Routen", () => {
     expect(r.status).toBe(502);
     const s = await (await kiApi(anfrage("GET", "/api/ki/status"), env, JETZT)).json();
     expect(s.verbrauchtCent).toBe(0);
+  });
+
+  it("Diagnose: 502 nennt die Ursache, Status merkt sie sich, Erfolg löscht sie wieder", async () => {
+    const env = mockEnv();
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("invalid x-api-key", { status: 401 })));
+    const r = await kiApi(anfrage("POST", "/api/ki/erklaeren", { frage: "x?" }), env, JETZT);
+    expect(r.status).toBe(502);
+    expect((await r.json()).detail).toContain("claude 401");
+    const s = await (await kiApi(anfrage("GET", "/api/ki/status"), env, JETZT)).json();
+    expect(s.letzterFehler).toMatchObject({ zweck: "erklaeren", zeit: JETZT.toISOString() });
+    expect(s.letzterFehler.detail).toContain("invalid x-api-key");
+    // nächster erfolgreicher Aufruf räumt den gemerkten Fehler weg
+    vi.stubGlobal("fetch", claudeMock());
+    await kiApi(anfrage("POST", "/api/ki/erklaeren", { frage: "x?" }), env, JETZT);
+    const s2 = await (await kiApi(anfrage("GET", "/api/ki/status"), env, JETZT)).json();
+    expect(s2.letzterFehler).toBeNull();
   });
 });

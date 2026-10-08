@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-032",
+    "version": "0.23.1",
+    "datum": "2026-10-08",
+    "titel": "KI-Fehler endlich sichtbar",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🧪 Elternbereich → KI-Funktionen: Knopf „KI-Verbindung testen“ schickt eine Mini-Testfrage und zeigt im Klartext, ob Leo antwortet – und wenn nicht, WAS der Server wirklich meldet (z. B. ungültiger Schlüssel nach einer Rotation oder fehlendes Guthaben)."
+      },
+      {
+        "type": "verbessert",
+        "text": "Der Server merkt sich den letzten echten KI-Fehler (Zeit, Zweck, Original-Meldung) und zeigt ihn in der Eltern-Karte; der nächste erfolgreiche Aufruf räumt ihn automatisch weg. Das Kind sieht weiterhin nur die freundliche Meldung."
+      }
+    ]
+  },
+  {
     "id": "rn-031",
     "version": "0.23.0",
     "datum": "2026-10-08",

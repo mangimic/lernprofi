@@ -200,6 +200,15 @@ export async function kiApi(request, env, jetzt = new Date()) {
   const standLesen = async () =>
     (kv && (await kv.get(`ki:monat:${monat}`, "json"))) || { mikro: 0, posten: [] };
 
+  // Diagnose: Der letzte echte Claude-Fehler wird gemerkt (und beim nächsten
+  // Erfolg gelöscht), damit Eltern die Ursache sehen statt nur „nicht erreichbar".
+  const fehlerMerken = async (zweck, e) => {
+    const detail = String(e?.message || e).slice(0, 300);
+    if (kv) await kv.put("ki:fehler", JSON.stringify({ zeit: jetzt.toISOString(), zweck, detail }));
+    return detail;
+  };
+  const fehlerLoeschen = async () => { if (kv?.delete) await kv.delete("ki:fehler"); };
+
   if (url.pathname === "/api/ki/status" && request.method === "GET") {
     const deckelCent = await deckelLesen();
     const s = await standLesen();
@@ -209,6 +218,7 @@ export async function kiApi(request, env, jetzt = new Date()) {
       monat, deckelCent, maxDeckelCent: maxDeckel,
       verbrauchtCent: mikroZuCent(s.mikro),
       posten: (s.posten || []).slice(-10).reverse().map((p) => ({ ...p, cent: mikroZuCent(p.mikro) })),
+      letzterFehler: (kv && (await kv.get("ki:fehler", "json"))) || null,
     });
   }
 
@@ -253,9 +263,11 @@ export async function kiApi(request, env, jetzt = new Date()) {
     let roh;
     try {
       roh = await claudeAnfragen(env, { konfig, system: LEO_SYSTEM, prompt: teile });
-    } catch {
-      return json(502, { grund: "ki-fehler", fehler: "Die KI hat gerade nicht geantwortet – später nochmal." });
+    } catch (e) {
+      const detail = await fehlerMerken("erklaeren", e);
+      return json(502, { grund: "ki-fehler", fehler: "Die KI hat gerade nicht geantwortet – später nochmal.", detail });
     }
+    await fehlerLoeschen();
 
     const mikro = kostenMikro(konfig.id, roh.usage);
     const posten = [...(stand.posten || []), { zeit: jetzt.toISOString(), zweck: "erklaeren", modell: wahl, mikro }].slice(-20);
@@ -297,9 +309,11 @@ export async function kiApi(request, env, jetzt = new Date()) {
           { type: "text", text: `Der Satz, den das Kind abschreiben sollte: „${satz}“` },
         ],
       });
-    } catch {
-      return json(502, { grund: "ki-fehler", fehler: "Die KI hat gerade nicht geantwortet – später nochmal." });
+    } catch (e) {
+      const detail = await fehlerMerken("schrift", e);
+      return json(502, { grund: "ki-fehler", fehler: "Die KI hat gerade nicht geantwortet – später nochmal.", detail });
     }
+    await fehlerLoeschen();
 
     const mikro = kostenMikro(konfig.id, roh.usage);
     const posten = [...(stand.posten || []), { zeit: jetzt.toISOString(), zweck: "schrift", modell: wahl, mikro }].slice(-20);

@@ -5,7 +5,7 @@ import { ZEIT_STUFEN, SPIELE_SCHALTER, spielAktiv, zeitHeute, GESPRAECH_BEREICHE
 import { PAUSEN_INTERVALLE, TAGESFORM_MODI } from "../calc/tagesform.js";
 import { idbStorage } from "../idbShim.js";
 import { syncStatus, hochladen, herunterladen, konfliktUeberschreiben } from "../sync.js";
-import { kiStatus, kiDeckelSetzen } from "../ki.js";
+import { kiStatus, kiDeckelSetzen, kiErklaeren } from "../ki.js";
 
 /* Elternbereich (eigener Tab, nur nach Entsperren mit dem Eltern-Passwort):
    Profil · Tagesziel · Stufen-Steuerung · neutrale Lern-Übersicht ·
@@ -125,6 +125,7 @@ export default function Eltern() {
 
   // 🤖 KI-Status (Deckel, Verbrauch)
   const [ki, setKi] = useState(null);
+  const [kiTest, setKiTest] = useState(null); // 🧪 Verbindungstest: null | {laden} | {ok,…} | {grund, detail}
   useEffect(() => { kiStatus().then(setKi); }, []);
   const syncAktion = async (arbeit, erfolgsText) => {
     setSyncMeldung("⏳ Einen Moment …"); setFrage(null);
@@ -384,6 +385,34 @@ export default function Eltern() {
               {ki.posten?.length > 0 && (
                 <p style={{ margin: "8px 0 0", color: T.textLeise, fontSize: "12.5px" }}>
                   Zuletzt: {ki.posten.slice(0, 4).map((p2) => `${p2.zweck} (${String(p2.cent).replace(".", ",")} ct)`).join(" · ")}
+                </p>
+              )}
+              {ki.letzterFehler && (
+                <p data-test="ki-letzter-fehler" style={{ margin: "8px 0 0", color: "var(--warn)", fontSize: "12.5px", wordBreak: "break-word" }}>
+                  ⚠️ Letzter KI-Fehler ({new Date(ki.letzterFehler.zeit).toLocaleString("de-DE")} · {ki.letzterFehler.zweck}):{" "}
+                  <code>{ki.letzterFehler.detail}</code>
+                </p>
+              )}
+              <button data-test="ki-test" disabled={!!kiTest?.laden}
+                onClick={async () => {
+                  setKiTest({ laden: true });
+                  const e = await kiErklaeren({
+                    fach: "Test", bereich: "Verbindungstest", frage: "Wie viele Beine hat eine Spinne?",
+                    loesung: "8", tipp: "Zähle nach.", modell: data.einstellungen.ki.modell,
+                  });
+                  setKiTest(e);
+                  setKi(await kiStatus()); // Verbrauch + letzter Fehler frisch anzeigen
+                }}
+                style={{ width: "100%", marginTop: 10, background: T.weich, color: T.text, fontWeight: 700 }}>
+                {kiTest?.laden ? "🧪 Teste …" : "🧪 KI-Verbindung testen (kostet ~1 Erklärung)"}
+              </button>
+              {kiTest && !kiTest.laden && (
+                <p data-test="ki-test-ergebnis" style={{ margin: "8px 0 0", fontSize: "var(--schrift-klein)", color: kiTest.ok ? T.ok : "var(--warn)", wordBreak: "break-word" }}>
+                  {kiTest.ok
+                    ? `✅ Leo hat geantwortet (Modell ${data.einstellungen.ki.modell}, ${String(kiTest.kostenCent).replace(".", ",")} ct) – die Verbindung steht.`
+                    : kiTest.grund === "deckel" ? "⚠️ Der Monatsdeckel ist erreicht – Deckel erhöhen oder nächsten Monat abwarten."
+                    : kiTest.grund === "offline" ? "⚠️ Keine Verbindung zum Server (offline?)."
+                    : <>⚠️ Der Server meldet: <code>{kiTest.detail || kiTest.grund}</code> – bei „401/invalid x-api-key“ stimmt der Schlüssel nicht (nach einer Rotation neu als Secret „lernprofiapi“ setzen), bei „credit“ fehlt Guthaben im Anthropic-Konto.</>}
                 </p>
               )}
             </>

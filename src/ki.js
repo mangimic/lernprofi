@@ -60,7 +60,7 @@ export async function kiErklaeren(aufgabe) {
     });
     if (status === 200 && daten?.blasen?.length) return { ok: true, ...daten };
     if (status === 402) return { ok: false, grund: "deckel" };
-    return { ok: false, grund: daten?.grund || "fehler" };
+    return { ok: false, grund: daten?.grund || "fehler", detail: daten?.detail };
   } catch {
     return { ok: false, grund: "offline" };
   }

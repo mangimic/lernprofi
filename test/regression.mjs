@@ -36,6 +36,21 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.23.1: KI-Fehler-Diagnose ----------
+console.log("== v0.23.1: KI-Fehler-Diagnose ==");
+test("v0.23.1: APP_VERSION mindestens 0.23.1", versionMindestens("0.23.1"));
+test("v0.23.1: Server merkt letzten KI-Fehler und liefert detail im 502", (() => {
+  const k = quelle("server/_lib/kiApi.js");
+  return k.includes("fehlerMerken") && k.includes("fehlerLoeschen") && k.includes("ki:fehler")
+    && k.includes("letzterFehler") && k.includes("detail });");
+})());
+test("v0.23.1: Eltern-Karte mit Verbindungstest und letzter-Fehler-Anzeige", (() => {
+  const e = quelle("src/features/Eltern.jsx");
+  return e.includes('data-test="ki-test"') && e.includes('data-test="ki-test-ergebnis"')
+    && e.includes('data-test="ki-letzter-fehler"') && e.includes("kiErklaeren")
+    && quelle("src/ki.js").includes("detail: daten?.detail");
+})());
+
 // ---------- v0.23: Schreib-Training mit Leos Schrift-Blick ----------
 console.log("== v0.23: Schreib-Training ==");
 test("v0.23: APP_VERSION mindestens 0.23.0", versionMindestens("0.23.0"));

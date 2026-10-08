@@ -750,6 +750,10 @@ test("KI-Erklärer: Eltern geben frei, Leo erklärt in getakteten Blasen mit Mac
   await page.getByTestId("ki-modell-opus").click(); // Modell-Wahl vorhanden
   await page.getByTestId("ki-deckel-300").click();
 
+  // 🧪 Verbindungstest: nutzt den Erklär-Endpunkt und meldet Erfolg im Klartext
+  await page.getByTestId("ki-test").click();
+  await expect(page.getByTestId("ki-test-ergebnis")).toContainText("Leo hat geantwortet");
+
   // Üben: falsche Antwort → Erklär-Knopf → Blase 1 → selbst weitertippen → Blase 2 + Mach-Aufgabe
   await page.getByTestId("nav-ueben").click();
   await page.getByTestId("bereich-dd").click();
