@@ -72,6 +72,9 @@ describe("wochenplan – Wochen-Rechnung", () => {
     p2 = blockHinzu(p2, 1, "lernen", 900);
     p2 = blockHinzu(p2, 1, "schrift", 930);
     expect(planPruefung(p2, [], 20).tage[1].status).toBe("einseitig");
+    // Ein Arzttermin ist kein Ausgleich – der Tag bleibt einseitig
+    const mitArzt = blockHinzu(p2, 1, "arzt", 1080);
+    expect(planPruefung(mitArzt, [], 20).tage[1].status).toBe("einseitig");
     p2 = blockHinzu(p2, 1, "sport", 990);
     const ok = planPruefung(p2, [], 20);
     expect(ok.tage[1]).toMatchObject({ status: "ok", lern: 2, frei: 1, lernMin: 20 });
@@ -131,6 +134,7 @@ describe("wochenplan – Wochen-Rechnung", () => {
     expect(schulFaecher(0)).toEqual(["Deutsch", "Französisch", "Mathe", "SU", "Italienisch"]); // Doppelstunde nur 1×
     expect(schulFaecher(3)).toEqual(["Mathe", "KoKo", "KuW"]);
     expect(schulFaecher(4)).toContain("Musik");
+    expect(schulStunden(4).at(-1)).toEqual([735, 780, "BSS (Sport)"]); // Fr: Sport bis 13 Uhr
     expect(schulFaecher(1).join(" ")).not.toContain("Chor"); // AG ist freiwillig
     expect(schulFaecher(6)).toEqual([]);
     // Anzeige-Zeilen: exakt die Zeitfenster vom Blatt, Pausen einsortiert
@@ -172,6 +176,11 @@ describe("wochenplan – Wochen-Rechnung", () => {
     expect(festerTermin(FESTE_TERMINE_STANDARD, 0, 1080)?.name).toBe("Bandprobe");
     expect(festerTermin(FESTE_TERMINE_STANDARD, 0, 990)?.name).toBe("Musikalische Spiele"); // 16:30 ist mit abgedeckt
     expect(festerTermin(FESTE_TERMINE_STANDARD, 1, 990)).toBeNull(); // Schlagzeug nur 30 Min
+    // 🍽️ 13-14 Uhr ist an ALLEN 7 Tagen blockiert (Mittag & Spielzeit)
+    for (let t = 0; t <= 6; t++) {
+      expect(festerTermin(FESTE_TERMINE_STANDARD, t, 780)?.name).toBe("Mittag & Spielzeit");
+      expect(festerTermin(FESTE_TERMINE_STANDARD, t, 810)?.name).toBe("Mittag & Spielzeit");
+    }
     expect(festerTermin(FESTE_TERMINE_STANDARD, 4, 840)).toBeNull();
     // 2 Lernboxen am Montag: ohne feste Termine „einseitig", MIT Bandprobe & Co. ok
     let p = leererPlan("2026-10-05");
@@ -190,12 +199,12 @@ describe("wochenplan – Wochen-Rechnung", () => {
     // Der Wächter zählt den ausgefallenen Sport nicht mehr als Ausgleich
     p = blockHinzu(p, 1, "lernen", 900);
     p = blockHinzu(p, 1, "schrift", 930);
-    expect(planPruefung(p, [], 20, FESTE_TERMINE_STANDARD).tage[1].frei).toBe(2); // Spielzeit + Schlagzeug
+    expect(planPruefung(p, [], 20, FESTE_TERMINE_STANDARD).tage[1].frei).toBe(1); // nur Schlagzeug (Mittag zählt nicht)
     const zurueck = ausfallAufheben(p, 1, 1020);
     expect(istAusgefallen(zurueck, 1, 1020)).toBe(false);
-    expect(planPruefung(zurueck, [], 20, FESTE_TERMINE_STANDARD).tage[1].frei).toBe(3); // + Sport
+    expect(planPruefung(zurueck, [], 20, FESTE_TERMINE_STANDARD).tage[1].frei).toBe(2); // + Sport
     // Fallen ALLE Aktiv-Termine des Tages aus, wird ein reiner Lerntag „einseitig"
-    let nurLernen = ausfallSetzen(ausfallSetzen(ausfallSetzen(leererPlan("2026-10-05"), 1, 780), 1, 960), 1, 1020);
+    let nurLernen = ausfallSetzen(ausfallSetzen(leererPlan("2026-10-05"), 1, 960), 1, 1020);
     nurLernen = blockHinzu(nurLernen, 1, "lernen", 900);
     expect(planPruefung(nurLernen, [], 20, FESTE_TERMINE_STANDARD).tage[1].status).toBe("einseitig");
     // Zurückholen räumt Bausteine aus dem Termin-Fenster (mit Dauer)

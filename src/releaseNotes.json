@@ -1,5 +1,33 @@
 [
   {
+    "id": "rn-044",
+    "version": "0.32.0",
+    "datum": "2026-10-08",
+    "titel": "Klare Farben, Mittagsblock, Arzttermin",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🎨 Der Wochenplan unterscheidet jetzt farblich auf einen Blick: freie Fenster sind grün (gestrichelt), blockierte Zeiten orange mit 🔒, Lernboxen blau, Freizeit-Bausteine hellblau – mit kleiner Legende unter dem Board."
+      },
+      {
+        "type": "neu",
+        "text": "🍽️ 13 bis 14 Uhr ist jetzt an ALLEN Tagen fest blockiert: „Mittag & Spielzeit“ – auch am Wochenende. (Bei Bedarf lässt sich der Block wie jeder feste Termin für eine Woche ausfallen lassen.)"
+      },
+      {
+        "type": "neu",
+        "text": "🩺 Neuer Baustein „Arzttermin“ – er zählt beim 🦁-Wächter bewusst weder als Lernen noch als Ausgleich."
+      },
+      {
+        "type": "geaendert",
+        "text": "🏫 Freitag: Sport (BSS) geht bis 13 Uhr – der Stundenplan und die Schulzeit-Anzeige sind angepasst."
+      },
+      {
+        "type": "verbessert",
+        "text": "📱 Die untere Leiste blendet sich beim Runterscrollen aus und kommt beim Hochscrollen sofort zurück – mehr Platz für den Plan, besonders auf dem iPad."
+      }
+    ]
+  },
+  {
     "id": "rn-043",
     "version": "0.31.1",
     "datum": "2026-10-08",

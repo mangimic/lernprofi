@@ -15,7 +15,7 @@ import Eltern from "./features/Eltern.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.31.1";
+export const APP_VERSION = "0.32.0";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -77,6 +77,27 @@ function WasIstNeu() {
 
 export default function App() {
   const { T, route, navTo, isMobile, tresor, data, heute, logChange, fokus } = useApp();
+  // 📱 Beim Runterscrollen verschwindet die untere Leiste (mehr Platz),
+  // beim Hochscrollen oder oben ist sie sofort wieder da.
+  const [navWeg, setNavWeg] = useState(false);
+  useEffect(() => {
+    let letztesY = window.scrollY;
+    let timer = null;
+    const beimScrollen = () => {
+      const y = window.scrollY;
+      if (y > letztesY + 4 && y > 80) {
+        setNavWeg(true); // beim Runterscrollen Platz machen …
+        clearTimeout(timer);
+        timer = setTimeout(() => setNavWeg(false), 600); // … und nach kurzem Stillstand zurück
+      } else if (y < letztesY - 4 || y <= 80) {
+        clearTimeout(timer);
+        setNavWeg(false); // hochscrollen oder oben: sofort da
+      }
+      letztesY = y;
+    };
+    window.addEventListener("scroll", beimScrollen, { passive: true });
+    return () => { clearTimeout(timer); window.removeEventListener("scroll", beimScrollen); };
+  }, []);
   if (tresor.status === "laden") return null; // kurzer Moment beim Start
   if (tresor.status !== "offen") return <VaultGate />;
 
@@ -166,11 +187,14 @@ export default function App() {
       </main>
 
       <nav
+        data-test="nav-leiste"
         style={{
           position: "fixed",
           left: 0,
           right: 0,
           bottom: 0,
+          transform: navWeg ? "translateY(110%)" : "none",
+          transition: "transform 0.25s ease",
           display: "flex",
           gap: 8,
           justifyContent: "center",

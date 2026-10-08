@@ -23,6 +23,8 @@ export const BAUSTEINE = [
   { typ: "sport", name: "Sport", emoji: "⚽", lern: false },
   { typ: "pfadfinder", name: "Pfadfinder", emoji: "🏕️", lern: false },
   { typ: "freunde", name: "Freunde", emoji: "🧑‍🤝‍🧑", lern: false },
+  // Arzttermin: Pflicht, weder Lernen noch Ausgleich – der Wächter zählt ihn nicht als „etwas Schönes".
+  { typ: "arzt", name: "Arzttermin", emoji: "🩺", lern: false, ausgleich: false },
   { typ: "frei", name: "Draußen & frei", emoji: "🌳", lern: false },
 ];
 export const LERN_MINUTEN = 10; // eine Lernbox (danach 5 Minuten Pause)
@@ -78,13 +80,20 @@ export const slotLabel = (m) => `${uhr(m)} Uhr`;
 /* 🔒 Feste Termine der Familie (Stand Okt 2026, von den Eltern gepflegt;
    liegen als Daten in den Einstellungen – hier nur der Startwert).
    aktiv=true heißt: zählt beim Wächter als Ausgleich zum Lernen. */
-export const FESTE_TERMINE_STANDARD = [
-  // 🎲 Spielzeit direkt nach dem Mittagessen – jeden Schultag, unantastbar.
-  { tag: 0, beginn: 780, dauer: 60, name: "Spielzeit", emoji: "🎲", hinweis: "nach dem Essen", aktiv: true },
-  { tag: 1, beginn: 780, dauer: 60, name: "Spielzeit", emoji: "🎲", hinweis: "nach dem Essen", aktiv: true },
-  { tag: 2, beginn: 780, dauer: 60, name: "Spielzeit", emoji: "🎲", hinweis: "nach dem Essen", aktiv: true },
-  { tag: 3, beginn: 780, dauer: 60, name: "Spielzeit", emoji: "🎲", hinweis: "nach dem Essen", aktiv: true },
-  { tag: 4, beginn: 780, dauer: 60, name: "Spielzeit", emoji: "🎲", hinweis: "nach dem Essen", aktiv: true },
+/** 🍽️ 13-14 Uhr ist IMMER blockiert: Mittagessen und freie Spielzeit –
+    an allen 7 Tagen. mittagErzwingen stellt das auch für gespeicherte
+    Termin-Listen sicher (alte „Spielzeit"-Einträge werden ersetzt). */
+export function mittagErzwingen(feste) {
+  const ohne = (feste || []).filter((f) => !(f.beginn === 780 && (f.name === "Spielzeit" || f.name === "Mittag & Spielzeit")));
+  // aktiv:false – Mittag und Spielzeit sind Grundversorgung, kein geplanter
+  // Ausgleich: Die 🟡-Ampel („plan was Schönes dazu") soll weiter greifen.
+  const mittag = [0, 1, 2, 3, 4, 5, 6].map((tag) => ({
+    tag, beginn: 780, dauer: 60, name: "Mittag & Spielzeit", emoji: "🍽️", hinweis: "", aktiv: false,
+  }));
+  return [...mittag, ...ohne].slice(0, 30);
+}
+
+export const FESTE_TERMINE_STANDARD = mittagErzwingen([
   { tag: 0, beginn: 960, dauer: 60, name: "Musikalische Spiele", emoji: "🎵", hinweis: "freiwillig", aktiv: true },
   { tag: 0, beginn: 1080, dauer: 60, name: "Bandprobe", emoji: "🎸", hinweis: "", aktiv: true },
   { tag: 1, beginn: 840, dauer: 60, name: "Italienisch (Schule)", emoji: "🏫", hinweis: "bis 14:50", aktiv: false },
@@ -93,9 +102,9 @@ export const FESTE_TERMINE_STANDARD = [
   { tag: 2, beginn: 900, dauer: 60, name: "Lernbetreuung", emoji: "🤝", hinweis: "", aktiv: false },
   { tag: 3, beginn: 1020, dauer: 60, name: "Tennis", emoji: "🎾", hinweis: "", aktiv: true },
   { tag: 3, beginn: 1110, dauer: 90, name: "Pfadfinder", emoji: "🏕️", hinweis: "bis 20:00", aktiv: true },
-];
+]);
 /** 🏫 Schulzeiten (Anzeige im Tageskopf; Vormittags-Stundenplan folgt). */
-export const SCHULE = { tage: [0, 1, 2, 3, 4], text: "7:50–13:00", jeTag: { 4: "7:50–12:15" } };
+export const SCHULE = { tage: [0, 1, 2, 3, 4], text: "7:50–13:00", jeTag: {} }; // Fr: Sport bis 13 Uhr
 
 /* 🏫 Stundenplan Klasse 4a (Schuljahr 2026/27, ab 14.09.2026) – reine
    Anzeige, der Vormittag ist nicht planbar. Einträge: [von, bis, Fach,
@@ -106,7 +115,7 @@ export const SCHULSTUNDEN = {
   1: [[470, 515, "Mathe"], [515, 560, "Deutsch · Leseband"], [580, 625, "D1 / It2"], [625, 670, "D2 / It1"], [690, 735, "SU"], [735, 780, "Chor (AG)", true]],
   2: [[470, 515, "Deutsch"], [515, 560, "Französisch"], [580, 625, "Mathe"], [625, 670, "Mathe"], [690, 735, "Deutsch · Leseband"], [735, 780, "BSS (Sport)"]],
   3: [[470, 515, "Mathe"], [515, 560, "Mathe"], [580, 625, "KoKo"], [625, 670, "KoKo"], [690, 735, "KuW"], [735, 780, "KuW"]],
-  4: [[470, 515, "SU"], [515, 560, "D1 / It2"], [580, 625, "D2 / It1"], [625, 670, "Musik"], [690, 735, "BSS (Sport)"]],
+  4: [[470, 515, "SU"], [515, 560, "D1 / It2"], [580, 625, "D2 / It1"], [625, 670, "Musik"], [690, 735, "BSS (Sport)"], [735, 780, "BSS (Sport)"]],
 };
 export function schulStunden(tag) {
   return SCHULSTUNDEN[tag] || [];
@@ -289,7 +298,8 @@ export function planPruefung(plan, termine, zeitLimit, feste = []) {
     const am = plan.bloecke.filter((b) => b.tag === i);
     const lern = am.filter((b) => bausteinInfo(b.typ).lern).length;
     // Feste Aktiv-Termine zählen als Ausgleich – außer sie fallen diese Woche aus.
-    const frei = am.length - lern
+    // Pflicht-Bausteine ohne Ausgleichswert (Arzttermin) zählen ebenfalls nicht.
+    const frei = am.filter((b) => { const i = bausteinInfo(b.typ); return !i.lern && i.ausgleich !== false; }).length
       + (feste || []).filter((f) => f.tag === i && f.aktiv && !istAusgefallen(plan, i, f.beginn)).length;
     let status = "ok";
     let hinweis = "";

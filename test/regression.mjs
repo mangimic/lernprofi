@@ -36,6 +36,25 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.32: Farben, Mittagsblock, Arzttermin, Nav-Ausblenden ----------
+console.log("== v0.32: Farben + Mittagsblock ==");
+test("v0.32: APP_VERSION mindestens 0.32.0", versionMindestens("0.32.0"));
+test("v0.32: Mittag 13-14 an allen Tagen erzwungen, Arzttermin ohne Ausgleich, Fr Sport bis 13", (() => {
+  const w = quelle("src/calc/wochenplan.js");
+  return w.includes("mittagErzwingen") && w.includes('name: "Mittag & Spielzeit"')
+    && w.includes("[0, 1, 2, 3, 4, 5, 6].map") && w.includes('typ: "arzt"')
+    && w.includes("i.ausgleich !== false") && w.includes('[735, 780, "BSS (Sport)"]],')
+    && quelle("src/calc/migrateData.js").includes("mittagErzwingen(")
+    && releaseNoteVorhanden("rn-044");
+})());
+test("v0.32: Farb-System (frei grün, blockiert orange) mit Legende; Nav blendet beim Scrollen aus", (() => {
+  const f = quelle("src/features/Wochenplan.jsx");
+  const a = quelle("src/App.jsx");
+  return f.includes('data-test="plan-legende"') && f.includes("var(--ok) 7%")
+    && f.includes("var(--warn) 16%")
+    && a.includes("navWeg") && a.includes('"translateY(110%)"') && a.includes('data-test="nav-leiste"');
+})());
+
 // ---------- v0.31.1: Ausfall-Fenster bebaubar ----------
 console.log("== v0.31.1: Ausfall-Fix ==");
 test("v0.31.1: freie Ausfall-Fenster antippbar, Zurückholen räumt Fenster-Blöcke", (() => {
@@ -99,7 +118,7 @@ test("v0.29: Stundenplan hinterlegt – 5 Tage, AG-Kennzeichnung, keine Lehrkraf
   return w.includes("SCHULSTUNDEN") && w.includes("schulFaecher") && w.includes("KoKo")
     && w.includes("Leseband") && (w.includes("Bläserklasse (AG)") || w.includes("Chor (AG)")) // Mo-AG wurde Okt 2026 zu Italienisch
     && !/Häußler|Weinmann|Kemper|Cecere|Lindinger|Hanser|gsakb/i.test(w)
-    && w.includes('jeTag: { 4: "7:50–12:15" }');
+    && (w.includes('jeTag: { 4: "7:50–12:15" }') || w.includes("jeTag: {}")); // seit v0.32: Fr Sport bis 13 Uhr
 })());
 test("v0.29: Schulstunden-Toggle im Plan + Heute-in-der-Schule-Zeile", (() => {
   return quelle("src/features/Wochenplan.jsx").includes('data-test="schule-zeigen"')
@@ -115,7 +134,8 @@ test("v0.28: Minuten-Slots – Werktag ab 13 Uhr (Spielzeit), Wochenende ab 9, T
   const w = quelle("src/calc/wochenplan.js");
   return w.includes("SLOT_MIN = 30") && w.includes("WERKTAG_START = 13 * 60")
     && w.includes("WOCHEMEND_START") === false && w.includes("WOCHENEND_START = 9 * 60")
-    && w.includes('name: "Spielzeit"') && w.includes("dauer: 30") && w.includes("f.beginn + f.dauer")
+    && (w.includes('name: "Spielzeit"') || w.includes('name: "Mittag & Spielzeit"')) // seit v0.32 Mittagsblock
+    && w.includes("dauer: 30") && w.includes("f.beginn + f.dauer")
     && quelle("src/calc/migrateData.js").includes("(f.slot + 14) * 60");
 })());
 test("v0.28: Kalenderwoche, Folgewoche-Vorplanung und Routine ohne Freunde-Zeit", (() => {

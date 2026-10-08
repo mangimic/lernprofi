@@ -48,8 +48,10 @@ function StundenSlot({ tagIdx, slot, block, fest, ausfall, wahlAktiv, aufTipp, a
       <div data-test={`fest-${tagIdx}-${slot}`} onClick={() => aufFest(fest)} style={{
         cursor: "pointer",
         display: "flex", alignItems: "center", gap: 6, minHeight: 34, marginBottom: 3,
-        borderRadius: 6, padding: "2px 6px", background: T.grund, color: T.text,
-        border: `1.5px solid ${T.rand}`, borderTop: fortsetzung ? "none" : undefined,
+        borderRadius: 6, padding: "2px 6px", color: T.text,
+        background: "color-mix(in srgb, var(--warn) 16%, var(--karte))",
+        border: "1.5px solid color-mix(in srgb, var(--warn) 45%, var(--karte))",
+        borderTop: fortsetzung ? "none" : undefined,
         opacity: fortsetzung ? 0.8 : 1,
       }}>
         <span style={{ fontSize: "11px", fontWeight: 700, minWidth: 34, opacity: 0.7 }}>{uhr(slot)}</span>
@@ -67,9 +69,13 @@ function StundenSlot({ tagIdx, slot, block, fest, ausfall, wahlAktiv, aufTipp, a
       style={{
         display: "flex", alignItems: "center", gap: 6, minHeight: 34, marginBottom: 3,
         borderRadius: 6, padding: "2px 6px",
-        background: block ? (info.lern ? T.primaer : T.weich) : isOver || wahlAktiv ? T.weich : "transparent",
-        color: block ? (info.lern ? T.primaerText : T.text) : T.textLeise,
-        border: block ? "none" : `1.5px dashed ${isOver || wahlAktiv ? T.primaer : T.rand}`,
+        background: block
+          ? (info.lern ? T.primaer : T.weich)
+          : isOver || wahlAktiv
+            ? "color-mix(in srgb, var(--ok) 20%, var(--karte))"
+            : "color-mix(in srgb, var(--ok) 7%, var(--karte))",
+        color: block ? (info.lern ? T.primaerText : T.text) : "var(--ok)",
+        border: block ? "none" : `1.5px dashed ${isOver || wahlAktiv ? "var(--ok)" : "color-mix(in srgb, var(--ok) 40%, var(--karte))"}`,
         cursor: "pointer",
         opacity: block?.fertig ? 0.65 : 1,
       }}>
@@ -92,7 +98,7 @@ function StundenSlot({ tagIdx, slot, block, fest, ausfall, wahlAktiv, aufTipp, a
       ) : ausfall ? (
         <>
           <span style={{ flex: 1, fontSize: "11.5px" }}>
-            frei · <s style={{ opacity: 0.8 }}>{ausfall.fest.emoji} {ausfall.fest.name} fällt aus</s>
+            frei · <s style={{ opacity: 0.75, color: "var(--text-leise)" }}>{ausfall.fest.emoji} {ausfall.fest.name} fällt aus</s>
           </span>
           {ausfall.istBeginn && (
             <button data-test="ausfall-zurueck" onClick={(ev) => { ev.stopPropagation(); aufZurueck(ausfall.fest); }}
@@ -300,6 +306,12 @@ export default function Wochenplan() {
             ))}
           </div>
         </DndContext>
+        <p data-test="plan-legende" style={{ margin: "8px 0 0", color: T.textLeise, fontSize: "12.5px" }}>
+          <span style={{ background: "color-mix(in srgb, var(--ok) 7%, var(--karte))", border: "1.5px dashed color-mix(in srgb, var(--ok) 40%, var(--karte))", borderRadius: 4, padding: "1px 7px", color: "var(--ok)" }}>frei</span>
+          {" "}· <span style={{ background: "color-mix(in srgb, var(--warn) 16%, var(--karte))", border: "1.5px solid color-mix(in srgb, var(--warn) 45%, var(--karte))", borderRadius: 4, padding: "1px 7px" }}>🔒 blockiert</span>
+          {" "}· <span style={{ background: T.primaer, color: T.primaerText, borderRadius: 4, padding: "1px 7px" }}>Lernbox</span>
+          {" "}· <span style={{ background: T.weich, borderRadius: 4, padding: "1px 7px" }}>Freizeit</span>
+        </p>
         {pruefung.hinweise.length > 0 && (
           <div data-test="plan-hinweise" style={{ marginTop: 10, background: "var(--warn-weich, #ffe9b3)", color: "#5b4300", borderRadius: T.radiusKlein, padding: "8px 12px" }}>
             {pruefung.hinweise.map((h, i) => (

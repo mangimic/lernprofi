@@ -937,14 +937,17 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await page.getByTestId("nav-plan").click();
   await expect(page.getByTestId("plan-kw")).toContainText("KW");
   await expect(page.getByTestId("termin-chip")).toContainText("Klassenarbeit Mathe");
-  await expect(page.getByTestId("fest-0-780")).toContainText("Spielzeit");
+  await expect(page.getByTestId("fest-0-780")).toContainText("Mittag & Spielzeit");
+  await expect(page.getByTestId("fest-6-780")).toContainText("Mittag & Spielzeit"); // auch am Wochenende
+  await expect(page.getByTestId("baustein-arzt")).toContainText("Arzttermin");
+  await expect(page.getByTestId("plan-legende")).toContainText("blockiert");
   await expect(page.getByTestId("fest-1-960")).toContainText("Schlagzeug-Stunde");
   await expect(page.getByTestId("fest-1-990")).toHaveCount(0); // Schlagzeug nur 30 Min
   await expect(page.getByTestId("fest-0-990")).toContainText("↳"); // Musikalische Spiele läuft 60 Min
   await expect(page.getByTestId("baustein-hausaufgaben")).toContainText("Hausaufgaben");
   await expect(page.getByTestId("fest-3-1110")).toContainText("Pfadfinder");
   await expect(page.getByTestId("tag-0")).toContainText("Schule 7:50");
-  await expect(page.getByTestId("tag-4")).toContainText("7:50–12:15"); // Freitag endet früher
+  await expect(page.getByTestId("tag-4")).toContainText("7:50–13:00"); // Fr: Sport bis 13 Uhr
   // 🏫 Vormittag aufklappen: Stundenplan je Tag, AGs als freiwillig
   await page.getByTestId("schule-zeigen").click();
   await expect(page.getByTestId("schule-3")).toContainText("KoKo");
@@ -1037,7 +1040,7 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await bausteinZu("schlagzeug", heuteIdx, slotFuerHeute);
   await page.getByTestId("plan-zurueck").click();
   await expect(page.getByTestId("heute-plan")).toBeVisible();
-  if (heuteIdx <= 4) await expect(page.getByTestId("heute-fest").first()).toBeVisible(); // feste Termine (nur Schultage)
+  await expect(page.getByTestId("heute-fest").first()).toBeVisible(); // Mittag & Spielzeit gibt es jeden Tag
   if (heuteIdx <= 4) await expect(page.getByTestId("heute-schule")).toContainText("Heute in der Schule");
   while (await page.getByTestId("heute-haken").count()) {
     await page.getByTestId("heute-haken").first().click();

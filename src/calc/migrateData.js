@@ -8,7 +8,7 @@
    unangetastet erhalten.
    ============================================================ */
 import { STARK_SAETZE } from "./aufgaben/stark.js";
-import { FESTE_TERMINE_STANDARD } from "./wochenplan.js";
+import { FESTE_TERMINE_STANDARD, mittagErzwingen } from "./wochenplan.js";
 
 export const SCHEMA_VERSION = 1;
 
@@ -164,8 +164,9 @@ export function migrateData(alt, heute) {
           hinweis: typeof f.hinweis === "string" ? f.hinweis.slice(0, 16) : "",
           aktiv: f.aktiv === true,
         };
-      }).slice(0, 20)
+      }).slice(0, 30)
     : FESTE_TERMINE_STANDARD;
+  d.einstellungen.festeTermine = mittagErzwingen(d.einstellungen.festeTermine);
   d.einstellungen.planRoutine = (Array.isArray(d.einstellungen.planRoutine) ? d.einstellungen.planRoutine : [])
     .filter((r) => istObjekt(r) && Number.isInteger(r.tag) && r.tag >= 0 && r.tag <= 6
       && Number.isInteger(r.slot) && typeof r.typ === "string")
