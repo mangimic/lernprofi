@@ -555,3 +555,36 @@ describe("einstufung", () => {
     expect(E.einstufungEmpfehlung(ergebnisse)).toEqual(["gws", "faelle", "mzahlen"]);
   });
 });
+
+describe("übungs-welten & wozu-anker", () => {
+  it("Themen filtern alle Satz-Pools, ohne Thema bleibt alles; Pools bleiben gesund", async () => {
+    const S = await import("./aufgaben/saetze.js");
+    const K = await import("./aufgaben/deutschKonverter.js");
+    const { THEMEN_KEYS, nurThema } = await import("./aufgaben/themen.js");
+    expect(THEMEN_KEYS).toEqual(["alltag", "angeln", "tennis", "fussball"]);
+    expect(nurThema({ a: 1, b: 2 }, "quatsch")).toEqual({ a: 1, b: 2 });
+    for (const thema of THEMEN_KEYS) {
+      for (const pool of [S.subjektPool(thema), S.praedikatPool(thema), S.gkPool(thema), K.redePool(thema)]) {
+        expect(pool.easy.length).toBeGreaterThan(0);
+        for (const a of pool.easy.slice(0, 3)) expect(a.ziel.every((i) => i >= 0 && i < a.woerter.length)).toBe(true);
+      }
+      expect(K.zeitPool(thema).easy.length + K.zeitPool(thema).hard.length).toBeGreaterThan(0);
+      expect(K.faellePool(thema).easy.length).toBeGreaterThan(0);
+      expect(K.wortartenPool(thema).easy.length).toBeGreaterThan(0);
+      expect(S.subjektPool(thema).easy.length).toBeLessThan(S.subjektPool().easy.length);
+    }
+  });
+
+  it("jedes Lernfeld hat einen Wozu-Satz (kurz, ohne Diagnose-Wörter)", async () => {
+    const { WOZU, wozuSatz } = await import("./wozu.js");
+    const KEYS = ["subj", "praed", "satzglied", "rede", "zeit", "wa", "faelle", "gk", "gws", "gesch", "dd", "doppel", "vorgang",
+      "mrechnen", "mzahlen", "mgeo", "mgroessen", "mdaten",
+      "sstrom", "srad", "skarte", "sgemeinde", "skoerper", "szeit", "stark"];
+    for (const k of KEYS) {
+      expect(WOZU[k], k).toBeTruthy();
+      expect(WOZU[k].length).toBeLessThan(120);
+      expect(/adhs|störung|unmotiviert|versager|dumm/i.test(WOZU[k])).toBe(false);
+    }
+    expect(wozuSatz("gibtsnicht")).toBe("");
+  });
+});

@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-025",
+    "version": "0.22.0",
+    "datum": "2026-10-08",
+    "titel": "Deine Übungs-Welt, Lehrer-Moment & Wozu-Anker",
+    "entries": [
+      { "type": "neu", "text": "🎨 Du wählst deine Übungs-Welt: Alltag, Angeln, Tennis oder Fußball! Alle Satz-Übungen (Subjekte, Prädikate, Groß/Klein, wörtliche Rede, Zeitformen, Wortarten, die 4 Fälle) kommen dann aus DEINER Welt – „Der Angler wirft die Schnur aus“ statt grauer Beispielsätze. Interesse ist der Zündschlüssel!" },
+      { "type": "neu", "text": "🧑‍🏫 Der Lehrer-Moment: Einmal pro Runde dreht Leo den Spieß um – nach einer richtigen Antwort sagst DU laut, WARUM sie stimmt. Was du erklären kannst, sitzt doppelt (aktives Abrufen statt nur lesen)." },
+      { "type": "neu", "text": "🧭 Der Wozu-Anker: Jede Runde startet mit einem Satz, wofür du das brauchst („Die 4 Fälle sagen dir, wem der Ball gehört und wen du anspielst“) – Sinn macht merkbar." },
+      { "type": "neu", "text": "⏳ Zeitformen haben jetzt einen Zeitstrahl (GESTERN – JETZT – MORGEN) als Bild über jeder Aufgabe – sehen statt nur lesen." }
+    ]
+  },
+  {
     "id": "rn-024",
     "version": "0.21.0",
     "datum": "2026-10-08",

@@ -8,7 +8,8 @@ import {
   ZEIT_THEMEN, WA_THEMEN, WA_K4, FAELLE_THEMEN, REDE_THEMEN, REDE_K4, GWS_KATEGORIEN,
 } from "./deutsch2.js";
 
-const flach = (themen) => Object.values(themen).flatMap((t) => (Array.isArray(t) ? t : t.saetze));
+import { nurThema } from "./themen.js";
+const flach = (themen, thema) => Object.values(nurThema(themen, thema)).flatMap((t) => (Array.isArray(t) ? t : t.saetze));
 const satz = (woerter) => woerter.join(" ");
 
 // --- Zeitformen: Satz lesen, Zeitform bestimmen (easy: Gegenwart/
@@ -31,8 +32,8 @@ const ZEIT_TIPP = {
   perfekt: "Zwei Teile: haben/sein + ge-Form (hat … gespielt).",
   futur: "Zukunft mit „wird/werden“ + Grundform (wird … spielen).",
 };
-export function zeitPool() {
-  const alle = flach(ZEIT_THEMEN).map((a) => ({
+export function zeitPool(thema) {
+  const alle = flach(ZEIT_THEMEN, thema).map((a) => ({
     f: `Welche Zeitform hat der Satz: „${a.satz}“?`,
     r: ZEIT_NAMEN[a.form],
     x: ZEIT_FALSCH[a.form].map((k) => ZEIT_NAMEN[k]),
@@ -62,8 +63,8 @@ function waNorm(a) {
     tipp: WA_TIPP[a.art],
   };
 }
-export function wortartenPool() {
-  return { easy: flach(WA_THEMEN).map(waNorm), hard: flach(WA_K4).map(waNorm) };
+export function wortartenPool(thema) {
+  return { easy: flach(WA_THEMEN, thema).map(waNorm), hard: flach(WA_K4, thema).map(waNorm) };
 }
 
 // --- Die 4 Fälle: markierte Wortgruppe bestimmen ---
@@ -71,8 +72,8 @@ export const FALL_NAMEN = { nom: "Nominativ (Wer?)", gen: "Genitiv (Wessen?)", d
 const FALL_FALSCH = {
   nom: ["akk", "dat"], akk: ["nom", "dat"], dat: ["akk", "gen"], gen: ["dat", "akk"],
 };
-export function faellePool() {
-  const easy = flach(FAELLE_THEMEN).map((a) => {
+export function faellePool(thema) {
+  const easy = flach(FAELLE_THEMEN, thema).map((a) => {
     const gruppe = a.ziel.map((i) => a.woerter[i].replace(/[.,!?]/g, "")).join(" ");
     return {
       kontext: satz(a.woerter),
@@ -86,7 +87,7 @@ export function faellePool() {
 }
 
 // --- Wörtliche Rede: die gesprochenen Wörter antippen (Tippen-Format) ---
-export function redePool() {
+export function redePool(thema) {
   const norm = (a) => ({
     woerter: a.woerter,
     ziel: a.rede,
@@ -94,7 +95,7 @@ export function redePool() {
     loesung: a.rede.map((i) => a.woerter[i]).join(" "),
     tipp: "Die wörtliche Rede beginnt nach dem Doppelpunkt – in Texten steht sie zwischen Anführungszeichen „…“.",
   });
-  return { easy: flach(REDE_THEMEN).map(norm), hard: flach(REDE_K4).map(norm) };
+  return { easy: flach(REDE_THEMEN, thema).map(norm), hard: flach(REDE_K4, thema).map(norm) };
 }
 
 // --- Grundwortschatz: 12 Regelgruppen, richtige Schreibweise wählen ---

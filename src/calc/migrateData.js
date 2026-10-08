@@ -44,6 +44,7 @@ export function leeresDokument(heute) {
       ki: {                // KI-Funktionen: je Zweck eine Eltern-Freigabe (Standard: aus)
         erklaeren: false, schrift: false, aufsatz: false, bericht: false, saetze: false,
       },
+      uebungsThema: "alltag", // Übungs-Welt der Satz-Übungen (Kind wählt selbst)
     },
     protokoll: [],     // Änderungsprotokoll: { zeit, bereich, art, text }
   };
@@ -112,6 +113,9 @@ export function migrateData(alt, heute) {
   if (typeof d.einstellungen.tagesformAktiv !== "boolean") d.einstellungen.tagesformAktiv = true;
   if (typeof d.einstellungen.pausenAktiv !== "boolean") d.einstellungen.pausenAktiv = true;
   if (![5, 10, 15].includes(d.einstellungen.pausenIntervall)) d.einstellungen.pausenIntervall = 10;
+  if (!["alltag", "angeln", "tennis", "fussball"].includes(d.einstellungen.uebungsThema)) {
+    d.einstellungen.uebungsThema = "alltag";
+  }
   const ki = istObjekt(d.einstellungen.ki) ? d.einstellungen.ki : {};
   d.einstellungen.ki = {
     erklaeren: ki.erklaeren === true, schrift: ki.schrift === true, aufsatz: ki.aufsatz === true,

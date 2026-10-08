@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useApp } from "../appContext.jsx";
 import { MATHE_DATEN, MATHE_BEREICHE } from "../calc/aufgaben/mathe.js";
 import { SACH_DATEN, SACH_BEREICHE } from "../calc/aufgaben/sachkunde.js";
@@ -15,6 +15,8 @@ import { muenzenNachRunde, aufgabenZaehlen, heutigerTag, lernspur } from "../cal
 import { missionsOpts, tagesModus } from "../calc/tagesform.js";
 import Vorgang from "./Vorgang.jsx";
 import { kiErklaeren } from "../ki.js";
+import { THEMEN_WELTEN } from "../calc/aufgaben/themen.js";
+import { wozuSatz } from "../calc/wozu.js";
 
 /* Üben: drei Übungstypen über denselben Runden-/Stufen-/Münz-Mechanismus:
    - "mc":        Frage mit 2-3 Antwort-Knöpfen (Mathe, Sachkunde, Deutsch-MC, Stark)
@@ -22,11 +24,15 @@ import { kiErklaeren } from "../ki.js";
    - "umstellen": Satzglied-Bausteine neu zusammenbauen + Zeit/Ort erkennen
    Feinschliff (Fokus-Modus) folgt später. */
 
-const DEUTSCH_DATEN = {
-  subj: subjektPool(), praed: praedikatPool(), gk: gkPool(), rede: redePool(),
-  zeit: zeitPool(), wa: wortartenPool(), faelle: faellePool(), gws: gwsPool(),
-  gesch: GESCH_DATEN, dd: ddPool(), doppel: doppelPool(), satzglied: umstellenPool(),
-};
+// 🎨 Die Satz-Übungen folgen der gewählten Übungs-Welt (Alltag/Angeln/
+// Tennis/Fußball) – Regel- und Wissens-Pools bleiben themenfrei.
+function deutschDaten(thema) {
+  return {
+    subj: subjektPool(thema), praed: praedikatPool(thema), gk: gkPool(thema), rede: redePool(thema),
+    zeit: zeitPool(thema), wa: wortartenPool(thema), faelle: faellePool(thema), gws: gwsPool(),
+    gesch: GESCH_DATEN, dd: ddPool(), doppel: doppelPool(), satzglied: umstellenPool(),
+  };
+}
 const DEUTSCH_LISTE = [
   { key: "subj", emoji: "🔎", name: "Subjekte", typ: "tippen" },
   { key: "praed", emoji: "🧲", name: "Prädikate", typ: "tippen" },
@@ -110,18 +116,46 @@ function ZahlenBloecke({ b }) {
   );
 }
 
-const FAECHER = [
-  { id: "deutsch", emoji: "📗", name: "Deutsch", bereiche: DEUTSCH_LISTE, daten: DEUTSCH_DATEN },
-  { id: "mathe", emoji: "🔢", name: "Mathe", bereiche: MATHE_BEREICHE, daten: MATHE_DATEN },
-  { id: "sachkunde", emoji: "🌍", name: "Sachkunde", bereiche: SACH_BEREICHE, daten: SACH_DATEN },
-  { id: "stark", emoji: "💪", name: "Stark", bereiche: STARK_BEREICHE, daten: { stark: STARK_DATEN } },
-];
+/* ⏳ Zeitstrahl: visueller Anker für die Zeitformen (gestern–jetzt–morgen). */
+function ZeitStrahl() {
+  return (
+    <div data-test="zeit-strahl" aria-hidden="true"
+      style={{ background: "var(--grund)", borderRadius: "var(--radius-klein)", padding: "8px 10px", margin: "8px 0" }}>
+      <svg viewBox="0 0 320 54" style={{ width: "100%", maxWidth: 420, display: "block", margin: "0 auto" }}>
+        <line x1="12" y1="26" x2="308" y2="26" stroke="var(--rand)" strokeWidth="3" strokeLinecap="round" />
+        <polygon points="308,26 298,21 298,31" fill="var(--rand)" />
+        {[
+          { x: 55, label: "GESTERN", unten: "war", farbe: "#b07a3c" },
+          { x: 160, label: "JETZT", unten: "ist", farbe: "var(--primaer)" },
+          { x: 265, label: "MORGEN", unten: "wird", farbe: "#3f9d54" },
+        ].map((p2) => (
+          <g key={p2.label}>
+            <circle cx={p2.x} cy="26" r="7" fill={p2.farbe} />
+            <text x={p2.x} y="12" textAnchor="middle" fontSize="11" fontWeight="800" fill="var(--text)" fontFamily="system-ui">{p2.label}</text>
+            <text x={p2.x} y="48" textAnchor="middle" fontSize="11" fill="var(--text-leise)" fontFamily="system-ui">{p2.unten}</text>
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+function faecherBauen(thema) {
+  return [
+    { id: "deutsch", emoji: "📗", name: "Deutsch", bereiche: DEUTSCH_LISTE, daten: deutschDaten(thema) },
+    { id: "mathe", emoji: "🔢", name: "Mathe", bereiche: MATHE_BEREICHE, daten: MATHE_DATEN },
+    { id: "sachkunde", emoji: "🌍", name: "Sachkunde", bereiche: SACH_BEREICHE, daten: SACH_DATEN },
+    { id: "stark", emoji: "💪", name: "Stark", bereiche: STARK_BEREICHE, daten: { stark: STARK_DATEN } },
+  ];
+}
 
 export default function Ueben() {
   const { data, logChange, T, heute, fokus, uebenZiel, uebenZielSetzen } = useApp();
   const [fachId, setFachId] = useState("deutsch");
   const [runde, setRunde] = useState(null);
-  const fach = FAECHER.find((f) => f.id === fachId);
+  const thema = data.einstellungen.uebungsThema;
+  const faecher = useMemo(() => faecherBauen(thema), [thema]);
+  const fach = faecher.find((f) => f.id === fachId);
 
   const karte = { background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand };
   const primaerKnopf = { width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 };
@@ -147,6 +181,8 @@ export default function Ueben() {
       fehlversuch: false,
       meldung: null,    // umstellen: { ok, text }
       ki: null,         // 🦁 Erklärer: null | {laden} | {blasen, mach, offen} | {fehler}
+      lehrer: null,     // 🧑‍🏫 Lehrer-Moment: null | {offen} | {fertig}
+      lehrerWar: false, // einmal pro Runde
       ergebnis: null,
     });
   };
@@ -154,13 +190,18 @@ export default function Ueben() {
   // 🎯 Trainingsplan-Deep-Link: Startseite wählt ein Lernfeld vor
   useEffect(() => {
     if (!uebenZiel || runde) return;
-    for (const f of FAECHER) {
+    for (const f of faecher) {
       const b = f.bereiche.find((x) => x.key === uebenZiel);
       if (b) { setFachId(f.id); starten(b, f); break; }
     }
     uebenZielSetzen(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uebenZiel]);
+
+  // 🧑‍🏫 Lehrer-Moment: fällig ab der 5. Aufgabe – in kurzen Runden
+  // (kleine Themen-Pools) spätestens bei der letzten.
+  const lehrerDran = (r, richtig) =>
+    richtig && !r.lehrerWar && r.index >= Math.min(4, r.aufgaben.length - 1);
 
   const beantwortet = runde
     ? (runde.typ === "mc" ? runde.gewaehlt !== null
@@ -172,7 +213,11 @@ export default function Ueben() {
     if (runde.gewaehlt !== null) return;
     const richtig = antwortRichtig(runde.aufgaben[runde.index], wahl);
     if (richtig) fokus.zaehlen();
-    setRunde({ ...runde, gewaehlt: wahl, fehler: runde.fehler + (richtig ? 0 : 1), geloest: runde.geloest + (richtig ? 1 : 0) });
+    const lehrerJetzt = lehrerDran(runde, richtig);
+    setRunde({
+      ...runde, gewaehlt: wahl, fehler: runde.fehler + (richtig ? 0 : 1), geloest: runde.geloest + (richtig ? 1 : 0),
+      lehrer: lehrerJetzt ? { offen: true } : runde.lehrer, lehrerWar: runde.lehrerWar || lehrerJetzt,
+    });
   };
 
   const wortToggle = (i) => {
@@ -184,7 +229,11 @@ export default function Ueben() {
   const tippenPruefen = () => {
     const erg = auswahlPruefen(runde.aufgaben[runde.index], runde.auswahl);
     if (erg.richtig) fokus.zaehlen();
-    setRunde({ ...runde, geprueft: erg, fehler: runde.fehler + (erg.richtig ? 0 : 1), geloest: runde.geloest + (erg.richtig ? 1 : 0) });
+    const lehrerJetzt = lehrerDran(runde, erg.richtig);
+    setRunde({
+      ...runde, geprueft: erg, fehler: runde.fehler + (erg.richtig ? 0 : 1), geloest: runde.geloest + (erg.richtig ? 1 : 0),
+      lehrer: lehrerJetzt ? { offen: true } : runde.lehrer, lehrerWar: runde.lehrerWar || lehrerJetzt,
+    });
   };
 
   // --- Umstellen: Satz neu bauen (Prädikat an 2. Stelle) ---
@@ -196,9 +245,11 @@ export default function Ueben() {
     const erg = umstellenPruefen(a, folge);
     if (erg.richtig) {
       fokus.zaehlen();
+      const lehrerJetzt = lehrerDran(runde, true);
       setRunde({
         ...runde, folge, fertig: true, geloest: runde.geloest + (runde.fehlversuch ? 0 : 1),
         meldung: { ok: true, text: "Super umgestellt! 🌟 Das Prädikat steht an 2. Stelle – der Satz stimmt." },
+        lehrer: lehrerJetzt ? { offen: true } : runde.lehrer, lehrerWar: runde.lehrerWar || lehrerJetzt,
       });
     } else {
       setRunde({
@@ -280,7 +331,7 @@ export default function Ueben() {
     if (runde.index + 1 < runde.aufgaben.length) {
       setRunde({
         ...runde, index: runde.index + 1, gewaehlt: null, auswahl: [], geprueft: null,
-        folge: [], zoPhase: "zeit", fertig: false, fehlversuch: false, meldung: null, ki: null,
+        folge: [], zoPhase: "zeit", fertig: false, fehlversuch: false, meldung: null, ki: null, lehrer: null,
       });
       return;
     }
@@ -349,6 +400,12 @@ export default function Ueben() {
             {runde.pakete > 1 ? ` · Paket ${runde.paket}/${runde.pakete}` : ""} ·
             🎯 Stufe {runde.stufe}/{runde.stufenMax} ({STUFEN_NAMEN[runde.stufe]})
           </p>
+          {runde.index === 0 && wozuSatz(runde.key) && (
+            <p data-test="wozu-anker" style={{ margin: "2px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+              🧭 <b>Wozu?</b> {wozuSatz(runde.key)}
+            </p>
+          )}
+          {runde.key === "zeit" && <ZeitStrahl />}
 
           {runde.typ === "mc" ? (
             <>
@@ -484,6 +541,23 @@ export default function Ueben() {
             </>
           )}
 
+          {runde.lehrer && (
+            <div className="mut-dialog" data-test="lehrer-moment">
+              <div className="mut-kopf">🧑‍🏫 <b>Lehrer-Moment</b> – jetzt bist DU dran!</div>
+              <div className="bubble coach">
+                {runde.lehrer.fertig
+                  ? "🌟 Stark erklärt! Was du erklären kannst, sitzt doppelt."
+                  : "Richtig! Jetzt sag mir LAUT, WARUM das stimmt – ich höre zu! 👂"}
+              </div>
+              {!runde.lehrer.fertig && (
+                <button data-test="lehrer-fertig" className="bw-knopf mut-weiter"
+                  onClick={() => setRunde({ ...runde, lehrer: { fertig: true } })}>
+                  ✅ Hab ich erklärt
+                </button>
+              )}
+            </div>
+          )}
+
           {(() => {
             const falsch =
               runde.typ === "mc" ? (runde.gewaehlt !== null && !antwortRichtig(a, runde.gewaehlt))
@@ -543,7 +617,7 @@ export default function Ueben() {
   return (
     <div data-test="ueben-bereiche">
       <div style={{ display: "flex", gap: 8, marginBottom: T.abstand }}>
-        {FAECHER.map((f) => (
+        {faecher.map((f) => (
           <button key={f.id} data-test={`ueben-fach-${f.id}`} onClick={() => setFachId(f.id)}
             style={{
               flex: 1, fontWeight: 700, padding: "0 4px",
@@ -554,6 +628,27 @@ export default function Ueben() {
           </button>
         ))}
       </div>
+      {fachId === "deutsch" && (
+        <div style={{ ...karte, paddingTop: 12, paddingBottom: 12 }}>
+          <p style={{ margin: "0 0 8px", fontSize: "var(--schrift-klein)" }}>
+            <b>🎨 Deine Übungs-Welt</b> <span style={{ color: T.textLeise }}>– für die Satz-Übungen (Subjekte bis Die 4 Fälle)</span>
+          </p>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {THEMEN_WELTEN.map((w) => (
+              <button key={w.key} data-test={`thema-${w.key}`}
+                onClick={() => logChange({ ...data, einstellungen: { ...data.einstellungen, uebungsThema: w.key } },
+                  "einstellungen", "geaendert", `Übungs-Welt: ${w.name}`)}
+                style={{
+                  flex: "1 1 auto", fontWeight: 700, padding: "0 12px", whiteSpace: "nowrap",
+                  background: thema === w.key ? T.primaer : T.weich,
+                  color: thema === w.key ? T.primaerText : T.text,
+                }}>
+                {w.emoji} {w.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {fach.bereiche.map((b) => {
         const fortschritt = data.lernstand.stufen[b.key];
         const stufe = b.typ === "modul" ? null

@@ -36,6 +36,31 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.22: Übungs-Welt, Lehrer-Moment, Wozu-Anker ----------
+console.log("== v0.22: Übungs-Welt, Lehrer-Moment, Wozu-Anker ==");
+test("v0.22: APP_VERSION mindestens 0.22.0", versionMindestens("0.22.0"));
+test("v0.22: rn-025 vorhanden", releaseNoteVorhanden("rn-025"));
+test("v0.22: alle 7 Satz-Pools nehmen die Übungs-Welt an (Kind wählt selbst)", (() => {
+  const s2 = quelle("src/calc/aufgaben/saetze.js") + quelle("src/calc/aufgaben/deutschKonverter.js");
+  return ["subjektPool(thema)", "praedikatPool(thema)", "gkPool(thema)", "redePool(thema)",
+    "zeitPool(thema)", "wortartenPool(thema)", "faellePool(thema)"].every((f) => s2.includes(`function ${f}`))
+    && quelle("src/features/Ueben.jsx").includes("deutschDaten(thema)")
+    && quelle("src/features/Ueben.jsx").includes('data-test={`thema-')
+    && quelle("src/calc/migrateData.js").includes("uebungsThema");
+})());
+test("v0.22: Lehrer-Moment einmal pro Runde nach richtiger Antwort (aktives Erklären)", (() => {
+  const u = quelle("src/features/Ueben.jsx");
+  return u.includes("lehrer-moment") && u.includes("lehrer-fertig")
+    && u.includes("lehrerDran") && u.includes("Math.min(4, r.aufgaben.length - 1)") && u.includes("lehrerWar")
+    && u.includes("sitzt doppelt");
+})());
+test("v0.22: Wozu-Anker für alle Lernfelder + Zeitstrahl bei den Zeitformen", (() => {
+  return quelle("src/calc/wozu.js").includes("export const WOZU")
+    && quelle("src/features/Ueben.jsx").includes("wozu-anker")
+    && quelle("src/features/Ueben.jsx").includes("zeit-strahl")
+    && quelle("src/features/Ueben.jsx").includes("GESTERN");
+})());
+
 // ---------- v0.21: KI-Start (Erklärer + Fundament) ----------
 console.log("== v0.21: KI-Start (Erklärer + Fundament) ==");
 test("v0.21: APP_VERSION mindestens 0.21.0", versionMindestens("0.21.0"));

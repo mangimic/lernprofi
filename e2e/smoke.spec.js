@@ -773,3 +773,38 @@ test("KI-Karte ohne Server: ehrliche Meldung statt Absturz, Schalter bleiben bed
   await expect(page.getByTestId("ki-meldung")).toBeVisible({ timeout: 10000 });
   await page.getByTestId("ki-erklaeren-1").click(); // Freigabe wirkt trotzdem (lokale Einstellung)
 });
+
+test("Übungs-Welt, Wozu-Anker, Zeitstrahl und Lehrer-Moment", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("nav-ueben").click();
+
+  // 🎨 Welt „Angeln“ wählen → Groß/Klein-Sätze kommen vom See
+  await page.getByTestId("thema-angeln").click();
+  await page.getByTestId("bereich-gk").click();
+  await expect(page.getByTestId("wozu-anker")).toContainText("Wozu?");
+  await expect(page.getByTestId("frage-karte")).toContainText("angler");
+  await page.getByTestId("abbrechen").click();
+
+  // ⏳ Zeitformen zeigen den Zeitstrahl
+  await page.getByTestId("bereich-zeit").click();
+  await expect(page.getByTestId("zeit-strahl")).toBeVisible();
+  await expect(page.getByTestId("frage-karte")).toContainText("Zeitform");
+  await page.getByTestId("abbrechen").click();
+
+  // 🧑‍🏫 Lehrer-Moment: kommt einmal, nach der fälligen richtigen Antwort
+  await page.getByTestId("ueben-fach-mathe").click();
+  await page.getByTestId("bereich-mrechnen").click();
+  for (let i = 0; i < 4; i++) {
+    await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+    await expect(page.getByTestId("lehrer-moment")).toHaveCount(0);
+    await page.getByTestId("weiter-knopf").click();
+  }
+  await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+  await expect(page.getByTestId("lehrer-moment")).toContainText("WARUM");
+  await page.getByTestId("lehrer-fertig").click();
+  await expect(page.getByTestId("lehrer-moment")).toContainText("sitzt doppelt");
+  await page.getByTestId("weiter-knopf").click();
+  // nur einmal pro Runde
+  await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+  await expect(page.getByTestId("lehrer-moment")).toHaveCount(0);
+});

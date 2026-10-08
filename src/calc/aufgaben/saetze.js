@@ -193,29 +193,30 @@ export const GK_THEMEN = {
   ]}
 };
 
-const flach = (themen) => Object.values(themen).flatMap((t) => Array.isArray(t) ? t : t.saetze);
+import { nurThema } from "./themen.js";
+const flach = (themen, thema) => Object.values(nurThema(themen, thema)).flatMap((t) => Array.isArray(t) ? t : t.saetze);
 
-export function subjektPool() {
+export function subjektPool(thema) {
   const norm = (a) => ({
     woerter: a.woerter, ziel: a.subj,
     frage: a.frage || "Wer oder was? Tippe das Subjekt an.",
     loesung: a.subjektText,
     tipp: "Frage „Wer oder was …?“ – die Antwort ist das Subjekt (kann aus mehreren Wörtern bestehen).",
   });
-  return { easy: flach(SUBJ_THEMEN).map(norm), hard: flach(SUBJ_K4).map(norm) };
+  return { easy: flach(SUBJ_THEMEN, thema).map(norm), hard: flach(SUBJ_K4, thema).map(norm) };
 }
 
-export function praedikatPool() {
+export function praedikatPool(thema) {
   const norm = (a) => ({
     woerter: a.woerter, ziel: a.praed,
     frage: "Was tut jemand? Tippe das Prädikat an.",
     loesung: a.praedText,
     tipp: "Das Prädikat ist das Tu-Wort des Satzes – manchmal zweiteilig (räumt … ab).",
   });
-  return { easy: flach(PRAED_THEMEN).map(norm), hard: flach(PRAED_K4).map(norm) };
+  return { easy: flach(PRAED_THEMEN, thema).map(norm), hard: flach(PRAED_K4, thema).map(norm) };
 }
 
-export function gkPool() {
+export function gkPool(thema) {
   const gross = (w) => w.charAt(0).toUpperCase() + w.slice(1);
   const norm = (a) => ({
     woerter: a.woerter, ziel: a.gross,
@@ -223,5 +224,5 @@ export function gkPool() {
     loesung: a.gross.map((i) => gross(a.woerter[i])).join(", "),
     tipp: "Großgeschrieben werden Satzanfänge und Nomen (Namenwörter) – mach die Artikel-Probe: der/die/das davor?",
   });
-  return { easy: flach(GK_THEMEN).map(norm), hard: [] };
+  return { easy: flach(GK_THEMEN, thema).map(norm), hard: [] };
 }
