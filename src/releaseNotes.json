@@ -1,5 +1,14 @@
 [
   {
+    "id": "rn-026",
+    "version": "0.22.1",
+    "datum": "2026-10-08",
+    "titel": "KI-Schlüssel angeschlossen",
+    "entries": [
+      { "type": "technik", "text": "Der Worker akzeptiert den Anthropic-Schlüssel jetzt auch unter dem Secret-Namen „lernprofiapi“ (so im Cloudflare-Dashboard angelegt) – zusätzlich zu ANTHROPIC_API_KEY." }
+    ]
+  },
+  {
     "id": "rn-025",
     "version": "0.22.0",
     "datum": "2026-10-08",

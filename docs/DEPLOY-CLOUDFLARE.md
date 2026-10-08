@@ -61,9 +61,11 @@ der Anthropic-Schlüssel liegt NUR dort als Secret, nie in der App.
 
 1. **API-Schlüssel anlegen:** console.anthropic.com → Settings → API Keys →
    „Create Key“. Den Schlüssel (beginnt mit `sk-ant-…`) kopieren.
-2. **Als Secret in den Worker legen** (einmalig, Schlüssel landet nie im Repo):
+2. **Als Secret in den Worker legen** (einmalig, Schlüssel landet nie im Repo).
+   Der Worker akzeptiert die Secret-Namen `lernprofiapi` (so eingerichtet)
+   oder `ANTHROPIC_API_KEY`:
    ```
-   npx wrangler secret put ANTHROPIC_API_KEY
+   npx wrangler secret put lernprofiapi
    ```
    (Wert einfügen, Enter.) Alternativ im Dashboard: Worker `lernprofi` →
    Settings → Variables and Secrets → „Add“ → Typ **Secret**.

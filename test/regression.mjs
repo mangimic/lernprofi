@@ -36,6 +36,15 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.22.1: KI-Schlüssel (Secret-Name) ----------
+console.log("== v0.22.1: KI-Schlüssel (Secret-Name) ==");
+test("v0.22.1: APP_VERSION mindestens 0.22.1", versionMindestens("0.22.1"));
+test("v0.22.1: Secret-Name lernprofiapi wird akzeptiert", (() => {
+  const k = quelle("server/_lib/kiApi.js");
+  return k.includes("env?.lernprofiapi") && k.includes("apiSchluessel(env)")
+    && quelle("docs/DEPLOY-CLOUDFLARE.md").includes("lernprofiapi");
+})());
+
 // ---------- v0.22: Übungs-Welt, Lehrer-Moment, Wozu-Anker ----------
 console.log("== v0.22: Übungs-Welt, Lehrer-Moment, Wozu-Anker ==");
 test("v0.22: APP_VERSION mindestens 0.22.0", versionMindestens("0.22.0"));
@@ -67,7 +76,7 @@ test("v0.21: APP_VERSION mindestens 0.21.0", versionMindestens("0.21.0"));
 test("v0.21: rn-024 vorhanden", releaseNoteVorhanden("rn-024"));
 test("v0.21: Schlüssel nur im Worker, Deckel hart im Server (402), Kosten echt gezählt", (() => {
   const k = quelle("server/_lib/kiApi.js");
-  return k.includes("env.ANTHROPIC_API_KEY") && k.includes("402") && k.includes("kostenMikro")
+  return k.includes("ANTHROPIC_API_KEY") && k.includes("402") && k.includes("kostenMikro")
     && k.includes("ki:monat:") && k.includes("KI_DECKEL_MAX_CENT")
     && !quelle("src/ki.js").includes("api.anthropic.com");
 })());
@@ -90,7 +99,7 @@ test("v0.21: Erklärer nur bei Freigabe + falscher Antwort, getaktete Blasen, Ma
 })());
 test("v0.21: KI-Route vor der Tresor-Route (vaultApi beantwortet sonst alles mit 404)", (() => {
   const i = quelle("server/index.js");
-  return i.indexOf("kiApi(") < i.indexOf("vaultApi(") && quelle("docs/DEPLOY-CLOUDFLARE.md").includes("wrangler secret put ANTHROPIC_API_KEY");
+  return i.indexOf("kiApi(") < i.indexOf("vaultApi(") && quelle("docs/DEPLOY-CLOUDFLARE.md").includes("wrangler secret put");
 })());
 
 // ---------- v0.20: Einstufungstest & Trainingsplan ----------

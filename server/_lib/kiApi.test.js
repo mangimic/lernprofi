@@ -68,6 +68,17 @@ describe("kiApi – reine Helfer", () => {
 });
 
 describe("kiApi – Routen", () => {
+  it("akzeptiert das Secret unter dem Namen lernprofiapi", async () => {
+    const env = mockEnv({ mitSchluessel: false });
+    env.lernprofiapi = "mein-schluessel";
+    const s = await (await kiApi(anfrage("GET", "/api/ki/status"), env, JETZT)).json();
+    expect(s.verfuegbar).toBe(true);
+    vi.stubGlobal("fetch", claudeMock());
+    await kiApi(anfrage("POST", "/api/ki/erklaeren", { frage: "x?" }), env, JETZT);
+    const [, init] = fetch.mock.calls[0];
+    expect(init.headers["x-api-key"]).toBe("mein-schluessel");
+  });
+
   it("fremde Route → null; ohne Access → 401", async () => {
     expect(await kiApi(anfrage("GET", "/api/meta"), mockEnv(), JETZT)).toBeNull();
     const r = await kiApi(anfrage("GET", "/api/ki/status", null, false), mockEnv(), JETZT);

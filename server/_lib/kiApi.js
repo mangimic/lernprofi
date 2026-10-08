@@ -21,6 +21,12 @@
    ============================================================ */
 import { zugriffErlaubt } from "./vaultApi.js";
 
+/** Der Anthropic-Schlüssel: Secret heißt bei uns "lernprofiapi"
+    (so im Cloudflare-Dashboard angelegt); ANTHROPIC_API_KEY geht auch. */
+export function apiSchluessel(env) {
+  return env?.ANTHROPIC_API_KEY || env?.lernprofiapi || "";
+}
+
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 export const KI_MODELLE = {
   erklaeren: "claude-haiku-5-5",
@@ -103,7 +109,7 @@ async function claudeAnfragen(env, { modell, system, prompt, maxTokens }) {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      "x-api-key": env.ANTHROPIC_API_KEY,
+      "x-api-key": apiSchluessel(env),
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
@@ -129,7 +135,7 @@ export async function kiApi(request, env, jetzt = new Date()) {
   if (!zugriffErlaubt(request, env)) return json(401, { fehler: "Kein Zugang (Cloudflare Access fehlt)." });
 
   const kv = env?.TRESOR;
-  const schluesselDa = !!env?.ANTHROPIC_API_KEY;
+  const schluesselDa = !!apiSchluessel(env);
   const maxDeckel = Math.max(100, parseInt(env?.KI_DECKEL_MAX_CENT || "1000", 10) || 1000);
   const monat = monatsKey(jetzt);
 
