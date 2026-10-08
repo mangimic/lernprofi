@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useApp } from "./appContext.jsx";
 import { zeitAbgelaufen } from "./calc/elternWerkzeuge.js";
 import { tagesformNoetig, tagesformEintragen, missionsLaengeHeute } from "./calc/tagesform.js";
@@ -14,7 +15,7 @@ import Eltern from "./features/Eltern.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.26.0";
+export const APP_VERSION = "0.27.0";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -24,6 +25,28 @@ const RN_TYP = {
   technik: "⚙️ Technik",
   geaendert: "🔁 Geändert",
 };
+
+/* ⏳ 5-Minuten-Pausen-Uhr (Timeboxing 10/5): läuft sichtbar rückwärts,
+   zwingt aber nicht – „Fertig" geht jederzeit (Selbstbestimmung). */
+function PauseUhr() {
+  const { T } = useApp();
+  const [rest, setRest] = useState(5 * 60);
+  useEffect(() => {
+    const takt = globalThis.__ZEIT_SCHNELL__ ? 15 : 1000; // Test-Zeitraffer
+    const t = setInterval(() => setRest((r) => Math.max(0, r - 1)), takt);
+    return () => clearInterval(t);
+  }, []);
+  const mm = String(Math.floor(rest / 60));
+  const ss = String(rest % 60).padStart(2, "0");
+  return (
+    <p data-test="pause-countdown" style={{ margin: "4px 0 8px", fontWeight: 800, fontSize: 30 }}>
+      {rest > 0 ? `⏳ ${mm}:${ss}` : <span style={{ color: T.ok }}>✅ Pause geschafft!</span>}
+      <span style={{ display: "block", fontSize: "var(--schrift-klein)", fontWeight: 400, color: T.textLeise }}>
+        5 Minuten Pause – ohne Bildschirm!
+      </span>
+    </p>
+  );
+}
 
 function WasIstNeu() {
   const { T } = useApp();
@@ -109,6 +132,7 @@ export default function App() {
   const tabs = [
     { id: "start", label: "🏠 Start", test: "nav-start" },
     { id: "ueben", label: "✏️ Üben", test: "nav-ueben" },
+    { id: "plan", label: "🗓️ Plan", test: "nav-plan" },
     { id: "spiele", label: "🎮 Spiele", test: "nav-spiele" },
     ...(tresor.elternModus ? [{ id: "eltern", label: "🔧 Eltern", test: "nav-eltern" }] : []),
     { id: "neu", label: "✨ Neu?", test: "nav-neu" },
@@ -117,7 +141,8 @@ export default function App() {
     <div
       data-test="app-shell"
       style={{
-        maxWidth: "var(--breite-max)",
+        // Der Wochenplan braucht Platz für 7 Tages-Spalten (iPad quer).
+        maxWidth: route === "plan" ? "min(1360px, 100%)" : "var(--breite-max)",
         margin: "0 auto",
         padding: isMobile ? "10px 12px 80px" : "16px 20px 90px",
       }}
@@ -215,6 +240,7 @@ export default function App() {
             <p data-test="fokus-idee" style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px", textAlign: "left" }}>
               🤸 {fokus.pause.idee}
             </p>
+            <PauseUhr />
             <button data-test="fokus-weiter" onClick={fokus.pauseFertig}
               style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
               Fertig – weiter lernen! 💪

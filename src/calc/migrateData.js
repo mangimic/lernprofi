@@ -8,6 +8,7 @@
    unangetastet erhalten.
    ============================================================ */
 import { STARK_SAETZE } from "./aufgaben/stark.js";
+import { FESTE_TERMINE_STANDARD } from "./wochenplan.js";
 
 export const SCHEMA_VERSION = 1;
 
@@ -51,6 +52,7 @@ export function leeresDokument(heute) {
       uebungsThema: "alltag", // Übungs-Welt der Satz-Übungen (Kind wählt selbst)
       eigeneSaetze: [],    // von den Eltern freigegebene Schreib-Sätze (max 12)
       termine: [],         // 🗓️ Klassenarbeiten/Kompass-Tests/WDWs: { id, tag, art, fach }
+      festeTermine: FESTE_TERMINE_STANDARD, // 🔒 wöchentlich feste Stunden (14-19-Raster)
     },
     protokoll: [],     // Änderungsprotokoll: { zeit, bereich, art, text }
   };
@@ -100,7 +102,11 @@ export function migrateData(alt, heute) {
   d.lernstand.aufsatz = { tag: typeof aufsatz.tag === "string" ? aufsatz.tag : "" };
   const wp = d.lernstand.wochenplan;
   d.lernstand.wochenplan = istObjekt(wp) && typeof wp.montag === "string" && Array.isArray(wp.bloecke)
-    ? { montag: wp.montag, bloecke: wp.bloecke.filter((b) => istObjekt(b)).slice(0, 60) }
+    ? {
+      montag: wp.montag,
+      bloecke: wp.bloecke.filter((b) => istObjekt(b)).slice(0, 60),
+      belohnt: (Array.isArray(wp.belohnt) ? wp.belohnt : []).filter((t) => typeof t === "string").slice(-7),
+    }
     : null;
   const mut = istObjekt(d.lernstand.mutSatz) ? d.lernstand.mutSatz : {};
   d.lernstand.mutSatz = {
@@ -132,6 +138,17 @@ export function migrateData(alt, heute) {
   d.einstellungen.eigeneSaetze = (Array.isArray(d.einstellungen.eigeneSaetze) ? d.einstellungen.eigeneSaetze : [])
     .filter((s) => typeof s === "string" && s.trim().length >= 1 && s.length <= 80)
     .map((s) => s.trim()).slice(0, 12);
+  d.einstellungen.festeTermine = Array.isArray(d.einstellungen.festeTermine)
+    ? d.einstellungen.festeTermine
+      .filter((f) => istObjekt(f) && Number.isInteger(f.tag) && f.tag >= 0 && f.tag <= 6
+        && Number.isInteger(f.slot) && f.slot >= 0 && f.slot <= 4 && typeof f.name === "string")
+      .map((f) => ({
+        tag: f.tag, slot: f.slot, name: f.name.slice(0, 30),
+        emoji: typeof f.emoji === "string" ? f.emoji.slice(0, 4) : "📌",
+        hinweis: typeof f.hinweis === "string" ? f.hinweis.slice(0, 16) : "",
+        aktiv: f.aktiv === true,
+      })).slice(0, 20)
+    : FESTE_TERMINE_STANDARD;
   d.einstellungen.termine = (Array.isArray(d.einstellungen.termine) ? d.einstellungen.termine : [])
     .filter((t) => istObjekt(t) && /^\d{4}-\d{2}-\d{2}$/.test(t.tag) && ["ka", "kompass", "wdw"].includes(t.art))
     .map((t, i) => ({ id: Number.isInteger(t.id) ? t.id : i + 1, tag: t.tag, art: t.art, fach: typeof t.fach === "string" ? t.fach.slice(0, 40) : "" }))

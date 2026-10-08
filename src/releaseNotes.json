@@ -1,5 +1,33 @@
 [
   {
+    "id": "rn-036",
+    "version": "0.27.0",
+    "datum": "2026-10-08",
+    "titel": "Wochenplan mit Uhrzeiten, festen Terminen und Heute-Ansicht",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "⏰ Zeitfenster 14–19 Uhr: Jeder Tag hat fünf Stunden-Felder – Bausteine landen jetzt in einer konkreten Stunde (eine pro Stunde). Feste Termine der Woche (Bandprobe, Schlagzeug-Stunde, Sport, Lernbetreuung, Tennis, Pfadfinder, Italienisch) sind mit 🔒 vorbelegt, die Schulzeit steht im Tageskopf. Der Vormittags-Stundenplan folgt als Nächstes."
+      },
+      {
+        "type": "neu",
+        "text": "📚 Hausaufgaben als eigener Baustein: Das Kind plant seine Hausaufgaben-Zeit selbst ein – der Wächter zählt sie als Lernzeit mit, damit der Nachmittag nicht überladen wird."
+      },
+      {
+        "type": "neu",
+        "text": "✅ Heute-Ansicht auf der Startseite: feste Termine und geplante Bausteine des Tages mit Uhrzeit, „▶ Los“ springt direkt in Üben/Schreiben/Konzentration, „✓ Gemacht“ hakt ab (Lernboxen zählen zur Mini-Mission). Ist der ganze Tagesplan geschafft: 🎉 + 1 Münze (einmal pro Tag). Im Plan zeigt die Wochen-Bilanz, wie viel schon steht."
+      },
+      {
+        "type": "neu",
+        "text": "⏳ 5-Minuten-Pausen-Uhr: Die Bewegungspause zeigt jetzt einen laufenden Countdown (ohne Bildschirm!) – zusammen mit den 10-Minuten-Lernboxen ist das bewährte 10/5-Timeboxing komplett. „Fertig“ geht weiterhin jederzeit."
+      },
+      {
+        "type": "verbessert",
+        "text": "🗓️ Plan ist jetzt ein eigener Tab in der unteren Leiste, und die Plan-Seite nutzt die volle iPad-Breite (7 Tages-Spalten nebeneinander). Der Wächter rechnet feste Aktiv-Termine als Ausgleich – ein Tag mit Bandprobe und zwei Lernboxen ist nicht mehr „einseitig“."
+      }
+    ]
+  },
+  {
     "id": "rn-035",
     "version": "0.26.0",
     "datum": "2026-10-08",

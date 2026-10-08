@@ -36,6 +36,35 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.27: Zeitfenster, feste Termine, Heute-Ansicht ----------
+console.log("== v0.27: Zeitfenster + Heute-Ansicht ==");
+test("v0.27: APP_VERSION mindestens 0.27.0", versionMindestens("0.27.0"));
+test("v0.27: Release-Note rn-036 vorhanden", releaseNoteVorhanden("rn-036"));
+test("v0.27: Slots 14-19, feste Termine als Daten, Wächter zählt Aktiv-Termine", (() => {
+  const w = quelle("src/calc/wochenplan.js");
+  return w.includes("SLOT_STUNDEN = [14, 15, 16, 17, 18]") && w.includes("FESTE_TERMINE_STANDARD")
+    && w.includes("festerTermin") && w.includes("slotBelegt") && w.includes("SCHULE")
+    && w.includes("Bandprobe") && w.includes("Pfadfinder") && w.includes("f.aktiv")
+    && w.includes('typ: "hausaufgaben"')
+    && quelle("src/calc/migrateData.js").includes("festeTermine");
+})());
+test("v0.27: Plan-Board – Stunden-Raster, 🔒-Felder, Schule im Tageskopf, breite Ansicht, Nav-Tab", (() => {
+  const f = quelle("src/features/Wochenplan.jsx");
+  return f.includes("StundenSlot") && f.includes("fest-") && f.includes("slot-")
+    && f.includes("SCHULE.text") && f.includes("festerTermin")
+    && quelle("src/App.jsx").includes('route === "plan" ? "min(1360px') 
+    && quelle("src/App.jsx").includes("nav-plan");
+})());
+test("v0.27: Heute-Ansicht mit Abhaken, Tages-Münze nur 1×, Pausen-Uhr, Bilanz", (() => {
+  const st = quelle("src/features/Start.jsx");
+  return st.includes('data-test="heute-plan"') && st.includes('data-test="heute-haken"')
+    && st.includes('data-test="heute-fest"') && st.includes("belohnungEintragen")
+    && st.includes("heuteBelohnt") && st.includes('data-test="heute-geschafft"')
+    && quelle("src/App.jsx").includes('data-test="pause-countdown"')
+    && quelle("src/calc/wochenplan.js").includes("wochenBilanz")
+    && quelle("src/features/Wochenplan.jsx").includes('data-test="plan-bilanz"');
+})());
+
 // ---------- v0.26: Mein Wochenplan ----------
 console.log("== v0.26: Mein Wochenplan ==");
 test("v0.26: APP_VERSION mindestens 0.26.0", versionMindestens("0.26.0"));

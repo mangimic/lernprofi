@@ -130,5 +130,6 @@ Cloud-Konfiguration; verzichtet zunächst auf Geräte-Sync.
 | 7d – ✍️ Aufsatz-Check (Textart, Foto, 1 markierte Stelle) (v0.24) | ✅ komplett |
 | 7e – 📊 Wochenbericht + 🔤 Übungssätze (Eltern prüfen vor Einspielen) (v0.25) | ✅ komplett – **Etappe 7 fertig** |
 | 9a-c – 🗓️ Mein Wochenplan: Termine (Eltern), Bausteine per Antippen/Ziehen (dnd-kit), 🦁-Überlastungs-Wächter (v0.26) | ✅ komplett |
-| 9d – Durchführung: Heute-Ansicht mit 10/5-Timer, Haken = Münze, Wochen-Rückblick | ⏳ offen |
+| 9d – Durchführung: Heute-Ansicht (Abhaken, Tages-Münze), 5-Min-Pausen-Uhr, Wochen-Bilanz, Zeitfenster 14-19 Uhr, feste Termine, Hausaufgaben-Baustein (v0.27) | ✅ komplett |
+| 9e – Vormittags-Stundenplan (Schulfächer je Stunde) + feste Termine im Elternbereich pflegbar | ⏳ offen (wartet auf Stundenplan) |
 | 8 – Parallelbetrieb + Umstellung | ⏳ offen |

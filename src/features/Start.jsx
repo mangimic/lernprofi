@@ -1,8 +1,13 @@
 import { useApp } from "../appContext.jsx";
-import { heutigerTag, lernspur } from "../calc/lerntage.js";
+import { heutigerTag, lernspur, muenzenNachRunde, aufgabenZaehlen } from "../calc/lerntage.js";
+import { missionsOpts } from "../calc/tagesform.js";
 import { zeitUebrigMin } from "../calc/elternWerkzeuge.js";
 import { EINSTUFUNG_FELDER } from "../calc/einstufung.js";
 import { STARK_SAETZE } from "../calc/aufgaben/stark.js";
+import {
+  wochenMontag, tagDatum, planFuerWoche, bausteinInfo, blockFertig,
+  tagGeschafft, heuteBelohnt, belohnungEintragen, WOCHENTAGE, slotLabel,
+} from "../calc/wochenplan.js";
 
 /* Startseite: Begrüßung, Tages-Stand (Münzen, Missionen, Lernspur),
    Einstieg ins Üben, Konzentrations-Training, Mut-Satz des Tages,
@@ -17,6 +22,32 @@ export default function Start() {
   const spur = lernspur(data.lernstand.lerntage, heute);
   const mut = data.lernstand.mutSatz;
   const mutHeute = mut.tag === heute;
+
+  // 🗓️ Heute auf dem Wochenplan: Abhaken zählt zur Mini-Mission,
+  // der komplett geschaffte Tag bringt 1 Münze (nur einmal je Datum).
+  const montag = wochenMontag(heute);
+  const plan = planFuerWoche(data.lernstand.wochenplan, montag);
+  const heuteIdx = WOCHENTAGE.findIndex((_, i) => tagDatum(montag, i) === heute);
+  const heutePlan = [...plan.bloecke.filter((b) => b.tag === heuteIdx)]
+    .sort((a, b) => (a.slot ?? 9) - (b.slot ?? 9));
+  const heuteFeste = [...(data.einstellungen.festeTermine || []).filter((f) => f.tag === heuteIdx)]
+    .sort((a, b) => a.slot - b.slot);
+  const planHaken = (id) => {
+    const block = plan.bloecke.find((b) => b.id === id);
+    if (!block || block.fertig) return;
+    let neuPlan = blockFertig(plan, id);
+    const lernstand = { ...data.lernstand };
+    if (bausteinInfo(block.typ).lern) {
+      lernstand.lerntage = aufgabenZaehlen(lernstand.lerntage, heute, 1, missionsOpts(data.einstellungen, data.lernstand.tagesform, heute));
+    }
+    if (tagGeschafft(neuPlan, heuteIdx) && !heuteBelohnt(neuPlan, heute)) {
+      neuPlan = belohnungEintragen(neuPlan, heute);
+      if (data.einstellungen.muenzenAktiv) lernstand.muenzen = muenzenNachRunde(lernstand.muenzen);
+    }
+    lernstand.wochenplan = neuPlan;
+    logChange({ ...data, lernstand }, "wochenplan", "neu", `Plan-Baustein „${block.typ}“ abgehakt`);
+  };
+  const planZiel = { lernen: "ueben", schrift: "schrift", konz: "konz" };
 
   const mutWaehlen = (idx) => {
     logChange(
@@ -65,6 +96,64 @@ export default function Start() {
           🗓️ Mein Wochenplan (DU bestimmst dein Pensum)
         </button>
       </div>
+      {(heutePlan.length > 0 || heuteFeste.length > 0) && (
+        <div data-test="heute-plan" style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
+          <b>🗓️ Heute auf deinem Plan</b>
+          <div style={{ display: "grid", gap: 6, margin: "8px 0 0" }}>
+            {heuteFeste.map((f) => (
+              <div key={`f-${f.slot}`} data-test="heute-fest" style={{
+                display: "flex", alignItems: "center", gap: 8,
+                background: T.grund, borderRadius: T.radiusKlein, padding: "6px 10px",
+                border: `1.5px solid ${T.rand}`,
+              }}>
+                <span style={{ flex: 1, fontWeight: 700 }}>
+                  {f.emoji} {f.name} <span style={{ color: T.textLeise, fontWeight: 400 }}>· {slotLabel(f.slot)}{f.hinweis ? ` (${f.hinweis})` : ""}</span>
+                </span>
+                <span style={{ opacity: 0.6 }}>🔒</span>
+              </div>
+            ))}
+            {heutePlan.map((b) => {
+              const info = bausteinInfo(b.typ);
+              const ziel = planZiel[b.typ];
+              return (
+                <div key={b.id} data-test="heute-block" style={{
+                  display: "flex", alignItems: "center", gap: 8,
+                  background: T.grund, borderRadius: T.radiusKlein, padding: "6px 10px",
+                  opacity: b.fertig ? 0.65 : 1,
+                }}>
+                  <span style={{ flex: 1, fontWeight: 700, textDecoration: b.fertig ? "line-through" : "none" }}>
+                    {info.emoji} {info.name}
+                    <span style={{ color: T.textLeise, fontWeight: 400 }}>
+                      {Number.isInteger(b.slot) ? ` · ${slotLabel(b.slot)}` : ""}{info.lern && info.box !== false ? " · 10+5 Min" : ""}
+                    </span>
+                  </span>
+                  {b.fertig ? (
+                    <span style={{ color: T.ok, fontWeight: 800 }}>✓</span>
+                  ) : (
+                    <>
+                      {ziel && (
+                        <button data-test="heute-los" onClick={() => navTo(ziel)}
+                          style={{ background: T.primaer, color: T.primaerText, fontWeight: 700, height: "auto", minHeight: 0, padding: "6px 10px" }}>
+                          ▶ Los
+                        </button>
+                      )}
+                      <button data-test="heute-haken" onClick={() => planHaken(b.id)}
+                        style={{ background: T.weich, color: T.text, fontWeight: 700, height: "auto", minHeight: 0, padding: "6px 10px" }}>
+                        ✓ Gemacht
+                      </button>
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          {tagGeschafft(plan, heuteIdx) && (
+            <p data-test="heute-geschafft" style={{ margin: "10px 0 0", color: T.ok, fontWeight: 800 }}>
+              🎉 Tagesplan komplett geschafft{heuteBelohnt(plan, heute) && data.einstellungen.muenzenAktiv ? " – 🪙 +1 Münze!" : "!"} Stark, dass DU das geplant und durchgezogen hast!
+            </p>
+          )}
+        </div>
+      )}
       {!einstufung ? (
         <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
           <b>🧪 Einstufungstest</b>

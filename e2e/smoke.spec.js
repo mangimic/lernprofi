@@ -656,6 +656,7 @@ test("Tagesform & Fokus: roter Tag macht Missionen kürzer, Bewegungspause kommt
   await page.getByTestId("nav-ueben").click(); // Tagesform ist heute schon beantwortet
   await expect(page.getByTestId("fokus-pause")).toBeVisible({ timeout: 15000 });
   await expect(page.getByTestId("fokus-idee")).toContainText("🤸");
+  await expect(page.getByTestId("pause-countdown")).toContainText("Pause"); // ⏳ 5-Minuten-Uhr läuft
   await page.getByTestId("fokus-weiter").click();
   await expect(page.getByTestId("fokus-pause")).toHaveCount(0);
 });
@@ -931,36 +932,38 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await page.getByTestId("termin-plus").click();
   await expect(page.getByTestId("termin-zeile")).toContainText("Klassenarbeit · Mathe");
 
-  // Kind plant: Termin sichtbar, Wächter empfiehlt Verteilen
+  // Kind plant: Termin sichtbar, feste Termine stehen im Raster, Wächter empfiehlt Verteilen
   await page.getByTestId("nav-start").click();
-  await page.getByTestId("zum-plan").click();
+  await page.getByTestId("nav-plan").click();
   await expect(page.getByTestId("termin-chip")).toContainText("Klassenarbeit Mathe");
+  await expect(page.getByTestId("fest-1-2")).toContainText("Schlagzeug-Stunde");
+  await expect(page.getByTestId("baustein-hausaufgaben")).toContainText("Hausaufgaben");
+  await expect(page.getByTestId("fest-3-4")).toContainText("Pfadfinder");
+  await expect(page.getByTestId("tag-0")).toContainText("Schule 7:45");
   await expect(page.getByTestId("plan-hinweise")).toContainText("Klassenarbeit");
 
-  // Antippen: Baustein → Tag (Dienstag). 3 Lernboxen überladen den Tag (Limit 2 bei 20 Min)
-  const lernboxZu = async (tag) => {
-    await page.getByTestId("baustein-lernen").click();
+  // Antippen: Baustein → freie Stunde. Samstag: 3 Lernboxen überladen (Limit 2 bei 20 Min)
+  const bausteinZu = async (typ, tag, slot) => {
+    await page.getByTestId(`baustein-${typ}`).click();
     await expect(page.getByTestId("plan-wahl-hinweis")).toBeVisible();
-    await page.getByTestId(`tag-${tag}`).click();
+    await page.getByTestId(`slot-${tag}-${slot}`).click();
   };
-  await lernboxZu(1);
-  await lernboxZu(1);
+  await bausteinZu("lernen", 5, 0);
+  await bausteinZu("lernen", 5, 1);
   await expect(page.getByTestId("plan-block")).toHaveCount(2);
-  await lernboxZu(1);
-  await expect(page.getByTestId("ampel-1")).toHaveText("🔴");
-  await expect(page.getByTestId("tag-hinweis-1")).toContainText("Schieb");
+  await bausteinZu("lernen", 5, 2);
+  await expect(page.getByTestId("ampel-5")).toHaveText("🔴");
+  await expect(page.getByTestId("tag-hinweis-5")).toContainText("Schieb");
 
   // Eine Box wieder weg → gelb (nur Lernen); Sport dazu → grün
   await page.getByTestId("block-weg").first().click();
-  await expect(page.getByTestId("ampel-1")).toHaveText("🟡");
-  await page.getByTestId("baustein-sport").click();
-  await page.getByTestId("tag-1").click();
-  await expect(page.getByTestId("ampel-1")).toHaveText("🟢");
+  await expect(page.getByTestId("ampel-5")).toHaveText("🟡");
+  await bausteinZu("sport", 5, 0);
+  await expect(page.getByTestId("ampel-5")).toHaveText("🟢");
 
-  // Zweiter Übungstag (Mittwoch) + Freunde → Wächter zufrieden
-  await lernboxZu(2);
-  await page.getByTestId("baustein-freunde").click();
-  await page.getByTestId("tag-2").click();
+  // Übungstage Di + Mi (freie Stunden neben den festen Terminen) → Wächter zufrieden
+  await bausteinZu("lernen", 1, 1);
+  await bausteinZu("lernen", 2, 0);
   await expect(page.getByTestId("plan-hinweise")).toHaveCount(0);
   await expect(page.getByTestId("plan-ok")).toBeVisible();
 
@@ -970,8 +973,22 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await page.getByTestId("pin-eingabe").fill(PIN);
   await page.getByTestId("pin-ok").click();
   await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
-  await page.getByTestId("zum-plan").click();
+  await page.getByTestId("nav-plan").click();
   await expect(page.getByTestId("plan-block")).toHaveCount(5);
+
+  // 9d: Heute-Baustein einplanen, auf der Startseite abhaken → Tag geschafft + Münze
+  const heuteIdx = (new Date().getDay() + 6) % 7;
+  const slotFuerHeute = [0, 4, 2, 0, 0, 3, 0][heuteIdx]; // je Wochentag eine sicher freie Stunde
+  await bausteinZu("schlagzeug", heuteIdx, slotFuerHeute);
+  await page.getByTestId("plan-zurueck").click();
+  await expect(page.getByTestId("heute-plan")).toBeVisible();
+  while (await page.getByTestId("heute-haken").count()) {
+    await page.getByTestId("heute-haken").first().click();
+  }
+  await expect(page.getByTestId("heute-geschafft")).toContainText("Münze");
+  await expect(page.getByTestId("tages-stand")).toContainText("🪙 1 Münze");
+  await page.getByTestId("nav-plan").click();
+  await expect(page.getByTestId("plan-bilanz")).toBeVisible();
 });
 
 test("KI-Karte ohne Server: ehrliche Meldung statt Absturz, Schalter bleiben bedienbar", async ({ page }) => {
