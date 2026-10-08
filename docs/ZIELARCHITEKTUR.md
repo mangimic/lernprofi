@@ -125,5 +125,6 @@ Cloud-Konfiguration; verzichtet zunächst auf Geräte-Sync.
 | Eltern-Werkzeuge: Zeitlimit, Spiele-Schalter, Münz-Freischaltung, Gesprächsimpulse (v0.17) | ✅ abgeschlossen |
 | Tagesform-Frage + Fokus-Paket (Bewegungspausen, Fokus-Serie) (v0.18) | ✅ abgeschlossen |
 | **Migration der Alt-App-Funktionen: vollständig** | ✅ |
-| 7 – KI-Funktionen (5-€-Deckel, Freigabe je Zweck) | ⏳ offen |
+| 7a/7b – KI-Fundament (Worker-Route, harter Deckel, Eltern-Freigaben) + 🦁 Erklärer (v0.21) | ✅ abgeschlossen; beim User offen: `wrangler secret put ANTHROPIC_API_KEY` |
+| 7c–7e – 🖐️ Schreib-Training · ✍️ Aufsatz-Feedback · 📊 Wochenbericht + 🔤 Übungssätze | ⏳ offen |
 | 8 – Parallelbetrieb + Umstellung | ⏳ offen |
