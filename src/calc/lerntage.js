@@ -18,16 +18,17 @@ function tagFinden(lerntage, heute) {
   return lerntage.find((t) => t.tag === heute);
 }
 
-/** Zählt gelöste Aufgaben auf den heutigen Lerntag (gibt NEUE Liste zurück). */
-export function aufgabenZaehlen(lerntage, heute, anzahl, { missionsZiel = 4 } = {}) {
+/** Zählt gelöste Aufgaben auf den heutigen Lerntag (gibt NEUE Liste zurück).
+    missionsLaenge folgt der Tagesform: rot 3 · normal 4 · grün 5. */
+export function aufgabenZaehlen(lerntage, heute, anzahl, { missionsZiel = 4, missionsLaenge = MISSIONS_LAENGE } = {}) {
   const liste = Array.isArray(lerntage) ? lerntage.slice(-60) : [];
   const vorhanden = tagFinden(liste, heute);
   const tag = vorhanden
     ? { ...vorhanden }
     : { tag: heute, aufgaben: 0, missionen: 0, zielErreicht: false };
   tag.aufgaben += anzahl;
-  tag.missionen = Math.floor(tag.aufgaben / MISSIONS_LAENGE);
-  tag.zielErreicht = tag.missionen >= missionsZiel;
+  tag.missionen = Math.floor(tag.aufgaben / Math.max(1, missionsLaenge));
+  tag.zielErreicht = tag.zielErreicht || tag.missionen >= missionsZiel;
   return vorhanden ? liste.map((t) => (t.tag === heute ? tag : t)) : [...liste, tag];
 }
 

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useApp } from "../appContext.jsx";
 import { heutigerTag, lernspur } from "../calc/lerntage.js";
 import { ZEIT_STUFEN, SPIELE_SCHALTER, spielAktiv, zeitHeute, GESPRAECH_BEREICHE, gespraechDesTages } from "../calc/elternWerkzeuge.js";
+import { PAUSEN_INTERVALLE, TAGESFORM_MODI } from "../calc/tagesform.js";
 import { idbStorage } from "../idbShim.js";
 import { syncStatus, hochladen, herunterladen, konfliktUeberschreiben } from "../sync.js";
 
@@ -190,14 +191,46 @@ export default function Eltern() {
         </p>
         {tage.length ? (
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--schrift-klein)" }}>
-            <thead><tr style={{ textAlign: "left", color: T.textLeise }}><th>Tag</th><th style={{ textAlign: "center" }}>Aufgaben</th><th style={{ textAlign: "center" }}>Missionen</th><th style={{ textAlign: "center" }}>Ziel</th></tr></thead>
+            <thead><tr style={{ textAlign: "left", color: T.textLeise }}><th>Tag</th><th>Tagesform</th><th style={{ textAlign: "center" }}>Aufgaben</th><th style={{ textAlign: "center" }}>Missionen</th><th style={{ textAlign: "center" }}>Ziel</th></tr></thead>
             <tbody>
               {tage.map((t) => (
-                <tr key={t.tag}><td>{t.tag}</td><td style={{ textAlign: "center" }}>{t.aufgaben}</td><td style={{ textAlign: "center" }}>{t.missionen}</td><td style={{ textAlign: "center" }}>{t.zielErreicht ? "🎯" : "–"}</td></tr>
+                <tr key={t.tag}><td>{t.tag}</td><td>{TAGESFORM_MODI[t.form] || "–"}</td><td style={{ textAlign: "center" }}>{t.aufgaben}</td><td style={{ textAlign: "center" }}>{t.missionen}</td><td style={{ textAlign: "center" }}>{t.zielErreicht ? "🎯" : "–"}</td></tr>
               ))}
             </tbody>
           </table>
         ) : <p style={{ color: T.textLeise }}>Noch keine Lerntage – die Übersicht füllt sich beim Üben.</p>}
+      </Karte>
+
+      <Karte test="eltern-lernen">
+        <b>🧭 Lernen</b>
+        <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          <b>🚦 Tagesform-Frage:</b> Beim ersten Üben des Tages fragt Leo, wie sich Lernen heute
+          anfühlt. An schweren Tagen werden die Mini-Missionen kürzer (3 statt 4 Aufgaben), das
+          Tagesziel kleiner und die Stufen steigen nicht – die Antwort gilt nur für den einen Tag
+          und ist keine Bewertung.
+        </p>
+        <Seg test="tagesform-aktiv" werte={[{ v: 1, label: "An" }, { v: 0, label: "Aus" }]}
+          aktiv={data.einstellungen.tagesformAktiv ? 1 : 0}
+          auf={(v) => einstellung({ tagesformAktiv: v === 1 }, `Tagesform-Frage ${v === 1 ? "an" : "aus"}`)} />
+        <p style={{ margin: "14px 0 8px" }}><b>🤸 Bewegungspausen</b></p>
+        <p style={{ margin: "0 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          Nach dieser Fokuszeit schlägt Leo eine kurze Bewegungspause vor – das beste Mittel gegen
+          Aufmerksamkeits-Ermüdung. Die Pausenzeit zählt nicht als Lernzeit.
+        </p>
+        <Seg test="pausen-aktiv" werte={[{ v: 1, label: "An" }, { v: 0, label: "Aus" }]}
+          aktiv={data.einstellungen.pausenAktiv ? 1 : 0}
+          auf={(v) => einstellung({ pausenAktiv: v === 1 }, `Bewegungspausen ${v === 1 ? "an" : "aus"}`)} />
+        {data.einstellungen.pausenAktiv && (
+          <div style={{ marginTop: 8 }}>
+            <Seg test="pausen-intervall" werte={PAUSEN_INTERVALLE.map((v) => ({ v, label: `${v} Min` }))}
+              aktiv={data.einstellungen.pausenIntervall}
+              auf={(v) => einstellung({ pausenIntervall: v }, `Bewegungspause alle ${v} Minuten`)} />
+          </div>
+        )}
+        <p data-test="fokus-rekord" style={{ margin: "12px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          🔥 Fokus-Serien-Rekord: <b>{data.lernstand.fokusRekord}</b> gelöste Aufgaben am Stück
+          (Abstand unter 90 Sekunden) – Dranbleiben zählt, nicht nur Richtigkeit.
+        </p>
       </Karte>
 
       <Karte test="eltern-spiele">

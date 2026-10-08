@@ -3,6 +3,7 @@ import { useApp } from "../appContext.jsx";
 import { spielStartbar, muenzeEinloesen } from "../calc/spiele.js";
 import { spielAktiv } from "../calc/elternWerkzeuge.js";
 import { aufgabenZaehlen } from "../calc/lerntage.js";
+import { missionsOpts } from "../calc/tagesform.js";
 import { seeAbenteuerStart } from "../spiele/seeAbenteuer.js";
 import { blockweltStart } from "../spiele/blockwelt.js";
 import { tennisMatchStart } from "../spiele/tennisMatch.js";
@@ -77,7 +78,7 @@ export default function Spielhalle() {
             ...d,
             lernstand: {
               ...d.lernstand,
-              lerntage: aufgabenZaehlen(d.lernstand.lerntage, heute, 1, { missionsZiel: d.einstellungen.missionsZiel }),
+              lerntage: aufgabenZaehlen(d.lernstand.lerntage, heute, 1, missionsOpts(d.einstellungen, d.lernstand.tagesform, heute)),
             },
           });
         },
@@ -98,7 +99,7 @@ export default function Spielhalle() {
           lernstand: {
             ...data.lernstand,
             rekorde: { ...data.lernstand.rekorde, seeAbenteuer: rekord },
-            lerntage: aufgabenZaehlen(data.lernstand.lerntage, heute, ergebnis.geloest, { missionsZiel: data.einstellungen.missionsZiel }),
+            lerntage: aufgabenZaehlen(data.lernstand.lerntage, heute, ergebnis.geloest, missionsOpts(data.einstellungen, data.lernstand.tagesform, heute)),
           },
         },
         "spiele", "neu", `See-Abenteuer: alle ${ergebnis.fische} Fische, ${ergebnis.geloest} Fragen richtig`,
@@ -113,7 +114,7 @@ export default function Spielhalle() {
           lernstand: {
             ...data.lernstand,
             stufen: { ...data.lernstand.stufen, [key]: { ...alt, runden: alt.runden + 1 } },
-            lerntage: aufgabenZaehlen(data.lernstand.lerntage, heute, ergebnis.wins, { missionsZiel: data.einstellungen.missionsZiel }),
+            lerntage: aufgabenZaehlen(data.lernstand.lerntage, heute, ergebnis.wins, missionsOpts(data.einstellungen, data.lernstand.tagesform, heute)),
           },
         },
         "spiele", "neu",

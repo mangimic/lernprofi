@@ -1,5 +1,6 @@
 import { useApp } from "./appContext.jsx";
 import { zeitAbgelaufen } from "./calc/elternWerkzeuge.js";
+import { tagesformNoetig, tagesformEintragen, missionsLaengeHeute } from "./calc/tagesform.js";
 import releaseNotes from "./releaseNotes.json";
 import Start from "./features/Start.jsx";
 import Ueben from "./features/Ueben.jsx";
@@ -9,7 +10,7 @@ import Eltern from "./features/Eltern.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.17.0";
+export const APP_VERSION = "0.18.0";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -48,9 +49,33 @@ function WasIstNeu() {
 }
 
 export default function App() {
-  const { T, route, navTo, isMobile, tresor, data, heute } = useApp();
+  const { T, route, navTo, isMobile, tresor, data, heute, logChange, fokus } = useApp();
   if (tresor.status === "laden") return null; // kurzer Moment beim Start
   if (tresor.status !== "offen") return <VaultGate />;
+
+  const overlayStil = {
+    position: "fixed", inset: 0, zIndex: 900, background: "rgba(38, 50, 72, 0.94)",
+    display: "flex", alignItems: "center", justifyContent: "center", padding: 18,
+  };
+  const karteStil = { maxWidth: 420, width: "100%", textAlign: "center", background: T.karte, borderRadius: T.radius, padding: T.abstand };
+
+  // 🚦 Tagesform: freiwillige Frage vor der ersten Lerneinheit des Tages.
+  const lernRoute = ["ueben", "spiele", "konz"].includes(route);
+  const tagesformWaehlen = (modus) => {
+    logChange(
+      {
+        ...data,
+        lernstand: {
+          ...data.lernstand,
+          tagesform: { tag: heute, modus },
+          lerntage: modus ? tagesformEintragen(data.lernstand.lerntage, heute, modus) : data.lernstand.lerntage,
+        },
+      },
+      "lernen", "neu", modus ? "Tagesform für heute gewählt" : "Tagesform-Frage übersprungen",
+    );
+  };
+  const tagesformOffen = !tresor.elternModus && lernRoute
+    && tagesformNoetig(data.einstellungen, data.lernstand.tagesform, heute);
 
   // ⏰ Time-Boxing: Ist die Lernzeit um, zeigt die App einen freundlichen
   // Stopp-Bildschirm (wie im Original). Der Eltern-Modus bleibt frei,
@@ -137,6 +162,62 @@ export default function App() {
           </button>
         ))}
       </nav>
+
+      {tagesformOffen && (
+        <div data-test="tagesform" style={overlayStil}>
+          <div style={{ ...karteStil, maxWidth: 360 }}>
+            <div style={{ fontSize: 38 }}>🦁</div>
+            <h2 style={{ margin: "6px 0" }}>Wie fühlt sich Lernen heute an?</h2>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
+              <button data-test="tf-gruen" onClick={() => tagesformWaehlen("gruen")}
+                style={{ textAlign: "left", background: T.weich, color: T.text, fontWeight: 700 }}>
+                💪 Ich bin fit
+              </button>
+              <button data-test="tf-gelb" onClick={() => tagesformWaehlen("gelb")}
+                style={{ textAlign: "left", background: T.weich, color: T.text, fontWeight: 700 }}>
+                🙂 Ganz normal
+              </button>
+              <button data-test="tf-rot" onClick={() => tagesformWaehlen("rot")}
+                style={{ textAlign: "left", background: T.weich, color: T.text, fontWeight: 700 }}>
+                🌧️ Heute ist es schwer
+              </button>
+            </div>
+            <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)", margin: "10px 0 6px" }}>
+              Deine Antwort gilt nur für heute: An schweren Tagen sind die Mini-Missionen
+              kürzer ({missionsLaengeHeute("rot")} Aufgaben) und das Tagesziel kleiner.
+            </p>
+            <button data-test="tf-skip" onClick={() => tagesformWaehlen("")}
+              style={{ background: "transparent", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+              Einfach loslegen
+            </button>
+          </div>
+        </div>
+      )}
+
+      {fokus.pause && (
+        <div data-test="fokus-pause" style={overlayStil}>
+          <div style={{ ...karteStil, maxWidth: 340 }}>
+            <div style={{ fontSize: 44 }}>🦁🤸</div>
+            <h2 style={{ margin: "6px 0" }}>Bewegungspause!</h2>
+            <p>
+              Du bist schon <b>{data.einstellungen.pausenIntervall} Minuten</b> voll dabei – richtig
+              stark{data.profil.name ? `, ${data.profil.name}` : ""}! Kurz auftanken, dann läuft der
+              Kopf wieder rund:
+            </p>
+            <p data-test="fokus-idee" style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px", textAlign: "left" }}>
+              🤸 {fokus.pause.idee}
+            </p>
+            <button data-test="fokus-weiter" onClick={fokus.pauseFertig}
+              style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+              Fertig – weiter lernen! 💪
+            </button>
+            <button data-test="fokus-spaeter" onClick={fokus.pauseSpaeter}
+              style={{ marginTop: 6, background: "transparent", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+              Gleich – ich mache erst die Aufgabe fertig
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

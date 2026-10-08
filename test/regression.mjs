@@ -36,6 +36,44 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.18: Tagesform & Fokus-Paket ----------
+console.log("== v0.18: Tagesform & Fokus-Paket ==");
+test("v0.18: APP_VERSION mindestens 0.18.0", versionMindestens("0.18.0"));
+test("v0.18: rn-021 vorhanden", releaseNoteVorhanden("rn-021"));
+test("v0.18: Tagesform-Logik rein (rot 3 / normal 4 / grün 5, Ziel nie unter 2)", (() => {
+  const q = quelle("src/calc/tagesform.js");
+  return q.includes('modus === "rot" ? 3 : modus === "gruen" ? 5 : 4')
+    && q.includes("Math.max(2, ziel - 1)") && q.includes("FOKUS_SERIE_ABSTAND = 90000")
+    && !/Date\.now\(|Math\.random/.test(q);
+})());
+test("v0.18: Tagesform-Frage als Overlay, nur für das Kind, mit Original-Wortlaut", (() => {
+  const a = quelle("src/App.jsx");
+  return a.includes("Wie fühlt sich Lernen heute an?") && a.includes("tf-rot")
+    && a.includes("Einfach loslegen") && a.includes("!tresor.elternModus && lernRoute");
+})());
+test("v0.18: Bewegungspause (9 Original-Ideen, Später-Knopf = 2 Minuten Aufschub)", (() => {
+  return quelle("src/calc/tagesform.js").includes("Mach 10 Hampelmänner!")
+    && quelle("src/App.jsx").includes("Bewegungspause!")
+    && quelle("src/appContext.jsx").includes("* 60 - 120");
+})());
+test("v0.18: rote Tage stoppen Stufen und verkürzen Missionen in ALLEN Zähl-Stellen", (() => {
+  const u = quelle("src/features/Ueben.jsx");
+  return u.includes("stufenStopp: rot") && u.includes("missionsOpts(")
+    && quelle("src/features/Spielhalle.jsx").includes("missionsOpts(")
+    && quelle("src/features/Konzentration.jsx").includes("missionsOpts(")
+    && quelle("src/features/Vorgang.jsx").includes("missionsOpts(");
+})());
+test("v0.18: Fokus-Serie mit Rekord im Tresor, Anzeige in Auswertung und Elternbereich", (() => {
+  return quelle("src/appContext.jsx").includes("fokusSerieWeiter")
+    && quelle("src/features/Ueben.jsx").includes("fokus-serie")
+    && quelle("src/features/Eltern.jsx").includes("fokus-rekord")
+    && quelle("src/calc/migrateData.js").includes("fokusRekord");
+})());
+test("v0.18: Alt-Übernahme bringt Tagesform, Fokus-Rekord und Pausen mit", (() => {
+  const i = quelle("src/calc/importAltdaten.js");
+  return i.includes("alt.tagesform") && i.includes("alt.fokusRekord") && i.includes("alt.pausenIntervall");
+})());
+
 // ---------- v0.17: Eltern-Werkzeuge ----------
 console.log("== v0.17: Eltern-Werkzeuge ==");
 test("v0.17: APP_VERSION mindestens 0.17.0", versionMindestens("0.17.0"));

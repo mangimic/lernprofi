@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-021",
+    "version": "0.18.0",
+    "datum": "2026-10-08",
+    "titel": "Tagesform & Fokus-Paket",
+    "entries": [
+      { "type": "neu", "text": "🚦 Die Tagesform-Frage ist zurück: Beim ersten Üben des Tages fragt Leo „Wie fühlt sich Lernen heute an?“ (💪 fit · 🙂 normal · 🌧️ heute schwer). An schweren Tagen sind die Mini-Missionen kürzer (3 statt 4 Aufgaben), das Tagesziel ist eine Mission kleiner und die Stufen steigen nicht – die Antwort gilt nur für den einen Tag und ist keine Bewertung. An fitten Tagen sind die Missionen 5 Aufgaben lang." },
+      { "type": "neu", "text": "🤸 Bewegungspausen: Nach 5/10/15 Minuten Fokuszeit (einstellbar im Elternbereich) schlägt Leo eine kurze Bewegungsübung vor – „Mach 10 Hampelmänner!“ und 8 weitere Ideen aus dem Original. Pausenzeit zählt nicht als Lernzeit, und „Gleich – erst die Aufgabe fertig“ verschiebt die Pause um 2 Minuten." },
+      { "type": "neu", "text": "🔥 Fokus-Serie: Gelöste Aufgaben am Stück (Abstand unter 90 Sekunden) werden gezählt – Dranbleiben wird belohnt, nicht nur Richtigkeit. Ab 3 am Stück zeigt die Runden-Auswertung die Serie, der Rekord wandert in den Tresor und steht im Elternbereich." },
+      { "type": "verbessert", "text": "Der Eltern-Abschnitt „🧭 Lernen“ bündelt Tagesform-Frage (An/Aus) und Bewegungspausen; die Lern-Übersicht zeigt jetzt die Tagesform je Tag. Die Datenübernahme bringt Tagesform, Fokus-Rekord und Pausen-Einstellungen aus der Alt-App mit. Damit ist die Migration der Alt-App vollständig. 🎉" }
+    ]
+  },
+  {
     "id": "rn-020",
     "version": "0.17.0",
     "datum": "2026-10-07",

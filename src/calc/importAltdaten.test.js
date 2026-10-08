@@ -52,8 +52,8 @@ describe("importAltdaten", () => {
     expect(dokument.lernstand.stufen.subj).toEqual({ freigeschaltet: 3, runden: 9, krone: true });
     expect(dokument.lernstand.stufen.mrechnen.freigeschaltet).toBe(2);
     expect(dokument.lernstand.lerntage).toEqual([
-      { tag: "2026-10-05", aufgaben: 16, missionen: 4, zielErreicht: true },
-      { tag: "2026-10-06", aufgaben: 8, missionen: 2, zielErreicht: false },
+      { tag: "2026-10-05", aufgaben: 16, missionen: 4, zielErreicht: true, form: "gruen" },
+      { tag: "2026-10-06", aufgaben: 8, missionen: 2, zielErreicht: false, form: "gelb" },
     ]);
     expect(dokument.lernstand.rekorde).toEqual({ zahlenkette: 6, blitzlesen: 44 });
     expect(dokument.einstellungen.missionsZiel).toBe(3);

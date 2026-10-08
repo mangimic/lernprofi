@@ -5,6 +5,7 @@ import {
   vgStrip, zutatenListe, anfangOptionen, anfangRichtig,
 } from "../calc/aufgaben/vorgang.js";
 import { muenzenNachRunde, aufgabenZaehlen } from "../calc/lerntage.js";
+import { missionsOpts } from "../calc/tagesform.js";
 
 /* 📝 Vorgangsbeschreibung – originalgetreu aus der Alt-App:
    Ablauf wählen (7 Themen), Grundlagen lesen, drei Übungs-Spiele
@@ -52,7 +53,7 @@ export default function Vorgang({ zurueck }) {
         lernstand: {
           ...data.lernstand,
           muenzen: muenzenNachRunde(data.lernstand.muenzen),
-          lerntage: aufgabenZaehlen(data.lernstand.lerntage, heute, geloest, { missionsZiel: data.einstellungen.missionsZiel }),
+          lerntage: aufgabenZaehlen(data.lernstand.lerntage, heute, geloest, missionsOpts(data.einstellungen, data.lernstand.tagesform, heute)),
         },
       },
       "ueben", "neu", text,

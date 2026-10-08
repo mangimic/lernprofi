@@ -12,6 +12,7 @@ import { aktiveStufe, leererFortschritt, rundeAbschliessen, STUFEN_NAMEN, stufen
 import { paketWaehlen, antwortOptionen, antwortRichtig } from "../calc/aufgabenRunde.js";
 import { auswahlPruefen } from "../calc/wortTippen.js";
 import { muenzenNachRunde, aufgabenZaehlen, heutigerTag, lernspur } from "../calc/lerntage.js";
+import { missionsOpts, tagesModus } from "../calc/tagesform.js";
 import Vorgang from "./Vorgang.jsx";
 
 /* Üben: drei Übungstypen über denselben Runden-/Stufen-/Münz-Mechanismus:
@@ -47,7 +48,7 @@ const FAECHER = [
 ];
 
 export default function Ueben() {
-  const { data, logChange, T, heute } = useApp();
+  const { data, logChange, T, heute, fokus } = useApp();
   const [fachId, setFachId] = useState("deutsch");
   const [runde, setRunde] = useState(null);
   const fach = FAECHER.find((f) => f.id === fachId);
@@ -88,6 +89,7 @@ export default function Ueben() {
   const antwortenMc = (wahl) => {
     if (runde.gewaehlt !== null) return;
     const richtig = antwortRichtig(runde.aufgaben[runde.index], wahl);
+    if (richtig) fokus.zaehlen();
     setRunde({ ...runde, gewaehlt: wahl, fehler: runde.fehler + (richtig ? 0 : 1), geloest: runde.geloest + (richtig ? 1 : 0) });
   };
 
@@ -99,6 +101,7 @@ export default function Ueben() {
 
   const tippenPruefen = () => {
     const erg = auswahlPruefen(runde.aufgaben[runde.index], runde.auswahl);
+    if (erg.richtig) fokus.zaehlen();
     setRunde({ ...runde, geprueft: erg, fehler: runde.fehler + (erg.richtig ? 0 : 1), geloest: runde.geloest + (erg.richtig ? 1 : 0) });
   };
 
@@ -110,6 +113,7 @@ export default function Ueben() {
     if (folge.length < a.teile.length) { setRunde({ ...runde, folge, meldung: null }); return; }
     const erg = umstellenPruefen(a, folge);
     if (erg.richtig) {
+      fokus.zaehlen();
       setRunde({
         ...runde, folge, fertig: true, geloest: runde.geloest + (runde.fehlversuch ? 0 : 1),
         meldung: { ok: true, text: "Super umgestellt! 🌟 Das Prädikat steht an 2. Stelle – der Satz stimmt." },
@@ -138,6 +142,7 @@ export default function Ueben() {
         setRunde({ ...runde, fehlversuch: true, fehler: runde.fehler + 1, meldung: { ok: false, text: "Das ist keine Zeitbestimmung. Frage dich: WANN passiert es?" } });
       }
     } else if (a.ort !== null && i === a.ort) {
+      fokus.zaehlen();
       setRunde({
         ...runde, fertig: true, geloest: runde.geloest + (runde.fehlversuch ? 0 : 1),
         meldung: { ok: true, text: "Richtig, das ist die Ortsbestimmung! 📍🌟" },
@@ -159,6 +164,7 @@ export default function Ueben() {
     if (runde.fertig || runde.zoPhase !== "ort") return;
     const a = runde.aufgaben[runde.index];
     if (a.ort === null) {
+      fokus.zaehlen();
       setRunde({
         ...runde, fertig: true, geloest: runde.geloest + (runde.fehlversuch ? 0 : 1),
         meldung: { ok: true, text: "Stark! Dieser Satz hat wirklich KEINE Ortsbestimmung. 🌟" },
@@ -177,14 +183,15 @@ export default function Ueben() {
       return;
     }
     const pool = fach.daten[runde.key];
-    const erg = rundeAbschliessen(data.lernstand.stufen[runde.key], { fehler: runde.fehler, klasse: data.profil.klasse, pool });
+    const rot = tagesModus(data.lernstand.tagesform, heute) === "rot";
+    const erg = rundeAbschliessen(data.lernstand.stufen[runde.key], { fehler: runde.fehler, klasse: data.profil.klasse, pool, stufenStopp: rot });
     const neu = {
       ...data,
       lernstand: {
         ...data.lernstand,
         stufen: { ...data.lernstand.stufen, [runde.key]: erg.fortschritt },
         muenzen: muenzenNachRunde(data.lernstand.muenzen),
-        lerntage: aufgabenZaehlen(data.lernstand.lerntage, heute, runde.geloest, { missionsZiel: data.einstellungen.missionsZiel }),
+        lerntage: aufgabenZaehlen(data.lernstand.lerntage, heute, runde.geloest, missionsOpts(data.einstellungen, data.lernstand.tagesform, heute)),
       },
     };
     logChange(neu, "ueben", "neu", `Runde ${runde.name} (Stufe ${runde.stufe}): ${runde.geloest} von ${runde.aufgaben.length} gelöst`);
@@ -206,6 +213,12 @@ export default function Ueben() {
           <p><b>{runde.geloest} von {runde.aufgaben.length}</b> richtig · 🪙 +1 Münze (jetzt {data.lernstand.muenzen})</p>
           {runde.ergebnis.stufeNeu && <p style={{ color: T.ok }}>⭐ Stark – Stufe {runde.stufe + 1} ist freigeschaltet!</p>}
           {runde.ergebnis.krone && <p style={{ color: T.ok }}>👑 Krone! Du hast die höchste Stufe fehlerfrei gemeistert.</p>}
+          {fokus.serie() >= 3 && (
+            <p data-test="fokus-serie" style={{ color: T.ok }}>
+              🔥 Fokus-Serie: <b>{fokus.serie()} Aufgaben am Stück</b>
+              {fokus.serie() >= data.lernstand.fokusRekord ? " – dein Rekord!" : ` · Rekord: ${data.lernstand.fokusRekord}`}
+            </p>
+          )}
           <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
             Heute: {tag.missionen} Mini-Mission{tag.missionen === 1 ? "" : "en"}
             {tag.zielErreicht ? " · 🎯 Tagesziel erreicht!" : ""}

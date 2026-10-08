@@ -27,6 +27,8 @@ export function leeresDokument(heute) {
       mutSatz: { tag: "", idx: 0 }, // Mut-Satz des Tages (Stark mit Leo)
       vorgang: null,       // Vorgangsbeschreibung: gewählter Ablauf + Selbst-Check
       zeit: { tag: "", sek: 0 }, // heute verbrauchte Lernzeit (Time-Boxing)
+      tagesform: { tag: "", modus: "" }, // NUR heutige Tagesform – keine Fähigkeitseinstufung
+      fokusRekord: 0,            // längste Fokus-Serie (Aufgaben am Stück)
     },
     einstellungen: {
       thema: "hell",   // "hell" | "dunkel"
@@ -35,6 +37,9 @@ export function leeresDokument(heute) {
       zeitLimit: 20,       // Lernzeit pro Tag in Minuten (0 = aus); Empfehlung 20
       spieleAktiv: {},     // je Spiel: false = in der Spielhalle ausgeblendet
       muenzenAktiv: true,  // Münz-Freischaltung (erst üben, dann spielen)
+      tagesformAktiv: true, // Tagesform-Frage vor der ersten Lerneinheit des Tages
+      pausenAktiv: true,   // Bewegungspausen nach längerer Fokuszeit
+      pausenIntervall: 10, // Minuten Fokuszeit bis zur Bewegungspause (5/10/15)
     },
     protokoll: [],     // Änderungsprotokoll: { zeit, bereich, art, text }
   };
@@ -70,6 +75,14 @@ export function migrateData(alt, heute) {
     tag: typeof zeit.tag === "string" ? zeit.tag : "",
     sek: Number.isFinite(zeit.sek) && zeit.sek >= 0 ? Math.floor(zeit.sek) : 0,
   };
+  const form = istObjekt(d.lernstand.tagesform) ? d.lernstand.tagesform : {};
+  d.lernstand.tagesform = {
+    tag: typeof form.tag === "string" ? form.tag : "",
+    modus: ["gruen", "gelb", "rot", ""].includes(form.modus) ? form.modus : "",
+  };
+  if (!Number.isInteger(d.lernstand.fokusRekord) || d.lernstand.fokusRekord < 0 || d.lernstand.fokusRekord > 999) {
+    d.lernstand.fokusRekord = 0;
+  }
   const mut = istObjekt(d.lernstand.mutSatz) ? d.lernstand.mutSatz : {};
   d.lernstand.mutSatz = {
     tag: typeof mut.tag === "string" ? mut.tag : "",
@@ -91,6 +104,9 @@ export function migrateData(alt, heute) {
   }
   if (!istObjekt(d.einstellungen.spieleAktiv)) d.einstellungen.spieleAktiv = {};
   if (typeof d.einstellungen.muenzenAktiv !== "boolean") d.einstellungen.muenzenAktiv = true;
+  if (typeof d.einstellungen.tagesformAktiv !== "boolean") d.einstellungen.tagesformAktiv = true;
+  if (typeof d.einstellungen.pausenAktiv !== "boolean") d.einstellungen.pausenAktiv = true;
+  if (![5, 10, 15].includes(d.einstellungen.pausenIntervall)) d.einstellungen.pausenIntervall = 10;
 
   if (!Array.isArray(d.protokoll)) d.protokoll = [];
 

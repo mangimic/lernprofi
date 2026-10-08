@@ -447,3 +447,46 @@ describe("elternWerkzeuge (Zeitlimit, Spiele-Schalter, Gespräche)", () => {
     expect(bericht.some((b) => b.feld === "Lernzeit-Limit")).toBe(true);
   });
 });
+
+describe("tagesform & fokus", () => {
+  it("Modus gilt nur heute; rot macht Missionen kürzer, Ziel kleiner", async () => {
+    const F = await import("./tagesform.js");
+    expect(F.tagesModus({ tag: HEUTE, modus: "rot" }, HEUTE)).toBe("rot");
+    expect(F.tagesModus({ tag: "2026-01-14", modus: "rot" }, HEUTE)).toBe("");
+    expect(F.tagesformNoetig({ tagesformAktiv: true }, { tag: "", modus: "" }, HEUTE)).toBe(true);
+    expect(F.tagesformNoetig({ tagesformAktiv: false }, { tag: "", modus: "" }, HEUTE)).toBe(false);
+    expect(F.tagesformNoetig({}, { tag: HEUTE, modus: "" }, HEUTE)).toBe(false); // übersprungen zählt
+    expect(F.missionsLaengeHeute("rot")).toBe(3);
+    expect(F.missionsLaengeHeute("")).toBe(4);
+    expect(F.missionsLaengeHeute("gruen")).toBe(5);
+    expect(F.tagesZiel(4, "rot")).toBe(3);
+    expect(F.tagesZiel(2, "rot")).toBe(2); // nie unter 2
+    expect(F.missionsOpts({ missionsZiel: 4 }, { tag: HEUTE, modus: "rot" }, HEUTE))
+      .toEqual({ missionsZiel: 3, missionsLaenge: 3 });
+  });
+
+  it("aufgabenZaehlen folgt der Missions-Länge; rundeAbschliessen stoppt Stufen an roten Tagen", async () => {
+    const { aufgabenZaehlen: zaehlen } = await import("./lerntage.js");
+    const { rundeAbschliessen: abschluss } = await import("./stufen.js");
+    const tage = zaehlen([], HEUTE, 9, { missionsZiel: 3, missionsLaenge: 3 });
+    expect(tage[0].missionen).toBe(3);
+    expect(tage[0].zielErreicht).toBe(true);
+    const POOL2 = { easy: [{}], hard: [{}] };
+    const rot = abschluss(undefined, { fehler: 0, klasse: 4, pool: POOL2, stufenStopp: true });
+    expect(rot.stufeNeu).toBe(false);
+    expect(rot.fortschritt.freigeschaltet).toBe(1);
+    const normal = abschluss(undefined, { fehler: 0, klasse: 4, pool: POOL2 });
+    expect(normal.stufeNeu).toBe(true);
+  });
+
+  it("Fokus-Serie wächst nur bei < 90 s Abstand; 9 Pausen-Ideen", async () => {
+    const F = await import("./tagesform.js");
+    expect(F.fokusSerieWeiter(0, 0, 1000)).toBe(1);
+    expect(F.fokusSerieWeiter(3, 10000, 99000)).toBe(4);   // 89 s später
+    expect(F.fokusSerieWeiter(3, 10000, 100001)).toBe(1);  // 90 s später: reißt
+    expect(F.FOKUS_PAUSEN.length).toBe(9);
+    expect(F.PAUSEN_INTERVALLE).toEqual([5, 10, 15]);
+    const tage = F.tagesformEintragen([], HEUTE, "gelb");
+    expect(tage[0]).toEqual({ tag: HEUTE, aufgaben: 0, missionen: 0, zielErreicht: false, form: "gelb" });
+  });
+});

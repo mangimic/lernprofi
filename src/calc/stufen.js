@@ -37,8 +37,9 @@ export function aktiveStufe(fortschritt, klasse, pool, vorgabe = 0) {
 /**
  * Wertet eine abgeschlossene Runde aus.
  * Rückgabe: { fortschritt, stufeNeu, krone } – stufeNeu/krone nur bei 0 Fehlern.
+ * stufenStopp (Tagesform ROT): heute keine automatische Erhöhung der Stufe.
  */
-export function rundeAbschliessen(fortschritt, { fehler, klasse, pool }) {
+export function rundeAbschliessen(fortschritt, { fehler, klasse, pool, stufenStopp = false }) {
   const alt = fortschritt || leererFortschritt();
   const max = stufenMax(pool);
   const stufe = aktiveStufe(alt, klasse, pool);
@@ -46,10 +47,10 @@ export function rundeAbschliessen(fortschritt, { fehler, klasse, pool }) {
   let stufeNeu = false;
   let krone = false;
   if (fehler === 0) {
-    if (stufe < max) {
+    if (stufe < max && !stufenStopp) {
       neu.freigeschaltet = Math.max(alt.freigeschaltet || 1, stufe + 1);
       stufeNeu = true;
-    } else if (!alt.krone) {
+    } else if (stufe >= max && !alt.krone) {
       neu.krone = true;
       krone = true;
     }

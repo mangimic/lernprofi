@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useApp } from "../appContext.jsx";
 import { aufgabenZaehlen } from "../calc/lerntage.js";
+import { missionsOpts } from "../calc/tagesform.js";
 import { konzentrationStart } from "../spiele/konzentration.js";
 
 /* 🧠 Konzentrations-Training: originalgetreuer Port aus der Alt-App
@@ -34,7 +35,7 @@ export default function Konzentration() {
       heute,
       speichern: (stand) => anwenden(() => ({ konzentration: stand })),
       aufgabeGeloest: () => anwenden((d) => ({
-        lerntage: aufgabenZaehlen(d.lernstand.lerntage, heute, 1, { missionsZiel: d.einstellungen.missionsZiel }),
+        lerntage: aufgabenZaehlen(d.lernstand.lerntage, heute, 1, missionsOpts(d.einstellungen, d.lernstand.tagesform, heute)),
       })),
     });
     return () => engine.current?.stop();

@@ -351,6 +351,7 @@ test("Konzentration: Blitzlesen-Runde im Zeitraffer + Mut-Satz des Tages bleibt"
   await page.getByTestId("pin-ok").click();
   await expect(page.getByTestId("mut-satz-heute")).toContainText("Fehler machen");
   await page.getByTestId("zum-konz").click();
+  await page.getByTestId("tf-skip").click(); // Tagesform-Frage (erste Lerneinheit als Kind)
   await page.getByTestId("konz-tab-blitz").click();
   await expect(page.getByTestId("konz")).toContainText("Runde 1: 25");
   await page.getByTestId("konz-zurueck").click();
@@ -614,4 +615,47 @@ test("Eltern-Werkzeuge: Spiel ausblenden, Münzen aus, Zeitlimit sperrt freundli
   await page.getByTestId("nav-eltern").click();
   await page.getByTestId("zeit-frei").click();
   await expect(page.getByTestId("zeit-verbraucht")).toContainText("0 Min von 10 Min");
+});
+
+test("Tagesform & Fokus: roter Tag macht Missionen kürzer, Bewegungspause kommt", async ({ page }) => {
+  await tresorAnlegen(page); // Eltern-Modus: keine Tagesform-Frage
+  await page.getByTestId("nav-eltern").click();
+  await expect(page.getByTestId("eltern-lernen")).toBeVisible();
+  await page.getByTestId("pausen-intervall-5").click();
+  await page.getByTestId("zeit-limit-0").click(); // Time-Boxing aus, damit nur die Pause triggert
+  await page.waitForTimeout(600); // asynchroner Tresor-Schreibvorgang
+
+  // Als Kind: erste Lerneinheit → Tagesform-Frage → 🌧️ „Heute ist es schwer“
+  await page.reload();
+  await page.getByTestId("pin-eingabe").fill(PIN);
+  await page.getByTestId("pin-ok").click();
+  await page.getByTestId("nav-ueben").click();
+  await expect(page.getByTestId("tagesform")).toContainText("Wie fühlt sich Lernen heute an?");
+  await page.getByTestId("tf-rot").click();
+  await expect(page.getByTestId("tagesform")).toHaveCount(0);
+
+  // 10 Aufgaben fehlerfrei: rot → Missionen à 3 (=3 Missionen, Ziel 3 erreicht),
+  // aber KEINE neue Stufe – dafür die 🔥 Fokus-Serie als Rekord
+  await page.getByTestId("bereich-dd").click();
+  for (let i = 0; i < 10; i++) {
+    await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+    await page.getByTestId("weiter-knopf").click();
+  }
+  await expect(page.getByTestId("runde-ergebnis")).toContainText("3 Mini-Missionen");
+  await expect(page.getByTestId("runde-ergebnis")).toContainText("Tagesziel erreicht");
+  await expect(page.getByTestId("runde-ergebnis")).not.toContainText("freigeschaltet");
+  await expect(page.getByTestId("fokus-serie")).toContainText("10 Aufgaben am Stück");
+  await expect(page.getByTestId("fokus-serie")).toContainText("dein Rekord");
+  await page.waitForTimeout(600);
+
+  // 🤸 Bewegungspause im Zeitraffer: nach „5 Minuten“ Fokuszeit beim Üben
+  await page.reload();
+  await page.evaluate(() => { window.__ZEIT_SCHNELL__ = true; });
+  await page.getByTestId("pin-eingabe").fill(PIN);
+  await page.getByTestId("pin-ok").click();
+  await page.getByTestId("nav-ueben").click(); // Tagesform ist heute schon beantwortet
+  await expect(page.getByTestId("fokus-pause")).toBeVisible({ timeout: 15000 });
+  await expect(page.getByTestId("fokus-idee")).toContainText("🤸");
+  await page.getByTestId("fokus-weiter").click();
+  await expect(page.getByTestId("fokus-pause")).toHaveCount(0);
 });

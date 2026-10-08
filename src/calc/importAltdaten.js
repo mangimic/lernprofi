@@ -84,6 +84,7 @@ export function importAltdaten(roh, heute) {
         aufgaben: Math.max(0, parseInt(e.mi, 10) || 0) * 4,
         missionen: Math.max(0, parseInt(e.mi, 10) || 0),
         zielErreicht: !!e.z,
+        ...(["gruen", "gelb", "rot"].includes(e.m) ? { form: e.m } : {}),
       }));
     hinzu("Lerntage", "übernommen", `${dokument.lernstand.lerntage.length} Tage (Lernspur bleibt erhalten)`);
   }
@@ -159,6 +160,23 @@ export function importAltdaten(roh, heute) {
     dokument.einstellungen.muenzenAktiv = alt.muenzenAktiv;
     hinzu("Münz-Freischaltung", "übernommen", alt.muenzenAktiv ? "an" : "aus");
   }
+  if (alt.tagesformAktiv === false) {
+    dokument.einstellungen.tagesformAktiv = false;
+    hinzu("Tagesform-Frage", "übernommen", "bleibt ausgeschaltet");
+  }
+  if (alt.tagesform && typeof alt.tagesform === "object" && typeof alt.tagesform.tag === "string"
+    && ["gruen", "gelb", "rot", ""].includes(alt.tagesform.modus)) {
+    dokument.lernstand.tagesform = { tag: alt.tagesform.tag, modus: alt.tagesform.modus };
+  }
+  if (Number.isFinite(alt.fokusRekord) && alt.fokusRekord > 0) {
+    dokument.lernstand.fokusRekord = Math.min(999, Math.floor(alt.fokusRekord));
+    hinzu("Fokus-Serien-Rekord", "übernommen", `${dokument.lernstand.fokusRekord} Aufgaben am Stück`);
+  }
+  if ([5, 10, 15].includes(parseInt(alt.pausenIntervall, 10))) {
+    dokument.einstellungen.pausenIntervall = parseInt(alt.pausenIntervall, 10);
+    hinzu("Bewegungspausen", "übernommen", `alle ${dokument.einstellungen.pausenIntervall} Minuten Fokuszeit`);
+  }
+  if (alt.pausenAktiv === false) dokument.einstellungen.pausenAktiv = false;
   if (alt.spieleAktiv && typeof alt.spieleAktiv === "object") {
     // Alt-Schlüssel "spiel" = See-Abenteuer; die übrigen heißen gleich
     const namen = { spiel: "see", tennis: "tennis", fussball: "fussball", schach: "schach", blockwelt: "blockwelt" };

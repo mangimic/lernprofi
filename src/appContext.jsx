@@ -1,6 +1,7 @@
 import { createContext, useContext, useMemo, useRef, useState, useEffect } from "react";
 import { migrateData } from "./calc/migrateData.js";
 import { zeitHeute } from "./calc/elternWerkzeuge.js";
+import { FOKUS_PAUSEN, fokusSerieWeiter } from "./calc/tagesform.js";
 import { importAltdaten, istAltExport } from "./calc/importAltdaten.js";
 import { idbStorage } from "./idbShim.js";
 import {
@@ -72,9 +73,18 @@ export function AppProvider({ children }) {
       .catch(() => setTresorStatus("neu"));
   }, []);
 
-  // ⏰ Lernzeit zählen (Time-Boxing): alle 5 s, nur bei offenem Tresor,
-  // sichtbarer App und aktivem Limit. __ZEIT_SCHNELL__ ist der
-  // Test-Zeitraffer (größere Schritte, kürzeres Intervall).
+  // ⏰ Lernzeit (Time-Boxing) + 🤸 Fokuszeit bis zur Bewegungspause:
+  // alle 5 s, nur bei offenem Tresor und sichtbarer App. Während einer
+  // Bewegungspause zählt NICHTS (Pausenzeit ist keine Lernzeit).
+  // __ZEIT_SCHNELL__ ist der Test-Zeitraffer.
+  const LERN_ROUTEN = ["ueben", "spiele", "konz"];
+  const [fokusPause, setFokusPause] = useState(null); // null | { idee }
+  const fokusPauseRef = useRef(null);
+  fokusPauseRef.current = fokusPause;
+  const fokusSek = useRef(0);
+  const fokusSerie = useRef({ serie: 0, letzte: 0 });
+  const routeRef = useRef(route);
+  routeRef.current = route;
   const zaehlRef = useRef(null);
   const zaehlDataRef = useRef(data);
   zaehlDataRef.current = data;
@@ -85,14 +95,49 @@ export function AppProvider({ children }) {
     const takt = schnell ? 400 : 5000;
     zaehlRef.current = setInterval(() => {
       if (document.visibilityState === "hidden") return;
+      if (fokusPauseRef.current) return; // Bewegungspause: nichts zählt
       const d = zaehlDataRef.current;
-      if (!(d.einstellungen.zeitLimit > 0)) return;
-      const z = zeitHeute(d.lernstand.zeit, heute);
-      update({ ...d, lernstand: { ...d.lernstand, zeit: { tag: z.tag, sek: z.sek + schritt } } });
+      if (d.einstellungen.zeitLimit > 0) {
+        const z = zeitHeute(d.lernstand.zeit, heute);
+        update({ ...d, lernstand: { ...d.lernstand, zeit: { tag: z.tag, sek: z.sek + schritt } } });
+      }
+      // Fokuszeit läuft nur beim Lernen (Üben, Spiele, Konzentration)
+      if (LERN_ROUTEN.includes(routeRef.current) && d.einstellungen.pausenAktiv !== false) {
+        fokusSek.current += schritt;
+        if (fokusSek.current >= (d.einstellungen.pausenIntervall || 10) * 60) {
+          setFokusPause({ idee: FOKUS_PAUSEN[Math.floor(Math.random() * FOKUS_PAUSEN.length)] });
+        }
+      }
     }, takt);
     return () => clearInterval(zaehlRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tresorStatus]);
+
+  // 🔥 Fokus-Serie: jede gelöste Aufgabe zählt; < 90 s Abstand lässt
+  // die Serie wachsen, der Rekord wandert in den Tresor.
+  const fokusZaehlen = () => {
+    const jetzt = Date.now();
+    const serie = fokusSerieWeiter(fokusSerie.current.serie, fokusSerie.current.letzte, jetzt);
+    fokusSerie.current = { serie, letzte: jetzt };
+    const d = zaehlDataRef.current;
+    if (serie > (d.lernstand.fokusRekord || 0)) {
+      const nd = { ...d, lernstand: { ...d.lernstand, fokusRekord: serie } };
+      zaehlDataRef.current = nd;
+      update(nd);
+    }
+    return serie;
+  };
+  const fokus = {
+    pause: fokusPause,
+    zaehlen: fokusZaehlen,
+    serie: () => fokusSerie.current.serie,
+    pauseFertig: () => { fokusSek.current = 0; setFokusPause(null); },
+    pauseSpaeter: () => {
+      const d = zaehlDataRef.current;
+      fokusSek.current = Math.max(0, (d.einstellungen.pausenIntervall || 10) * 60 - 120);
+      setFokusPause(null);
+    },
+  };
 
   // Hell/Dunkel über data-theme am <html>
   useEffect(() => {
@@ -176,7 +221,7 @@ export function AppProvider({ children }) {
     },
   };
 
-  const wert = { data, update, logChange, rueckgaengig, T, heute, route, navTo: setRoute, isMobile, tresor };
+  const wert = { data, update, logChange, rueckgaengig, T, heute, route, navTo: setRoute, isMobile, tresor, fokus };
   return <AppContext.Provider value={wert}>{children}</AppContext.Provider>;
 }
 
