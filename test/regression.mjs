@@ -36,6 +36,29 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.37: Auto-Sicherung + Auto-Abholen ----------
+console.log("== v0.37: Auto-Sync ==");
+test("v0.37: Autosave entprellt im Hintergrund, Konflikt nie still überschrieben", (() => {
+  const a = quelle("src/appContext.jsx");
+  return a.includes("AUTOSYNC_RUHE_MS") && a.includes("autoHochladen") && a.includes("autoSyncAnstossen")
+    && a.includes('"konflikt"') && a.includes("AUTOSYNC_NEUVERSUCH_MS")
+    && quelle("src/sync.js").includes("DIRTY_SCHLUESSEL")
+    && releaseNoteVorhanden("rn-049");
+})());
+test("v0.37: Von-bis – Dauer im Raster, Span-Prüfung, Editor-Endzeiten, Folgefenster", (() => {
+  const w = quelle("src/calc/wochenplan.js");
+  const f = quelle("src/features/Wochenplan.jsx");
+  return w.includes("spanFrei") && w.includes("blockDauer") && w.includes("blockDauerVon")
+    && f.includes("dauer-${ende}") && f.includes('data-test="plan-block-folge"')
+    && f.includes("bis {uhr(block.slot + blockDauerVon(block))}");
+})());
+test("v0.37: Auto-Abholen beim Anmelden nur ohne lokale offene Änderungen, mit Rücklage bei Schlüssel-Mismatch", (() => {
+  const a = quelle("src/appContext.jsx");
+  return a.includes("s.rev > lokalRev && !dirty") && a.includes("alteMeta")
+    && a.includes("herunterladen") && a.includes('data-test="autosync-status"') === false
+    && quelle("src/features/Eltern.jsx").includes('data-test="autosync-status"');
+})());
+
 // ---------- v0.36: Angeln, Schlagzeug 10 Min, Sportart-Frage ----------
 console.log("== v0.36: Bausteine erweitert ==");
 test("v0.36: Angeln-Baustein, Schlagzeug als 10-Min-Einheit, Sport fragt nach der Sportart", (() => {

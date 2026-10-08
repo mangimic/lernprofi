@@ -1107,6 +1107,45 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await expect(page.getByTestId("tages-stand")).toContainText("🪙 1 Münze");
   await page.getByTestId("nav-plan").click();
   await expect(page.getByTestId("plan-bilanz")).toBeVisible();
+
+  // ⏱️ Von-bis: lange Wochenend-Aktivität über mehrere Fenster (So 10:00 bis 12:30)
+  await page.getByTestId("slot-6-600").click();
+  await page.getByTestId("fenster-suche").fill("Bei Michi zu Besuch");
+  await page.getByTestId("fenster-frei").click();
+  await page.getByTestId("slot-6-600").click(); // Baustein-Editor öffnen
+  await page.getByTestId("dauer-750").click();  // bis 12:30
+  await page.getByTestId("notiz-abbrechen").click();
+  await expect(page.getByTestId("slot-6-600")).toContainText("bis 12:30");
+  await expect(page.getByTestId("slot-6-630")).toContainText("↳"); // Folgefenster belegt
+  await expect(page.getByTestId("slot-6-720")).toContainText("↳");
+});
+
+test("Auto-Sicherung: Änderungen wandern near-realtime im Hintergrund zum Server", async ({ page }) => {
+  let rev = 0;
+  let puts = 0;
+  await page.route("**/api/meta", (r) => r.fulfill({ json: { rev, aktualisiert: null } }));
+  await page.route("**/api/vault", (r) => {
+    if (r.request().method() === "PUT") {
+      rev++; puts++;
+      return r.fulfill({ json: { rev } });
+    }
+    return r.fulfill({ json: { rev, blobs: null } });
+  });
+
+  await tresorAnlegen(page);
+  await page.getByTestId("thema-schalter").click(); // irgendeine Änderung …
+  await page.getByTestId("nav-eltern").click();
+  // … landet ohne Knopfdruck verschlüsselt auf dem Server
+  await expect(page.getByTestId("autosync-status")).toContainText("Automatisch gesichert", { timeout: 10000 });
+  expect(puts).toBeGreaterThanOrEqual(1);
+
+  // Nächste Änderung → nächste Revision, wieder von selbst
+  const putsVorher = puts;
+  await page.getByTestId("nav-start").click();
+  await page.getByTestId("thema-schalter").click();
+  await page.getByTestId("nav-eltern").click();
+  await expect(page.getByTestId("autosync-status")).toContainText("Automatisch gesichert", { timeout: 10000 });
+  expect(puts).toBeGreaterThan(putsVorher);
 });
 
 test("Untere Leiste macht beim Scrollen Platz und kommt nach dem Stopp zurück", async ({ page }) => {

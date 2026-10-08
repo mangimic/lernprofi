@@ -56,7 +56,7 @@ function Seg({ werte, aktiv, auf, test }) {
 }
 
 export default function Eltern() {
-  const { data, logChange, T, tresor, heute } = useApp();
+  const { data, logChange, T, tresor, heute, autoSync } = useApp();
   const datei = useRef(null);
   const [meldung, setMeldung] = useState("");
   const [bericht, setBericht] = useState(null);
@@ -588,6 +588,16 @@ export default function Eltern() {
 
       <Karte test="eltern-sync">
         <b>☁️ Geräte-Abgleich</b>
+        <p data-test="autosync-status" style={{
+          margin: "4px 0 6px", fontSize: "var(--schrift-klein)",
+          color: autoSync.stand === "konflikt" ? "var(--warn)" : T.textLeise,
+        }}>
+          {autoSync.stand === "ok" ? `🔄 Automatisch gesichert · Rev. ${autoSync.rev} · ${new Date(autoSync.zeit).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}${autoSync.geholt ? " (beim Anmelden vom Server geholt)" : ""}`
+            : autoSync.stand === "wartet" || autoSync.stand === "laedt" ? "🔄 Auto-Sicherung läuft …"
+            : autoSync.stand === "offline" ? "🔄 Auto-Sicherung wartet auf Netz – versucht es gleich wieder."
+            : autoSync.stand === "konflikt" ? "⚠️ Auto-Sicherung angehalten: Auf dem Server liegt ein NEUERER Stand (anderes Gerät). Bitte unten entscheiden: ⬇️ holen oder ⬆️ überschreiben."
+            : "🔄 Auto-Sicherung: an (springt bei der ersten Änderung an, sobald der Server erreichbar ist)."}
+        </p>
         <p style={{ margin: "4px 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           {sync === null ? "Prüfe Verbindung …"
             : sync.verfuegbar ? <>Verbunden · Server-Stand Rev. {sync.rev}{sync.aktualisiert ? ` vom ${new Date(sync.aktualisiert).toLocaleString("de-DE")}` : " (noch leer)"}. Es wandern nur verschlüsselte Daten – der Server kann nichts lesen.</>

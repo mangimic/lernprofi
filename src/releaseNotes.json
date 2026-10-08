@@ -1,5 +1,29 @@
 [
   {
+    "id": "rn-049",
+    "version": "0.37.0",
+    "datum": "2026-10-08",
+    "titel": "Auto-Sicherung + lange Aktivitäten (von–bis)",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "☁️ Auto-Sicherung: Jede Änderung wird nach 2–3 Sekunden Ruhe automatisch verschlüsselt zum Server gesichert – near-realtime, im Hintergrund, ohne Knopfdruck. Ohne Netz versucht es die App von selbst wieder. Der Status steht im Elternbereich (Geräte-Abgleich)."
+      },
+      {
+        "type": "neu",
+        "text": "📥 Auto-Abholen: Beim Anmelden holt die App automatisch den neuesten Server-Stand, wenn ein anderes Gerät inzwischen etwas gesichert hat und lokal nichts Ungesichertes offen ist. Liegen auf beiden Seiten Änderungen, wird NIE still überschrieben – die Eltern entscheiden wie bisher (⬆️/⬇️)."
+      },
+      {
+        "type": "hinweis",
+        "text": "Die manuellen Sichern/Holen-Knöpfe bleiben erhalten; der Server sieht weiterhin nur verschlüsselte Daten."
+      },
+      {
+        "type": "neu",
+        "text": "⏱️ Von–bis: Bausteine können mehrere Fenster lang sein – Baustein antippen und die Endzeit wählen (z. B. „Bei Oma · 10:00 bis 14:00“ am Wochenende). Lange Bausteine zeigen ↳ in den Folgefenstern, lassen sich am Stück verschieben, und die Wochen-Kopie übernimmt die Dauer."
+      }
+    ]
+  },
+  {
     "id": "rn-048",
     "version": "0.36.0",
     "datum": "2026-10-08",

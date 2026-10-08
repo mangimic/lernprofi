@@ -7,6 +7,7 @@ import {
   termineDerWoche, planPruefung, wochenBilanz, festerTermin, SCHULE,
   kalenderWoche, routineAusPlan, routineAnwenden, schulZeilen, blockNotiz,
   istAusgefallen, ausfallSetzen, ausfallAufheben, blockVerschieben, wocheKopieren,
+  blockDauer, blockDauerVon, slotBelegt as slotBelegtCalc,
 } from "../calc/wochenplan.js";
 
 /* 🗓️ MEIN WOCHENPLAN (Etappe 9): Felix setzt sein Pensum selbst.
@@ -38,11 +39,11 @@ function PaletteBaustein({ b, gewaehlt, aufTipp }) {
 
 /* Eine Stunde (14-19 Uhr) an einem Tag: leer = Ablagefläche (tippen
    oder hineinziehen), belegt = Baustein-Kärtchen mit ✖. */
-function StundenSlot({ tagIdx, slot, block, fest, wahlAktiv, aufTipp, aufWeg, aufEdit, aufFest }) {
+function StundenSlot({ tagIdx, slot, block, blockStart, fest, wahlAktiv, aufTipp, aufWeg, aufEdit, aufFest }) {
   const { T } = useApp();
   const { setNodeRef, isOver } = useDroppable({ id: `slot-${tagIdx}-${slot}`, disabled: !!fest });
   // Platzierte Bausteine sind selbst ziehbar (umplanen ohne Löschen).
-  const zieh = useDraggable({ id: `block-${block?.id ?? `leer-${tagIdx}-${slot}`}`, disabled: !block });
+  const zieh = useDraggable({ id: `block-${block?.id ?? `leer-${tagIdx}-${slot}`}`, disabled: !block || !blockStart });
   const info = block ? bausteinInfo(block.typ) : null;
   if (fest) {
     const fortsetzung = fest.beginn !== slot;
@@ -82,7 +83,9 @@ function StundenSlot({ tagIdx, slot, block, fest, wahlAktiv, aufTipp, aufWeg, au
         opacity: block?.fertig ? 0.65 : 1,
       }}>
       <span style={{ fontSize: "11px", fontWeight: 700, minWidth: 34, opacity: 0.8 }}>{uhr(slot)}</span>
-      {block ? (
+      {block && !blockStart ? (
+        <span data-test="plan-block-folge" style={{ flex: 1, fontWeight: 700, fontSize: "var(--schrift-klein)", opacity: 0.8 }}>↳</span>
+      ) : block ? (
         <>
           <span data-test="plan-block" data-typ={block.typ}
             ref={zieh.setNodeRef} {...zieh.listeners} {...zieh.attributes}
@@ -95,6 +98,7 @@ function StundenSlot({ tagIdx, slot, block, fest, wahlAktiv, aufTipp, aufWeg, au
             }}>
             {block.fertig ? "✓ " : ""}{info.emoji} {block.typ === "eigen" ? (block.notiz || info.name) : info.name}
             {block.typ !== "eigen" && block.notiz && <span style={{ fontWeight: 400, opacity: 0.85 }}> · {block.notiz}</span>}
+            {blockDauerVon(block) > 30 && <span style={{ fontWeight: 400, opacity: 0.85 }}> · bis {uhr(block.slot + blockDauerVon(block))}</span>}
           </span>
           <button data-test="block-weg" onClick={(ev) => { ev.stopPropagation(); aufWeg(block.id); }}
             aria-label="Baustein entfernen"
@@ -152,10 +156,11 @@ function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, ausfaelle, pruefung
       {tagesStunden(idx).map((s) => {
         const f = festerTermin(feste, idx, s);
         const weg = f && (ausfaelle || []).some((a) => a.tag === idx && a.beginn === f.beginn);
+        const block = bloecke.find((b) => s >= b.slot && s < b.slot + blockDauerVon(b));
         return (
           <StundenSlot key={s} tagIdx={idx} slot={s} wahlAktiv={wahlAktiv}
             fest={weg ? null : f}
-            block={bloecke.find((b) => b.slot === s)}
+            block={block} blockStart={!!block && block.slot === s}
             aufTipp={aufTipp} aufWeg={aufWeg} aufEdit={aufEdit} aufFest={aufFest} />
         );
       })}
@@ -575,6 +580,40 @@ export default function Wochenplan() {
                 style={{ width: "100%", marginTop: 10, background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
                 ✓ Speichern
               </button>
+              {(() => {
+                const enden = [];
+                for (let d = 30; enden.length < 12; d += 30) {
+                  const m = block.slot + d - 30;
+                  if (!tagesStunden(block.tag).includes(m)) break;
+                  if (d > 30) {
+                    if (slotBelegtCalc(plan, block.tag, m, block.id)) break;
+                    const f2 = festerTermin(feste, block.tag, m);
+                    if (f2 && !istAusgefallen(plan, block.tag, f2.beginn)) break;
+                  }
+                  enden.push(block.slot + d);
+                }
+                if (enden.length < 2) return null;
+                return (
+                  <div style={{ marginTop: 10 }}>
+                    <p style={{ margin: "0 0 4px", fontSize: "var(--schrift-klein)", color: T.textLeise }}>
+                      ⏱️ Von {uhr(block.slot)} bis …
+                    </p>
+                    <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                      {enden.map((ende) => (
+                        <button key={ende} data-test={`dauer-${ende}`}
+                          onClick={() => speichern(blockDauer(plan, block.id, ende - block.slot), `Dauer bis ${uhr(ende)} Uhr gesetzt`)}
+                          style={{
+                            height: "auto", minHeight: 0, padding: "7px 9px", fontWeight: 700, fontSize: "var(--schrift-klein)",
+                            background: block.slot + blockDauerVon(block) === ende ? T.primaer : T.weich,
+                            color: block.slot + blockDauerVon(block) === ende ? T.primaerText : T.text,
+                          }}>
+                          {uhr(ende)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
               <button data-test="block-verschieben"
                 onClick={() => { setVerschieben(block.id); zu(); }}
                 style={{ width: "100%", marginTop: 6, background: T.weich, color: T.text, fontWeight: 700 }}>

@@ -4,10 +4,20 @@ import { zeitHeute } from "./calc/elternWerkzeuge.js";
 import { FOKUS_PAUSEN, fokusSerieWeiter } from "./calc/tagesform.js";
 import { importAltdaten, istAltExport } from "./calc/importAltdaten.js";
 import { idbStorage } from "./idbShim.js";
+import { syncStatus, hochladen, herunterladen, DIRTY_SCHLUESSEL } from "./sync.js";
 import {
   tresorVorhanden, tresorAnlegen, entsperrenMitPasswort, entsperrenMitPin,
   pinAendern, datenSpeichern, datenLaden, MAX_PIN_VERSUCHE,
 } from "./vault.js";
+
+/* ☁️ Auto-Sicherung: Jede Änderung wird kurz gesammelt (2,5 s Ruhe)
+   und dann im Hintergrund verschlüsselt zum Server geschoben – ohne
+   Knopf, ohne Nachfrage, near-realtime. Konflikte werden NIE still
+   überschrieben, sondern im Elternbereich gemeldet. „sync.dirty" im
+   Gerätespeicher merkt sich, ob lokal Ungesichertes liegt – nur dann
+   verzichtet die Anmeldung aufs automatische Abholen des Server-Stands. */
+const AUTOSYNC_RUHE_MS = 2500;
+const AUTOSYNC_NEUVERSUCH_MS = 60000;
 
 /* ============================================================
    App-Kontext: jede Ansicht holt sich ALLES über useApp().
@@ -146,12 +156,48 @@ export function AppProvider({ children }) {
       data.einstellungen.thema === "dunkel" ? "dark" : "";
   }, [data.einstellungen.thema]);
 
+  // ☁️ Auto-Sicherung (Status für die Eltern-Karte; Kind sieht nichts davon)
+  const [autoSync, setAutoSync] = useState({ stand: "aus" }); // aus | wartet | laedt | ok | konflikt | offline
+  const syncTimer = useRef(null);
+  const syncMoeglich = useRef(null); // null = ungeprüft, sonst true/false
+
+  const autoHochladen = async () => {
+    if (!master.current) return;
+    if (syncMoeglich.current === null) {
+      const s = await syncStatus();
+      syncMoeglich.current = !!s.verfuegbar || s.grund === "offline"; // offline: später nochmal
+      if (!syncMoeglich.current) { setAutoSync({ stand: "aus", grund: s.grund }); return; }
+    }
+    if (syncMoeglich.current === false) return;
+    setAutoSync((a) => ({ ...a, stand: "laedt" }));
+    const e = await hochladen(idbStorage);
+    if (e.ok) {
+      setAutoSync({ stand: "ok", rev: e.rev, zeit: new Date().toISOString() });
+    } else if (e.grund === "konflikt") {
+      setAutoSync({ stand: "konflikt", serverRev: e.serverRev });
+    } else {
+      // offline/Fehler: leise bleiben und in einer Minute erneut versuchen
+      setAutoSync((a) => ({ ...a, stand: "offline" }));
+      clearTimeout(syncTimer.current);
+      syncTimer.current = setTimeout(autoHochladen, AUTOSYNC_NEUVERSUCH_MS);
+    }
+  };
+  const autoSyncAnstossen = () => {
+    idbStorage.set(DIRTY_SCHLUESSEL, true).catch(() => {});
+    setAutoSync((a) => (a.stand === "konflikt" ? a : { ...a, stand: "wartet" }));
+    clearTimeout(syncTimer.current);
+    syncTimer.current = setTimeout(autoHochladen, AUTOSYNC_RUHE_MS);
+  };
+  useEffect(() => () => clearTimeout(syncTimer.current), []);
+
   const speichern = (dokument) => {
     if (!master.current) return;
-    datenSpeichern(master.current, dokument, idbStorage).catch(() => {
-      /* Speichern schlug fehl – die Daten bleiben im Arbeitsspeicher;
-         der nächste erfolgreiche Schreibvorgang holt alles nach. */
-    });
+    datenSpeichern(master.current, dokument, idbStorage)
+      .then(autoSyncAnstossen)
+      .catch(() => {
+        /* Speichern schlug fehl – die Daten bleiben im Arbeitsspeicher;
+           der nächste erfolgreiche Schreibvorgang holt alles nach. */
+      });
   };
 
   const update = (nd) => {
@@ -173,7 +219,36 @@ export function AppProvider({ children }) {
 
   const nachEntsperren = async (schluessel, eltern) => {
     master.current = schluessel;
-    const geladen = await datenLaden(schluessel, idbStorage);
+    let geladen = await datenLaden(schluessel, idbStorage);
+
+    // ☁️ Auto-Abholen: Liegt auf dem Server ein NEUERER Stand (anderes
+    // Gerät) und ist lokal nichts Ungesichertes offen, wird er beim
+    // Anmelden automatisch übernommen. Bei lokalen offenen Änderungen
+    // entscheiden die Eltern wie bisher (Konflikt-Karte).
+    try {
+      const dirty = await idbStorage.get(DIRTY_SCHLUESSEL);
+      const lokalRev = (await idbStorage.get("sync.rev")) ?? 0;
+      const s = await syncStatus();
+      syncMoeglich.current = !!s.verfuegbar;
+      if (s.verfuegbar && s.rev > lokalRev && !dirty) {
+        const alteMeta = await idbStorage.get("tresor.meta");
+        const alteDaten = await idbStorage.get("tresor.daten");
+        const holen = await herunterladen(idbStorage);
+        if (holen.ok) {
+          try {
+            geladen = await datenLaden(schluessel, idbStorage);
+            setAutoSync({ stand: "ok", rev: holen.rev, zeit: new Date().toISOString(), geholt: true });
+          } catch {
+            // Server-Stand passt nicht zu diesem Schlüssel → lokalen Stand zurücklegen
+            await idbStorage.set("tresor.meta", alteMeta);
+            await idbStorage.set("tresor.daten", alteDaten);
+            await idbStorage.set("sync.rev", lokalRev);
+            geladen = await datenLaden(schluessel, idbStorage);
+          }
+        }
+      }
+    } catch { /* ohne Netz einfach lokal weiterarbeiten */ }
+
     const sauber = migrateData(geladen, heute);
     setData(sauber);
     if (!geladen) speichern(sauber); // Erstbefüllung direkt ablegen
@@ -224,7 +299,7 @@ export function AppProvider({ children }) {
 
   const wert = {
     data, update, logChange, rueckgaengig, T, heute, route, navTo: setRoute, isMobile, tresor, fokus,
-    uebenZiel, uebenZielSetzen: setUebenZiel,
+    uebenZiel, uebenZielSetzen: setUebenZiel, autoSync,
   };
   return <AppContext.Provider value={wert}>{children}</AppContext.Provider>;
 }

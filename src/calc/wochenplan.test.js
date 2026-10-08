@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   BAUSTEINE, TERMIN_ARTEN, FESTE_TERMINE_STANDARD, festerTermin, blockNotiz, schulZeilen,
   istAusgefallen, ausfallSetzen, ausfallAufheben, blockVerschieben, wocheKopieren, blockUnfertig,
+  blockDauer, blockDauerVon, spanFrei,
   kalenderWoche, routineAusPlan, routineAnwenden, schulStunden, schulFaecher,
   wochenMontag, tagDatum, leererPlan, planFuerWoche,
   blockHinzu, blockWeg, blockFertig, tagGeschafft, heuteBelohnt, belohnungEintragen,
@@ -233,6 +234,27 @@ describe("wochenplan – Wochen-Rechnung", () => {
     expect(planPruefung(r, [], 20, FESTE_TERMINE_STANDARD).tage[5].lernMin).toBe(10); // nur die Box zählt
     let voll = blockHinzu(r, 5, "lernen", 690);
     expect(planPruefung(voll, [], 20, FESTE_TERMINE_STANDARD).tage[5].status).toBe("ok"); // HA + 2 Boxen
+  });
+
+  it("Von-bis: lange Bausteine belegen mehrere Fenster, Dauer änderbar, Kopie behält sie", () => {
+    // 10:00-12:30 am Sonntag (150 Minuten)
+    let p = blockHinzu(leererPlan("2026-10-05"), 6, "eigen", 600, 150);
+    expect(blockDauerVon(p.bloecke[0])).toBe(150);
+    expect(spanFrei(p, 6, 630, 30)).toBe(false);          // Folgefenster belegt
+    expect(blockHinzu(p, 6, "sport", 690)).toBe(p);       // mitten im Span: abgelehnt
+    expect(blockHinzu(p, 6, "sport", 750).bloecke.length).toBe(2); // direkt danach: ok
+    // Dauer ändern: kürzen gibt Fenster frei; Verlängern in Belegtes scheitert
+    const kurz = blockDauer(p, 1, 60);
+    expect(spanFrei(kurz, 6, 690, 30)).toBe(true);
+    expect(blockDauer(blockHinzu(p, 6, "sport", 750), 1, 180)).toEqual(blockHinzu(p, 6, "sport", 750));
+    // krumme/ungültige Dauern werden ignoriert
+    expect(blockDauer(p, 1, 45)).toBe(p);
+    // Verschieben nimmt die Dauer mit und braucht den ganzen Platz
+    const bewegt = blockVerschieben(p, 1, 5, 540);
+    expect(bewegt.bloecke[0]).toMatchObject({ tag: 5, slot: 540, dauer: 150 });
+    expect(blockVerschieben(p, 1, 0, 1080)).toBe(p); // 18:00 + 150 Min ragt über 19 Uhr hinaus
+    // Wochen-Kopie behält die Dauer
+    expect(wocheKopieren(leererPlan("2026-10-12"), p).bloecke[0].dauer).toBe(150);
   });
 
   it("Ausfälle: Termin fällt nur diese Woche aus, Wächter rechnet ohne ihn", () => {

@@ -8,6 +8,7 @@
 import { META_SCHLUESSEL, DATEN_SCHLUESSEL } from "./vault.js";
 
 const REV_SCHLUESSEL = "sync.rev";
+export const DIRTY_SCHLUESSEL = "sync.dirty"; // lokal Ungesichertes offen?
 
 export async function syncStatus() {
   try {
@@ -44,6 +45,7 @@ export async function hochladen(speicher) {
   if (!r.ok) return { ok: false, grund: "fehler" };
   const { rev } = await r.json();
   await speicher.set(REV_SCHLUESSEL, rev);
+  await speicher.set(DIRTY_SCHLUESSEL, false);
   return { ok: true, rev };
 }
 
@@ -56,6 +58,7 @@ export async function herunterladen(speicher) {
   await speicher.set(META_SCHLUESSEL, s.blobs["tresor.meta"]);
   await speicher.set(DATEN_SCHLUESSEL, s.blobs["tresor.daten"]);
   await speicher.set(REV_SCHLUESSEL, s.rev);
+  await speicher.set(DIRTY_SCHLUESSEL, false);
   return { ok: true, rev: s.rev };
 }
 

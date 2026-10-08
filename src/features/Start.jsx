@@ -6,7 +6,7 @@ import { EINSTUFUNG_FELDER } from "../calc/einstufung.js";
 import { STARK_SAETZE } from "../calc/aufgaben/stark.js";
 import {
   wochenMontag, tagDatum, planFuerWoche, bausteinInfo, blockFertig, blockUnfertig,
-  tagGeschafft, heuteBelohnt, belohnungEintragen, WOCHENTAGE, slotLabel, schulFaecher, istAusgefallen,
+  tagGeschafft, heuteBelohnt, belohnungEintragen, WOCHENTAGE, slotLabel, schulFaecher, istAusgefallen, blockDauerVon, uhr,
 } from "../calc/wochenplan.js";
 
 /* Startseite: Begrüßung, Tages-Stand (Münzen, Missionen, Lernspur),
@@ -131,7 +131,7 @@ export default function Start() {
                   <span style={{ flex: 1, fontWeight: 700, textDecoration: b.fertig ? "line-through" : "none" }}>
                     {info.emoji} {b.typ === "eigen" ? (b.notiz || info.name) : `${info.name}${b.notiz ? ` · ${b.notiz}` : ""}`}
                     <span style={{ color: T.textLeise, fontWeight: 400 }}>
-                      {Number.isInteger(b.slot) ? ` · ${slotLabel(b.slot)}` : ""}{info.lern && info.box !== false ? " · 10+5 Min" : info.kurz ? " · 10 Min" : ""}
+                      {Number.isInteger(b.slot) ? ` · ${slotLabel(b.slot)}${blockDauerVon(b) > 30 ? `–${uhr(b.slot + blockDauerVon(b))}` : ""}` : ""}{info.lern && info.box !== false ? " · 10+5 Min" : info.kurz ? " · 10 Min" : ""}
                     </span>
                   </span>
                   {b.fertig ? (

@@ -153,8 +153,21 @@ export function festerTermin(feste, tag, slotMin) {
   return (feste || []).find((f) => f.tag === tag && slotMin >= f.beginn && slotMin < f.beginn + f.dauer) || null;
 }
 
-export function slotBelegt(plan, tag, slot) {
-  return plan.bloecke.some((b) => b.tag === tag && b.slot === slot);
+export const blockDauerVon = (b) => (Number.isInteger(b.dauer) && b.dauer >= SLOT_MIN ? b.dauer : SLOT_MIN);
+
+export function slotBelegt(plan, tag, slot, ausserId = null) {
+  return plan.bloecke.some((b) => b.id !== ausserId && b.tag === tag
+    && slot >= b.slot && slot < b.slot + blockDauerVon(b));
+}
+
+/** Passt eine Dauer ab `von` in den Tag (Raster + keine anderen Bausteine)? */
+export function spanFrei(plan, tag, von, dauer, ausserId = null) {
+  if (!Number.isInteger(dauer) || dauer < SLOT_MIN || dauer % SLOT_MIN !== 0) return false;
+  for (let m = von; m < von + dauer; m += SLOT_MIN) {
+    if (!tagesStunden(tag).includes(m)) return false;
+    if (slotBelegt(plan, tag, m, ausserId)) return false;
+  }
+  return true;
 }
 
 /** ISO-Kalenderwoche des Montags (fürs Sonntags-Gespräch: „KW 42 planen"). */
@@ -224,12 +237,26 @@ export function naechsteId(bloecke) {
   return bloecke.reduce((m, b) => Math.max(m, b.id || 0), 0) + 1;
 }
 
-export function blockHinzu(plan, tag, typ, slot) {
+export function blockHinzu(plan, tag, typ, slot, dauer = SLOT_MIN) {
   if (tag < 0 || tag > 6 || !BAUSTEINE.some((b) => b.typ === typ)) return plan;
-  if (!tagesStunden(tag).includes(slot)) return plan; // nur planbare Stunden
-  if (slotBelegt(plan, tag, slot)) return plan; // ein Baustein je Stunde
-  const bloecke = [...plan.bloecke, { id: naechsteId(plan.bloecke), tag, slot, typ }];
+  if (!spanFrei(plan, tag, slot, dauer)) return plan;
+  const block = { id: naechsteId(plan.bloecke), tag, slot, typ };
+  if (dauer > SLOT_MIN) block.dauer = dauer;
+  const bloecke = [...plan.bloecke, block];
   return { ...plan, bloecke: bloecke.slice(0, 60) }; // harte Obergrenze
+}
+
+/** Von-bis: Dauer eines Bausteins ändern (30-Minuten-Raster, nur wenn Platz;
+    feste Termine prüft die Oberfläche über festerTermin/istAusgefallen mit). */
+export function blockDauer(plan, id, dauer) {
+  const block = plan.bloecke.find((b) => b.id === id);
+  if (!block || !spanFrei(plan, block.tag, block.slot, dauer, id)) return plan;
+  return {
+    ...plan,
+    bloecke: plan.bloecke.map((b) => (b.id === id
+      ? (dauer > SLOT_MIN ? { ...b, dauer } : (({ dauer: _weg, ...rest }) => rest)(b))
+      : b)),
+  };
 }
 
 export function blockWeg(plan, id) {
@@ -255,8 +282,7 @@ export function routineAnwenden(plan, routine) {
 /** Baustein in ein anderes freies Fenster schieben (gleicher oder anderer Tag). */
 export function blockVerschieben(plan, id, tag, slot) {
   const block = plan.bloecke.find((b) => b.id === id);
-  if (!block || !tagesStunden(tag).includes(slot)) return plan;
-  if (plan.bloecke.some((b) => b.id !== id && b.tag === tag && b.slot === slot)) return plan;
+  if (!block || !spanFrei(plan, tag, slot, blockDauerVon(block), id)) return plan;
   return { ...plan, bloecke: plan.bloecke.map((b) => (b.id === id ? { ...b, tag, slot } : b)) };
 }
 
@@ -266,7 +292,7 @@ export function wocheKopieren(ziel, quelle) {
   let p = ziel;
   for (const b of quelle.bloecke) {
     const vorher = p.bloecke.length;
-    p = blockHinzu(p, b.tag, b.typ, b.slot);
+    p = blockHinzu(p, b.tag, b.typ, b.slot, blockDauerVon(b));
     if (p.bloecke.length > vorher && b.notiz) p = blockNotiz(p, p.bloecke[p.bloecke.length - 1].id, b.notiz);
   }
   return p;
