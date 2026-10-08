@@ -7,11 +7,12 @@ import Ueben from "./features/Ueben.jsx";
 import Spielhalle from "./features/Spielhalle.jsx";
 import Konzentration from "./features/Konzentration.jsx";
 import Einstufung from "./features/Einstufung.jsx";
+import Schrift from "./features/Schrift.jsx";
 import Eltern from "./features/Eltern.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.22.5";
+export const APP_VERSION = "0.23.0";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -61,7 +62,7 @@ export default function App() {
   const karteStil = { maxWidth: 420, width: "100%", textAlign: "center", background: T.karte, borderRadius: T.radius, padding: T.abstand };
 
   // 🚦 Tagesform: freiwillige Frage vor der ersten Lerneinheit des Tages.
-  const lernRoute = ["ueben", "spiele", "konz"].includes(route);
+  const lernRoute = ["ueben", "spiele", "konz", "schrift"].includes(route);
   const tagesformWaehlen = (modus) => {
     logChange(
       {
@@ -130,6 +131,7 @@ export default function App() {
         {route === "neu" ? <WasIstNeu /> : route === "ueben" ? <Ueben /> :
          route === "spiele" ? <Spielhalle /> :
          route === "konz" ? <Konzentration /> :
+         route === "schrift" ? <Schrift /> :
          route === "einstufung" ? <Einstufung /> :
          route === "eltern" && tresor.elternModus ? <Eltern /> : <Start />}
       </main>

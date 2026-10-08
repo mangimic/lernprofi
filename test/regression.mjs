@@ -36,6 +36,36 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.23: Schreib-Training mit Leos Schrift-Blick ----------
+console.log("== v0.23: Schreib-Training ==");
+test("v0.23: APP_VERSION mindestens 0.23.0", versionMindestens("0.23.0"));
+test("v0.23: Release-Note rn-031 vorhanden", releaseNoteVorhanden("rn-031"));
+test("v0.23: Schreib-Satz-Logik deterministisch, 4 Welten, Reise auf 30 begrenzt", (() => {
+  const s = quelle("src/calc/schrift.js");
+  return s.includes("SCHREIB_SAETZE") && s.includes("schreibSatz") && s.includes("Date.UTC")
+    && s.includes("fussball") && s.includes("reiseEintragen") && s.includes("slice(-30)")
+    && s.includes("heuteGeschrieben");
+})());
+test("v0.23: Server-Endpunkt /api/ki/schrift mit Bild-Block, Größenlimit und Deckel", (() => {
+  const k = quelle("server/_lib/kiApi.js");
+  return k.includes("/api/ki/schrift") && k.includes("LEO_SCHRIFT") && k.includes("HANDSCHRIFT")
+    && k.includes('type: "image"') && k.includes("1_500_000") && k.includes("schriftZurechtstutzen")
+    && k.includes('zweck: "schrift"');
+})());
+test("v0.23: Schrift-Seite – Satz des Tages, Mut-Satz-Vorrang, Foto-Verkleinerung, Reise", (() => {
+  const f = quelle("src/features/Schrift.jsx");
+  return f.includes('data-test="schrift-satz"') && f.includes("mutHeute") && f.includes("bildVerkleinern")
+    && f.includes("toDataURL") && f.includes('data-test="schrift-foto"') && f.includes("capture=")
+    && f.includes('data-test="schrift-stern"') && f.includes('data-test="schrift-reise"')
+    && f.includes("heuteGeschrieben") && f.includes('data-test="schrift-freigabe-hinweis"');
+})());
+test("v0.23: Route + Start-Kachel + Eltern-Freigabe scharf, Belohnung nur 1× am Tag", (() => {
+  return quelle("src/App.jsx").includes('route === "schrift"')
+    && quelle("src/features/Start.jsx").includes('data-test="zum-schrift"')
+    && /\{ key: "schrift",[^\n]*da: true/.test(quelle("src/features/Eltern.jsx"))
+    && quelle("src/features/Schrift.jsx").includes("schonHeute ? {} :");
+})());
+
 // ---------- v0.22.5: Leo-Modell wählbar ----------
 console.log("== v0.22.5: Leo-Modell wählbar ==");
 test("v0.22.5: APP_VERSION mindestens 0.22.5", versionMindestens("0.22.5"));

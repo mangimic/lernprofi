@@ -30,6 +30,7 @@ export function leeresDokument(heute) {
       tagesform: { tag: "", modus: "" }, // NUR heutige Tagesform – keine Fähigkeitseinstufung
       fokusRekord: 0,            // längste Fokus-Serie (Aufgaben am Stück)
       einstufung: null,          // letzter Einstufungstest: { tag, ergebnisse, empfehlung }
+      schrift: null,             // Schreib-Training: { reise: [{tag, satz, buchstabe, thumb}] }
     },
     einstellungen: {
       thema: "hell",   // "hell" | "dunkel"
@@ -90,6 +91,7 @@ export function migrateData(alt, heute) {
     d.lernstand.fokusRekord = 0;
   }
   if (!istObjekt(d.lernstand.einstufung)) d.lernstand.einstufung = null;
+  if (!istObjekt(d.lernstand.schrift)) d.lernstand.schrift = null;
   const mut = istObjekt(d.lernstand.mutSatz) ? d.lernstand.mutSatz : {};
   d.lernstand.mutSatz = {
     tag: typeof mut.tag === "string" ? mut.tag : "",

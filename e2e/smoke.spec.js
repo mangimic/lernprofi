@@ -767,6 +767,51 @@ test("KI-Erklärer: Eltern geben frei, Leo erklärt in getakteten Blasen mit Mac
   await expect(page.getByTestId("ki-erklaer-knopf")).toHaveCount(0);
 });
 
+test("Schreib-Training: Satz des Tages, Foto → Leos Schrift-Blick, Schrift-Reise + Münze", async ({ page }) => {
+  await page.route("**/api/ki/status", (route) => route.fulfill({ json: {
+    verfuegbar: true, grund: null, monat: "2026-10", deckelCent: 500, maxDeckelCent: 1000,
+    verbrauchtCent: 0, posten: [],
+  } }));
+  await page.route("**/api/ki/schrift", (route) => route.fulfill({ json: {
+    sterne: ["Dein L steht kerzengerade – stark! ⭐", "Alle Wörter sitzen auf der Linie."],
+    uebe: { buchstabe: "e", blase: "Das e ist manchmal zu eng." },
+    mach: "Schreib das e RIESIG in die Luft!",
+    kostenCent: 0.5, verbrauchtCent: 0.5, deckelCent: 500,
+  } }));
+
+  await tresorAnlegen(page);
+  // Ohne Freigabe: Aufgabe sichtbar, Foto-Teil nur als Hinweis
+  await page.getByTestId("zum-schrift").click();
+  await expect(page.getByTestId("schrift-satz")).toContainText("„");
+  await expect(page.getByTestId("schrift-freigabe-hinweis")).toBeVisible();
+  await expect(page.getByTestId("schrift-foto")).toHaveCount(0);
+
+  // Eltern geben den Schrift-Blick frei
+  await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("ki-schrift-1").click();
+  await page.getByTestId("nav-start").click();
+  await page.getByTestId("zum-schrift").click();
+
+  // Foto hochladen (Mini-PNG) → Sterne selbst getaktet → Übe-Buchstabe + Mach-Aufgabe
+  const PNG = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAFklEQVR4nGP8z8Dwn4EIwESMolGFlCsEAGcTAxEDrri8AAAAAElFTkSuQmCC",
+    "base64",
+  );
+  await page.getByTestId("schrift-foto").setInputFiles({ name: "blatt.png", mimeType: "image/png", buffer: PNG });
+  await expect(page.getByTestId("schrift-stern")).toHaveCount(1);
+  await page.getByTestId("schrift-weiter").click();
+  await expect(page.getByTestId("schrift-stern")).toHaveCount(2);
+  await expect(page.getByTestId("schrift-uebe")).toContainText("„e“");
+  await expect(page.getByTestId("schrift-mach")).toContainText("RIESIG");
+
+  // In die Schrift-Reise legen → Galerie-Eintrag + Münze; zweites Foto heute ohne neue Münze
+  await page.getByTestId("schrift-speichern").click();
+  await expect(page.getByTestId("reise-blatt")).toHaveCount(1);
+  await expect(page.getByTestId("schrift-heute-fertig")).toBeVisible();
+  await page.getByTestId("schrift-zurueck").click();
+  await expect(page.getByTestId("tages-stand")).toContainText("🪙 1 Münze");
+});
+
 test("KI-Karte ohne Server: ehrliche Meldung statt Absturz, Schalter bleiben bedienbar", async ({ page }) => {
   await tresorAnlegen(page);
   await page.getByTestId("nav-eltern").click();

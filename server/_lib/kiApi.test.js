@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import {
-  kiApi, kostenMikro, mikroZuCent, monatsKey, antwortZurechtstutzen, wortProblem,
-  MAX_BLASEN, MAX_WOERTER,
+  kiApi, kostenMikro, mikroZuCent, monatsKey, antwortZurechtstutzen, schriftZurechtstutzen,
+  wortProblem, MAX_BLASEN, MAX_WOERTER,
 } from "./kiApi.js";
 
 // Mini-Mocks wie bei der vaultApi: KV als Map, echte Request-Objekte.
@@ -66,6 +66,27 @@ describe("kiApi – reine Helfer", () => {
     const s = antwortZurechtstutzen('{"blasen":["Das liegt an deiner Störung."],"mach":"Üb halt mehr."}');
     expect(s.ersetzt).toBe(true);
     expect(s.blasen.join(" ")).not.toMatch(/Störung/);
+  });
+
+  it("schriftZurechtstutzen: 2 Sterne + Übe-Buchstabe + Mach; Fallback bei Müll", () => {
+    const gut = schriftZurechtstutzen(
+      'Hier: {"sterne":["Dein M sitzt sauber auf der Linie! ⭐","Schöne Lücken zwischen den Wörtern."],' +
+      '"uebe":{"buchstabe":"e","blase":"Das e ist oft zu eng."},"mach":"Schreib das e RIESIG in die Luft!"}',
+    );
+    expect(gut.sterne.length).toBe(2);
+    expect(gut.uebe).toEqual({ buchstabe: "e", blase: "Das e ist oft zu eng." });
+    expect(gut.mach).toContain("RIESIG");
+    expect(gut.ersetzt).toBe(false);
+    // lange Sterne werden gestutzt, Buchstabe auf 2 Zeichen begrenzt
+    const lang = Array.from({ length: 30 }, (_, i) => "wort" + i).join(" ");
+    const gekuerzt = schriftZurechtstutzen(`{"sterne":["${lang}","ok"],"uebe":{"buchstabe":"Sch","blase":"x"},"mach":"y"}`);
+    expect(gekuerzt.sterne[0].endsWith("…")).toBe(true);
+    expect(gekuerzt.uebe.buchstabe).toBe("Sc");
+    // kein JSON / Wort-Wächter → kompletter Ersatz
+    expect(schriftZurechtstutzen("Blabla ohne JSON").ersetzt).toBe(true);
+    const boese = schriftZurechtstutzen('{"sterne":["Du bist zu faul zum Schreiben.","x"],"uebe":{"buchstabe":"a","blase":"y"},"mach":"z"}');
+    expect(boese.ersetzt).toBe(true);
+    expect([...boese.sterne, boese.mach].join(" ")).not.toMatch(/faul/);
   });
 });
 
@@ -166,6 +187,51 @@ describe("kiApi – Routen", () => {
     expect(r.status).toBe(402);
     expect((await r.json()).grund).toBe("deckel");
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("schrift: schickt Bild + Satz an Claude, bucht den Posten als schrift", async () => {
+    const env = mockEnv();
+    const fetchMock = claudeMock({
+      text: '{"sterne":["Dein L steht kerzengerade! ⭐","Alle Wörter sitzen auf der Linie."],' +
+        '"uebe":{"buchstabe":"e","blase":"Das e ist manchmal zu eng."},"mach":"Schreib das e RIESIG in die Luft!"}',
+      input: 2000, output: 300,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const bild = "a".repeat(200);
+    const r = await kiApi(anfrage("POST", "/api/ki/schrift", {
+      bild, satz: "Der Hecht wehrt sich dreimal.", typ: "image/jpeg", modell: "haiku",
+    }), env, JETZT);
+    expect(r.status).toBe(200);
+    const d = await r.json();
+    expect(d.sterne.length).toBe(2);
+    expect(d.uebe.buchstabe).toBe("e");
+    expect(d.mach).toContain("Luft");
+    // Anfrage an Claude: Bild-Block zuerst, dann der Soll-Satz als Text
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.model).toBe("claude-haiku-5-5");
+    expect(body.messages[0].content[0]).toEqual({
+      type: "image", source: { type: "base64", media_type: "image/jpeg", data: bild },
+    });
+    expect(body.messages[0].content[1].text).toContain("Der Hecht wehrt sich dreimal.");
+    expect(body.system).toContain("HANDSCHRIFT");
+    // Posten gebucht
+    const s = await (await kiApi(anfrage("GET", "/api/ki/status"), env, JETZT)).json();
+    expect(s.posten[0]).toMatchObject({ zweck: "schrift", modell: "haiku" });
+  });
+
+  it("schrift: PNG-Typ wird übernommen; ohne/zu großes Bild 400; Deckel 402 ohne Claude-Ruf", async () => {
+    const env = mockEnv();
+    const fetchMock = claudeMock();
+    vi.stubGlobal("fetch", fetchMock);
+    await kiApi(anfrage("POST", "/api/ki/schrift", { bild: "b".repeat(200), satz: "x", typ: "image/png" }), env, JETZT);
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).messages[0].content[0].source.media_type).toBe("image/png");
+    expect((await kiApi(anfrage("POST", "/api/ki/schrift", { satz: "x" }), env, JETZT)).status).toBe(400);
+    expect((await kiApi(anfrage("POST", "/api/ki/schrift", { bild: "kurz", satz: "x" }), env, JETZT)).status).toBe(400);
+    expect((await kiApi(anfrage("POST", "/api/ki/schrift", { bild: "c".repeat(1_500_001), satz: "x" }), env, JETZT)).status).toBe(400);
+    env._map.set("ki:monat:2026-10", JSON.stringify({ mikro: 500 * 10000, posten: [] }));
+    const voll = await kiApi(anfrage("POST", "/api/ki/schrift", { bild: "d".repeat(200), satz: "x" }), env, JETZT);
+    expect(voll.status).toBe(402);
+    expect(fetchMock).toHaveBeenCalledTimes(1); // kein zweiter Ruf trotz 4 weiterer Anfragen
   });
 
   it("ohne Schlüssel 503; KI-Fehler → 502 und nichts gebucht", async () => {

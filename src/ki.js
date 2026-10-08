@@ -36,6 +36,21 @@ export async function kiDeckelSetzen(deckelCent) {
   } catch { return { ok: false }; }
 }
 
+/** 🖐️ Schreib-Training: Foto (Base64 ohne Daten-Präfix) + Soll-Satz → Leos Schrift-Blick.
+    daten: { bild, satz, typ ("image/jpeg"|"image/png"), modell } */
+export async function kiSchrift(daten) {
+  try {
+    const { status, daten: d } = await anfrage("/api/ki/schrift", {
+      method: "POST", body: JSON.stringify(daten),
+    });
+    if (status === 200 && d?.sterne?.length) return { ok: true, ...d };
+    if (status === 402) return { ok: false, grund: "deckel" };
+    return { ok: false, grund: d?.grund || "fehler" };
+  } catch {
+    return { ok: false, grund: "offline" };
+  }
+}
+
 /** 🦁 „Erklär es mir anders“: holt 1-2 Blasen + Mach-Aufgabe.
     aufgabe.modell: "haiku" | "sonnet" | "opus" (Eltern-Wahl). */
 export async function kiErklaeren(aufgabe) {

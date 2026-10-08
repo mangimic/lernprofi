@@ -1,12 +1,42 @@
 [
   {
+    "id": "rn-031",
+    "version": "0.23.0",
+    "datum": "2026-10-08",
+    "titel": "Schreib-Training mit Leos Schrift-Blick",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🖐️ Schreib-Training (KI-Etappe 7c): Jeden Tag EIN kurzer Satz zum Abschreiben mit der Hand – auf echtem Papier. Ist heute schon ein Mut-Satz gewählt, ist genau der die Schreibaufgabe. Die Sätze kommen aus der gewählten Übungs-Welt (Alltag, Angeln, Tennis, Fußball)."
+      },
+      {
+        "type": "neu",
+        "text": "📸 Leos Schrift-Blick: Blatt abfotografieren, Leo schaut NUR auf die Handschrift (nie auf Inhalt oder Rechtschreibung) und antwortet im festen Format – 2 ⭐-Stärken, 1 🌱-Übe-Buchstabe, 1 Mach-Aufgabe mit Körper (z. B. den Buchstaben riesig in die Luft schreiben). Eltern-Freigabe im Elternbereich, läuft unter demselben Kostendeckel."
+      },
+      {
+        "type": "neu",
+        "text": "🛤️ Schrift-Reise: Jedes geprüfte Blatt landet als kleines Vorschaubild in der Galerie (höchstens 30). Ab dem zweiten Blatt zeigt die Seite „Anfang ➡️ Heute“ – Fortschritt sehen statt lesen. Das erste Blatt des Tages bringt 1 Münze und zählt als Mini-Mission."
+      },
+      {
+        "type": "technik",
+        "text": "Fotos werden im Browser auf ~1024 Pixel verkleinert (JPEG), bevor sie zum Server gehen; der Server begrenzt die Größe zusätzlich hart. Neuer Endpunkt /api/ki/schrift mit Bild-Analyse, eigenem Format-Stutzer und Wort-Wächter."
+      }
+    ]
+  },
+  {
     "id": "rn-030",
     "version": "0.22.5",
     "datum": "2026-10-08",
     "titel": "Leo-Modell wählbar",
     "entries": [
-      { "type": "neu", "text": "🧠 Eltern wählen jetzt das Leo-Modell: Haiku (flott & günstig, ~0,03 ct pro Erklärung) · Sonnet (empfohlener Mittelweg, ~0,5 ct) · Opus (beste Qualität, ~1 ct). Standard ist ab jetzt Sonnet – spürbar bessere Erklärungen, und alle Modelle laufen unter demselben Monatsdeckel." },
-      { "type": "technik", "text": "Der Server kennt je Modell die richtige Denk-Konfiguration und bucht die Kosten nach den echten Preisen des gewählten Modells; die Einzelposten zeigen jetzt auch das Modell." }
+      {
+        "type": "neu",
+        "text": "🧠 Eltern wählen jetzt das Leo-Modell: Haiku (flott & günstig, ~0,03 ct pro Erklärung) · Sonnet (empfohlener Mittelweg, ~0,5 ct) · Opus (beste Qualität, ~1 ct). Standard ist ab jetzt Sonnet – spürbar bessere Erklärungen, und alle Modelle laufen unter demselben Monatsdeckel."
+      },
+      {
+        "type": "technik",
+        "text": "Der Server kennt je Modell die richtige Denk-Konfiguration und bucht die Kosten nach den echten Preisen des gewählten Modells; die Einzelposten zeigen jetzt auch das Modell."
+      }
     ]
   },
   {
@@ -15,8 +45,14 @@
     "datum": "2026-10-08",
     "titel": "Leo antwortet jetzt wirklich",
     "entries": [
-      { "type": "fix", "text": "🦁 Der Erklärer lieferte oft nur den Notfall-Ersatztext: Das interne Vordenken des KI-Modells fraß das knappe Antwort-Budget auf, bevor Text ankam. Jetzt ist das Vordenken für diese Kurzantworten abgeschaltet und das Budget größer – Leo antwortet mit echten Erklärungen." },
-      { "type": "verbessert", "text": "Der Leo-Prompt enthält ein Musterbeispiel (bessere, konkretere Erklärungen), und der Wort-Wächter blockt Alltagswörter wie „krank“ nur noch als ganzes Wort – „Krankenwagen“ in einer Sachkunde-Erklärung ist kein Fehlalarm mehr." }
+      {
+        "type": "fix",
+        "text": "🦁 Der Erklärer lieferte oft nur den Notfall-Ersatztext: Das interne Vordenken des KI-Modells fraß das knappe Antwort-Budget auf, bevor Text ankam. Jetzt ist das Vordenken für diese Kurzantworten abgeschaltet und das Budget größer – Leo antwortet mit echten Erklärungen."
+      },
+      {
+        "type": "verbessert",
+        "text": "Der Leo-Prompt enthält ein Musterbeispiel (bessere, konkretere Erklärungen), und der Wort-Wächter blockt Alltagswörter wie „krank“ nur noch als ganzes Wort – „Krankenwagen“ in einer Sachkunde-Erklärung ist kein Fehlalarm mehr."
+      }
     ]
   },
   {
@@ -25,7 +61,10 @@
     "datum": "2026-10-08",
     "titel": "Klarere Schlüssel-Meldung",
     "entries": [
-      { "type": "fix", "text": "Die Meldung bei fehlendem KI-Schlüssel nennt jetzt den richtigen Secret-Namen („lernprofiapi“) und weist darauf hin, dass es ein Secret (kein Text-Eintrag) sein muss." }
+      {
+        "type": "fix",
+        "text": "Die Meldung bei fehlendem KI-Schlüssel nennt jetzt den richtigen Secret-Namen („lernprofiapi“) und weist darauf hin, dass es ein Secret (kein Text-Eintrag) sein muss."
+      }
     ]
   },
   {
@@ -34,7 +73,10 @@
     "datum": "2026-10-08",
     "titel": "Geräte-Abgleich & KI-Zähler angeschlossen",
     "entries": [
-      { "type": "technik", "text": "Der KV-Namespace ist mit dem Worker verbunden – damit sind ☁️ Geräte-Abgleich und der 🤖 KI-Kostenzähler scharf. Zusammen mit Cloudflare Access und dem API-Schlüssel ist die Server-Seite jetzt komplett eingerichtet." }
+      {
+        "type": "technik",
+        "text": "Der KV-Namespace ist mit dem Worker verbunden – damit sind ☁️ Geräte-Abgleich und der 🤖 KI-Kostenzähler scharf. Zusammen mit Cloudflare Access und dem API-Schlüssel ist die Server-Seite jetzt komplett eingerichtet."
+      }
     ]
   },
   {
@@ -43,7 +85,10 @@
     "datum": "2026-10-08",
     "titel": "KI-Schlüssel angeschlossen",
     "entries": [
-      { "type": "technik", "text": "Der Worker akzeptiert den Anthropic-Schlüssel jetzt auch unter dem Secret-Namen „lernprofiapi“ (so im Cloudflare-Dashboard angelegt) – zusätzlich zu ANTHROPIC_API_KEY." }
+      {
+        "type": "technik",
+        "text": "Der Worker akzeptiert den Anthropic-Schlüssel jetzt auch unter dem Secret-Namen „lernprofiapi“ (so im Cloudflare-Dashboard angelegt) – zusätzlich zu ANTHROPIC_API_KEY."
+      }
     ]
   },
   {
@@ -52,10 +97,22 @@
     "datum": "2026-10-08",
     "titel": "Deine Übungs-Welt, Lehrer-Moment & Wozu-Anker",
     "entries": [
-      { "type": "neu", "text": "🎨 Du wählst deine Übungs-Welt: Alltag, Angeln, Tennis oder Fußball! Alle Satz-Übungen (Subjekte, Prädikate, Groß/Klein, wörtliche Rede, Zeitformen, Wortarten, die 4 Fälle) kommen dann aus DEINER Welt – „Der Angler wirft die Schnur aus“ statt grauer Beispielsätze. Interesse ist der Zündschlüssel!" },
-      { "type": "neu", "text": "🧑‍🏫 Der Lehrer-Moment: Einmal pro Runde dreht Leo den Spieß um – nach einer richtigen Antwort sagst DU laut, WARUM sie stimmt. Was du erklären kannst, sitzt doppelt (aktives Abrufen statt nur lesen)." },
-      { "type": "neu", "text": "🧭 Der Wozu-Anker: Jede Runde startet mit einem Satz, wofür du das brauchst („Die 4 Fälle sagen dir, wem der Ball gehört und wen du anspielst“) – Sinn macht merkbar." },
-      { "type": "neu", "text": "⏳ Zeitformen haben jetzt einen Zeitstrahl (GESTERN – JETZT – MORGEN) als Bild über jeder Aufgabe – sehen statt nur lesen." }
+      {
+        "type": "neu",
+        "text": "🎨 Du wählst deine Übungs-Welt: Alltag, Angeln, Tennis oder Fußball! Alle Satz-Übungen (Subjekte, Prädikate, Groß/Klein, wörtliche Rede, Zeitformen, Wortarten, die 4 Fälle) kommen dann aus DEINER Welt – „Der Angler wirft die Schnur aus“ statt grauer Beispielsätze. Interesse ist der Zündschlüssel!"
+      },
+      {
+        "type": "neu",
+        "text": "🧑‍🏫 Der Lehrer-Moment: Einmal pro Runde dreht Leo den Spieß um – nach einer richtigen Antwort sagst DU laut, WARUM sie stimmt. Was du erklären kannst, sitzt doppelt (aktives Abrufen statt nur lesen)."
+      },
+      {
+        "type": "neu",
+        "text": "🧭 Der Wozu-Anker: Jede Runde startet mit einem Satz, wofür du das brauchst („Die 4 Fälle sagen dir, wem der Ball gehört und wen du anspielst“) – Sinn macht merkbar."
+      },
+      {
+        "type": "neu",
+        "text": "⏳ Zeitformen haben jetzt einen Zeitstrahl (GESTERN – JETZT – MORGEN) als Bild über jeder Aufgabe – sehen statt nur lesen."
+      }
     ]
   },
   {
@@ -64,10 +121,22 @@
     "datum": "2026-10-08",
     "titel": "KI-Start: Leo erklärt es anders",
     "entries": [
-      { "type": "neu", "text": "🦁 Die erste KI-Funktion ist da: „Erklär es mir anders“. Wer eine Aufgabe nicht knackt, bekommt auf Wunsch eine NEUE Erklärung – höchstens 2 kurze Sprechblasen (je max. 12 Wörter, selbst weitertippen) mit einem Bild aus deiner Welt (Fußball, Angeln, Tennis) und immer einer Mach-Aufgabe am Ende (laut sagen, Finger zeigen, in die Luft schreiben). Die Lösung verrät Leo nie." },
-      { "type": "neu", "text": "🔧 Eltern-Karte „🤖 KI-Funktionen“: jede Funktion einzeln freigeben (Standard: alles aus), Monatsdeckel 3/5/10 € mit Verbrauchsbalken und Einzelposten. Der Deckel wird vom Server hart durchgesetzt – bei Erreichen antwortet er freundlich mit Stopp, nichts bricht." },
-      { "type": "technik", "text": "Der Anthropic-Schlüssel liegt ausschließlich als Worker-Secret (Anleitung in docs/DEPLOY-CLOUDFLARE.md); die App ruft nur /api/ki/* hinter Cloudflare Access. Der Server erzwingt das Kurzformat (Blasen-Limit) und filtert Diagnose-/Druck-Wörter (Wort-Wächter). Es wird nur die konkrete Aufgabe übertragen – nie der Name, nie das Lernprofil; API-Daten werden nicht zum Training verwendet." },
-      { "type": "hinweis", "text": "Als Nächstes folgen 🖐️ Schreib-Training (Handschrift-Foto), ✍️ Aufsatz-Feedback, 📊 Wochenbericht und 🔤 persönliche Übungssätze – die Schalter stehen schon bereit." }
+      {
+        "type": "neu",
+        "text": "🦁 Die erste KI-Funktion ist da: „Erklär es mir anders“. Wer eine Aufgabe nicht knackt, bekommt auf Wunsch eine NEUE Erklärung – höchstens 2 kurze Sprechblasen (je max. 12 Wörter, selbst weitertippen) mit einem Bild aus deiner Welt (Fußball, Angeln, Tennis) und immer einer Mach-Aufgabe am Ende (laut sagen, Finger zeigen, in die Luft schreiben). Die Lösung verrät Leo nie."
+      },
+      {
+        "type": "neu",
+        "text": "🔧 Eltern-Karte „🤖 KI-Funktionen“: jede Funktion einzeln freigeben (Standard: alles aus), Monatsdeckel 3/5/10 € mit Verbrauchsbalken und Einzelposten. Der Deckel wird vom Server hart durchgesetzt – bei Erreichen antwortet er freundlich mit Stopp, nichts bricht."
+      },
+      {
+        "type": "technik",
+        "text": "Der Anthropic-Schlüssel liegt ausschließlich als Worker-Secret (Anleitung in docs/DEPLOY-CLOUDFLARE.md); die App ruft nur /api/ki/* hinter Cloudflare Access. Der Server erzwingt das Kurzformat (Blasen-Limit) und filtert Diagnose-/Druck-Wörter (Wort-Wächter). Es wird nur die konkrete Aufgabe übertragen – nie der Name, nie das Lernprofil; API-Daten werden nicht zum Training verwendet."
+      },
+      {
+        "type": "hinweis",
+        "text": "Als Nächstes folgen 🖐️ Schreib-Training (Handschrift-Foto), ✍️ Aufsatz-Feedback, 📊 Wochenbericht und 🔤 persönliche Übungssätze – die Schalter stehen schon bereit."
+      }
     ]
   },
   {
@@ -76,9 +145,18 @@
     "datum": "2026-10-08",
     "titel": "Einstufungstest & Trainingsplan",
     "entries": [
-      { "type": "neu", "text": "🧪 Neuer Einstufungstest: In 6 Kern-Bereichen (Grundwortschatz, das/dass, Zeitformen, die 4 Fälle, Rechnen, Zahlen-Profi) löst du erst 2 leichte Aufgaben – schaffst du beide, kommen adaptiv 2 schwere dazu. Keine Noten, keine Münzen: Fehler zeigen nur, wo wir üben." },
-      { "type": "neu", "text": "🎯 Das Ergebnis stellt die Stufen ALLER getesteten Bereiche genau auf dich ein (auch nach unten – dafür ist der Test da) und legt deinen Trainingsplan auf die Startseite: die schwächsten Bereiche zuerst, mit Direkt-Knopf in die passende Übung." },
-      { "type": "verbessert", "text": "Im Üben-Bereich tragen empfohlene Bereiche das 🎯-empfohlen-Abzeichen; der Test lässt sich jederzeit von der Startseite aus wiederholen. Deine Runden-Historie und Kronen bleiben bei der Einstufung erhalten." }
+      {
+        "type": "neu",
+        "text": "🧪 Neuer Einstufungstest: In 6 Kern-Bereichen (Grundwortschatz, das/dass, Zeitformen, die 4 Fälle, Rechnen, Zahlen-Profi) löst du erst 2 leichte Aufgaben – schaffst du beide, kommen adaptiv 2 schwere dazu. Keine Noten, keine Münzen: Fehler zeigen nur, wo wir üben."
+      },
+      {
+        "type": "neu",
+        "text": "🎯 Das Ergebnis stellt die Stufen ALLER getesteten Bereiche genau auf dich ein (auch nach unten – dafür ist der Test da) und legt deinen Trainingsplan auf die Startseite: die schwächsten Bereiche zuerst, mit Direkt-Knopf in die passende Übung."
+      },
+      {
+        "type": "verbessert",
+        "text": "Im Üben-Bereich tragen empfohlene Bereiche das 🎯-empfohlen-Abzeichen; der Test lässt sich jederzeit von der Startseite aus wiederholen. Deine Runden-Historie und Kronen bleiben bei der Einstufung erhalten."
+      }
     ]
   },
   {
@@ -87,9 +165,18 @@
     "datum": "2026-10-08",
     "titel": "Zahlenblöcke als Grafik & bessere Lesbarkeit",
     "entries": [
-      { "type": "neu", "text": "🟫 Stellenwert-Aufgaben zeigen jetzt echte Zahlenblöcke als Grafik – wie das Material aus der Schule: Tausenderwürfel, Hunderterplatte (10×10), Zehnerstange und Einerwürfel. Dazu 4 neue „Welche Zahl zeigen die Blöcke?“-Aufgaben (auch mit Null-Stellen wie 304 und 2056, wo man genau hinschauen muss)." },
-      { "type": "verbessert", "text": "📱 Lange Wörter werden nie mehr mitten im Wort umgebrochen: Antwort-Knöpfe in den Spielen und alle Wort-Bausteine (Satzglieder, Wörter antippen) bleiben in EINER Zeile – auf dem iPad ist genug Platz, der Knopf wird einfach breiter." },
-      { "type": "hinweis", "text": "Die Blöcke-Aufgaben erscheinen nur im Üben-Bereich (wo die Grafik dazu gehört) – die Spiele stellen weiterhin ihre kompakten Blitz-Fragen." }
+      {
+        "type": "neu",
+        "text": "🟫 Stellenwert-Aufgaben zeigen jetzt echte Zahlenblöcke als Grafik – wie das Material aus der Schule: Tausenderwürfel, Hunderterplatte (10×10), Zehnerstange und Einerwürfel. Dazu 4 neue „Welche Zahl zeigen die Blöcke?“-Aufgaben (auch mit Null-Stellen wie 304 und 2056, wo man genau hinschauen muss)."
+      },
+      {
+        "type": "verbessert",
+        "text": "📱 Lange Wörter werden nie mehr mitten im Wort umgebrochen: Antwort-Knöpfe in den Spielen und alle Wort-Bausteine (Satzglieder, Wörter antippen) bleiben in EINER Zeile – auf dem iPad ist genug Platz, der Knopf wird einfach breiter."
+      },
+      {
+        "type": "hinweis",
+        "text": "Die Blöcke-Aufgaben erscheinen nur im Üben-Bereich (wo die Grafik dazu gehört) – die Spiele stellen weiterhin ihre kompakten Blitz-Fragen."
+      }
     ]
   },
   {
@@ -98,10 +185,22 @@
     "datum": "2026-10-08",
     "titel": "Tagesform & Fokus-Paket",
     "entries": [
-      { "type": "neu", "text": "🚦 Die Tagesform-Frage ist zurück: Beim ersten Üben des Tages fragt Leo „Wie fühlt sich Lernen heute an?“ (💪 fit · 🙂 normal · 🌧️ heute schwer). An schweren Tagen sind die Mini-Missionen kürzer (3 statt 4 Aufgaben), das Tagesziel ist eine Mission kleiner und die Stufen steigen nicht – die Antwort gilt nur für den einen Tag und ist keine Bewertung. An fitten Tagen sind die Missionen 5 Aufgaben lang." },
-      { "type": "neu", "text": "🤸 Bewegungspausen: Nach 5/10/15 Minuten Fokuszeit (einstellbar im Elternbereich) schlägt Leo eine kurze Bewegungsübung vor – „Mach 10 Hampelmänner!“ und 8 weitere Ideen aus dem Original. Pausenzeit zählt nicht als Lernzeit, und „Gleich – erst die Aufgabe fertig“ verschiebt die Pause um 2 Minuten." },
-      { "type": "neu", "text": "🔥 Fokus-Serie: Gelöste Aufgaben am Stück (Abstand unter 90 Sekunden) werden gezählt – Dranbleiben wird belohnt, nicht nur Richtigkeit. Ab 3 am Stück zeigt die Runden-Auswertung die Serie, der Rekord wandert in den Tresor und steht im Elternbereich." },
-      { "type": "verbessert", "text": "Der Eltern-Abschnitt „🧭 Lernen“ bündelt Tagesform-Frage (An/Aus) und Bewegungspausen; die Lern-Übersicht zeigt jetzt die Tagesform je Tag. Die Datenübernahme bringt Tagesform, Fokus-Rekord und Pausen-Einstellungen aus der Alt-App mit. Damit ist die Migration der Alt-App vollständig. 🎉" }
+      {
+        "type": "neu",
+        "text": "🚦 Die Tagesform-Frage ist zurück: Beim ersten Üben des Tages fragt Leo „Wie fühlt sich Lernen heute an?“ (💪 fit · 🙂 normal · 🌧️ heute schwer). An schweren Tagen sind die Mini-Missionen kürzer (3 statt 4 Aufgaben), das Tagesziel ist eine Mission kleiner und die Stufen steigen nicht – die Antwort gilt nur für den einen Tag und ist keine Bewertung. An fitten Tagen sind die Missionen 5 Aufgaben lang."
+      },
+      {
+        "type": "neu",
+        "text": "🤸 Bewegungspausen: Nach 5/10/15 Minuten Fokuszeit (einstellbar im Elternbereich) schlägt Leo eine kurze Bewegungsübung vor – „Mach 10 Hampelmänner!“ und 8 weitere Ideen aus dem Original. Pausenzeit zählt nicht als Lernzeit, und „Gleich – erst die Aufgabe fertig“ verschiebt die Pause um 2 Minuten."
+      },
+      {
+        "type": "neu",
+        "text": "🔥 Fokus-Serie: Gelöste Aufgaben am Stück (Abstand unter 90 Sekunden) werden gezählt – Dranbleiben wird belohnt, nicht nur Richtigkeit. Ab 3 am Stück zeigt die Runden-Auswertung die Serie, der Rekord wandert in den Tresor und steht im Elternbereich."
+      },
+      {
+        "type": "verbessert",
+        "text": "Der Eltern-Abschnitt „🧭 Lernen“ bündelt Tagesform-Frage (An/Aus) und Bewegungspausen; die Lern-Übersicht zeigt jetzt die Tagesform je Tag. Die Datenübernahme bringt Tagesform, Fokus-Rekord und Pausen-Einstellungen aus der Alt-App mit. Damit ist die Migration der Alt-App vollständig. 🎉"
+      }
     ]
   },
   {
@@ -110,10 +209,22 @@
     "datum": "2026-10-07",
     "titel": "Eltern-Werkzeuge: Lernzeit, Spiele-Schalter, Gespräche",
     "entries": [
-      { "type": "neu", "text": "⏰ Lernzeit pro Tag (Time-Boxing) ist zurück: Eltern stellen das Tageslimit ein (Aus/10/15/20/30/45/60 Minuten, Empfehlung 20). Ist die Zeit um, zeigt die App den freundlichen Stopp-Bildschirm („Dein Kopf darf sich jetzt ausruhen“) – gezählt wird nur, solange die App sichtbar ist, und Eltern können den Tag jederzeit wieder freigeben." },
-      { "type": "neu", "text": "🎮 Spiele-Steuerung im Elternbereich: See-Abenteuer, Blockwelt, Tennis, Fußball und Schach lassen sich einzeln ausblenden; die Münz-Freischaltung (erst üben, dann spielen) ist abschaltbar, und es gibt den 🎁 „3 Münzen schenken“-Knopf." },
-      { "type": "neu", "text": "💬 Neuer Eltern-Abschnitt „Gesprächsimpulse“: 20 offene Fragen in 4 Bereichen (🚧 Grenzen · 💪 Stehauf-Kraft · 🧠 Denkweise · 🔍 Probleme lösen) mit täglich wechselnder Frage des Tages und Tipps, wie das Gespräch gelingt (nebenbei fragen, selbst zuerst erzählen, nicht sofort trösten)." },
-      { "type": "verbessert", "text": "Die Startseite zeigt die verbleibende Lernzeit („⏰ noch X Min“); die Datenübernahme bringt Zeitlimit, Münz-Freischaltung und Spiele-Schalter jetzt aus der Alt-App mit." }
+      {
+        "type": "neu",
+        "text": "⏰ Lernzeit pro Tag (Time-Boxing) ist zurück: Eltern stellen das Tageslimit ein (Aus/10/15/20/30/45/60 Minuten, Empfehlung 20). Ist die Zeit um, zeigt die App den freundlichen Stopp-Bildschirm („Dein Kopf darf sich jetzt ausruhen“) – gezählt wird nur, solange die App sichtbar ist, und Eltern können den Tag jederzeit wieder freigeben."
+      },
+      {
+        "type": "neu",
+        "text": "🎮 Spiele-Steuerung im Elternbereich: See-Abenteuer, Blockwelt, Tennis, Fußball und Schach lassen sich einzeln ausblenden; die Münz-Freischaltung (erst üben, dann spielen) ist abschaltbar, und es gibt den 🎁 „3 Münzen schenken“-Knopf."
+      },
+      {
+        "type": "neu",
+        "text": "💬 Neuer Eltern-Abschnitt „Gesprächsimpulse“: 20 offene Fragen in 4 Bereichen (🚧 Grenzen · 💪 Stehauf-Kraft · 🧠 Denkweise · 🔍 Probleme lösen) mit täglich wechselnder Frage des Tages und Tipps, wie das Gespräch gelingt (nebenbei fragen, selbst zuerst erzählen, nicht sofort trösten)."
+      },
+      {
+        "type": "verbessert",
+        "text": "Die Startseite zeigt die verbleibende Lernzeit („⏰ noch X Min“); die Datenübernahme bringt Zeitlimit, Münz-Freischaltung und Spiele-Schalter jetzt aus der Alt-App mit."
+      }
     ]
   },
   {
@@ -122,10 +233,22 @@
     "datum": "2026-10-07",
     "titel": "Vorgangsbeschreibung",
     "entries": [
-      { "type": "neu", "text": "📝 Die Vorgangsbeschreibung ist komplett umgezogen – mit allen 7 Abläufen (🧇 Waffelrezept, 🍞 Toast, ✈️ Papierflieger, 🚲 Fahrrad putzen, 🎣 Angeltag, 🎾 Tennis-Aufschlag, ⚽ Elfmeter) und den drei Übungs-Spielen: 🧩 Schritte ordnen, 🚦 Satzanfänge wählen und 🧺 Zutaten-Check mit Ablenkern aus anderen Rezepten." },
-      { "type": "neu", "text": "🖨️ Das Arbeitsblatt zum Drucken ist dabei: Aufgabe (Klasse 4 mit man-Form, Fachbegriffen und Bindewörtern), Überschrift- und Zutaten-Zeilen, die 5 Schritt-Stichworte und die Checkliste – geschrieben wird wie in der Schule MIT DER HAND." },
-      { "type": "neu", "text": "🔑 Die Muster-Lösung gibt es erst nach der Fleiß-Hürde (3× „Ich habe es versucht“ + mindestens 3 Schritte abgehakt) – und 🌸 der Selbst-Check mit den 12 Schul-Kriterien (Inhalt/Sprache/Form) wird im Tresor gespeichert." },
-      { "type": "verbessert", "text": "Jedes abgeschlossene Übungs-Spiel bringt 1 🪙 Münze und zählt in die Mini-Missionen; der gewählte Ablauf wandert bei der Datenübernahme aus der Alt-App mit." }
+      {
+        "type": "neu",
+        "text": "📝 Die Vorgangsbeschreibung ist komplett umgezogen – mit allen 7 Abläufen (🧇 Waffelrezept, 🍞 Toast, ✈️ Papierflieger, 🚲 Fahrrad putzen, 🎣 Angeltag, 🎾 Tennis-Aufschlag, ⚽ Elfmeter) und den drei Übungs-Spielen: 🧩 Schritte ordnen, 🚦 Satzanfänge wählen und 🧺 Zutaten-Check mit Ablenkern aus anderen Rezepten."
+      },
+      {
+        "type": "neu",
+        "text": "🖨️ Das Arbeitsblatt zum Drucken ist dabei: Aufgabe (Klasse 4 mit man-Form, Fachbegriffen und Bindewörtern), Überschrift- und Zutaten-Zeilen, die 5 Schritt-Stichworte und die Checkliste – geschrieben wird wie in der Schule MIT DER HAND."
+      },
+      {
+        "type": "neu",
+        "text": "🔑 Die Muster-Lösung gibt es erst nach der Fleiß-Hürde (3× „Ich habe es versucht“ + mindestens 3 Schritte abgehakt) – und 🌸 der Selbst-Check mit den 12 Schul-Kriterien (Inhalt/Sprache/Form) wird im Tresor gespeichert."
+      },
+      {
+        "type": "verbessert",
+        "text": "Jedes abgeschlossene Übungs-Spiel bringt 1 🪙 Münze und zählt in die Mini-Missionen; der gewählte Ablauf wandert bei der Datenübernahme aus der Alt-App mit."
+      }
     ]
   },
   {
@@ -134,9 +257,18 @@
     "datum": "2026-10-07",
     "titel": "Satzglieder umstellen",
     "entries": [
-      { "type": "neu", "text": "🔀 Der Deutsch-Bereich „Satzglieder umstellen“ ist umgezogen (nach Könnernachweis 8 „Sprache untersuchen“): Baue Sätze aus Satzglied-Bausteinen NEU zusammen – die Regel: Das Prädikat bleibt an 2. Stelle, und die Reihenfolge muss sich vom Ausgangssatz unterscheiden." },
-      { "type": "neu", "text": "🕐📍 Dazu Zeit- und Ortsbestimmungen erkennen: erst die Zeitbestimmung (Wann?) antippen, dann die Ortsbestimmung (Wo?) – inklusive Sätzen, die gar KEINE Ortsbestimmung haben („🚫 Keine da!“). Die Schulfarben (Zeit = orange, Ort = grün) sind wie im Original." },
-      { "type": "verbessert", "text": "Am Satzanfang wird der erste Buchstabe automatisch groß – die Bausteine stehen wie auf den Schul-Kärtchen in Satzmitte-Schreibung. Alle 9 Original-Aufgaben sind 1:1 übernommen; der Fortschritt zählt wie gewohnt in Stufen, Münzen und Mini-Missionen." }
+      {
+        "type": "neu",
+        "text": "🔀 Der Deutsch-Bereich „Satzglieder umstellen“ ist umgezogen (nach Könnernachweis 8 „Sprache untersuchen“): Baue Sätze aus Satzglied-Bausteinen NEU zusammen – die Regel: Das Prädikat bleibt an 2. Stelle, und die Reihenfolge muss sich vom Ausgangssatz unterscheiden."
+      },
+      {
+        "type": "neu",
+        "text": "🕐📍 Dazu Zeit- und Ortsbestimmungen erkennen: erst die Zeitbestimmung (Wann?) antippen, dann die Ortsbestimmung (Wo?) – inklusive Sätzen, die gar KEINE Ortsbestimmung haben („🚫 Keine da!“). Die Schulfarben (Zeit = orange, Ort = grün) sind wie im Original."
+      },
+      {
+        "type": "verbessert",
+        "text": "Am Satzanfang wird der erste Buchstabe automatisch groß – die Bausteine stehen wie auf den Schul-Kärtchen in Satzmitte-Schreibung. Alle 9 Original-Aufgaben sind 1:1 übernommen; der Fortschritt zählt wie gewohnt in Stufen, Münzen und Mini-Missionen."
+      }
     ]
   },
   {
@@ -145,9 +277,18 @@
     "datum": "2026-10-07",
     "titel": "Schach ist eingezogen",
     "entries": [
-      { "type": "neu", "text": "♟️ Schach mit allen drei Bereichen aus der Alt-App: 🎓 Schach-Schule (6 Lektionen Schritt für Schritt – von deiner Spanischen Eröffnung über die Italienische, die 3 goldenen Regeln und die Rochade bis zu Gabel, Fesselung und Schäfermatt-Abwehr), 🧩 10 Taktik-Aufgaben zum Antippen und 🤖 echtes Schach gegen den Computer." },
-      { "type": "neu", "text": "Der Computer spielt mit allen Regeln (Rochade, en passant, Umwandlung, Matt & Patt), ist aber kindgerecht schwach – mit 💡 Tipp-Knopf (zeigt einen starken Zug in Gelb) und ↩️ Zug-Zurücknehmen." },
-      { "type": "verbessert", "text": "Das Brett hat die Feldnummerierung a–h und 1–8; auf dem Handy stehen Frage und Knöpfe über dem Brett, das Brett richtet sich nach der Bildschirmhöhe. Gelöste Taktik-Aufgaben zählen für deine Mini-Missionen." }
+      {
+        "type": "neu",
+        "text": "♟️ Schach mit allen drei Bereichen aus der Alt-App: 🎓 Schach-Schule (6 Lektionen Schritt für Schritt – von deiner Spanischen Eröffnung über die Italienische, die 3 goldenen Regeln und die Rochade bis zu Gabel, Fesselung und Schäfermatt-Abwehr), 🧩 10 Taktik-Aufgaben zum Antippen und 🤖 echtes Schach gegen den Computer."
+      },
+      {
+        "type": "neu",
+        "text": "Der Computer spielt mit allen Regeln (Rochade, en passant, Umwandlung, Matt & Patt), ist aber kindgerecht schwach – mit 💡 Tipp-Knopf (zeigt einen starken Zug in Gelb) und ↩️ Zug-Zurücknehmen."
+      },
+      {
+        "type": "verbessert",
+        "text": "Das Brett hat die Feldnummerierung a–h und 1–8; auf dem Handy stehen Frage und Knöpfe über dem Brett, das Brett richtet sich nach der Bildschirmhöhe. Gelöste Taktik-Aufgaben zählen für deine Mini-Missionen."
+      }
     ]
   },
   {
@@ -156,10 +297,22 @@
     "datum": "2026-10-07",
     "titel": "Tennis- und Fußball-Match",
     "entries": [
-      { "type": "neu", "text": "🎾 Das Tennis-Match ist originalgetreu umgezogen: Wörter- und Mathe-Fragen als Ballwechsel (15–30–40–Spiel, bei 40:40 Entscheidungsball), 2 Spiele gewinnen das Match – mit Ballflug-Animation, 3 Gegnern in Rotation und Tennis-Wissen beim Seitenwechsel." },
-      { "type": "neu", "text": "⚽ Das Fußball-Match ist da: 2 Halbzeiten mit je 5 Torchancen, richtig = TOOOR, falsch = Konter – bei Gleichstand entscheidet ein Elfmeter. Mit Torwart-Mutmacher und Fußball-Wissen in der Halbzeit." },
-      { "type": "neu", "text": "🦁 Coach Leo (Mutmacher) begleitet beide Matches wie im Original: Rollenspiel mit Sprechblasen vor dem Start (dein Mut-Satz ist DEINE Rolle – laut sagen und antippen!), kurze Mutmacher im Spiel, nach Fehlern, bei Führung/Rückstand und ein Lob am Ende." },
-      { "type": "verbessert", "text": "Gewonnene Bälle zählen für deine Mini-Missionen; gespielte Matches werden im Tresor gezählt, damit jedes Mal ein anderer Gegner wartet. Die Datenübernahme bringt die Match-Zähler aus der Alt-App mit." }
+      {
+        "type": "neu",
+        "text": "🎾 Das Tennis-Match ist originalgetreu umgezogen: Wörter- und Mathe-Fragen als Ballwechsel (15–30–40–Spiel, bei 40:40 Entscheidungsball), 2 Spiele gewinnen das Match – mit Ballflug-Animation, 3 Gegnern in Rotation und Tennis-Wissen beim Seitenwechsel."
+      },
+      {
+        "type": "neu",
+        "text": "⚽ Das Fußball-Match ist da: 2 Halbzeiten mit je 5 Torchancen, richtig = TOOOR, falsch = Konter – bei Gleichstand entscheidet ein Elfmeter. Mit Torwart-Mutmacher und Fußball-Wissen in der Halbzeit."
+      },
+      {
+        "type": "neu",
+        "text": "🦁 Coach Leo (Mutmacher) begleitet beide Matches wie im Original: Rollenspiel mit Sprechblasen vor dem Start (dein Mut-Satz ist DEINE Rolle – laut sagen und antippen!), kurze Mutmacher im Spiel, nach Fehlern, bei Führung/Rückstand und ein Lob am Ende."
+      },
+      {
+        "type": "verbessert",
+        "text": "Gewonnene Bälle zählen für deine Mini-Missionen; gespielte Matches werden im Tresor gezählt, damit jedes Mal ein anderer Gegner wartet. Die Datenübernahme bringt die Match-Zähler aus der Alt-App mit."
+      }
     ]
   },
   {
@@ -168,10 +321,22 @@
     "datum": "2026-10-07",
     "titel": "Konzentrations-Training & Mut-Satz",
     "entries": [
-      { "type": "neu", "text": "🧠 Das Konzentrations-Training ist umgezogen – mit allen drei Übungen: 🔢 Zahlenkette (jeden Tag fehlerfrei aufsagen → eine Zahl mehr, bei 7 die große Feier + Rekord), 🔤 Alphabet-Sprünge (jeden 2./3. Buchstaben, vorwärts und rückwärts, mit Bestwert je Stufe) und ⚡ Blitzlesen „Tiere“ (1 Minute laut lesen, 5 Runden, Rekord). Einstieg direkt auf der Startseite." },
-      { "type": "neu", "text": "🦁 Der Mut-Satz des Tages ist zurück: Jeden Tag einen starken Satz aussuchen – er gehört dir bis morgen und steht gut sichtbar auf der Startseite." },
-      { "type": "verbessert", "text": "Jede geschaffte Trainings-Runde zählt für deine Mini-Missionen; Kette, Bestwerte und Blitz-Runden liegen im verschlüsselten Tresor und wandern beim Geräte-Abgleich mit." },
-      { "type": "technik", "text": "Datenübernahme aus der Alt-App bringt Zahlenkette, ABC-Bestwerte, Blitz-Runden und den heutigen Mut-Satz jetzt vollständig mit." }
+      {
+        "type": "neu",
+        "text": "🧠 Das Konzentrations-Training ist umgezogen – mit allen drei Übungen: 🔢 Zahlenkette (jeden Tag fehlerfrei aufsagen → eine Zahl mehr, bei 7 die große Feier + Rekord), 🔤 Alphabet-Sprünge (jeden 2./3. Buchstaben, vorwärts und rückwärts, mit Bestwert je Stufe) und ⚡ Blitzlesen „Tiere“ (1 Minute laut lesen, 5 Runden, Rekord). Einstieg direkt auf der Startseite."
+      },
+      {
+        "type": "neu",
+        "text": "🦁 Der Mut-Satz des Tages ist zurück: Jeden Tag einen starken Satz aussuchen – er gehört dir bis morgen und steht gut sichtbar auf der Startseite."
+      },
+      {
+        "type": "verbessert",
+        "text": "Jede geschaffte Trainings-Runde zählt für deine Mini-Missionen; Kette, Bestwerte und Blitz-Runden liegen im verschlüsselten Tresor und wandern beim Geräte-Abgleich mit."
+      },
+      {
+        "type": "technik",
+        "text": "Datenübernahme aus der Alt-App bringt Zahlenkette, ABC-Bestwerte, Blitz-Runden und den heutigen Mut-Satz jetzt vollständig mit."
+      }
     ]
   },
   {
@@ -180,9 +345,18 @@
     "datum": "2026-10-07",
     "titel": "Die Blockwelt ist da",
     "entries": [
-      { "type": "neu", "text": "⛏️ Die Blockwelt ist originalgetreu umgezogen: Bau deine Welt auf dem Raster, verdiene Blöcke mit Wörter- und Mathe-Fragen (jede 3. Frage ist schwer und bringt einen seltenen Block wie 💎), bau in der Werkstatt Tiere, Möbel und 💥 TNT – mit Meilenstein-Freischaltungen, Welt-Sicherung und Neu-Anfangen (Fortschritt bleibt!)." },
-      { "type": "verbessert", "text": "Deine Blockwelt liegt jetzt im verschlüsselten Tresor – sie überlebt Neustarts und wandert beim Geräte-Abgleich mit auf iPad, Laptop und Handy." },
-      { "type": "technik", "text": "Gemeinsames Fragen-Modul für alle Spiele (Mathe-Mix, dritte Falsch-Schreibweise); Anti-Schummel-Denk-Pause (3 s, nach 3 Fehlern 8 s) wie im Original." }
+      {
+        "type": "neu",
+        "text": "⛏️ Die Blockwelt ist originalgetreu umgezogen: Bau deine Welt auf dem Raster, verdiene Blöcke mit Wörter- und Mathe-Fragen (jede 3. Frage ist schwer und bringt einen seltenen Block wie 💎), bau in der Werkstatt Tiere, Möbel und 💥 TNT – mit Meilenstein-Freischaltungen, Welt-Sicherung und Neu-Anfangen (Fortschritt bleibt!)."
+      },
+      {
+        "type": "verbessert",
+        "text": "Deine Blockwelt liegt jetzt im verschlüsselten Tresor – sie überlebt Neustarts und wandert beim Geräte-Abgleich mit auf iPad, Laptop und Handy."
+      },
+      {
+        "type": "technik",
+        "text": "Gemeinsames Fragen-Modul für alle Spiele (Mathe-Mix, dritte Falsch-Schreibweise); Anti-Schummel-Denk-Pause (3 s, nach 3 Fehlern 8 s) wie im Original."
+      }
     ]
   },
   {
@@ -191,9 +365,18 @@
     "datum": "2026-10-07",
     "titel": "Geräte-Abgleich (Etappe 6)",
     "entries": [
-      { "type": "neu", "text": "Der Elternbereich hat jetzt „☁️ Geräte-Abgleich“: Den verschlüsselten Tresor auf den Server sichern und auf iPad, Laptop und Handy holen – der Server sieht dabei nie Klartext, nur Chiffrat mit Revisionsnummer. Konflikte werden gemeldet und niemals still überschrieben." },
-      { "type": "hinweis", "text": "Zum Aktivieren einmalig den KV-Namespace anlegen und in wrangler.jsonc eintragen – Schritt-für-Schritt in docs/DEPLOY-CLOUDFLARE.md (dort steht auch die Cloudflare-Access-Einrichtung und der Ablauf für neue Geräte). Bis dahin zeigt die Karte „noch nicht eingerichtet“." },
-      { "type": "technik", "text": "Worker-API /api/meta und /api/vault (GET/PUT mit baseRev, 409 bei Konflikt, 401 ohne Access, Eingabe-Validierung) als reines Modul mit 5 Tests; Client-Sync in src/sync.js." }
+      {
+        "type": "neu",
+        "text": "Der Elternbereich hat jetzt „☁️ Geräte-Abgleich“: Den verschlüsselten Tresor auf den Server sichern und auf iPad, Laptop und Handy holen – der Server sieht dabei nie Klartext, nur Chiffrat mit Revisionsnummer. Konflikte werden gemeldet und niemals still überschrieben."
+      },
+      {
+        "type": "hinweis",
+        "text": "Zum Aktivieren einmalig den KV-Namespace anlegen und in wrangler.jsonc eintragen – Schritt-für-Schritt in docs/DEPLOY-CLOUDFLARE.md (dort steht auch die Cloudflare-Access-Einrichtung und der Ablauf für neue Geräte). Bis dahin zeigt die Karte „noch nicht eingerichtet“."
+      },
+      {
+        "type": "technik",
+        "text": "Worker-API /api/meta und /api/vault (GET/PUT mit baseRev, 409 bei Konflikt, 401 ohne Access, Eingabe-Validierung) als reines Modul mit 5 Tests; Client-Sync in src/sync.js."
+      }
     ]
   },
   {
@@ -202,9 +385,18 @@
     "datum": "2026-10-07",
     "titel": "Das echte See-Abenteuer ist zurück",
     "entries": [
-      { "type": "geaendert", "text": "Das See-Abenteuer ist jetzt das Original aus der bisherigen App: Lauf mit deiner Figur um den Schwarzwald-See (Angelplatz antippen – sie läuft von selbst außen herum), wirf die Angel mit Schwimmer-Animation aus und fang alle 5 Fische aus dem Besatz." },
-      { "type": "neu", "text": "8 echte Fischarten mit naturgetreuen Zeichnungen und Wusstest-du-Infos: Rotfeder, Barsch, Bachforelle, Schleie, Zander, Aal, Karpfen – und der Hecht, der sich dreimal wehrt und Stück für Stück herangezogen wird." },
-      { "type": "neu", "text": "Wie im Original: ~jede zweite Frage ist Mathe, Wort-Fragen bekommen eine dritte Falsch-Schreibweise (Ratechance nur 33 %), und nach einem Fehler gibt es die 3-Sekunden-Denk-Pause statt Durchklicken." }
+      {
+        "type": "geaendert",
+        "text": "Das See-Abenteuer ist jetzt das Original aus der bisherigen App: Lauf mit deiner Figur um den Schwarzwald-See (Angelplatz antippen – sie läuft von selbst außen herum), wirf die Angel mit Schwimmer-Animation aus und fang alle 5 Fische aus dem Besatz."
+      },
+      {
+        "type": "neu",
+        "text": "8 echte Fischarten mit naturgetreuen Zeichnungen und Wusstest-du-Infos: Rotfeder, Barsch, Bachforelle, Schleie, Zander, Aal, Karpfen – und der Hecht, der sich dreimal wehrt und Stück für Stück herangezogen wird."
+      },
+      {
+        "type": "neu",
+        "text": "Wie im Original: ~jede zweite Frage ist Mathe, Wort-Fragen bekommen eine dritte Falsch-Schreibweise (Ratechance nur 33 %), und nach einem Fehler gibt es die 3-Sekunden-Denk-Pause statt Durchklicken."
+      }
     ]
   },
   {
@@ -213,9 +405,18 @@
     "datum": "2026-10-07",
     "titel": "Die Spielhalle öffnet: See-Abenteuer",
     "entries": [
-      { "type": "neu", "text": "🎮 Der Spiele-Tab ist da! Wie gewohnt gilt: 1 Übungsrunde = 1 Münze, 1 Spielbesuch = 1 Münze. Ohne Münze bleibt die Angel eingepackt – erst üben, dann spielen." },
-      { "type": "neu", "text": "🎣 See-Abenteuer: 10 Würfe, Frage richtig = Fisch gefangen. Wer eine Serie schafft, zieht dicke Brocken an Land (🐟 → 🐠 → 🦈 → 🐋) – bei einem Fehler entwischt der Fisch und die Serie reißt. Mit Punkte-Rekord!" },
-      { "type": "technik", "text": "Blitz-Fragen mischen Deutsch und Mathe aus den vorhandenen Pools (kurz, seedbar, getestet). Blockwelt, Tennis, Fußball und Schach folgen." }
+      {
+        "type": "neu",
+        "text": "🎮 Der Spiele-Tab ist da! Wie gewohnt gilt: 1 Übungsrunde = 1 Münze, 1 Spielbesuch = 1 Münze. Ohne Münze bleibt die Angel eingepackt – erst üben, dann spielen."
+      },
+      {
+        "type": "neu",
+        "text": "🎣 See-Abenteuer: 10 Würfe, Frage richtig = Fisch gefangen. Wer eine Serie schafft, zieht dicke Brocken an Land (🐟 → 🐠 → 🦈 → 🐋) – bei einem Fehler entwischt der Fisch und die Serie reißt. Mit Punkte-Rekord!"
+      },
+      {
+        "type": "technik",
+        "text": "Blitz-Fragen mischen Deutsch und Mathe aus den vorhandenen Pools (kurz, seedbar, getestet). Blockwelt, Tennis, Fußball und Schach folgen."
+      }
     ]
   },
   {
@@ -224,9 +425,18 @@
     "datum": "2026-10-07",
     "titel": "Elternbereich + Umzug aus der alten App",
     "entries": [
-      { "type": "neu", "text": "Der Elternbereich ist jetzt ein eigener Tab (nach Entsperren mit dem Eltern-Passwort): Profil, Tagesziel (2–6 Missionen), Stufen-Steuerung (Auto oder fest, global und je Lernfeld) und die neutrale Lern-Übersicht der letzten 14 Tage." },
-      { "type": "neu", "text": "Der große Umzug ist bereit: „Lernstand aus Datei übernehmen“ versteht den Export der bisherigen App („Lernstand sichern“) – Münzen, alle Stufen (inkl. Grundwortschatz), Lerntage, Lernspur, Rekorde und Tagesziel wandern mit. Ein Bericht zeigt genau, was übernommen und was bewusst zurückgelassen wurde." },
-      { "type": "technik", "text": "Übernahme-Konverter als reines Modul mit 5 Tests (inkl. kaputter Eingaben); Stufen-Vorgabe der Eltern greift in allen Übungen." }
+      {
+        "type": "neu",
+        "text": "Der Elternbereich ist jetzt ein eigener Tab (nach Entsperren mit dem Eltern-Passwort): Profil, Tagesziel (2–6 Missionen), Stufen-Steuerung (Auto oder fest, global und je Lernfeld) und die neutrale Lern-Übersicht der letzten 14 Tage."
+      },
+      {
+        "type": "neu",
+        "text": "Der große Umzug ist bereit: „Lernstand aus Datei übernehmen“ versteht den Export der bisherigen App („Lernstand sichern“) – Münzen, alle Stufen (inkl. Grundwortschatz), Lerntage, Lernspur, Rekorde und Tagesziel wandern mit. Ein Bericht zeigt genau, was übernommen und was bewusst zurückgelassen wurde."
+      },
+      {
+        "type": "technik",
+        "text": "Übernahme-Konverter als reines Modul mit 5 Tests (inkl. kaputter Eingaben); Stufen-Vorgabe der Eltern greift in allen Übungen."
+      }
     ]
   },
   {
@@ -235,8 +445,14 @@
     "datum": "2026-10-07",
     "titel": "Deutsch ist (fast) komplett",
     "entries": [
-      { "type": "neu", "text": "5 neue Deutsch-Bereiche mit 386 Aufgaben: 💬 Wörtliche Rede (antippen, was gesprochen wird) · ⏳ Zeitformen bestimmen (Präsens bis Futur) · 🏷️ Wortarten (Nomen/Verb/Adjektiv mit Proben als Tipp) · 🎯 Die 4 Fälle (mit Fragewort-Trick) · 📖 Grundwortschatz: alle 12 Regelgruppen mit 246 Wörtern, jede Frage zeigt die passende Regel." },
-      { "type": "hinweis", "text": "Damit sind 11 Deutsch-Bereiche spielbar – insgesamt über 800 Aufgaben in der neuen App. Es fehlt aus der alten App noch: Satzglieder umstellen (braucht eine eigene Schiebe-Oberfläche), Vorgangsbeschreibung und die Spiele." }
+      {
+        "type": "neu",
+        "text": "5 neue Deutsch-Bereiche mit 386 Aufgaben: 💬 Wörtliche Rede (antippen, was gesprochen wird) · ⏳ Zeitformen bestimmen (Präsens bis Futur) · 🏷️ Wortarten (Nomen/Verb/Adjektiv mit Proben als Tipp) · 🎯 Die 4 Fälle (mit Fragewort-Trick) · 📖 Grundwortschatz: alle 12 Regelgruppen mit 246 Wörtern, jede Frage zeigt die passende Regel."
+      },
+      {
+        "type": "hinweis",
+        "text": "Damit sind 11 Deutsch-Bereiche spielbar – insgesamt über 800 Aufgaben in der neuen App. Es fehlt aus der alten App noch: Satzglieder umstellen (braucht eine eigene Schiebe-Oberfläche), Vorgangsbeschreibung und die Spiele."
+      }
     ]
   },
   {
@@ -245,7 +461,10 @@
     "datum": "2026-10-07",
     "titel": "Automatisches Ausliefern eingerichtet",
     "entries": [
-      { "type": "technik", "text": "Die Cloudflare-Konfiguration (wrangler.jsonc) liegt jetzt im Repository – damit kann der automatische Build bei jedem Push selbst deployen, ohne Klick im Dashboard." }
+      {
+        "type": "technik",
+        "text": "Die Cloudflare-Konfiguration (wrangler.jsonc) liegt jetzt im Repository – damit kann der automatische Build bei jedem Push selbst deployen, ohne Klick im Dashboard."
+      }
     ]
   },
   {
@@ -254,9 +473,18 @@
     "datum": "2026-10-07",
     "titel": "Wörter antippen: Subjekte, Prädikate, Groß & Klein",
     "entries": [
-      { "type": "neu", "text": "Der zweite Übungstyp ist da: Wörter im Satz antippen! 🔎 Subjekte (mit der Wer-oder-was-Frage), 🧲 Prädikate (auch zweiteilige wie „räumt … ab“) und 🔠 Groß & Klein – zusammen 136 Sätze aus der bisherigen App." },
-      { "type": "verbessert", "text": "Nach dem Prüfen zeigt die Übung die Lösung farbig im Satz: richtige Wörter grün, zu viel angetippte orange – mit Erklär-Tipp." },
-      { "type": "technik", "text": "Die Prüf-Logik (auswahlPruefen) ist ein reines, getestetes Modul; die Satz-Pools laufen über Normalisierer auf ein gemeinsames Tippen-Format." }
+      {
+        "type": "neu",
+        "text": "Der zweite Übungstyp ist da: Wörter im Satz antippen! 🔎 Subjekte (mit der Wer-oder-was-Frage), 🧲 Prädikate (auch zweiteilige wie „räumt … ab“) und 🔠 Groß & Klein – zusammen 136 Sätze aus der bisherigen App."
+      },
+      {
+        "type": "verbessert",
+        "text": "Nach dem Prüfen zeigt die Übung die Lösung farbig im Satz: richtige Wörter grün, zu viel angetippte orange – mit Erklär-Tipp."
+      },
+      {
+        "type": "technik",
+        "text": "Die Prüf-Logik (auswahlPruefen) ist ein reines, getestetes Modul; die Satz-Pools laufen über Normalisierer auf ein gemeinsames Tippen-Format."
+      }
     ]
   },
   {
@@ -265,9 +493,18 @@
     "datum": "2026-10-07",
     "titel": "Deutsch und Stark mit Leo ziehen ein",
     "entries": [
-      { "type": "neu", "text": "Im Üben-Tab gibt es jetzt 📗 Deutsch mit drei Bereichen: Geschichten-Werkstatt (Aufbau, Überschriften, wörtliche Rede), „das oder dass?“ (24 Sätze mit der dieses/welches-Probe als Tipp) und Doppelte Mitlaute (32 Wörter: richtige gegen falsche Schreibweise)." },
-      { "type": "neu", "text": "💪 Stark mit Leo ist da: alle 41 Mut-Situationen zu Freundschaft, Grenzen und Stehauf-Kraft – mit bestärkendem Tipp zu jeder Antwort." },
-      { "type": "hinweis", "text": "Die Antipp-Übungen (Subjekt, Satzglieder umstellen, Groß/Klein, wörtliche Rede setzen) brauchen ihre eigene Oberfläche und folgen in der nächsten Etappe." }
+      {
+        "type": "neu",
+        "text": "Im Üben-Tab gibt es jetzt 📗 Deutsch mit drei Bereichen: Geschichten-Werkstatt (Aufbau, Überschriften, wörtliche Rede), „das oder dass?“ (24 Sätze mit der dieses/welches-Probe als Tipp) und Doppelte Mitlaute (32 Wörter: richtige gegen falsche Schreibweise)."
+      },
+      {
+        "type": "neu",
+        "text": "💪 Stark mit Leo ist da: alle 41 Mut-Situationen zu Freundschaft, Grenzen und Stehauf-Kraft – mit bestärkendem Tipp zu jeder Antwort."
+      },
+      {
+        "type": "hinweis",
+        "text": "Die Antipp-Übungen (Subjekt, Satzglieder umstellen, Groß/Klein, wörtliche Rede setzen) brauchen ihre eigene Oberfläche und folgen in der nächsten Etappe."
+      }
     ]
   },
   {
@@ -276,8 +513,14 @@
     "datum": "2026-10-07",
     "titel": "Updates kommen jetzt sofort an",
     "entries": [
-      { "type": "fix", "text": "Nach einem Update zeigte der Browser manchmal noch die alte Version an. Die Startdatei wird jetzt mit „no-cache“ ausgeliefert (der Browser fragt bei jedem Start kurz nach), die Bausteine mit langem Cache – schnell UND aktuell." },
-      { "type": "technik", "text": "Neu: /version.json (Version, Datum, Git-Stand, niemals gecacht) – damit lässt sich jederzeit prüfen, welche Version wirklich live ist." }
+      {
+        "type": "fix",
+        "text": "Nach einem Update zeigte der Browser manchmal noch die alte Version an. Die Startdatei wird jetzt mit „no-cache“ ausgeliefert (der Browser fragt bei jedem Start kurz nach), die Bausteine mit langem Cache – schnell UND aktuell."
+      },
+      {
+        "type": "technik",
+        "text": "Neu: /version.json (Version, Datum, Git-Stand, niemals gecacht) – damit lässt sich jederzeit prüfen, welche Version wirklich live ist."
+      }
     ]
   },
   {
@@ -286,9 +529,18 @@
     "datum": "2026-10-07",
     "titel": "Üben ist da: Mathe & Sachkunde",
     "entries": [
-      { "type": "neu", "text": "Der Üben-Tab ist eröffnet! Alle 5 Mathe-Bereiche (Rechnen, Zahlen-Profi, Formen, Größen, Daten & Zufall) und alle 6 Sachkunde-Bereiche (Strom, Radfahrprüfung, Karten & BW, Gemeinde, Körper, Zeit) mit 244 Frage-Karten aus der bisherigen App." },
-      { "type": "neu", "text": "Das bekannte Regelwerk ist mit umgezogen: Stufen (Aufwärmen → Profi, Klasse 4 startet auf Stufe 2), fehlerfreie Runde schaltet frei, Krone auf der höchsten Stufe, 1 Münze pro Runde, Mini-Missionen, Tagesziel und Lernspur." },
-      { "type": "technik", "text": "Die komplette Fachlogik liegt als reine, seedbare Module in src/calc/* (Zufall und Datum kommen als Parameter) – mit 12 neuen Unit-Tests. Deutsch, Spiele und Feinschliff folgen in den nächsten Etappen." }
+      {
+        "type": "neu",
+        "text": "Der Üben-Tab ist eröffnet! Alle 5 Mathe-Bereiche (Rechnen, Zahlen-Profi, Formen, Größen, Daten & Zufall) und alle 6 Sachkunde-Bereiche (Strom, Radfahrprüfung, Karten & BW, Gemeinde, Körper, Zeit) mit 244 Frage-Karten aus der bisherigen App."
+      },
+      {
+        "type": "neu",
+        "text": "Das bekannte Regelwerk ist mit umgezogen: Stufen (Aufwärmen → Profi, Klasse 4 startet auf Stufe 2), fehlerfreie Runde schaltet frei, Krone auf der höchsten Stufe, 1 Münze pro Runde, Mini-Missionen, Tagesziel und Lernspur."
+      },
+      {
+        "type": "technik",
+        "text": "Die komplette Fachlogik liegt als reine, seedbare Module in src/calc/* (Zufall und Datum kommen als Parameter) – mit 12 neuen Unit-Tests. Deutsch, Spiele und Feinschliff folgen in den nächsten Etappen."
+      }
     ]
   },
   {
@@ -297,7 +549,10 @@
     "datum": "2026-10-07",
     "titel": "Erster Cloudflare-Deploy repariert",
     "entries": [
-      { "type": "fix", "text": "Die Sicherheits-Header-Datei enthielt Kommentarzeilen, die Cloudflare Pages nicht versteht – der allererste Deploy brach deshalb ab. Jetzt ist die Datei im korrekten Format und der Deploy läuft durch." }
+      {
+        "type": "fix",
+        "text": "Die Sicherheits-Header-Datei enthielt Kommentarzeilen, die Cloudflare Pages nicht versteht – der allererste Deploy brach deshalb ab. Jetzt ist die Datei im korrekten Format und der Deploy läuft durch."
+      }
     ]
   },
   {
@@ -306,10 +561,22 @@
     "datum": "2026-10-08",
     "titel": "Der Tresor ist da",
     "entries": [
-      { "type": "neu", "text": "Alle Lerndaten liegen jetzt in einem verschlüsselten Tresor auf dem Gerät. Das Kind startet selbständig mit seiner 4-stelligen Lern-PIN – Einstellungen und Backups öffnen die Eltern mit ihrem Passwort." },
-      { "type": "neu", "text": "Elternbereich: Backup als Datei sichern, Lernstand aus Datei übernehmen, Lern-PIN ändern, Tresor sperren." },
-      { "type": "hinweis", "text": "Es gibt keine Passwort-Wiederherstellung – bitte das Eltern-Passwort gut aufbewahren und regelmäßig ein Backup exportieren. Nach 5 falschen PIN-Eingaben hilft einmal das Eltern-Passwort." },
-      { "type": "technik", "text": "Verschlüsselung im Browser: PBKDF2 (SHA-256, 310.000 Iterationen, zufälliges Salt) und AES-256-GCM; gespeichert wird ausschließlich Chiffrat (IndexedDB). 8 neue Unit-Tests." }
+      {
+        "type": "neu",
+        "text": "Alle Lerndaten liegen jetzt in einem verschlüsselten Tresor auf dem Gerät. Das Kind startet selbständig mit seiner 4-stelligen Lern-PIN – Einstellungen und Backups öffnen die Eltern mit ihrem Passwort."
+      },
+      {
+        "type": "neu",
+        "text": "Elternbereich: Backup als Datei sichern, Lernstand aus Datei übernehmen, Lern-PIN ändern, Tresor sperren."
+      },
+      {
+        "type": "hinweis",
+        "text": "Es gibt keine Passwort-Wiederherstellung – bitte das Eltern-Passwort gut aufbewahren und regelmäßig ein Backup exportieren. Nach 5 falschen PIN-Eingaben hilft einmal das Eltern-Passwort."
+      },
+      {
+        "type": "technik",
+        "text": "Verschlüsselung im Browser: PBKDF2 (SHA-256, 310.000 Iterationen, zufälliges Salt) und AES-256-GCM; gespeichert wird ausschließlich Chiffrat (IndexedDB). 8 neue Unit-Tests."
+      }
     ]
   },
   {
@@ -318,9 +585,18 @@
     "datum": "2026-10-07",
     "titel": "Das Gerüst steht",
     "entries": [
-      { "type": "neu", "text": "Die neue Lernprofi-App ist geboren: Startseite, Navigation und „Was ist neu?“ funktionieren." },
-      { "type": "technik", "text": "Fundament nach dem Familien-Bauplan: React 19 + Vite, Design-Tokens (hell/dunkel), ein Datendokument mit Schemaversion und Migration, Qualitätsgates (Lint, Unit-Tests, Regression, Smoke-Test auf iPad und iPhone)." },
-      { "type": "hinweis", "text": "Übungen, Tresor und Geräte-Abgleich folgen in den nächsten Etappen – bis dahin bleibt die bisherige App im Einsatz." }
+      {
+        "type": "neu",
+        "text": "Die neue Lernprofi-App ist geboren: Startseite, Navigation und „Was ist neu?“ funktionieren."
+      },
+      {
+        "type": "technik",
+        "text": "Fundament nach dem Familien-Bauplan: React 19 + Vite, Design-Tokens (hell/dunkel), ein Datendokument mit Schemaversion und Migration, Qualitätsgates (Lint, Unit-Tests, Regression, Smoke-Test auf iPad und iPhone)."
+      },
+      {
+        "type": "hinweis",
+        "text": "Übungen, Tresor und Geräte-Abgleich folgen in den nächsten Etappen – bis dahin bleibt die bisherige App im Einsatz."
+      }
     ]
   }
 ]

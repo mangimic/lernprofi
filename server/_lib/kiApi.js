@@ -117,7 +117,48 @@ REGELN (alle verbindlich):
 BEISPIEL (für eine Dativ-Aufgabe):
 {"blasen":["⚽ Beim Training gibst du den Ball – aber WEM?","Die Frage „wem?“ ist dein Spürhund für diesen Fall."],"mach":"Frag LAUT: Wem gibt er den Ball? Zeig auf die Antwort!"}`;
 
+const LEO_SCHRIFT = `Du bist Coach Leo 🦁. Ein Kind (Klasse 4, Deutschland) hat einen Satz MIT DER HAND
+geschrieben und fotografiert. Bewerte NUR die HANDSCHRIFT – niemals Inhalt oder Rechtschreibung.
+Schau auf: Sitzen die Wörter auf der Linie? Sind die Buchstaben gleichmäßig groß? Gibt es
+Lücken zwischen den Wörtern? Welcher Buchstabe ist besonders gelungen, welcher braucht Übung?
+REGELN (alle verbindlich):
+- Antworte NUR mit JSON: {"sterne":["…","…"],"uebe":{"buchstabe":"e","blase":"…"},"mach":"…"}.
+- "sterne": GENAU 2 konkrete Stärken, je höchstens 12 Wörter, mit dem Buchstaben/Merkmal benannt.
+- "uebe": genau EIN Buchstabe (klein- oder Großbuchstabe aus dem Foto) + 1 kurzer Satz dazu.
+- "mach" ist eine Körper-Übung für genau diesen Buchstaben (RIESIG in die Luft schreiben,
+  mit dem Finger auf den Tisch, 3-mal nachspuren) – höchstens 14 Wörter.
+- Du-Form, einfach, bestärkend, gern 1-2 Emojis. Niemals Diagnose-Wörter, niemals Druck.
+- Ist auf dem Foto keine Handschrift zu erkennen, sage das freundlich in "sterne"[0] und
+  bitte in "mach" um ein neues Foto bei gutem Licht.`;
+
+/** Schrift-Antwort in die feste Form bringen (2 Sterne, 1 Übe-Buchstabe, Mach-Aufgabe). */
+export function schriftZurechtstutzen(rohText) {
+  let geparst = null;
+  const treffer = String(rohText || "").match(/\{[\s\S]*\}/);
+  if (treffer) { try { geparst = JSON.parse(treffer[0]); } catch { geparst = null; } }
+  const kuerzen = (satz, max) => {
+    const w = String(satz || "").trim().split(/\s+/).filter(Boolean);
+    return w.length <= max + 2 ? w.join(" ") : w.slice(0, max).join(" ") + " …";
+  };
+  const sterne = (Array.isArray(geparst?.sterne) ? geparst.sterne : [])
+    .map((x) => kuerzen(x, MAX_WOERTER)).filter(Boolean).slice(0, 2);
+  const buchstabe = String(geparst?.uebe?.buchstabe || "").slice(0, 2);
+  const uebeBlase = kuerzen(geparst?.uebe?.blase || "", MAX_WOERTER);
+  const mach = kuerzen(geparst?.mach || "Schreib den Satz morgen gleich nochmal – du wirst besser!", 14);
+  const alles = [...sterne, uebeBlase, mach].join(" ");
+  if (!sterne.length || wortProblem(alles)) {
+    return {
+      sterne: ["Dein Blatt ist angekommen – stark, dass du geschrieben hast! ⭐"],
+      uebe: { buchstabe: "", blase: "Das Foto war schwer zu lesen." },
+      mach: "Mach es nochmal bei hellem Licht, Blatt gerade halten. 📸",
+      ersetzt: true,
+    };
+  }
+  return { sterne, uebe: { buchstabe, blase: uebeBlase }, mach, ersetzt: false };
+}
+
 async function claudeAnfragen(env, { konfig, system, prompt }) {
+  // prompt: String ODER fertige Content-Block-Liste (z. B. Bild + Text)
   const antwort = await fetch(ANTHROPIC_URL, {
     method: "POST",
     headers: {
@@ -223,6 +264,50 @@ export async function kiApi(request, env, jetzt = new Date()) {
     const sauber = antwortZurechtstutzen(roh.text);
     return json(200, {
       blasen: sauber.blasen, mach: sauber.mach,
+      kostenCent: mikroZuCent(mikro),
+      verbrauchtCent: mikroZuCent(stand.mikro + mikro),
+      deckelCent,
+    });
+  }
+
+  if (url.pathname === "/api/ki/schrift" && request.method === "POST") {
+    if (!kv) return json(503, { grund: "kein-kv", fehler: "KV-Namespace fehlt." });
+    if (!schluesselDa) return json(503, { grund: "kein-schluessel", fehler: "API-Schlüssel fehlt (docs/DEPLOY-CLOUDFLARE.md)." });
+    let eingabe;
+    try { eingabe = await request.json(); } catch { return json(400, { fehler: "Kein gültiges JSON." }); }
+    const bild = String(eingabe?.bild || "");
+    const satz = String(eingabe?.satz || "").slice(0, 120);
+    if (!bild || bild.length < 100) return json(400, { fehler: "Erwartet { bild (Base64-JPEG), satz }." });
+    if (bild.length > 1_500_000) return json(400, { fehler: "Das Foto ist zu groß – die App verkleinert es normalerweise selbst." });
+
+    const deckelCent = await deckelLesen();
+    const stand = await standLesen();
+    if (stand.mikro >= deckelCent * 10000) {
+      return json(402, { grund: "deckel", deckelCent, verbrauchtCent: mikroZuCent(stand.mikro) });
+    }
+
+    const wahl = modellWahl(eingabe?.modell);
+    const konfig = MODELL_KONFIG[wahl];
+    let roh;
+    try {
+      roh = await claudeAnfragen(env, {
+        konfig, system: LEO_SCHRIFT,
+        prompt: [
+          { type: "image", source: { type: "base64", media_type: eingabe?.typ === "image/png" ? "image/png" : "image/jpeg", data: bild } },
+          { type: "text", text: `Der Satz, den das Kind abschreiben sollte: „${satz}“` },
+        ],
+      });
+    } catch {
+      return json(502, { grund: "ki-fehler", fehler: "Die KI hat gerade nicht geantwortet – später nochmal." });
+    }
+
+    const mikro = kostenMikro(konfig.id, roh.usage);
+    const posten = [...(stand.posten || []), { zeit: jetzt.toISOString(), zweck: "schrift", modell: wahl, mikro }].slice(-20);
+    await kv.put(`ki:monat:${monat}`, JSON.stringify({ mikro: stand.mikro + mikro, posten }));
+
+    const sauber = schriftZurechtstutzen(roh.text);
+    return json(200, {
+      sterne: sauber.sterne, uebe: sauber.uebe, mach: sauber.mach,
       kostenCent: mikroZuCent(mikro),
       verbrauchtCent: mikroZuCent(stand.mikro + mikro),
       deckelCent,
