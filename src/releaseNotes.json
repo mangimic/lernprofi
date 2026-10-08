@@ -1,5 +1,29 @@
 [
   {
+    "id": "rn-037",
+    "version": "0.28.0",
+    "datum": "2026-10-08",
+    "titel": "Halbe Stunden, ganzes Wochenende, Wochen-Routine",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "⏰ 30-Minuten-Fenster statt voller Stunden: Jeder Baustein bekommt ein halbstündiges Fenster – auch 10 Minuten Schlagzeug-Üben haben so einen ehrlichen Platz. Feste Termine haben jetzt echte Dauern (Schlagzeug-Stunde 30 Min, Pfadfinder bis 20 Uhr) und belegen mehrere Fenster."
+      },
+      {
+        "type": "neu",
+        "text": "🌞 Wochenende ab 9 Uhr: Samstag und Sonntag ist der ganze Tag planbar. Wochentags startet der Plan um 13 Uhr – mit 🎲 fester Spielzeit nach dem Mittagessen an jedem Schultag, bevor irgendetwas anderes kommt."
+      },
+      {
+        "type": "neu",
+        "text": "📅 Kalenderwoche + Sonntags-Gespräch: Der Plan zeigt die KW, und über „Nächste Woche planen“ bereitet ihr sonntags gemeinsam die kommende Woche vor – beim Wochenwechsel wird sie automatisch aktiv."
+      },
+      {
+        "type": "neu",
+        "text": "🔁 Wochen-Routine: „Als Routine speichern“ merkt sich den Wochenrhythmus (Üben, Hausaufgaben, Schlagzeug – ohne Freunde-Zeit), „Routine übernehmen“ legt ihn in eine leere Woche. Die Freunde-Zeit wird bewusst jede Woche neu verabredet und eingeplant."
+      }
+    ]
+  },
+  {
     "id": "rn-036",
     "version": "0.27.0",
     "datum": "2026-10-08",

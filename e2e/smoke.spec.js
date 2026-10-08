@@ -932,56 +932,74 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await page.getByTestId("termin-plus").click();
   await expect(page.getByTestId("termin-zeile")).toContainText("Klassenarbeit · Mathe");
 
-  // Kind plant: Termin sichtbar, feste Termine stehen im Raster, Wächter empfiehlt Verteilen
+  // Kind plant: Termin sichtbar, feste Termine (mit Dauer) im Raster, Wächter empfiehlt Verteilen
   await page.getByTestId("nav-start").click();
   await page.getByTestId("nav-plan").click();
+  await expect(page.getByTestId("plan-kw")).toContainText("KW");
   await expect(page.getByTestId("termin-chip")).toContainText("Klassenarbeit Mathe");
-  await expect(page.getByTestId("fest-1-2")).toContainText("Schlagzeug-Stunde");
+  await expect(page.getByTestId("fest-0-780")).toContainText("Spielzeit");
+  await expect(page.getByTestId("fest-1-960")).toContainText("Schlagzeug-Stunde");
+  await expect(page.getByTestId("fest-1-990")).toHaveCount(0); // Schlagzeug nur 30 Min
+  await expect(page.getByTestId("fest-0-990")).toContainText("↳"); // Musikalische Spiele läuft 60 Min
   await expect(page.getByTestId("baustein-hausaufgaben")).toContainText("Hausaufgaben");
-  await expect(page.getByTestId("fest-3-4")).toContainText("Pfadfinder");
+  await expect(page.getByTestId("fest-3-1110")).toContainText("Pfadfinder");
   await expect(page.getByTestId("tag-0")).toContainText("Schule 7:45");
   await expect(page.getByTestId("plan-hinweise")).toContainText("Klassenarbeit");
 
-  // Antippen: Baustein → freie Stunde. Samstag: 3 Lernboxen überladen (Limit 2 bei 20 Min)
+  // Antippen: Baustein → freies 30-Minuten-Fenster. Samstag ab 9 Uhr; 3 Lernboxen überladen (Limit 2 bei 20 Min)
   const bausteinZu = async (typ, tag, slot) => {
     await page.getByTestId(`baustein-${typ}`).click();
     await expect(page.getByTestId("plan-wahl-hinweis")).toBeVisible();
     await page.getByTestId(`slot-${tag}-${slot}`).click();
   };
-  await bausteinZu("lernen", 5, 0);
-  await bausteinZu("lernen", 5, 1);
+  await bausteinZu("lernen", 5, 540);
+  await bausteinZu("lernen", 5, 570);
   await expect(page.getByTestId("plan-block")).toHaveCount(2);
-  await bausteinZu("lernen", 5, 2);
+  await bausteinZu("lernen", 5, 600);
   await expect(page.getByTestId("ampel-5")).toHaveText("🔴");
   await expect(page.getByTestId("tag-hinweis-5")).toContainText("Schieb");
 
   // Eine Box wieder weg → gelb (nur Lernen); Sport dazu → grün
   await page.getByTestId("block-weg").first().click();
   await expect(page.getByTestId("ampel-5")).toHaveText("🟡");
-  await bausteinZu("sport", 5, 0);
+  await bausteinZu("sport", 5, 540);
   await expect(page.getByTestId("ampel-5")).toHaveText("🟢");
 
-  // Übungstage Di + Mi (freie Stunden neben den festen Terminen) → Wächter zufrieden
-  await bausteinZu("lernen", 1, 1);
-  await bausteinZu("lernen", 2, 0);
+  // Übungstage Di + Mi (freie Fenster neben den festen Terminen) → Wächter zufrieden
+  await bausteinZu("lernen", 1, 900);
+  await bausteinZu("lernen", 2, 840);
   await expect(page.getByTestId("plan-hinweise")).toHaveCount(0);
   await expect(page.getByTestId("plan-ok")).toBeVisible();
 
-  // Plan überlebt den Neustart
+  // 🔁 Routine: Üben wiederholt sich – Freunde-Zeit wird sonntags neu verabredet
+  await bausteinZu("freunde", 2, 870);
+  await page.getByTestId("routine-speichern").click();
+  await page.getByTestId("woche-naechste").click();
+  await expect(page.getByTestId("plan-block")).toHaveCount(0);
+  await page.getByTestId("routine-uebernehmen").click();
+  await expect(page.getByTestId("plan-block")).toHaveCount(5); // alles außer Freunde-Zeit
+  await page.getByTestId("woche-diese").click();
+  await expect(page.getByTestId("plan-block")).toHaveCount(6);
+
+  // Plan (beide Wochen) überlebt den Neustart
   await page.waitForTimeout(600);
   await page.reload();
   await page.getByTestId("pin-eingabe").fill(PIN);
   await page.getByTestId("pin-ok").click();
   await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
   await page.getByTestId("nav-plan").click();
+  await expect(page.getByTestId("plan-block")).toHaveCount(6);
+  await page.getByTestId("woche-naechste").click();
   await expect(page.getByTestId("plan-block")).toHaveCount(5);
+  await page.getByTestId("woche-diese").click();
 
   // 9d: Heute-Baustein einplanen, auf der Startseite abhaken → Tag geschafft + Münze
   const heuteIdx = (new Date().getDay() + 6) % 7;
-  const slotFuerHeute = [0, 4, 2, 0, 0, 3, 0][heuteIdx]; // je Wochentag eine sicher freie Stunde
+  const slotFuerHeute = [840, 930, 960, 840, 840, 630, 540][heuteIdx]; // je Wochentag ein sicher freies Fenster
   await bausteinZu("schlagzeug", heuteIdx, slotFuerHeute);
   await page.getByTestId("plan-zurueck").click();
   await expect(page.getByTestId("heute-plan")).toBeVisible();
+  if (heuteIdx <= 4) await expect(page.getByTestId("heute-fest").first()).toBeVisible(); // feste Termine (nur Schultage)
   while (await page.getByTestId("heute-haken").count()) {
     await page.getByTestId("heute-haken").first().click();
   }

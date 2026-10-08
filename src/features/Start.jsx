@@ -31,7 +31,7 @@ export default function Start() {
   const heutePlan = [...plan.bloecke.filter((b) => b.tag === heuteIdx)]
     .sort((a, b) => (a.slot ?? 9) - (b.slot ?? 9));
   const heuteFeste = [...(data.einstellungen.festeTermine || []).filter((f) => f.tag === heuteIdx)]
-    .sort((a, b) => a.slot - b.slot);
+    .sort((a, b) => a.beginn - b.beginn);
   const planHaken = (id) => {
     const block = plan.bloecke.find((b) => b.id === id);
     if (!block || block.fertig) return;
@@ -101,13 +101,13 @@ export default function Start() {
           <b>🗓️ Heute auf deinem Plan</b>
           <div style={{ display: "grid", gap: 6, margin: "8px 0 0" }}>
             {heuteFeste.map((f) => (
-              <div key={`f-${f.slot}`} data-test="heute-fest" style={{
+              <div key={`f-${f.beginn}`} data-test="heute-fest" style={{
                 display: "flex", alignItems: "center", gap: 8,
                 background: T.grund, borderRadius: T.radiusKlein, padding: "6px 10px",
                 border: `1.5px solid ${T.rand}`,
               }}>
                 <span style={{ flex: 1, fontWeight: 700 }}>
-                  {f.emoji} {f.name} <span style={{ color: T.textLeise, fontWeight: 400 }}>· {slotLabel(f.slot)}{f.hinweis ? ` (${f.hinweis})` : ""}</span>
+                  {f.emoji} {f.name} <span style={{ color: T.textLeise, fontWeight: 400 }}>· {slotLabel(f.beginn)}{f.hinweis ? ` (${f.hinweis})` : ""}</span>
                 </span>
                 <span style={{ opacity: 0.6 }}>🔒</span>
               </div>

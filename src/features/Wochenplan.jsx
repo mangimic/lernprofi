@@ -2,9 +2,10 @@ import { useState } from "react";
 import { DndContext, useDraggable, useDroppable, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { useApp } from "../appContext.jsx";
 import {
-  WOCHENTAGE, BAUSTEINE, TERMIN_ARTEN, LERN_MINUTEN, SLOT_STUNDEN, slotLabel, bausteinInfo,
-  wochenMontag, tagDatum, planFuerWoche, blockHinzu, blockWeg, slotBelegt,
+  WOCHENTAGE, BAUSTEINE, TERMIN_ARTEN, LERN_MINUTEN, tagesStunden, uhr, bausteinInfo,
+  wochenMontag, tagDatum, planFuerWoche, leererPlan, blockHinzu, blockWeg, slotBelegt,
   termineDerWoche, planPruefung, wochenBilanz, festerTermin, SCHULE,
+  kalenderWoche, routineAusPlan, routineAnwenden,
 } from "../calc/wochenplan.js";
 
 /* 🗓️ MEIN WOCHENPLAN (Etappe 9): Felix setzt sein Pensum selbst.
@@ -41,25 +42,27 @@ function StundenSlot({ tagIdx, slot, block, fest, wahlAktiv, aufTipp, aufWeg }) 
   const { setNodeRef, isOver } = useDroppable({ id: `slot-${tagIdx}-${slot}`, disabled: !!fest });
   const info = block ? bausteinInfo(block.typ) : null;
   if (fest) {
+    const fortsetzung = fest.beginn !== slot;
     return (
       <div data-test={`fest-${tagIdx}-${slot}`} style={{
-        display: "flex", alignItems: "center", gap: 6, minHeight: 40, marginBottom: 4,
+        display: "flex", alignItems: "center", gap: 6, minHeight: 34, marginBottom: 3,
         borderRadius: 6, padding: "2px 6px", background: T.grund, color: T.text,
-        border: `1.5px solid ${T.rand}`,
+        border: `1.5px solid ${T.rand}`, borderTop: fortsetzung ? "none" : undefined,
+        opacity: fortsetzung ? 0.8 : 1,
       }}>
-        <span style={{ fontSize: "11.5px", fontWeight: 700, minWidth: 24, opacity: 0.7 }}>{SLOT_STUNDEN[slot]}</span>
+        <span style={{ fontSize: "11px", fontWeight: 700, minWidth: 34, opacity: 0.7 }}>{uhr(slot)}</span>
         <span style={{ flex: 1, fontWeight: 700, fontSize: "var(--schrift-klein)" }}>
-          {fest.emoji} {fest.name}
-          {fest.hinweis && <span style={{ fontWeight: 400, opacity: 0.75 }}> · {fest.hinweis}</span>}
+          {fortsetzung ? "↳" : <>{fest.emoji} {fest.name}</>}
+          {!fortsetzung && fest.hinweis && <span style={{ fontWeight: 400, opacity: 0.75 }}> · {fest.hinweis}</span>}
         </span>
-        <span style={{ fontSize: 12, opacity: 0.6 }}>🔒</span>
+        {!fortsetzung && <span style={{ fontSize: 12, opacity: 0.6 }}>🔒</span>}
       </div>
     );
   }
   return (
     <div ref={setNodeRef} data-test={`slot-${tagIdx}-${slot}`} onClick={() => !block && aufTipp(tagIdx, slot)}
       style={{
-        display: "flex", alignItems: "center", gap: 6, minHeight: 40, marginBottom: 4,
+        display: "flex", alignItems: "center", gap: 6, minHeight: 34, marginBottom: 3,
         borderRadius: 6, padding: "2px 6px",
         background: block ? (info.lern ? T.primaer : T.weich) : isOver || wahlAktiv ? T.weich : "transparent",
         color: block ? (info.lern ? T.primaerText : T.text) : T.textLeise,
@@ -67,7 +70,7 @@ function StundenSlot({ tagIdx, slot, block, fest, wahlAktiv, aufTipp, aufWeg }) 
         cursor: block ? "default" : "pointer",
         opacity: block?.fertig ? 0.65 : 1,
       }}>
-      <span style={{ fontSize: "11.5px", fontWeight: 700, minWidth: 24, opacity: 0.8 }}>{SLOT_STUNDEN[slot]}</span>
+      <span style={{ fontSize: "11px", fontWeight: 700, minWidth: 34, opacity: 0.8 }}>{uhr(slot)}</span>
       {block ? (
         <>
           <span data-test="plan-block" data-typ={block.typ} style={{
@@ -117,7 +120,7 @@ function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, pruefung, wahlAktiv
           </div>
         );
       })}
-      {SLOT_STUNDEN.map((_, s) => (
+      {tagesStunden(idx).map((s) => (
         <StundenSlot key={s} tagIdx={idx} slot={s} wahlAktiv={wahlAktiv}
           fest={festerTermin(feste, idx, s)}
           block={bloecke.find((b) => b.slot === s)} aufTipp={aufTipp} aufWeg={aufWeg} />
@@ -142,23 +145,47 @@ export default function Wochenplan() {
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 8 } }),
   );
 
-  const montag = wochenMontag(heute);
-  const plan = planFuerWoche(data.lernstand.wochenplan, montag);
-  const heuteIdx = WOCHENTAGE.findIndex((_, i) => tagDatum(montag, i) === heute);
+  const [woche, setWoche] = useState("diese"); // Sonntags wird die NÄCHSTE Woche besprochen
+  const montagAktiv = wochenMontag(heute);
+  const aktiv = planFuerWoche(data.lernstand.wochenplan, montagAktiv);
+  const naechsteW = woche === "naechste";
+  const montag = naechsteW ? tagDatum(montagAktiv, 7) : montagAktiv;
+  // Angezeigter Plan: aktive Woche ODER die Vorplanung der Folgewoche.
+  const plan = naechsteW
+    ? (aktiv.naechste?.montag === montag
+      ? { montag, bloecke: aktiv.naechste.bloecke, belohnt: [], naechste: null }
+      : leererPlan(montag))
+    : aktiv;
+  const heuteIdx = naechsteW ? -1 : WOCHENTAGE.findIndex((_, i) => tagDatum(montag, i) === heute);
   const feste = data.einstellungen.festeTermine;
+  const routine = data.einstellungen.planRoutine;
   const termineJe = termineDerWoche(data.einstellungen.termine, montag);
   const pruefung = planPruefung(plan, data.einstellungen.termine, data.einstellungen.zeitLimit, feste);
 
+  // Speichern: die aktive Woche direkt, die Folgewoche als „naechste“-Vorplanung.
   const speichern = (neuerPlan, text) => {
-    logChange({ ...data, lernstand: { ...data.lernstand, wochenplan: neuerPlan } }, "wochenplan", "geaendert", text);
+    const wochenplan = naechsteW
+      ? { ...aktiv, naechste: { montag, bloecke: neuerPlan.bloecke } }
+      : { ...neuerPlan, naechste: aktiv.naechste || null };
+    logChange({ ...data, lernstand: { ...data.lernstand, wochenplan } }, "wochenplan", "geaendert", text);
   };
   const hinzu = (tagIdx, slot, typ) => {
     const neu = blockHinzu(plan, tagIdx, typ, slot);
-    if (neu !== plan) speichern(neu, `Baustein ${typ} am ${WOCHENTAGE[tagIdx]} um ${slotLabel(slot)} eingeplant`);
+    if (neu !== plan) speichern(neu, `Baustein ${typ} am ${WOCHENTAGE[tagIdx]} um ${uhr(slot)} Uhr eingeplant`);
   };
   const slotGetippt = (tagIdx, slot) => {
     if (festerTermin(feste, tagIdx, slot)) return; // feste Stunde ist tabu
     if (wahl && !slotBelegt(plan, tagIdx, slot)) { hinzu(tagIdx, slot, wahl); setWahl(null); }
+  };
+  const routineSpeichern = () => {
+    logChange(
+      { ...data, einstellungen: { ...data.einstellungen, planRoutine: routineAusPlan(plan) } },
+      "wochenplan", "geaendert", "Wochen-Routine gespeichert (ohne Freunde-Zeit)",
+    );
+  };
+  const routineHolen = () => {
+    const neu = routineAnwenden(plan, routine);
+    if (neu !== plan) speichern(neu, "Wochen-Routine in den Plan übernommen");
   };
   const ziehenEnde = ({ active, over }) => {
     if (!over) return;
@@ -170,11 +197,37 @@ export default function Wochenplan() {
   return (
     <div data-test="plan-seite">
       <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
-        <h2 style={{ margin: "0 0 4px" }}>🗓️ Mein Wochenplan</h2>
+        <h2 style={{ margin: "0 0 4px" }}>
+          🗓️ Mein Wochenplan{" "}
+          <span data-test="plan-kw" style={{ fontSize: "var(--schrift-klein)", color: T.textLeise, fontWeight: 400 }}>
+            KW {kalenderWoche(montag)} · {tagDatum(montag, 0).slice(8)}.{tagDatum(montag, 0).slice(5, 7)}. – {tagDatum(montag, 6).slice(8)}.{tagDatum(montag, 6).slice(5, 7)}.
+          </span>
+        </h2>
+        <div style={{ display: "flex", gap: 6, margin: "6px 0 10px", flexWrap: "wrap" }}>
+          <button data-test="woche-diese" onClick={() => { setWoche("diese"); setWahl(null); }}
+            style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: !naechsteW ? T.primaer : T.weich, color: !naechsteW ? T.primaerText : T.text }}>
+            Diese Woche
+          </button>
+          <button data-test="woche-naechste" onClick={() => { setWoche("naechste"); setWahl(null); }}
+            style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: naechsteW ? T.primaer : T.weich, color: naechsteW ? T.primaerText : T.text }}>
+            Nächste Woche planen
+          </button>
+          <button data-test="routine-uebernehmen" onClick={routineHolen} disabled={!routine.length}
+            style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: T.weich, color: T.text, opacity: routine.length ? 1 : 0.5 }}>
+            🔁 Routine übernehmen
+          </button>
+          <button data-test="routine-speichern" onClick={routineSpeichern} disabled={!plan.bloecke.some((b) => b.typ !== "freunde")}
+            style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: T.weich, color: T.text }}>
+            💾 Als Routine speichern
+          </button>
+        </div>
         <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          DU bestimmst dein Pensum – dein Nachmittag von <b>14 bis 19 Uhr</b>. Tippe einen
-          Baustein an und dann eine freie Stunde, oder zieh ihn einfach rüber. Eine Lernbox
-          = {LERN_MINUTEN} Minuten, danach 5 Minuten Pause (Trampolin, essen, trinken – keine Bildschirme).
+          DU bestimmst dein Pensum – wochentags ab <b>13 Uhr</b> (🎲 erst Spielzeit nach dem Essen),
+          am Wochenende <b>ab 9 Uhr</b>. Tippe einen Baustein an und dann ein freies Fenster (je 30 Minuten),
+          oder zieh ihn rüber. Eine Lernbox = {LERN_MINUTEN} Minuten, danach 5 Minuten Pause
+          (Trampolin, essen, trinken – keine Bildschirme).
+          {" "}🦁 Tipp: Sonntags besprecht ihr die nächste Woche – das Üben bleibt Routine,
+          die Freunde-Zeit kommt je Verabredung neu dazu.
         </p>
         <DndContext sensors={sensoren} onDragEnd={ziehenEnde}>
           <div data-test="plan-palette" style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>

@@ -52,7 +52,8 @@ export function leeresDokument(heute) {
       uebungsThema: "alltag", // Übungs-Welt der Satz-Übungen (Kind wählt selbst)
       eigeneSaetze: [],    // von den Eltern freigegebene Schreib-Sätze (max 12)
       termine: [],         // 🗓️ Klassenarbeiten/Kompass-Tests/WDWs: { id, tag, art, fach }
-      festeTermine: FESTE_TERMINE_STANDARD, // 🔒 wöchentlich feste Stunden (14-19-Raster)
+      festeTermine: FESTE_TERMINE_STANDARD, // 🔒 wöchentlich feste Termine (Minuten-Slots)
+      planRoutine: [],     // 🔁 Wochen-Routine: { tag, slot, typ } (ohne Freunde-Zeit)
     },
     protokoll: [],     // Änderungsprotokoll: { zeit, bereich, art, text }
   };
@@ -106,6 +107,9 @@ export function migrateData(alt, heute) {
       montag: wp.montag,
       bloecke: wp.bloecke.filter((b) => istObjekt(b)).slice(0, 60),
       belohnt: (Array.isArray(wp.belohnt) ? wp.belohnt : []).filter((t) => typeof t === "string").slice(-7),
+      naechste: istObjekt(wp.naechste) && typeof wp.naechste.montag === "string" && Array.isArray(wp.naechste.bloecke)
+        ? { montag: wp.naechste.montag, bloecke: wp.naechste.bloecke.filter((b) => istObjekt(b)).slice(0, 60) }
+        : null,
     }
     : null;
   const mut = istObjekt(d.lernstand.mutSatz) ? d.lernstand.mutSatz : {};
@@ -141,14 +145,26 @@ export function migrateData(alt, heute) {
   d.einstellungen.festeTermine = Array.isArray(d.einstellungen.festeTermine)
     ? d.einstellungen.festeTermine
       .filter((f) => istObjekt(f) && Number.isInteger(f.tag) && f.tag >= 0 && f.tag <= 6
-        && Number.isInteger(f.slot) && f.slot >= 0 && f.slot <= 4 && typeof f.name === "string")
-      .map((f) => ({
-        tag: f.tag, slot: f.slot, name: f.name.slice(0, 30),
-        emoji: typeof f.emoji === "string" ? f.emoji.slice(0, 4) : "📌",
-        hinweis: typeof f.hinweis === "string" ? f.hinweis.slice(0, 16) : "",
-        aktiv: f.aktiv === true,
-      })).slice(0, 20)
+        && typeof f.name === "string" && (Number.isInteger(f.beginn) || Number.isInteger(f.slot)))
+      .map((f) => {
+        // Alt-Formate anheben: Index-Slot 0-4 (v0.27) bzw. volle Stunde → Minuten.
+        let beginn = Number.isInteger(f.beginn) ? f.beginn
+          : f.slot < 9 ? (f.slot + 14) * 60 : f.slot < 24 ? f.slot * 60 : f.slot;
+        beginn = Math.min(1110, Math.max(420, beginn));
+        return {
+          tag: f.tag, beginn,
+          dauer: Number.isInteger(f.dauer) && f.dauer >= 30 && f.dauer <= 240 ? f.dauer : 60,
+          name: f.name.slice(0, 30),
+          emoji: typeof f.emoji === "string" ? f.emoji.slice(0, 4) : "📌",
+          hinweis: typeof f.hinweis === "string" ? f.hinweis.slice(0, 16) : "",
+          aktiv: f.aktiv === true,
+        };
+      }).slice(0, 20)
     : FESTE_TERMINE_STANDARD;
+  d.einstellungen.planRoutine = (Array.isArray(d.einstellungen.planRoutine) ? d.einstellungen.planRoutine : [])
+    .filter((r) => istObjekt(r) && Number.isInteger(r.tag) && r.tag >= 0 && r.tag <= 6
+      && Number.isInteger(r.slot) && typeof r.typ === "string")
+    .map((r) => ({ tag: r.tag, slot: r.slot, typ: r.typ.slice(0, 20) })).slice(0, 60);
   d.einstellungen.termine = (Array.isArray(d.einstellungen.termine) ? d.einstellungen.termine : [])
     .filter((t) => istObjekt(t) && /^\d{4}-\d{2}-\d{2}$/.test(t.tag) && ["ka", "kompass", "wdw"].includes(t.art))
     .map((t, i) => ({ id: Number.isInteger(t.id) ? t.id : i + 1, tag: t.tag, art: t.art, fach: typeof t.fach === "string" ? t.fach.slice(0, 40) : "" }))

@@ -57,48 +57,91 @@ export function tagDatum(montag, idx) {
 /* ⏰ Zeitfenster: Felix' Nachmittag von 14 bis 19 Uhr, je Tag fünf
    Stunden-Slots. Der Vormittag (Schul-Stundenplan) kommt später als
    eigener Abschnitt dazu – die Slot-Struktur ist darauf vorbereitet. */
-export const SLOT_STUNDEN = [14, 15, 16, 17, 18];
-export const slotLabel = (s) => `${SLOT_STUNDEN[s]}–${SLOT_STUNDEN[s] + 1} Uhr`;
+/* Ein „Slot" ist seit v0.28 eine halbe Stunde, gespeichert als Minuten
+   seit Mitternacht (840 = 14:00). Halbe Stunden passen zum 10/5-Takt –
+   auch 10 Minuten Schlagzeug-Üben haben so ein ehrliches Fenster.
+   Schultage: 14-19 Uhr · Wochenende: ganzer Tag ab 9 Uhr. */
+export const SLOT_MIN = 30;
+export const WERKTAG_START = 13 * 60; // 13 Uhr: erst Spielzeit (nach dem Mittagessen)
+export const WOCHENEND_START = 9 * 60;
+export const TAG_ENDE = 19 * 60;
+/** Die planbaren Slot-Startminuten eines Wochentags (0=Mo … 6=So). */
+export function tagesStunden(tag) {
+  const start = tag === 5 || tag === 6 ? WOCHENEND_START : WERKTAG_START;
+  const liste = [];
+  for (let m = start; m < TAG_ENDE; m += SLOT_MIN) liste.push(m);
+  return liste;
+}
+export const uhr = (m) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, "0")}`;
+export const slotLabel = (m) => `${uhr(m)} Uhr`;
 
 /* 🔒 Feste Termine der Familie (Stand Okt 2026, von den Eltern gepflegt;
    liegen als Daten in den Einstellungen – hier nur der Startwert).
    aktiv=true heißt: zählt beim Wächter als Ausgleich zum Lernen. */
 export const FESTE_TERMINE_STANDARD = [
-  { tag: 0, slot: 2, name: "Musikalische Spiele", emoji: "🎵", hinweis: "freiwillig", aktiv: true },
-  { tag: 0, slot: 4, name: "Bandprobe", emoji: "🎸", hinweis: "", aktiv: true },
-  { tag: 1, slot: 0, name: "Italienisch (Schule)", emoji: "🏫", hinweis: "", aktiv: false },
-  { tag: 1, slot: 2, name: "Schlagzeug-Stunde", emoji: "🥁", hinweis: "bis 16:30", aktiv: true },
-  { tag: 1, slot: 3, name: "Sport", emoji: "⚽", hinweis: "", aktiv: true },
-  { tag: 2, slot: 1, name: "Lernbetreuung", emoji: "🤝", hinweis: "", aktiv: false },
-  { tag: 3, slot: 3, name: "Tennis", emoji: "🎾", hinweis: "", aktiv: true },
-  { tag: 3, slot: 4, name: "Pfadfinder", emoji: "🏕️", hinweis: "bis 20:00", aktiv: true },
+  // 🎲 Spielzeit direkt nach dem Mittagessen – jeden Schultag, unantastbar.
+  { tag: 0, beginn: 780, dauer: 60, name: "Spielzeit", emoji: "🎲", hinweis: "nach dem Essen", aktiv: true },
+  { tag: 1, beginn: 780, dauer: 60, name: "Spielzeit", emoji: "🎲", hinweis: "nach dem Essen", aktiv: true },
+  { tag: 2, beginn: 780, dauer: 60, name: "Spielzeit", emoji: "🎲", hinweis: "nach dem Essen", aktiv: true },
+  { tag: 3, beginn: 780, dauer: 60, name: "Spielzeit", emoji: "🎲", hinweis: "nach dem Essen", aktiv: true },
+  { tag: 4, beginn: 780, dauer: 60, name: "Spielzeit", emoji: "🎲", hinweis: "nach dem Essen", aktiv: true },
+  { tag: 0, beginn: 960, dauer: 60, name: "Musikalische Spiele", emoji: "🎵", hinweis: "freiwillig", aktiv: true },
+  { tag: 0, beginn: 1080, dauer: 60, name: "Bandprobe", emoji: "🎸", hinweis: "", aktiv: true },
+  { tag: 1, beginn: 840, dauer: 60, name: "Italienisch (Schule)", emoji: "🏫", hinweis: "", aktiv: false },
+  { tag: 1, beginn: 960, dauer: 30, name: "Schlagzeug-Stunde", emoji: "🥁", hinweis: "", aktiv: true },
+  { tag: 1, beginn: 1020, dauer: 60, name: "Sport", emoji: "⚽", hinweis: "", aktiv: true },
+  { tag: 2, beginn: 900, dauer: 60, name: "Lernbetreuung", emoji: "🤝", hinweis: "", aktiv: false },
+  { tag: 3, beginn: 1020, dauer: 60, name: "Tennis", emoji: "🎾", hinweis: "", aktiv: true },
+  { tag: 3, beginn: 1110, dauer: 90, name: "Pfadfinder", emoji: "🏕️", hinweis: "bis 20:00", aktiv: true },
 ];
 /** 🏫 Schulzeiten (Anzeige im Tageskopf; Vormittags-Stundenplan folgt). */
 export const SCHULE = { tage: [0, 1, 2, 3, 4], text: "7:45–13:00" };
 
-export function festerTermin(feste, tag, slot) {
-  return (feste || []).find((f) => f.tag === tag && f.slot === slot) || null;
+/** Der feste Termin, der die Slot-Minute abdeckt (Termine haben eine Dauer). */
+export function festerTermin(feste, tag, slotMin) {
+  return (feste || []).find((f) => f.tag === tag && slotMin >= f.beginn && slotMin < f.beginn + f.dauer) || null;
 }
 
 export function slotBelegt(plan, tag, slot) {
   return plan.bloecke.some((b) => b.tag === tag && b.slot === slot);
 }
 
+/** ISO-Kalenderwoche des Montags (fürs Sonntags-Gespräch: „KW 42 planen"). */
+export function kalenderWoche(montag) {
+  const [j, m, t] = String(montag).split("-").map((x) => parseInt(x, 10));
+  if (!Number.isFinite(j)) return 0;
+  const donnerstag = new Date(Date.UTC(j, (m || 1) - 1, (t || 1) + 3));
+  const jahresanfang = new Date(Date.UTC(donnerstag.getUTCFullYear(), 0, 1));
+  return Math.ceil(((donnerstag - jahresanfang) / 86400000 + 1) / 7);
+}
+
 export function leererPlan(montag) {
-  return { montag, bloecke: [], belohnt: [] }; // bloecke: { id, tag: 0-6, slot: 0-4, typ, fertig? }
+  // bloecke: { id, tag: 0-6, slot: Minuten, typ, fertig? } · naechste: Vorplanung der Folgewoche
+  return { montag, bloecke: [], belohnt: [], naechste: null };
 }
 
 /** Gültiger Plan für DIESE Woche – eine alte Woche startet frisch.
-    Blöcke aus der Zeit VOR den Zeitfenstern bekommen der Reihe nach
-    freie Stunden zugewiesen (verlustfreie Anhebung). */
+    Verlustfreie Anhebung alter Slot-Formate: Index 0-4 (v0.27) und
+    volle Stunden 9-23 werden zu Minuten; Blöcke ohne gültigen Slot
+    bekommen den ersten freien Slot ihres Tages. */
 export function planFuerWoche(plan, montag) {
+  if (plan && plan.montag !== montag && plan.naechste?.montag === montag && Array.isArray(plan.naechste.bloecke)) {
+    // Wochenwechsel: die sonntags besprochene Vorplanung wird zur aktiven Woche.
+    return planFuerWoche({ montag, bloecke: plan.naechste.bloecke, belohnt: [], naechste: null }, montag);
+  }
   if (!(plan && plan.montag === montag && Array.isArray(plan.bloecke))) return leererPlan(montag);
-  if (plan.bloecke.every((b) => Number.isInteger(b.slot))) return plan;
+  const gueltig = (b) => Number.isInteger(b.slot) && tagesStunden(b.tag).includes(b.slot);
+  if (plan.bloecke.every(gueltig)) return plan;
   const bloecke = [];
   for (const b of plan.bloecke) {
-    if (Number.isInteger(b.slot)) { bloecke.push(b); continue; }
-    const frei = SLOT_STUNDEN.findIndex((_, s) => !bloecke.some((x) => x.tag === b.tag && x.slot === s));
-    bloecke.push({ ...b, slot: frei === -1 ? 0 : frei });
+    let s = Number.isInteger(b.slot) ? b.slot : null;
+    if (s !== null && s < 9) s = (s + 14) * 60;       // Index-Slot (v0.27)
+    else if (s !== null && s < 24) s = s * 60;        // Stunden-Slot (Zwischenstand)
+    const slots = tagesStunden(b.tag);
+    if (s === null || !slots.includes(s) || bloecke.some((x) => x.tag === b.tag && x.slot === s)) {
+      s = slots.find((m) => !bloecke.some((x) => x.tag === b.tag && x.slot === m)) ?? slots[0];
+    }
+    bloecke.push({ ...b, slot: s });
   }
   return { ...plan, bloecke };
 }
@@ -109,7 +152,7 @@ export function naechsteId(bloecke) {
 
 export function blockHinzu(plan, tag, typ, slot) {
   if (tag < 0 || tag > 6 || !BAUSTEINE.some((b) => b.typ === typ)) return plan;
-  if (!Number.isInteger(slot) || slot < 0 || slot >= SLOT_STUNDEN.length) return plan;
+  if (!tagesStunden(tag).includes(slot)) return plan; // nur planbare Stunden
   if (slotBelegt(plan, tag, slot)) return plan; // ein Baustein je Stunde
   const bloecke = [...plan.bloecke, { id: naechsteId(plan.bloecke), tag, slot, typ }];
   return { ...plan, bloecke: bloecke.slice(0, 60) }; // harte Obergrenze
@@ -117,6 +160,22 @@ export function blockHinzu(plan, tag, typ, slot) {
 
 export function blockWeg(plan, id) {
   return { ...plan, bloecke: plan.bloecke.filter((b) => b.id !== id) };
+}
+
+/* 🔁 Wochen-Routine: Das Üben soll fester Rhythmus werden – die
+   Freunde-Zeit wird dagegen jede Woche neu verabredet (sonntags
+   besprochen) und wandert deshalb NICHT in die Routine. */
+export function routineAusPlan(plan) {
+  return plan.bloecke
+    .filter((b) => b.typ !== "freunde")
+    .map(({ tag, slot, typ }) => ({ tag, slot, typ }));
+}
+
+/** Routine in einen (Wochen-)Plan legen – nur in freie Slots. */
+export function routineAnwenden(plan, routine) {
+  let p = plan;
+  for (const r of routine || []) p = blockHinzu(p, r.tag, r.typ, r.slot);
+  return p;
 }
 
 /** Haken dran: Baustein ist geschafft (bleibt im Plan, wird durchgestrichen). */

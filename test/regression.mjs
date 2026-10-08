@@ -36,13 +36,35 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.28: 30-Min-Fenster, Wochenende, KW + Routine ----------
+console.log("== v0.28: Halbe Stunden + Routine ==");
+test("v0.28: APP_VERSION mindestens 0.28.0", versionMindestens("0.28.0"));
+test("v0.28: Release-Note rn-037 vorhanden", releaseNoteVorhanden("rn-037"));
+test("v0.28: Minuten-Slots – Werktag ab 13 Uhr (Spielzeit), Wochenende ab 9, Termine mit Dauer", (() => {
+  const w = quelle("src/calc/wochenplan.js");
+  return w.includes("SLOT_MIN = 30") && w.includes("WERKTAG_START = 13 * 60")
+    && w.includes("WOCHEMEND_START") === false && w.includes("WOCHENEND_START = 9 * 60")
+    && w.includes('name: "Spielzeit"') && w.includes("dauer: 30") && w.includes("f.beginn + f.dauer")
+    && quelle("src/calc/migrateData.js").includes("(f.slot + 14) * 60");
+})());
+test("v0.28: Kalenderwoche, Folgewoche-Vorplanung und Routine ohne Freunde-Zeit", (() => {
+  const w = quelle("src/calc/wochenplan.js");
+  const f = quelle("src/features/Wochenplan.jsx");
+  return w.includes("kalenderWoche") && w.includes("naechste") && w.includes("routineAusPlan")
+    && w.includes("routineAnwenden") && w.includes('b.typ !== "freunde"')
+    && f.includes('data-test="plan-kw"') && f.includes('data-test="woche-naechste"')
+    && f.includes('data-test="routine-speichern"') && f.includes('data-test="routine-uebernehmen"')
+    && quelle("src/calc/migrateData.js").includes("planRoutine");
+})());
+
 // ---------- v0.27: Zeitfenster, feste Termine, Heute-Ansicht ----------
 console.log("== v0.27: Zeitfenster + Heute-Ansicht ==");
 test("v0.27: APP_VERSION mindestens 0.27.0", versionMindestens("0.27.0"));
 test("v0.27: Release-Note rn-036 vorhanden", releaseNoteVorhanden("rn-036"));
 test("v0.27: Slots 14-19, feste Termine als Daten, Wächter zählt Aktiv-Termine", (() => {
   const w = quelle("src/calc/wochenplan.js");
-  return w.includes("SLOT_STUNDEN = [14, 15, 16, 17, 18]") && w.includes("FESTE_TERMINE_STANDARD")
+  return (w.includes("SLOT_STUNDEN = [14, 15, 16, 17, 18]") || w.includes("WERKTAG_START")) // seit v0.28 Minuten-Slots
+    && w.includes("FESTE_TERMINE_STANDARD")
     && w.includes("festerTermin") && w.includes("slotBelegt") && w.includes("SCHULE")
     && w.includes("Bandprobe") && w.includes("Pfadfinder") && w.includes("f.aktiv")
     && w.includes('typ: "hausaufgaben"')
