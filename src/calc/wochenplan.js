@@ -165,8 +165,13 @@ export function ausfallSetzen(plan, tag, beginn) {
   if (istAusgefallen(plan, tag, beginn)) return plan;
   return { ...plan, ausfaelle: [...(plan.ausfaelle || []), { tag, beginn }].slice(0, 20) };
 }
-export function ausfallAufheben(plan, tag, beginn) {
-  return { ...plan, ausfaelle: (plan.ausfaelle || []).filter((a) => !(a.tag === tag && a.beginn === beginn)) };
+export function ausfallAufheben(plan, tag, beginn, dauer = 0) {
+  return {
+    ...plan,
+    ausfaelle: (plan.ausfaelle || []).filter((a) => !(a.tag === tag && a.beginn === beginn)),
+    // Ist der Termin wieder da, räumen seine Fenster die dort geparkten Bausteine frei.
+    bloecke: plan.bloecke.filter((b) => !(b.tag === tag && b.slot >= beginn && b.slot < beginn + dauer)),
+  };
 }
 
 /** Gültiger Plan für DIESE Woche – eine alte Woche startet frisch.

@@ -988,8 +988,16 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await expect(page.getByTestId("fest-1-1020")).toHaveCount(0);
   await expect(page.getByTestId("slot-1-1020")).toContainText("Sport fällt aus");
   await expect(page.getByTestId("slot-1-1050")).toBeVisible(); // zweites Fenster auch frei
+  // das freie Fenster lässt sich sofort neu verplanen
+  await page.getByTestId("baustein-freunde").click();
+  await page.getByTestId("slot-1-1050").click();
+  await page.getByTestId("notiz-feld").fill("Oma");
+  await page.getByTestId("notiz-ok").click();
+  await expect(page.getByTestId("slot-1-1050")).toContainText("Freunde · Oma");
+  // Zurückholen bringt den Sport zurück und räumt NUR das Fenster wieder frei
   await page.getByTestId("ausfall-zurueck").click();
   await expect(page.getByTestId("fest-1-1020")).toContainText("Sport");
+  await expect(page.getByTestId("plan-block")).toHaveCount(5); // die 5 geplanten Bausteine bleiben
 
   // 🔁 Routine: Üben wiederholt sich – Freunde-Zeit wird sonntags neu verabredet.
   // Beim Platzieren fragt die App direkt, MIT WEM – der Name steht dann am Baustein.

@@ -216,7 +216,8 @@ export default function Wochenplan() {
     }
   };
   const slotGetippt = (tagIdx, slot) => {
-    if (festerTermin(feste, tagIdx, slot)) return; // feste Stunde ist tabu
+    const f = festerTermin(feste, tagIdx, slot);
+    if (f && !istAusgefallen(plan, tagIdx, f.beginn)) return; // feste Stunde ist tabu – außer sie fällt aus
     if (wahl && !slotBelegt(plan, tagIdx, slot)) { hinzu(tagIdx, slot, wahl); setWahl(null); }
   };
   const routineSpeichern = () => {
@@ -292,7 +293,7 @@ export default function Wochenplan() {
                 aufEdit={(b) => setEditor({ id: b.id, notiz: b.notiz || "" })}
                 ausfaelle={plan.ausfaelle}
                 aufFest={(f) => setFestDialog(f)}
-                aufZurueck={(f) => speichern(ausfallAufheben(plan, f.tag, f.beginn), `${f.name} ist doch wieder da`)}
+                aufZurueck={(f) => speichern(ausfallAufheben(plan, f.tag, f.beginn, f.dauer), `${f.name} ist doch wieder da`)}
                 termine={termineJe[i]} bloecke={plan.bloecke.filter((b) => b.tag === i)}
                 pruefung={pruefung} aufTipp={slotGetippt}
                 aufWeg={(id) => speichern(blockWeg(plan, id), "Baustein entfernt")} />

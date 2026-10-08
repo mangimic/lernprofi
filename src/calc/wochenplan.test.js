@@ -198,6 +198,13 @@ describe("wochenplan – Wochen-Rechnung", () => {
     let nurLernen = ausfallSetzen(ausfallSetzen(ausfallSetzen(leererPlan("2026-10-05"), 1, 780), 1, 960), 1, 1020);
     nurLernen = blockHinzu(nurLernen, 1, "lernen", 900);
     expect(planPruefung(nurLernen, [], 20, FESTE_TERMINE_STANDARD).tage[1].status).toBe("einseitig");
+    // Zurückholen räumt Bausteine aus dem Termin-Fenster (mit Dauer)
+    let belegt = ausfallSetzen(leererPlan("2026-10-05"), 1, 1020);
+    belegt = blockHinzu(belegt, 1, "freunde", 1050); // ins freie Sport-Fenster gelegt
+    belegt = blockHinzu(belegt, 1, "lernen", 900);   // außerhalb – bleibt
+    const wiederDa = ausfallAufheben(belegt, 1, 1020, 60);
+    expect(istAusgefallen(wiederDa, 1, 1020)).toBe(false);
+    expect(wiederDa.bloecke.map((b) => b.typ)).toEqual(["lernen"]);
     // Vorplanung nimmt ihre Ausfälle mit in die neue Woche
     const alt = {
       montag: "2026-09-28", bloecke: [], belohnt: [],

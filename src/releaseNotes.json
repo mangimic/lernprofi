@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-043",
+    "version": "0.31.1",
+    "datum": "2026-10-08",
+    "titel": "Ausgefallene Fenster richtig nutzbar",
+    "entries": [
+      {
+        "type": "fix",
+        "text": "❌➡️✏️ Fällt ein fester Termin aus, ließ sich sein Fenster per Antippen noch nicht neu bebauen – jetzt geht es. Und holt man den Termin mit ↩️ zurück, werden dort geparkte Bausteine automatisch weggeräumt (nichts verschwindet unsichtbar unter dem Termin)."
+      }
+    ]
+  },
+  {
     "id": "rn-042",
     "version": "0.31.0",
     "datum": "2026-10-08",

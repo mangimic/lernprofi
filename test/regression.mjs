@@ -36,6 +36,14 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.31.1: Ausfall-Fenster bebaubar ----------
+console.log("== v0.31.1: Ausfall-Fix ==");
+test("v0.31.1: freie Ausfall-Fenster antippbar, Zurückholen räumt Fenster-Blöcke", (() => {
+  return quelle("src/features/Wochenplan.jsx").includes("!istAusgefallen(plan, tagIdx, f.beginn)")
+    && quelle("src/calc/wochenplan.js").includes("b.slot >= beginn && b.slot < beginn + dauer")
+    && releaseNoteVorhanden("rn-043");
+})());
+
 // ---------- v0.31: Termin-Ausfälle ----------
 console.log("== v0.31: Termin-Ausfälle ==");
 test("v0.31: APP_VERSION mindestens 0.31.0", versionMindestens("0.31.0"));
