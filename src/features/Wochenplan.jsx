@@ -5,7 +5,7 @@ import {
   WOCHENTAGE, BAUSTEINE, TERMIN_ARTEN, LERN_MINUTEN, tagesStunden, uhr, bausteinInfo,
   wochenMontag, tagDatum, planFuerWoche, leererPlan, blockHinzu, blockWeg, slotBelegt,
   termineDerWoche, planPruefung, wochenBilanz, festerTermin, SCHULE,
-  kalenderWoche, routineAusPlan, routineAnwenden,
+  kalenderWoche, routineAusPlan, routineAnwenden, schulStunden,
 } from "../calc/wochenplan.js";
 
 /* 🗓️ MEIN WOCHENPLAN (Etappe 9): Felix setzt sein Pensum selbst.
@@ -92,7 +92,7 @@ function StundenSlot({ tagIdx, slot, block, fest, wahlAktiv, aufTipp, aufWeg }) 
   );
 }
 
-function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, pruefung, wahlAktiv, aufTipp, aufWeg }) {
+function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, pruefung, wahlAktiv, schuleAuf, aufTipp, aufWeg }) {
   const { T } = useApp();
   const p = pruefung.tage[idx];
   const ampel = p.status === "voll" ? "🔴" : p.status === "einseitig" ? "🟡" : p.lern + p.frei > 0 ? "🟢" : "";
@@ -107,8 +107,20 @@ function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, pruefung, wahlAktiv
         {WOCHENTAGE[idx]}{idx === heuteIdx ? " · heute" : ""} <span data-test={`ampel-${idx}`}>{ampel}</span>
       </div>
       <div style={{ color: T.textLeise, fontSize: "11.5px", marginBottom: 4, minHeight: 15 }}>
-        {schule ? `🏫 Schule ${SCHULE.text}` : "🌞 schulfrei"}
+        {schule ? `🏫 Schule ${SCHULE.jeTag?.[idx] || SCHULE.text}` : "🌞 schulfrei"}
       </div>
+      {schule && schuleAuf && (
+        <div data-test={`schule-${idx}`} style={{
+          background: T.grund, borderRadius: 6, padding: "4px 6px", marginBottom: 4,
+          fontSize: "11px", lineHeight: 1.5, color: T.textLeise,
+        }}>
+          {schulStunden(idx).map(([von, , fach, ag], i) => (
+            <div key={i} style={{ opacity: ag ? 0.65 : 1 }}>
+              <b>{uhr(von)}</b> {fach}{ag ? " · freiwillig" : ""}
+            </div>
+          ))}
+        </div>
+      )}
       {termine.map((t) => {
         const art = TERMIN_ARTEN[t.art];
         return (
@@ -146,6 +158,7 @@ export default function Wochenplan() {
   );
 
   const [woche, setWoche] = useState("diese"); // Sonntags wird die NÄCHSTE Woche besprochen
+  const [schuleAuf, setSchuleAuf] = useState(false); // 🏫 Vormittags-Stunden ein-/ausklappen
   const montagAktiv = wochenMontag(heute);
   const aktiv = planFuerWoche(data.lernstand.wochenplan, montagAktiv);
   const naechsteW = woche === "naechste";
@@ -220,6 +233,10 @@ export default function Wochenplan() {
             style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: T.weich, color: T.text }}>
             💾 Als Routine speichern
           </button>
+          <button data-test="schule-zeigen" onClick={() => setSchuleAuf(!schuleAuf)}
+            style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: schuleAuf ? T.primaer : T.weich, color: schuleAuf ? T.primaerText : T.text }}>
+            🏫 Schulstunden
+          </button>
         </div>
         <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           DU bestimmst dein Pensum – wochentags ab <b>13 Uhr</b> (🎲 erst Spielzeit nach dem Essen),
@@ -242,7 +259,7 @@ export default function Wochenplan() {
           )}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "stretch", background: T.grund, borderRadius: T.radiusKlein, padding: 8 }}>
             {WOCHENTAGE.map((_, i) => (
-              <TagSpalte key={i} idx={i} heuteIdx={heuteIdx} wahlAktiv={!!wahl} feste={feste}
+              <TagSpalte key={i} idx={i} heuteIdx={heuteIdx} wahlAktiv={!!wahl} feste={feste} schuleAuf={schuleAuf}
                 termine={termineJe[i]} bloecke={plan.bloecke.filter((b) => b.tag === i)}
                 pruefung={pruefung} aufTipp={slotGetippt}
                 aufWeg={(id) => speichern(blockWeg(plan, id), "Baustein entfernt")} />

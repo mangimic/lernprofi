@@ -6,7 +6,7 @@ import { EINSTUFUNG_FELDER } from "../calc/einstufung.js";
 import { STARK_SAETZE } from "../calc/aufgaben/stark.js";
 import {
   wochenMontag, tagDatum, planFuerWoche, bausteinInfo, blockFertig,
-  tagGeschafft, heuteBelohnt, belohnungEintragen, WOCHENTAGE, slotLabel,
+  tagGeschafft, heuteBelohnt, belohnungEintragen, WOCHENTAGE, slotLabel, schulFaecher,
 } from "../calc/wochenplan.js";
 
 /* Startseite: Begrüßung, Tages-Stand (Münzen, Missionen, Lernspur),
@@ -99,6 +99,11 @@ export default function Start() {
       {(heutePlan.length > 0 || heuteFeste.length > 0) && (
         <div data-test="heute-plan" style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
           <b>🗓️ Heute auf deinem Plan</b>
+          {schulFaecher(heuteIdx).length > 0 && (
+            <p data-test="heute-schule" style={{ margin: "6px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+              🏫 Heute in der Schule: {schulFaecher(heuteIdx).join(" · ")}
+            </p>
+          )}
           <div style={{ display: "grid", gap: 6, margin: "8px 0 0" }}>
             {heuteFeste.map((f) => (
               <div key={`f-${f.beginn}`} data-test="heute-fest" style={{

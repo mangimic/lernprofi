@@ -943,7 +943,14 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await expect(page.getByTestId("fest-0-990")).toContainText("↳"); // Musikalische Spiele läuft 60 Min
   await expect(page.getByTestId("baustein-hausaufgaben")).toContainText("Hausaufgaben");
   await expect(page.getByTestId("fest-3-1110")).toContainText("Pfadfinder");
-  await expect(page.getByTestId("tag-0")).toContainText("Schule 7:45");
+  await expect(page.getByTestId("tag-0")).toContainText("Schule 7:50");
+  await expect(page.getByTestId("tag-4")).toContainText("7:50–12:15"); // Freitag endet früher
+  // 🏫 Vormittag aufklappen: Stundenplan je Tag, AGs als freiwillig
+  await page.getByTestId("schule-zeigen").click();
+  await expect(page.getByTestId("schule-3")).toContainText("KoKo");
+  await expect(page.getByTestId("schule-0")).toContainText("freiwillig"); // Bläserklasse-AG
+  await page.getByTestId("schule-zeigen").click();
+  await expect(page.getByTestId("schule-3")).toHaveCount(0);
   await expect(page.getByTestId("plan-hinweise")).toContainText("Klassenarbeit");
 
   // Antippen: Baustein → freies 30-Minuten-Fenster. Samstag ab 9 Uhr; 3 Lernboxen überladen (Limit 2 bei 20 Min)
@@ -1000,6 +1007,7 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await page.getByTestId("plan-zurueck").click();
   await expect(page.getByTestId("heute-plan")).toBeVisible();
   if (heuteIdx <= 4) await expect(page.getByTestId("heute-fest").first()).toBeVisible(); // feste Termine (nur Schultage)
+  if (heuteIdx <= 4) await expect(page.getByTestId("heute-schule")).toContainText("Heute in der Schule");
   while (await page.getByTestId("heute-haken").count()) {
     await page.getByTestId("heute-haken").first().click();
   }

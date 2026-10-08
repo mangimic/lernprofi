@@ -36,6 +36,23 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.29: Schul-Vormittag im Plan ----------
+console.log("== v0.29: Schul-Vormittag ==");
+test("v0.29: APP_VERSION mindestens 0.29.0", versionMindestens("0.29.0"));
+test("v0.29: Release-Note rn-038 vorhanden", releaseNoteVorhanden("rn-038"));
+test("v0.29: Stundenplan hinterlegt – 5 Tage, AG-Kennzeichnung, keine Lehrkraft-Namen", (() => {
+  const w = quelle("src/calc/wochenplan.js");
+  return w.includes("SCHULSTUNDEN") && w.includes("schulFaecher") && w.includes("KoKo")
+    && w.includes("Leseband") && w.includes("Bläserklasse (AG)")
+    && !/Häußler|Weinmann|Kemper|Cecere|Lindinger|Hanser|gsakb/i.test(w)
+    && w.includes('jeTag: { 4: "7:50–12:15" }');
+})());
+test("v0.29: Schulstunden-Toggle im Plan + Heute-in-der-Schule-Zeile", (() => {
+  return quelle("src/features/Wochenplan.jsx").includes('data-test="schule-zeigen"')
+    && quelle("src/features/Wochenplan.jsx").includes("schulStunden")
+    && quelle("src/features/Start.jsx").includes('data-test="heute-schule"');
+})());
+
 // ---------- v0.28: 30-Min-Fenster, Wochenende, KW + Routine ----------
 console.log("== v0.28: Halbe Stunden + Routine ==");
 test("v0.28: APP_VERSION mindestens 0.28.0", versionMindestens("0.28.0"));

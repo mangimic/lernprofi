@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   BAUSTEINE, TERMIN_ARTEN, FESTE_TERMINE_STANDARD, festerTermin,
-  kalenderWoche, routineAusPlan, routineAnwenden,
+  kalenderWoche, routineAusPlan, routineAnwenden, schulStunden, schulFaecher,
   wochenMontag, tagDatum, leererPlan, planFuerWoche,
   blockHinzu, blockWeg, blockFertig, tagGeschafft, heuteBelohnt, belohnungEintragen,
   wochenBilanz, termineDerWoche, planPruefung, bausteinInfo,
@@ -110,6 +110,23 @@ describe("wochenplan – Wochen-Rechnung", () => {
     expect(ziel.bloecke.length).toBe(1); // nichts doppelt gelegt
     const frei = routineAnwenden(leererPlan("2026-10-12"), routine);
     expect(frei.bloecke).toEqual([{ id: 1, tag: 1, slot: 900, typ: "lernen" }]);
+  });
+
+  it("Stundenplan: 5 Schultage, saubere Zeiten, Fächerfolge ohne AGs und Dubletten", () => {
+    for (let t = 0; t <= 4; t++) {
+      expect(schulStunden(t).length).toBeGreaterThanOrEqual(5);
+      for (const [von, bis] of schulStunden(t)) {
+        expect(von).toBeGreaterThanOrEqual(470); // frühestens 7:50
+        expect(bis).toBeGreaterThan(von);
+        expect(bis).toBeLessThanOrEqual(780);    // spätestens 13:00
+      }
+    }
+    expect(schulStunden(5)).toEqual([]);
+    expect(schulFaecher(0)).toEqual(["Deutsch", "Französisch", "Mathe", "SU"]); // Doppelstunde nur 1×, AG raus
+    expect(schulFaecher(3)).toEqual(["Mathe", "KoKo", "KuW"]);
+    expect(schulFaecher(4)).toContain("Musik");
+    expect(schulFaecher(1).join(" ")).not.toContain("Chor"); // AG ist freiwillig
+    expect(schulFaecher(6)).toEqual([]);
   });
 
   it("Durchführung: abhaken, Tag geschafft, Belohnung nur 1× je Datum, Bilanz", () => {
