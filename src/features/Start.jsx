@@ -131,7 +131,7 @@ export default function Start() {
                   <span style={{ flex: 1, fontWeight: 700, textDecoration: b.fertig ? "line-through" : "none" }}>
                     {info.emoji} {b.typ === "eigen" ? (b.notiz || info.name) : `${info.name}${b.notiz ? ` · ${b.notiz}` : ""}`}
                     <span style={{ color: T.textLeise, fontWeight: 400 }}>
-                      {Number.isInteger(b.slot) ? ` · ${slotLabel(b.slot)}` : ""}{info.lern && info.box !== false ? " · 10+5 Min" : ""}
+                      {Number.isInteger(b.slot) ? ` · ${slotLabel(b.slot)}` : ""}{info.lern && info.box !== false ? " · 10+5 Min" : info.kurz ? " · 10 Min" : ""}
                     </span>
                   </span>
                   {b.fertig ? (

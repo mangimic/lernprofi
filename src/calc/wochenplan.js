@@ -23,8 +23,9 @@ export const BAUSTEINE = [
   { typ: "konz", name: "Konzentration", emoji: "🧠", lern: true },
   // Hausaufgaben: Pflicht-Lernzeit (zählt beim Wächter mit), aber keine 10-Minuten-Box.
   { typ: "hausaufgaben", name: "Hausaufgaben", emoji: "📚", lern: true, box: false },
-  { typ: "schlagzeug", name: "Schlagzeug", emoji: "🥁", lern: false },
+  { typ: "schlagzeug", name: "Schlagzeug", emoji: "🥁", lern: false, kurz: true }, // 10-Minuten-Übe-Einheit
   { typ: "sport", name: "Sport", emoji: "⚽", lern: false },
+  { typ: "angeln", name: "Angeln", emoji: "🎣", lern: false },
   { typ: "pfadfinder", name: "Pfadfinder", emoji: "🏕️", lern: false },
   { typ: "freunde", name: "Freunde", emoji: "🧑‍🤝‍🧑", lern: false },
   // Arzttermin: Pflicht, weder Lernen noch Ausgleich – der Wächter zählt ihn nicht als „etwas Schönes".

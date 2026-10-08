@@ -1,5 +1,25 @@
 [
   {
+    "id": "rn-048",
+    "version": "0.36.0",
+    "datum": "2026-10-08",
+    "titel": "Angeln, Schlagzeug-10-Minuten, Sportart-Frage",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🎣 Angeln ist jetzt ein eigener Baustein in der Palette (zählt beim Wächter als Ausgleich)."
+      },
+      {
+        "type": "geaendert",
+        "text": "🥁 Schlagzeug-Üben ist als 10-Minuten-Einheit ausgewiesen – wie die Lernboxen."
+      },
+      {
+        "type": "neu",
+        "text": "⚽ Sport fragt beim Platzieren direkt: „Welcher Sport?“ (z. B. Tennis oder BJJ) – die Antwort steht am Baustein und bleibt jederzeit änderbar (Baustein antippen)."
+      }
+    ]
+  },
+  {
     "id": "rn-047",
     "version": "0.35.0",
     "datum": "2026-10-08",

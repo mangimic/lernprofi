@@ -31,7 +31,7 @@ function PaletteBaustein({ b, gewaehlt, aufTipp }) {
         transform: transform ? `translate(${transform.x}px, ${transform.y}px)` : undefined,
         zIndex: isDragging ? 50 : undefined, position: "relative",
       }}>
-      {b.emoji} {b.name}{b.lern && b.box !== false ? ` · ${LERN_MINUTEN} Min` : ""}
+      {b.emoji} {b.name}{(b.lern && b.box !== false) || b.kurz ? ` · ${LERN_MINUTEN} Min` : ""}
     </button>
   );
 }
@@ -214,8 +214,8 @@ export default function Wochenplan() {
     const neu = blockHinzu(plan, tagIdx, typ, slot);
     if (neu !== plan) {
       speichern(neu, `Baustein ${typ} am ${WOCHENTAGE[tagIdx]} um ${uhr(slot)} Uhr eingeplant`);
-      // Freunde-Zeit lebt von der Verabredung: direkt fragen, mit wem.
-      if (typ === "freunde") setEditor({ id: neu.bloecke[neu.bloecke.length - 1].id, notiz: "" });
+      // Freunde-Zeit lebt von der Verabredung, Sport von der Sportart: direkt fragen.
+      if (typ === "freunde" || typ === "sport") setEditor({ id: neu.bloecke[neu.bloecke.length - 1].id, notiz: "" });
     }
   };
   const slotGetippt = (tagIdx, slot) => {
@@ -433,7 +433,7 @@ export default function Wochenplan() {
                   <button key={b.typ} data-test={`fenster-wahl-${b.typ}`}
                     onClick={() => { hinzu(fenster.tag, fenster.slot, b.typ); zu(); }}
                     style={{ textAlign: "left", height: "auto", minHeight: "var(--touch)", padding: "8px 12px", fontWeight: 700, background: T.weich, color: T.text }}>
-                    {b.emoji} {b.name}{b.lern && b.box !== false ? ` · ${LERN_MINUTEN} Min` : ""}
+                    {b.emoji} {b.name}{(b.lern && b.box !== false) || b.kurz ? ` · ${LERN_MINUTEN} Min` : ""}
                   </button>
                 ))}
                 {fenster.suche.trim() && (
@@ -568,7 +568,7 @@ export default function Wochenplan() {
               <input data-test="notiz-feld" type="text" maxLength={24} autoFocus
                 value={editor.notiz} onChange={(e) => setEditor({ ...editor, notiz: e.target.value })}
                 onKeyDown={(e) => { if (e.key === "Enter") { speichern(blockNotiz(plan, block.id, editor.notiz), "Baustein-Notiz geändert"); zu(); } }}
-                placeholder={block.typ === "freunde" ? "Mit wem triffst du dich?" : "Notiz (z. B. was genau?)"}
+                placeholder={block.typ === "freunde" ? "Mit wem triffst du dich?" : block.typ === "sport" ? "Welcher Sport? (z. B. Tennis, BJJ)" : "Notiz (z. B. was genau?)"}
                 style={{ width: "100%", boxSizing: "border-box", minHeight: "var(--touch)", borderRadius: T.radiusKlein, border: `1px solid ${T.rand}`, padding: "0 12px", background: T.grund, color: T.text }} />
               <button data-test="notiz-ok"
                 onClick={() => { speichern(blockNotiz(plan, block.id, editor.notiz), "Baustein-Notiz geändert"); zu(); }}

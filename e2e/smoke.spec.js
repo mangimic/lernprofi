@@ -976,6 +976,12 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await page.getByTestId("block-weg").first().click();
   await expect(page.getByTestId("ampel-5")).toHaveText("🟡");
   await bausteinZu("sport", 5, 540);
+  await expect(page.getByTestId("block-editor")).toContainText("Sport"); // fragt: welcher Sport?
+  await page.getByTestId("notiz-feld").fill("BJJ");
+  await page.getByTestId("notiz-ok").click();
+  await expect(page.getByTestId("tag-5")).toContainText("Sport · BJJ");
+  await expect(page.getByTestId("baustein-angeln")).toContainText("Angeln"); // 🎣 neu in der Palette
+  await expect(page.getByTestId("baustein-schlagzeug")).toContainText("10 Min"); // Schlagzeug = 10-Minuten-Einheit
   await expect(page.getByTestId("ampel-5")).toHaveText("🟡"); // Sport reicht nicht – Reihenfolge fehlt
   await expect(page.getByTestId("tag-hinweis-5")).toContainText("Hausaufgaben");
   await bausteinZu("hausaufgaben", 5, 570);

@@ -279,6 +279,8 @@ describe("wochenplan – Wochen-Rechnung", () => {
     expect(Object.keys(TERMIN_ARTEN)).toEqual(["ka", "kompass", "wdw"]);
     expect(BAUSTEINE.filter((b) => b.lern).map((b) => b.typ)).toEqual(["mathe", "deutsch", "lernen", "schrift", "konz", "hausaufgaben"]);
     expect(BAUSTEINE.find((b) => b.typ === "lernen").verborgen).toBe(true); // Alt-Typ nur noch intern
+    expect(BAUSTEINE.find((b) => b.typ === "angeln")).toMatchObject({ emoji: "🎣", lern: false });
+    expect(BAUSTEINE.find((b) => b.typ === "schlagzeug").kurz).toBe(true); // 10-Minuten-Einheit
     expect(bausteinInfo("unbekannt").lern).toBe(false);
   });
 });

@@ -36,6 +36,17 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.36: Angeln, Schlagzeug 10 Min, Sportart-Frage ----------
+console.log("== v0.36: Bausteine erweitert ==");
+test("v0.36: Angeln-Baustein, Schlagzeug als 10-Min-Einheit, Sport fragt nach der Sportart", (() => {
+  const w = quelle("src/calc/wochenplan.js");
+  const f = quelle("src/features/Wochenplan.jsx");
+  return w.includes('typ: "angeln"') && w.includes("kurz: true")
+    && f.includes('typ === "freunde" || typ === "sport"')
+    && f.includes("Welcher Sport?") && f.includes("|| b.kurz")
+    && releaseNoteVorhanden("rn-048");
+})());
+
 // ---------- v0.35: Fenster-Dialog mit Suche + Freitext ----------
 console.log("== v0.35: Fenster-Dialog ==");
 test("v0.35: Direkt-Tipp aufs Fenster – Suche, Vordefiniertes, Freitext als ⭐-Baustein", (() => {
