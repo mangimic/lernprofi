@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   kiApi, kostenMikro, mikroZuCent, monatsKey, antwortZurechtstutzen, schriftZurechtstutzen,
-  wortProblem, MAX_BLASEN, MAX_WOERTER,
+  aufsatzZurechtstutzen, wortProblem, MAX_BLASEN, MAX_WOERTER,
 } from "./kiApi.js";
 
 // Mini-Mocks wie bei der vaultApi: KV als Map, echte Request-Objekte.
@@ -233,6 +233,38 @@ describe("kiApi – Routen", () => {
     const voll = await kiApi(anfrage("POST", "/api/ki/schrift", { bild: "d".repeat(200), satz: "x" }), env, JETZT);
     expect(voll.status).toBe(402);
     expect(fetchMock).toHaveBeenCalledTimes(1); // kein zweiter Ruf trotz 4 weiterer Anfragen
+  });
+
+  it("aufsatz: Kriterien je Textart, Posten „aufsatz“, Whitelist; Stutzer mit Tipp-Stelle", async () => {
+    const env = mockEnv();
+    const fetchMock = claudeMock({
+      text: '{"sterne":["Deine Reihenfolge stimmt – Schritt für Schritt! ⭐","„Zuerst“ und „danach“ nutzt du super."],' +
+        '"tipp":{"stelle":"dann kommt das Wasser","blase":"Hier fehlt, WIE VIEL Wasser – sag es genau."},' +
+        '"mach":"Lies die Stelle LAUT und ruf die fehlende Menge dazu!"}',
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const r = await kiApi(anfrage("POST", "/api/ki/aufsatz", {
+      bild: "e".repeat(200), textart: "vorgang", modell: "haiku",
+    }), env, JETZT);
+    expect(r.status).toBe(200);
+    const d = await r.json();
+    expect(d.sterne.length).toBe(2);
+    expect(d.tipp.stelle).toBe("dann kommt das Wasser");
+    expect(d.mach).toContain("LAUT");
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.messages[0].content[0].type).toBe("image");
+    expect(body.messages[0].content[1].text).toContain("Vorgangsbeschreibung");
+    expect(body.system).toContain("AUFSATZ");
+    expect(body.system).toContain("NIEMALS eine Fehlerliste");
+    const s = await (await kiApi(anfrage("GET", "/api/ki/status"), env, JETZT)).json();
+    expect(s.posten[0]).toMatchObject({ zweck: "aufsatz", modell: "haiku" });
+    // unbekannte Textart und fehlendes Bild → 400
+    expect((await kiApi(anfrage("POST", "/api/ki/aufsatz", { bild: "f".repeat(200), textart: "krimi" }), env, JETZT)).status).toBe(400);
+    expect((await kiApi(anfrage("POST", "/api/ki/aufsatz", { textart: "vorgang" }), env, JETZT)).status).toBe(400);
+    // Stutzer: ohne JSON oder mit Druck-Wörtern → freundlicher Ersatz
+    expect(aufsatzZurechtstutzen("Geplauder").ersetzt).toBe(true);
+    const boese = aufsatzZurechtstutzen('{"sterne":["Sei nicht so faul.","x"],"tipp":{"stelle":"a","blase":"b"},"mach":"c"}');
+    expect(boese.ersetzt).toBe(true);
   });
 
   it("ohne Schlüssel 503; KI-Fehler → 502 und nichts gebucht", async () => {

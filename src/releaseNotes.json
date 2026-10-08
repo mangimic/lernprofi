@@ -1,5 +1,25 @@
 [
   {
+    "id": "rn-033",
+    "version": "0.24.0",
+    "datum": "2026-10-08",
+    "titel": "Aufsatz-Check + Blätter wieder ansehen",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "✍️ Aufsatz-Check (KI-Etappe 7d): Aufsatz auf Papier schreiben, Textart wählen (Vorgangsbeschreibung · Erlebniserzählung · Bildergeschichte), Foto machen – Leo liest den Text und zeigt 2 ⭐-Stärken, genau EINE markierte Verbesserungs-Stelle (wörtliches Zitat statt Fehlerliste) und eine Mach-Aufgabe mit Stimme. Nie Rechtschreib-Korrekturen am Stück, nie Noten. Eltern-Freigabe im Elternbereich, erster Check des Tages bringt 1 Münze."
+      },
+      {
+        "type": "neu",
+        "text": "👁️ Schreib-Training: Ein Tipp auf ein Blatt in der Schrift-Reise öffnet es jetzt groß (mit Datum, Übe-Buchstabe und dem Satz). Neue Blätter werden dafür zusätzlich in besserer Auflösung gespeichert."
+      },
+      {
+        "type": "technik",
+        "text": "Neuer Endpunkt /api/ki/aufsatz mit Textart-Kriterien, eigenem Format-Stutzer und Wort-Wächter; Foto-Verkleinerung in ein gemeinsames Modul ausgelagert (Aufsatz nutzt 1280 px für besser lesbaren Text)."
+      }
+    ]
+  },
+  {
     "id": "rn-032",
     "version": "0.23.1",
     "datum": "2026-10-08",

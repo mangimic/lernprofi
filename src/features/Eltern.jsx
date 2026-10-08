@@ -330,7 +330,7 @@ export default function Eltern() {
         {[
           { key: "erklaeren", name: "🦁 „Erklär es mir anders“ (nach Fehlversuchen)", da: true },
           { key: "schrift", name: "🖐️ Schrift-Blick (Foto vom Blatt prüfen)", da: true },
-          { key: "aufsatz", name: "✍️ Aufsatz-Feedback", da: false },
+          { key: "aufsatz", name: "✍️ Aufsatz-Check (Foto vom Text)", da: true },
           { key: "bericht", name: "📊 Wochenbericht", da: false },
           { key: "saetze", name: "🔤 Persönliche Übungssätze", da: false },
         ].map((f) => (

@@ -51,6 +51,21 @@ export async function kiSchrift(daten) {
   }
 }
 
+/** ✍️ Aufsatz-Check: Foto (Base64) + Textart → 2 Sterne, 1 Tipp-Stelle, Mach-Aufgabe.
+    daten: { bild, textart ("vorgang"|"erlebnis"|"bild"), typ, modell } */
+export async function kiAufsatz(daten) {
+  try {
+    const { status, daten: d } = await anfrage("/api/ki/aufsatz", {
+      method: "POST", body: JSON.stringify(daten),
+    });
+    if (status === 200 && d?.sterne?.length) return { ok: true, ...d };
+    if (status === 402) return { ok: false, grund: "deckel" };
+    return { ok: false, grund: d?.grund || "fehler" };
+  } catch {
+    return { ok: false, grund: "offline" };
+  }
+}
+
 /** 🦁 „Erklär es mir anders“: holt 1-2 Blasen + Mach-Aufgabe.
     aufgabe.modell: "haiku" | "sonnet" | "opus" (Eltern-Wahl). */
 export async function kiErklaeren(aufgabe) {

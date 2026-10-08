@@ -812,7 +812,59 @@ test("Schreib-Training: Satz des Tages, Foto → Leos Schrift-Blick, Schrift-Rei
   await page.getByTestId("schrift-speichern").click();
   await expect(page.getByTestId("reise-blatt")).toHaveCount(1);
   await expect(page.getByTestId("schrift-heute-fertig")).toBeVisible();
+
+  // 👁️ Blatt antippen → Groß-Ansicht mit Bild öffnet und schließt wieder
+  await page.getByTestId("reise-blatt").click();
+  await expect(page.getByTestId("blatt-anzeige")).toBeVisible();
+  await expect(page.getByTestId("blatt-anzeige").locator("img")).toBeVisible();
+  await page.getByTestId("blatt-zu").click();
+  await expect(page.getByTestId("blatt-anzeige")).toHaveCount(0);
+
   await page.getByTestId("schrift-zurueck").click();
+  await expect(page.getByTestId("tages-stand")).toContainText("🪙 1 Münze");
+});
+
+test("Aufsatz-Check: Textart wählen, Foto → 2 Sterne + markierte Stelle + Mach-Aufgabe + Münze", async ({ page }) => {
+  await page.route("**/api/ki/status", (route) => route.fulfill({ json: {
+    verfuegbar: true, grund: null, monat: "2026-10", deckelCent: 500, maxDeckelCent: 1000,
+    verbrauchtCent: 0, posten: [],
+  } }));
+  await page.route("**/api/ki/aufsatz", (route) => route.fulfill({ json: {
+    sterne: ["Deine Reihenfolge stimmt – Schritt für Schritt! ⭐", "„Zuerst“ und „danach“ nutzt du super."],
+    tipp: { stelle: "dann kommt das Wasser", blase: "Hier fehlt, WIE VIEL Wasser – sag es genau." },
+    mach: "Lies die Stelle LAUT und ruf die Menge dazu!",
+    kostenCent: 0.5, verbrauchtCent: 0.5, deckelCent: 500,
+  } }));
+
+  await tresorAnlegen(page);
+  // Ohne Freigabe nur der Hinweis
+  await page.getByTestId("zum-aufsatz").click();
+  await expect(page.getByTestId("aufsatz-freigabe-hinweis")).toBeVisible();
+  await expect(page.getByTestId("aufsatz-foto")).toHaveCount(0);
+
+  // Eltern geben frei
+  await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("ki-aufsatz-1").click();
+  await page.getByTestId("nav-start").click();
+  await page.getByTestId("zum-aufsatz").click();
+
+  // Textart wählen + Foto hochladen
+  await page.getByTestId("aufsatz-art-vorgang").click();
+  const PNG = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAFklEQVR4nGP8z8Dwn4EIwESMolGFlCsEAGcTAxEDrri8AAAAAElFTkSuQmCC",
+    "base64",
+  );
+  await page.getByTestId("aufsatz-foto").setInputFiles({ name: "aufsatz.png", mimeType: "image/png", buffer: PNG });
+  await expect(page.getByTestId("aufsatz-stern")).toHaveCount(1);
+  await page.getByTestId("aufsatz-weiter").click();
+  await expect(page.getByTestId("aufsatz-stern")).toHaveCount(2);
+  await expect(page.getByTestId("aufsatz-tipp")).toContainText("dann kommt das Wasser");
+  await expect(page.getByTestId("aufsatz-mach")).toContainText("LAUT");
+
+  // Fertig → Münze, nur 1× am Tag
+  await page.getByTestId("aufsatz-fertig").click();
+  await expect(page.getByTestId("aufsatz-heute-fertig")).toBeVisible();
+  await page.getByTestId("aufsatz-zurueck").click();
   await expect(page.getByTestId("tages-stand")).toContainText("🪙 1 Münze");
 });
 

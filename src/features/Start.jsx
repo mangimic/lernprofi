@@ -56,6 +56,10 @@ export default function Start() {
           style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
           🖐️ Schreib-Training (1 Satz am Tag, mit der Hand)
         </button>
+        <button data-test="zum-aufsatz" onClick={() => navTo("aufsatz")}
+          style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
+          ✍️ Aufsatz-Check (Leo liest dein Foto)
+        </button>
       </div>
       {!einstufung ? (
         <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>

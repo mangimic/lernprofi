@@ -36,6 +36,35 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.24: Aufsatz-Check + Blatt-Anzeige ----------
+console.log("== v0.24: Aufsatz-Check ==");
+test("v0.24: APP_VERSION mindestens 0.24.0", versionMindestens("0.24.0"));
+test("v0.24: Release-Note rn-033 vorhanden", releaseNoteVorhanden("rn-033"));
+test("v0.24: Server-Endpunkt /api/ki/aufsatz mit Textart-Kriterien und Ein-Stellen-Regel", (() => {
+  const k = quelle("server/_lib/kiApi.js");
+  return k.includes("/api/ki/aufsatz") && k.includes("AUFSATZ_KRITERIEN") && k.includes("Vorgangsbeschreibung")
+    && k.includes("aufsatzZurechtstutzen") && k.includes("NIEMALS eine Fehlerliste")
+    && k.includes('zweck: "aufsatz"');
+})());
+test("v0.24: Aufsatz-Seite – Textarten, markierte Tipp-Stelle, Belohnung 1× am Tag", (() => {
+  const f = quelle("src/features/Aufsatz.jsx");
+  return f.includes("TEXTARTEN") && f.includes("aufsatz-art-") && f.includes('key: "vorgang"')
+    && f.includes('data-test="aufsatz-tipp"') && f.includes("<mark") && f.includes("schonHeute ? {} :")
+    && f.includes('data-test="aufsatz-freigabe-hinweis"') && f.includes("bildVerkleinern(datei, 1280");
+})());
+test("v0.24: Route + Start-Kachel + Eltern-Freigabe aufsatz scharf + Datenfeld", (() => {
+  return quelle("src/App.jsx").includes('route === "aufsatz"')
+    && quelle("src/features/Start.jsx").includes('data-test="zum-aufsatz"')
+    && /\{ key: "aufsatz",[^\n]*da: true/.test(quelle("src/features/Eltern.jsx"))
+    && quelle("src/calc/migrateData.js").includes("lernstand.aufsatz");
+})());
+test("v0.24: Schrift-Reise – Blatt antippen öffnet Groß-Ansicht, bessere Auflösung gespeichert", (() => {
+  const f = quelle("src/features/Schrift.jsx");
+  return f.includes('data-test="blatt-anzeige"') && f.includes('data-test="blatt-zu"')
+    && f.includes("anzeige.gross || anzeige.thumb") && f.includes("bildVerkleinern(datei, 640")
+    && quelle("src/foto.js").includes("toDataURL");
+})());
+
 // ---------- v0.23.1: KI-Fehler-Diagnose ----------
 console.log("== v0.23.1: KI-Fehler-Diagnose ==");
 test("v0.23.1: APP_VERSION mindestens 0.23.1", versionMindestens("0.23.1"));
@@ -70,7 +99,8 @@ test("v0.23: Server-Endpunkt /api/ki/schrift mit Bild-Block, Größenlimit und D
 test("v0.23: Schrift-Seite – Satz des Tages, Mut-Satz-Vorrang, Foto-Verkleinerung, Reise", (() => {
   const f = quelle("src/features/Schrift.jsx");
   return f.includes('data-test="schrift-satz"') && f.includes("mutHeute") && f.includes("bildVerkleinern")
-    && f.includes("toDataURL") && f.includes('data-test="schrift-foto"') && f.includes("capture=")
+    && (f.includes("toDataURL") || quelle("src/foto.js").includes("toDataURL")) // seit v0.24 geteilter Foto-Helfer
+    && f.includes('data-test="schrift-foto"') && f.includes("capture=")
     && f.includes('data-test="schrift-stern"') && f.includes('data-test="schrift-reise"')
     && f.includes("heuteGeschrieben") && f.includes('data-test="schrift-freigabe-hinweis"');
 })());

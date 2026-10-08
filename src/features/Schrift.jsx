@@ -5,6 +5,7 @@ import { muenzenNachRunde, aufgabenZaehlen } from "../calc/lerntage.js";
 import { missionsOpts } from "../calc/tagesform.js";
 import { STARK_SAETZE } from "../calc/aufgaben/stark.js";
 import { kiSchrift } from "../ki.js";
+import { bildVerkleinern } from "../foto.js";
 
 /* 🖐️ Schreib-Training: EIN kurzer Satz pro Tag, mit der Hand auf
    Papier geschrieben, abfotografiert – Coach Leo schaut NUR auf die
@@ -14,32 +15,10 @@ import { kiSchrift } from "../ki.js";
    Die Schrift-Reise (kleine Vorschaubilder) zeigt den Fortschritt:
    Tag 1 neben heute – sehen statt lesen. */
 
-/** Foto im Browser verkleinern: maxKante px, JPEG. Gibt {base64, dataUrl}. */
-function bildVerkleinern(datei, maxKante, qualitaet) {
-  return new Promise((erfuellt, abgelehnt) => {
-    const leser = new FileReader();
-    leser.onerror = () => abgelehnt(new Error("lesen"));
-    leser.onload = () => {
-      const img = new Image();
-      img.onerror = () => abgelehnt(new Error("bild"));
-      img.onload = () => {
-        const f = Math.min(1, maxKante / Math.max(img.width, img.height));
-        const c = document.createElement("canvas");
-        c.width = Math.max(1, Math.round(img.width * f));
-        c.height = Math.max(1, Math.round(img.height * f));
-        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-        const dataUrl = c.toDataURL("image/jpeg", qualitaet);
-        erfuellt({ dataUrl, base64: dataUrl.split(",")[1] || "" });
-      };
-      img.src = leser.result;
-    };
-    leser.readAsDataURL(datei);
-  });
-}
-
 export default function Schrift() {
   const { data, logChange, T, heute, navTo } = useApp();
-  const [ki, setKi] = useState(null); // null | {laden} | {fehler} | {sterne, uebe, mach, offen, thumb}
+  const [ki, setKi] = useState(null); // null | {laden} | {fehler} | {sterne, uebe, mach, offen, thumb, gross}
+  const [anzeige, setAnzeige] = useState(null); // 👁️ Blatt aus der Reise groß ansehen
   const karte = { background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand };
 
   // Satz des Tages: Hat Felix heute seinen Mut-Satz gewählt, ist DER die
@@ -55,19 +34,20 @@ export default function Schrift() {
   const fotoPruefen = async (datei) => {
     if (!datei) return;
     setKi({ laden: true });
-    let gross, klein;
+    let pruef, mittel, klein;
     try {
-      gross = await bildVerkleinern(datei, 1024, 0.8);
-      klein = await bildVerkleinern(datei, 120, 0.6);
+      pruef = await bildVerkleinern(datei, 1024, 0.8);   // geht zu Leo
+      mittel = await bildVerkleinern(datei, 640, 0.7);   // zum Wieder-Ansehen in der Reise
+      klein = await bildVerkleinern(datei, 120, 0.6);    // Galerie-Kachel
     } catch {
       setKi({ fehler: "foto" });
       return;
     }
     const erg = await kiSchrift({
-      bild: gross.base64, satz, typ: "image/jpeg", modell: data.einstellungen.ki.modell,
+      bild: pruef.base64, satz, typ: "image/jpeg", modell: data.einstellungen.ki.modell,
     });
     setKi(erg.ok
-      ? { sterne: erg.sterne, uebe: erg.uebe, mach: erg.mach, offen: 1, thumb: klein.dataUrl }
+      ? { sterne: erg.sterne, uebe: erg.uebe, mach: erg.mach, offen: 1, thumb: klein.dataUrl, gross: mittel.dataUrl }
       : { fehler: erg.grund });
   };
 
@@ -76,7 +56,7 @@ export default function Schrift() {
       ...data,
       lernstand: {
         ...data.lernstand,
-        schrift: reiseEintragen(stand, { tag: heute, satz, buchstabe: ki?.uebe?.buchstabe || "", thumb: ki?.thumb || "" }),
+        schrift: reiseEintragen(stand, { tag: heute, satz, buchstabe: ki?.uebe?.buchstabe || "", thumb: ki?.thumb || "", gross: ki?.gross || "" }),
         // Belohnung nur beim ersten Blatt des Tages – sonst würde Knipsen Münzen farmen.
         ...(schonHeute ? {} : {
           muenzen: data.einstellungen.muenzenAktiv ? muenzenNachRunde(data.lernstand.muenzen) : data.lernstand.muenzen,
@@ -202,15 +182,43 @@ export default function Schrift() {
           )}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
             {[...reise].reverse().map((e) => (
-              <div key={e.tag} data-test="reise-blatt" style={{ textAlign: "center" }}>
+              <button key={e.tag} data-test="reise-blatt" onClick={() => setAnzeige(e)}
+                style={{ textAlign: "center", background: "transparent", padding: 0, minHeight: 0, height: "auto", display: "block" }}>
                 {e.thumb
                   ? <img src={e.thumb} alt="" style={{ width: 72, borderRadius: T.radiusKlein, display: "block" }} />
                   : <div style={{ width: 72, height: 50, background: T.grund, borderRadius: T.radiusKlein, fontSize: 24, lineHeight: "50px" }}>📝</div>}
                 <span style={{ fontSize: "var(--schrift-klein)", color: T.textLeise }}>
                   {e.tag.slice(8)}.{e.tag.slice(5, 7)}.{e.buchstabe ? ` · ${e.buchstabe}` : ""}
                 </span>
-              </div>
+              </button>
             ))}
+          </div>
+          <p style={{ margin: "8px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+            👆 Tipp auf ein Blatt, um es groß anzusehen.
+          </p>
+        </div>
+      )}
+
+      {anzeige && (
+        <div data-test="blatt-anzeige" onClick={() => setAnzeige(null)} style={{
+          position: "fixed", inset: 0, zIndex: 900, background: "rgba(38, 50, 72, 0.94)",
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 18,
+        }}>
+          <div onClick={(ev) => ev.stopPropagation()} style={{ maxWidth: 560, width: "100%", textAlign: "center", background: T.karte, borderRadius: T.radius, padding: T.abstand }}>
+            <p style={{ margin: "0 0 8px", fontWeight: 700 }}>
+              📝 {anzeige.tag.slice(8)}.{anzeige.tag.slice(5, 7)}.{anzeige.tag.slice(0, 4)}
+              {anzeige.buchstabe ? ` · Übe-Buchstabe „${anzeige.buchstabe}“` : ""}
+            </p>
+            {(anzeige.gross || anzeige.thumb)
+              ? <img src={anzeige.gross || anzeige.thumb} alt="" style={{ maxWidth: "100%", maxHeight: "60vh", borderRadius: T.radiusKlein }} />
+              : <div style={{ fontSize: 56 }}>📝</div>}
+            {anzeige.satz && (
+              <p style={{ margin: "8px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>„{anzeige.satz}“</p>
+            )}
+            <button data-test="blatt-zu" onClick={() => setAnzeige(null)}
+              style={{ width: "100%", marginTop: 10, background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+              ✓ Zurück
+            </button>
           </div>
         </div>
       )}

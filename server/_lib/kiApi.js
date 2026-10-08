@@ -18,6 +18,8 @@
      POST /api/ki/deckel  { deckelCent }
      POST /api/ki/erklaeren { fach, bereich, frage, optionen, loesung, tipp, kontext? }
           → { blasen: [≤2], mach, kostenCent, verbrauchtCent, deckelCent }
+     POST /api/ki/schrift  { bild, satz, typ?, modell? }     → { sterne, uebe, mach, … }
+     POST /api/ki/aufsatz  { bild, textart, typ?, modell? }  → { sterne, tipp, mach, … }
    ============================================================ */
 import { zugriffErlaubt } from "./vaultApi.js";
 
@@ -130,6 +132,55 @@ REGELN (alle verbindlich):
 - Du-Form, einfach, bestärkend, gern 1-2 Emojis. Niemals Diagnose-Wörter, niemals Druck.
 - Ist auf dem Foto keine Handschrift zu erkennen, sage das freundlich in "sterne"[0] und
   bitte in "mach" um ein neues Foto bei gutem Licht.`;
+
+/* ✍️ Aufsatz-Check: Leo liest den fotografierten Text und gibt Feedback
+   nach den Kriterien der Textart – IMMER nur EINE Verbesserungs-Stelle
+   (markieren statt Fehlerliste), nie Rechtschreib-Korrekturen am Stück. */
+export const AUFSATZ_KRITERIEN = {
+  vorgang: "Vorgangsbeschreibung: Stimmt die Reihenfolge? Gibt es Zuerst/Dann/Danach/Zum-Schluss-Wörter? Steht alles im Präsens? Sind alle Schritte da, sodass jemand es nachmachen könnte?",
+  erlebnis: "Erlebniserzählung: Gibt es Einleitung, Höhepunkt und Schluss? Wird der Höhepunkt ausführlich und spannend erzählt (wörtliche Rede, Gefühle, treffende Wörter statt „dann…dann…dann“)?",
+  bild: "Bildergeschichte: Passt die Geschichte zu den Bildern und ihrer Reihenfolge? Haben die Figuren Namen? Gibt es einen richtigen Schluss-Satz?",
+};
+
+const LEO_AUFSATZ = `Du bist Coach Leo 🦁. Ein Kind (Klasse 4, Deutschland) hat einen AUFSATZ mit der Hand
+geschrieben und fotografiert. Lies den Text und gib Feedback NUR zum Text (nie zur Handschrift).
+REGELN (alle verbindlich):
+- Antworte NUR mit JSON: {"sterne":["…","…"],"tipp":{"stelle":"…","blase":"…"},"mach":"…"}.
+- "sterne": GENAU 2 konkrete Stärken aus DIESEM Text (gern mit kurzem Zitat), je höchstens 12 Wörter.
+- "tipp": die EINE wichtigste Verbesserungs-Stelle. "stelle" = wörtliches kurzes Zitat aus dem
+  Text (höchstens 8 Wörter), "blase" = was dort besser geht, höchstens 12 Wörter.
+  NIEMALS eine Fehlerliste, NIEMALS Rechtschreibung anstreichen – nur diese eine Sache.
+- "mach" ist eine Mach-Aufgabe mit Körper oder Stimme zu genau dieser Stelle (laut vorlesen,
+  besseres Wort laut rufen, Stelle mit dem Finger zeigen) – höchstens 14 Wörter.
+- Du-Form, einfach, bestärkend, gern 1-2 Emojis. Niemals Diagnose-Wörter, Druck oder Noten.
+- Ist der Text auf dem Foto nicht lesbar, sage das freundlich in "sterne"[0] und bitte in
+  "mach" um ein neues Foto bei gutem Licht.`;
+
+/** Aufsatz-Antwort in die feste Form bringen (2 Sterne, 1 Tipp-Stelle, Mach-Aufgabe). */
+export function aufsatzZurechtstutzen(rohText) {
+  let geparst = null;
+  const treffer = String(rohText || "").match(/\{[\s\S]*\}/);
+  if (treffer) { try { geparst = JSON.parse(treffer[0]); } catch { geparst = null; } }
+  const kuerzen = (satz, max) => {
+    const w = String(satz || "").trim().split(/\s+/).filter(Boolean);
+    return w.length <= max + 2 ? w.join(" ") : w.slice(0, max).join(" ") + " …";
+  };
+  const sterne = (Array.isArray(geparst?.sterne) ? geparst.sterne : [])
+    .map((x) => kuerzen(x, MAX_WOERTER)).filter(Boolean).slice(0, 2);
+  const stelle = kuerzen(geparst?.tipp?.stelle || "", 10).slice(0, 120);
+  const blase = kuerzen(geparst?.tipp?.blase || "", MAX_WOERTER);
+  const mach = kuerzen(geparst?.mach || "Lies deinen Aufsatz einmal LAUT vor – Ohren finden mehr als Augen!", 14);
+  const alles = [...sterne, stelle, blase, mach].join(" ");
+  if (!sterne.length || wortProblem(alles)) {
+    return {
+      sterne: ["Dein Aufsatz ist angekommen – stark, dass du geschrieben hast! ⭐"],
+      tipp: { stelle: "", blase: "Das Foto war schwer zu lesen." },
+      mach: "Mach es nochmal bei hellem Licht, Blatt gerade halten. 📸",
+      ersetzt: true,
+    };
+  }
+  return { sterne, tipp: { stelle, blase }, mach, ersetzt: false };
+}
 
 /** Schrift-Antwort in die feste Form bringen (2 Sterne, 1 Übe-Buchstabe, Mach-Aufgabe). */
 export function schriftZurechtstutzen(rohText) {
@@ -322,6 +373,53 @@ export async function kiApi(request, env, jetzt = new Date()) {
     const sauber = schriftZurechtstutzen(roh.text);
     return json(200, {
       sterne: sauber.sterne, uebe: sauber.uebe, mach: sauber.mach,
+      kostenCent: mikroZuCent(mikro),
+      verbrauchtCent: mikroZuCent(stand.mikro + mikro),
+      deckelCent,
+    });
+  }
+
+  if (url.pathname === "/api/ki/aufsatz" && request.method === "POST") {
+    if (!kv) return json(503, { grund: "kein-kv", fehler: "KV-Namespace fehlt." });
+    if (!schluesselDa) return json(503, { grund: "kein-schluessel", fehler: "API-Schlüssel fehlt (docs/DEPLOY-CLOUDFLARE.md)." });
+    let eingabe;
+    try { eingabe = await request.json(); } catch { return json(400, { fehler: "Kein gültiges JSON." }); }
+    const bild = String(eingabe?.bild || "");
+    const kriterien = AUFSATZ_KRITERIEN[eingabe?.textart];
+    if (!bild || bild.length < 100) return json(400, { fehler: "Erwartet { bild (Base64-JPEG), textart }." });
+    if (bild.length > 1_500_000) return json(400, { fehler: "Das Foto ist zu groß – die App verkleinert es normalerweise selbst." });
+    if (!kriterien) return json(400, { fehler: "Unbekannte textart (vorgang | erlebnis | bild)." });
+
+    const deckelCent = await deckelLesen();
+    const stand = await standLesen();
+    if (stand.mikro >= deckelCent * 10000) {
+      return json(402, { grund: "deckel", deckelCent, verbrauchtCent: mikroZuCent(stand.mikro) });
+    }
+
+    const wahl = modellWahl(eingabe?.modell);
+    const konfig = MODELL_KONFIG[wahl];
+    let roh;
+    try {
+      roh = await claudeAnfragen(env, {
+        konfig, system: LEO_AUFSATZ,
+        prompt: [
+          { type: "image", source: { type: "base64", media_type: eingabe?.typ === "image/png" ? "image/png" : "image/jpeg", data: bild } },
+          { type: "text", text: `Textart und Kriterien: ${kriterien}` },
+        ],
+      });
+    } catch (e) {
+      const detail = await fehlerMerken("aufsatz", e);
+      return json(502, { grund: "ki-fehler", fehler: "Die KI hat gerade nicht geantwortet – später nochmal.", detail });
+    }
+    await fehlerLoeschen();
+
+    const mikro = kostenMikro(konfig.id, roh.usage);
+    const posten = [...(stand.posten || []), { zeit: jetzt.toISOString(), zweck: "aufsatz", modell: wahl, mikro }].slice(-20);
+    await kv.put(`ki:monat:${monat}`, JSON.stringify({ mikro: stand.mikro + mikro, posten }));
+
+    const sauber = aufsatzZurechtstutzen(roh.text);
+    return json(200, {
+      sterne: sauber.sterne, tipp: sauber.tipp, mach: sauber.mach,
       kostenCent: mikroZuCent(mikro),
       verbrauchtCent: mikroZuCent(stand.mikro + mikro),
       deckelCent,
