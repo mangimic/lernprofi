@@ -68,7 +68,11 @@ der Anthropic-Schlüssel liegt NUR dort als Secret, nie in der App.
    npx wrangler secret put lernprofiapi
    ```
    (Wert einfügen, Enter.) Alternativ im Dashboard: Worker `lernprofi` →
-   Settings → Variables and Secrets → „Add“ → Typ **Secret**.
+   Settings → Kasten **„Variables and Secrets“** (die Worker-Runtime!) →
+   „Add“ → Typ **Secret**.
+   ⚠️ Stolperstein: NICHT in den „Variables and secrets“ INNERHALB des
+   Build-Kastens anlegen (dort, wo Build command/Branch control stehen) –
+   Build-Secrets sieht nur der Build, nie der laufende Worker.
 3. **Voraussetzung:** Der KV-Namespace aus Abschnitt „Geräte-Abgleich“ muss
    eingerichtet sein – dort zählt der Worker die Kosten mit (`ki:monat:*`).
 4. **Deckel:** Standard 5 €/Monat, im Elternbereich auf 3/5/10 € stellbar.
