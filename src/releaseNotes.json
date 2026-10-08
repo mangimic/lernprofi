@@ -1,5 +1,16 @@
 [
   {
+    "id": "rn-022",
+    "version": "0.19.0",
+    "datum": "2026-10-08",
+    "titel": "Zahlenblöcke als Grafik & bessere Lesbarkeit",
+    "entries": [
+      { "type": "neu", "text": "🟫 Stellenwert-Aufgaben zeigen jetzt echte Zahlenblöcke als Grafik – wie das Material aus der Schule: Tausenderwürfel, Hunderterplatte (10×10), Zehnerstange und Einerwürfel. Dazu 4 neue „Welche Zahl zeigen die Blöcke?“-Aufgaben (auch mit Null-Stellen wie 304 und 2056, wo man genau hinschauen muss)." },
+      { "type": "verbessert", "text": "📱 Lange Wörter werden nie mehr mitten im Wort umgebrochen: Antwort-Knöpfe in den Spielen und alle Wort-Bausteine (Satzglieder, Wörter antippen) bleiben in EINER Zeile – auf dem iPad ist genug Platz, der Knopf wird einfach breiter." },
+      { "type": "hinweis", "text": "Die Blöcke-Aufgaben erscheinen nur im Üben-Bereich (wo die Grafik dazu gehört) – die Spiele stellen weiterhin ihre kompakten Blitz-Fragen." }
+    ]
+  },
+  {
     "id": "rn-021",
     "version": "0.18.0",
     "datum": "2026-10-08",

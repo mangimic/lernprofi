@@ -659,3 +659,23 @@ test("Tagesform & Fokus: roter Tag macht Missionen kürzer, Bewegungspause kommt
   await page.getByTestId("fokus-weiter").click();
   await expect(page.getByTestId("fokus-pause")).toHaveCount(0);
 });
+
+test("Zahlenblöcke: Stellenwert-Aufgaben zeigen das Dienes-Material als Grafik", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("nav-ueben").click();
+  await page.getByTestId("ueben-fach-mathe").click();
+  await page.getByTestId("bereich-mzahlen").click();
+  // Klasse 4 startet auf Stufe 2 (schwere Liste): Aufgaben 3-5 sind Blöcke-Aufgaben
+  const bloeckeSvgs = [null, null, 20, 7, 13, null, null, null, null, null]; // 632 / 1240 / 2056
+  for (let i = 0; i < 10; i++) {
+    if (bloeckeSvgs[i] !== null) {
+      await expect(page.getByTestId("zahlen-bloecke")).toBeVisible();
+      await expect(page.locator('[data-test="zahlen-bloecke"] svg')).toHaveCount(bloeckeSvgs[i]);
+    } else {
+      await expect(page.getByTestId("zahlen-bloecke")).toHaveCount(0);
+    }
+    await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+    await page.getByTestId("weiter-knopf").click();
+  }
+  await expect(page.getByTestId("runde-ergebnis")).toBeVisible();
+});

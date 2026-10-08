@@ -36,6 +36,30 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.19: Zahlenblöcke & Lesbarkeit ----------
+console.log("== v0.19: Zahlenblöcke & Lesbarkeit ==");
+test("v0.19: APP_VERSION mindestens 0.19.0", versionMindestens("0.19.0"));
+test("v0.19: rn-022 vorhanden", releaseNoteVorhanden("rn-022"));
+test("v0.19: Stellenwert-Aufgaben tragen Blöcke-Daten (inkl. Null-Stellen und Tausender)", (() => {
+  const m = quelle("src/calc/aufgaben/mathe.js");
+  return m.includes("bloecke:{h:2,z:4,e:6}") && m.includes("bloecke:{h:3,z:0,e:4}")
+    && m.includes("bloecke:{t:1,h:2,z:4,e:0}") && m.includes("bloecke:{h:5,z:13,e:2}");
+})());
+test("v0.19: Zahlenblöcke-Grafik (Tausenderwürfel, Hunderterplatte, Zehnerstange, Einerwürfel)", (() => {
+  const u = quelle("src/features/Ueben.jsx");
+  return ["zbTausender", "zbHunderter", "zbZehner", "zbEiner"].every((f) => u.includes(`function ${f}`))
+    && u.includes('data-test="zahlen-bloecke"') && u.includes("a.bloecke && <ZahlenBloecke");
+})());
+test("v0.19: kein Umbruch mitten im Wort (Spiel-Optionen nowrap, kein overflow-wrap anywhere)", (() => {
+  const css = quelle("src/styles/tokens.css");
+  return css.includes(".spiel-opt") && /\.spiel-opt \{[^}]*white-space: nowrap/.test(css)
+    && !css.includes("overflow-wrap: anywhere")
+    && quelle("src/features/Ueben.jsx").includes('whiteSpace: "nowrap"');
+})());
+test("v0.19: Spiele filtern Blöcke-Aufgaben aus (Grafik gibt es nur im Üben)", (() => {
+  return quelle("src/spiele/fragen.js").includes("!a.bloecke");
+})());
+
 // ---------- v0.18: Tagesform & Fokus-Paket ----------
 console.log("== v0.18: Tagesform & Fokus-Paket ==");
 test("v0.18: APP_VERSION mindestens 0.18.0", versionMindestens("0.18.0"));

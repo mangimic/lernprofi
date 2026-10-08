@@ -40,6 +40,75 @@ const DEUTSCH_LISTE = [
   { key: "vorgang", emoji: "📝", name: "Vorgangsbeschreibung", typ: "modul" },
 ];
 
+/* 🟫 Zahlenblöcke (Dienes-Material wie in der Schule): Tausenderwürfel,
+   Hunderterplatte, Zehnerstange, Einerwürfel – als Grafik statt nur
+   Text. Große Blöcke zuerst, bei vielen Blöcken wird umgebrochen. */
+const ZB = { fuellung: "#eac089", rand: "#9a6a33", linie: "rgba(122, 80, 35, 0.45)" };
+function zbEiner(key) {
+  return (
+    <svg key={key} width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+      <rect x="1" y="1" width="14" height="14" rx="2" fill={ZB.fuellung} stroke={ZB.rand} strokeWidth="1.5" />
+    </svg>
+  );
+}
+function zbZehner(key) {
+  return (
+    <svg key={key} width="16" height="76" viewBox="0 0 16 76" aria-hidden="true">
+      <rect x="1" y="1" width="14" height="74" rx="2" fill={ZB.fuellung} stroke={ZB.rand} strokeWidth="1.5" />
+      {Array.from({ length: 9 }, (_, i) => (
+        <line key={i} x1="1" y1={8.4 + i * 7.3} x2="15" y2={8.4 + i * 7.3} stroke={ZB.linie} strokeWidth="1" />
+      ))}
+    </svg>
+  );
+}
+function zbHunderter(key) {
+  return (
+    <svg key={key} width="76" height="76" viewBox="0 0 76 76" aria-hidden="true">
+      <rect x="1" y="1" width="74" height="74" rx="2" fill={ZB.fuellung} stroke={ZB.rand} strokeWidth="1.5" />
+      {Array.from({ length: 9 }, (_, i) => (
+        <g key={i}>
+          <line x1="1" y1={8.4 + i * 7.3} x2="75" y2={8.4 + i * 7.3} stroke={ZB.linie} strokeWidth="1" />
+          <line x1={8.4 + i * 7.3} y1="1" x2={8.4 + i * 7.3} y2="75" stroke={ZB.linie} strokeWidth="1" />
+        </g>
+      ))}
+    </svg>
+  );
+}
+function zbTausender(key) {
+  // Würfel mit einfacher 3D-Andeutung (Deckel + Seite dunkler)
+  return (
+    <svg key={key} width="92" height="92" viewBox="0 0 92 92" aria-hidden="true">
+      <polygon points="1,17 17,1 91,1 75,17" fill="#dba968" stroke={ZB.rand} strokeWidth="1.5" />
+      <polygon points="75,17 91,1 91,75 75,91" fill="#c08f4e" stroke={ZB.rand} strokeWidth="1.5" />
+      <rect x="1" y="17" width="74" height="74" rx="2" fill={ZB.fuellung} stroke={ZB.rand} strokeWidth="1.5" />
+      {Array.from({ length: 9 }, (_, i) => (
+        <g key={i}>
+          <line x1="1" y1={24.4 + i * 7.3} x2="75" y2={24.4 + i * 7.3} stroke={ZB.linie} strokeWidth="1" />
+          <line x1={8.4 + i * 7.3} y1="17" x2={8.4 + i * 7.3} y2="91" stroke={ZB.linie} strokeWidth="1" />
+        </g>
+      ))}
+    </svg>
+  );
+}
+function ZahlenBloecke({ b }) {
+  const gruppen = [
+    { n: b.t || 0, mal: zbTausender, name: "Tausender" },
+    { n: b.h || 0, mal: zbHunderter, name: "Hunderter" },
+    { n: b.z || 0, mal: zbZehner, name: "Zehner" },
+    { n: b.e || 0, mal: zbEiner, name: "Einer" },
+  ].filter((g) => g.n > 0);
+  const label = gruppen.map((g) => `${g.n} ${g.name}`).join(", ");
+  return (
+    <div data-test="zahlen-bloecke" role="img" aria-label={`Zahlenblöcke: ${label}`}
+      style={{
+        display: "flex", flexWrap: "wrap", alignItems: "flex-end", gap: 6,
+        background: "var(--grund)", borderRadius: "var(--radius-klein)", padding: "12px 14px", margin: "10px 0",
+      }}>
+      {gruppen.flatMap((g) => Array.from({ length: g.n }, (_, i) => g.mal(`${g.name}-${i}`)))}
+    </div>
+  );
+}
+
 const FAECHER = [
   { id: "deutsch", emoji: "📗", name: "Deutsch", bereiche: DEUTSCH_LISTE, daten: DEUTSCH_DATEN },
   { id: "mathe", emoji: "🔢", name: "Mathe", bereiche: MATHE_BEREICHE, daten: MATHE_DATEN },
@@ -254,6 +323,7 @@ export default function Ueben() {
                 <p style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px" }}>{a.kontext}</p>
               )}
               <p data-test="frage-text" style={{ fontSize: "var(--schrift-gross)", fontWeight: 700, margin: "10px 0" }}>{a.f}</p>
+              {a.bloecke && <ZahlenBloecke b={a.bloecke} />}
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {runde.optionen[runde.index].map((o) => (
                   <button key={o} data-test="antwort-opt" data-richtig={o === a.r ? "1" : undefined}
@@ -291,7 +361,7 @@ export default function Ueben() {
                         style={{
                           background: runde.folge.includes(i) ? T.primaer : T.weich,
                           color: runde.folge.includes(i) ? T.primaerText : T.text,
-                          fontWeight: 700, padding: "0 12px",
+                          fontWeight: 700, padding: "0 12px", whiteSpace: "nowrap",
                         }}>
                         {t2}
                       </button>
@@ -325,7 +395,7 @@ export default function Ueben() {
                           style={{
                             background: ortOk ? "#c9edcc" : zeitOk ? "#ffd9a0" : T.weich,
                             color: zeitOk || ortOk ? "#333" : T.text,
-                            fontWeight: 700, padding: "0 12px",
+                            fontWeight: 700, padding: "0 12px", whiteSpace: "nowrap",
                           }}>
                           {t2}
                         </button>
@@ -360,7 +430,7 @@ export default function Ueben() {
                   return (
                     <button key={i} data-test="wort-chip" data-ziel={istZiel ? "1" : undefined}
                       disabled={!!runde.geprueft} onClick={() => wortToggle(i)}
-                      style={{ background: hintergrund, color: farbe, fontWeight: 700, padding: "0 12px", fontSize: "var(--schrift-gross)" }}>
+                      style={{ background: hintergrund, color: farbe, fontWeight: 700, padding: "0 12px", fontSize: "var(--schrift-gross)", whiteSpace: "nowrap" }}>
                       {w}
                     </button>
                   );

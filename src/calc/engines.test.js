@@ -99,8 +99,8 @@ describe("aufgabenRunde", () => {
     for (const b of MATHE_BEREICHE) expect(poolGesund(MATHE_DATEN[b.key]), b.key).toBe(true);
     for (const b of SACH_BEREICHE) expect(poolGesund(SACH_DATEN[b.key]), b.key).toBe(true);
     for (const b of MATHE_BEREICHE) {
-      expect(MATHE_DATEN[b.key].easy.length).toBe(12);
-      expect(MATHE_DATEN[b.key].hard.length).toBe(12);
+      expect(MATHE_DATEN[b.key].easy.length).toBeGreaterThanOrEqual(12);
+      expect(MATHE_DATEN[b.key].hard.length).toBeGreaterThanOrEqual(12);
     }
     for (const b of SACH_BEREICHE) {
       expect(SACH_DATEN[b.key].easy.length).toBe(10);
@@ -488,5 +488,29 @@ describe("tagesform & fokus", () => {
     expect(F.PAUSEN_INTERVALLE).toEqual([5, 10, 15]);
     const tage = F.tagesformEintragen([], HEUTE, "gelb");
     expect(tage[0]).toEqual({ tag: HEUTE, aufgaben: 0, missionen: 0, zielErreicht: false, form: "gelb" });
+  });
+});
+
+describe("zahlenblöcke (Dienes-Material)", () => {
+  it("jede Blöcke-Aufgabe mit Zahl-Antwort stimmt mit den Blöcken überein", async () => {
+    const { MATHE_DATEN } = await import("./aufgaben/mathe.js");
+    const alle = Object.values(MATHE_DATEN).flatMap((p2) => [...p2.easy, ...p2.hard]).filter((a) => a.bloecke);
+    expect(alle.length).toBeGreaterThanOrEqual(7);
+    for (const a of alle) {
+      const b = a.bloecke;
+      for (const k of Object.keys(b)) expect(["t", "h", "z", "e"]).toContain(k);
+      if (/^\d+$/.test(a.r)) {
+        const wert = (b.t || 0) * 1000 + (b.h || 0) * 100 + (b.z || 0) * 10 + (b.e || 0);
+        expect(wert, a.f + " / " + a.r).toBe(parseInt(a.r, 10));
+      }
+    }
+  });
+
+  it("Blöcke-Aufgaben bleiben den Übungen vorbehalten (Spiele filtern sie aus)", async () => {
+    const { spielMatheFrage } = await import("../spiele/fragen.js");
+    for (let i = 0; i < 60; i++) {
+      const q = spielMatheFrage(i % 2 === 1);
+      expect(q.frage.includes("Blöcke")).toBe(false);
+    }
   });
 });

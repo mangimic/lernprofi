@@ -14,7 +14,8 @@ const WORT_POOL = {
 export function spielMatheFrage(schwer) {
   const kandidaten = ["mrechnen", "mzahlen"].flatMap((k) =>
     (schwer ? MATHE_DATEN[k].hard : MATHE_DATEN[k].easy))
-    .filter((a) => a.f.length <= 80 && [a.r].concat(a.x).every((o) => o.length <= 16));
+    // Blöcke-Aufgaben brauchen die Grafik – die gibt es nur im Üben-Bereich
+    .filter((a) => !a.bloecke && a.f.length <= 80 && [a.r].concat(a.x).every((o) => o.length <= 16));
   if (!kandidaten.length) return null;
   const a = kandidaten[Math.floor(Math.random() * kandidaten.length)];
   return { w: { richtig: a.r, falsch: a.x[0], dritte: a.x[1] }, tipp: a.tipp, schwer: !!schwer, mathe: true, frage: a.f };

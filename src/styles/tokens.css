@@ -75,7 +75,9 @@ button {
 }
 .spiel-hint { background: var(--grund); border-radius: var(--radius-klein); padding: 10px 12px; margin-top: 8px; }
 .spiel-leise { color: var(--text-leise); font-size: var(--schrift-klein); }
-.spiel-opt { flex: 1 1 30%; min-width: 0; font-size: 18px; font-weight: 700; background: var(--weich); color: var(--text); padding: 0 10px; overflow-wrap: anywhere; }
+/* Antwort-Knöpfe: Wörter bleiben IMMER in einer Zeile (kein Umbruch
+   mitten im Wort) – lange Wörter bekommen einfach einen breiteren Knopf. */
+.spiel-opt { flex: 1 1 auto; font-size: 18px; font-weight: 700; background: var(--weich); color: var(--text); padding: 0 14px; white-space: nowrap; }
 .spiel-opt.spiel-opt-ok { background: var(--ok); color: #fff; }
 .spiel-feedback { border-radius: var(--radius-klein); padding: 10px 12px; margin-top: 8px; line-height: 1.45; }
 .spiel-feedback.ok { background: color-mix(in srgb, var(--ok) 14%, var(--karte)); }
