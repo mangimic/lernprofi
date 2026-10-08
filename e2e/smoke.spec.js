@@ -728,3 +728,48 @@ test("Einstufungstest: adaptiv testen, Stufen einstellen, Trainingsplan führt z
   await page.getByTestId("ueben-fach-mathe").click();
   await expect(page.getByTestId("bereich-mzahlen")).toContainText("Stufe 3");
 });
+
+test("KI-Erklärer: Eltern geben frei, Leo erklärt in getakteten Blasen mit Mach-Aufgabe", async ({ page }) => {
+  // Der echte Worker läuft im Preview nicht – /api/ki/* wird gemockt.
+  await page.route("**/api/ki/status", (route) => route.fulfill({ json: {
+    verfuegbar: true, grund: null, monat: "2026-10", deckelCent: 500, maxDeckelCent: 1000,
+    verbrauchtCent: 87, posten: [{ zweck: "erklaeren", cent: 0.03 }],
+  } }));
+  await page.route("**/api/ki/deckel", (route) => route.fulfill({ json: { deckelCent: 300 } }));
+  await page.route("**/api/ki/erklaeren", (route) => route.fulfill({ json: {
+    blasen: ["⚽ Fußball: Du gibst WEM? den Ball.", "Immer bei „wem?“ → der 3. Fall."],
+    mach: "Frag LAUT: Wem gibt er den Ball?",
+    kostenCent: 0.03, verbrauchtCent: 87.03, deckelCent: 500,
+  } }));
+
+  await tresorAnlegen(page);
+  await page.getByTestId("nav-eltern").click();
+  await expect(page.getByTestId("eltern-ki")).toBeVisible();
+  await expect(page.getByTestId("ki-verbrauch")).toContainText("0,87 € von 5,00 €");
+  await page.getByTestId("ki-erklaeren-1").click(); // 🦁 freigeben
+  await page.getByTestId("ki-deckel-300").click();
+
+  // Üben: falsche Antwort → Erklär-Knopf → Blase 1 → selbst weitertippen → Blase 2 + Mach-Aufgabe
+  await page.getByTestId("nav-ueben").click();
+  await page.getByTestId("bereich-dd").click();
+  await page.locator('[data-test="antwort-opt"]:not([data-richtig])').first().click();
+  await page.getByTestId("ki-erklaer-knopf").click();
+  await expect(page.getByTestId("ki-blase")).toHaveCount(1);
+  await expect(page.getByTestId("ki-blase").first()).toContainText("WEM");
+  await page.getByTestId("ki-weiter").click();
+  await expect(page.getByTestId("ki-blase")).toHaveCount(2);
+  await expect(page.getByTestId("ki-mach")).toContainText("LAUT");
+
+  // Richtige Antwort: kein Erklär-Knopf
+  await page.getByTestId("weiter-knopf").click();
+  await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+  await expect(page.getByTestId("ki-erklaer-knopf")).toHaveCount(0);
+});
+
+test("KI-Karte ohne Server: ehrliche Meldung statt Absturz, Schalter bleiben bedienbar", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("nav-eltern").click();
+  await expect(page.getByTestId("eltern-ki")).toBeVisible();
+  await expect(page.getByTestId("ki-meldung")).toBeVisible({ timeout: 10000 });
+  await page.getByTestId("ki-erklaeren-1").click(); // Freigabe wirkt trotzdem (lokale Einstellung)
+});

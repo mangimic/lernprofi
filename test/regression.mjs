@@ -36,6 +36,38 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.21: KI-Start (Erklärer + Fundament) ----------
+console.log("== v0.21: KI-Start (Erklärer + Fundament) ==");
+test("v0.21: APP_VERSION mindestens 0.21.0", versionMindestens("0.21.0"));
+test("v0.21: rn-024 vorhanden", releaseNoteVorhanden("rn-024"));
+test("v0.21: Schlüssel nur im Worker, Deckel hart im Server (402), Kosten echt gezählt", (() => {
+  const k = quelle("server/_lib/kiApi.js");
+  return k.includes("env.ANTHROPIC_API_KEY") && k.includes("402") && k.includes("kostenMikro")
+    && k.includes("ki:monat:") && k.includes("KI_DECKEL_MAX_CENT")
+    && !quelle("src/ki.js").includes("api.anthropic.com");
+})());
+test("v0.21: Kurzformat erzwungen (max 2 Blasen à 12 Wörter) + Wort-Wächter + Lösung geheim", (() => {
+  const k = quelle("server/_lib/kiApi.js");
+  return k.includes("MAX_BLASEN = 2") && k.includes("MAX_WOERTER = 12")
+    && k.includes("wortProblem") && k.includes("NICHT verraten")
+    && k.includes("Mach-Aufgabe");
+})());
+test("v0.21: Eltern-Freigabe je Zweck (Standard aus) + Deckel-Karte", (() => {
+  return quelle("src/calc/migrateData.js").includes("erklaeren: ki.erklaeren === true")
+    && quelle("src/features/Eltern.jsx").includes('test="eltern-ki"')
+    && quelle("src/features/Eltern.jsx").includes("kiDeckelSetzen")
+    && quelle("src/features/Eltern.jsx").includes("ki-verbrauch");
+})());
+test("v0.21: Erklärer nur bei Freigabe + falscher Antwort, getaktete Blasen, Mach-Aufgabe", (() => {
+  const u = quelle("src/features/Ueben.jsx");
+  return u.includes("data.einstellungen.ki.erklaeren") && u.includes("ki-erklaer-knopf")
+    && u.includes("ki-blase") && u.includes("ki-mach") && u.includes("offen: k.offen + 1");
+})());
+test("v0.21: KI-Route vor der Tresor-Route (vaultApi beantwortet sonst alles mit 404)", (() => {
+  const i = quelle("server/index.js");
+  return i.indexOf("kiApi(") < i.indexOf("vaultApi(") && quelle("docs/DEPLOY-CLOUDFLARE.md").includes("wrangler secret put ANTHROPIC_API_KEY");
+})());
+
 // ---------- v0.20: Einstufungstest & Trainingsplan ----------
 console.log("== v0.20: Einstufungstest & Trainingsplan ==");
 test("v0.20: APP_VERSION mindestens 0.20.0", versionMindestens("0.20.0"));

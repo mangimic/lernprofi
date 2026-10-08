@@ -53,3 +53,27 @@ NIE in Produktion setzen).
 
 `npm run gates` = oxlint · Vitest (inkl. server/_lib) · statische
 Regression · Build · Playwright-Smoke (iPhone + iPad hoch/quer).
+
+## 7) KI-Funktionen einrichten (Etappe 7)
+
+Die KI-Funktionen (🦁 „Erklär es mir anders“ usw.) laufen über den Worker –
+der Anthropic-Schlüssel liegt NUR dort als Secret, nie in der App.
+
+1. **API-Schlüssel anlegen:** console.anthropic.com → Settings → API Keys →
+   „Create Key“. Den Schlüssel (beginnt mit `sk-ant-…`) kopieren.
+2. **Als Secret in den Worker legen** (einmalig, Schlüssel landet nie im Repo):
+   ```
+   npx wrangler secret put ANTHROPIC_API_KEY
+   ```
+   (Wert einfügen, Enter.) Alternativ im Dashboard: Worker `lernprofi` →
+   Settings → Variables and Secrets → „Add“ → Typ **Secret**.
+3. **Voraussetzung:** Der KV-Namespace aus Abschnitt „Geräte-Abgleich“ muss
+   eingerichtet sein – dort zählt der Worker die Kosten mit (`ki:monat:*`).
+4. **Deckel:** Standard 5 €/Monat, im Elternbereich auf 3/5/10 € stellbar.
+   Absolute Obergrenze optional per Variable `KI_DECKEL_MAX_CENT` (Standard 1000).
+5. **Prüfen:** Elternbereich → Karte „🤖 KI-Funktionen“ zeigt „Monatsdeckel“
+   und Verbrauch, sobald Schlüssel + KV da sind. Vorher steht dort ehrlich,
+   was fehlt.
+
+Hinweis: Abgerechnet wird in US-Dollar; wir zählen 1 $ ≈ 1 € (leicht zu
+unseren Ungunsten gerundet – der Deckel hält also sicher).

@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-024",
+    "version": "0.21.0",
+    "datum": "2026-10-08",
+    "titel": "KI-Start: Leo erklärt es anders",
+    "entries": [
+      { "type": "neu", "text": "🦁 Die erste KI-Funktion ist da: „Erklär es mir anders“. Wer eine Aufgabe nicht knackt, bekommt auf Wunsch eine NEUE Erklärung – höchstens 2 kurze Sprechblasen (je max. 12 Wörter, selbst weitertippen) mit einem Bild aus deiner Welt (Fußball, Angeln, Tennis) und immer einer Mach-Aufgabe am Ende (laut sagen, Finger zeigen, in die Luft schreiben). Die Lösung verrät Leo nie." },
+      { "type": "neu", "text": "🔧 Eltern-Karte „🤖 KI-Funktionen“: jede Funktion einzeln freigeben (Standard: alles aus), Monatsdeckel 3/5/10 € mit Verbrauchsbalken und Einzelposten. Der Deckel wird vom Server hart durchgesetzt – bei Erreichen antwortet er freundlich mit Stopp, nichts bricht." },
+      { "type": "technik", "text": "Der Anthropic-Schlüssel liegt ausschließlich als Worker-Secret (Anleitung in docs/DEPLOY-CLOUDFLARE.md); die App ruft nur /api/ki/* hinter Cloudflare Access. Der Server erzwingt das Kurzformat (Blasen-Limit) und filtert Diagnose-/Druck-Wörter (Wort-Wächter). Es wird nur die konkrete Aufgabe übertragen – nie der Name, nie das Lernprofil; API-Daten werden nicht zum Training verwendet." },
+      { "type": "hinweis", "text": "Als Nächstes folgen 🖐️ Schreib-Training (Handschrift-Foto), ✍️ Aufsatz-Feedback, 📊 Wochenbericht und 🔤 persönliche Übungssätze – die Schalter stehen schon bereit." }
+    ]
+  },
+  {
     "id": "rn-023",
     "version": "0.20.0",
     "datum": "2026-10-08",

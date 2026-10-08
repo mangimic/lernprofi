@@ -41,6 +41,9 @@ export function leeresDokument(heute) {
       tagesformAktiv: true, // Tagesform-Frage vor der ersten Lerneinheit des Tages
       pausenAktiv: true,   // Bewegungspausen nach längerer Fokuszeit
       pausenIntervall: 10, // Minuten Fokuszeit bis zur Bewegungspause (5/10/15)
+      ki: {                // KI-Funktionen: je Zweck eine Eltern-Freigabe (Standard: aus)
+        erklaeren: false, schrift: false, aufsatz: false, bericht: false, saetze: false,
+      },
     },
     protokoll: [],     // Änderungsprotokoll: { zeit, bereich, art, text }
   };
@@ -109,6 +112,11 @@ export function migrateData(alt, heute) {
   if (typeof d.einstellungen.tagesformAktiv !== "boolean") d.einstellungen.tagesformAktiv = true;
   if (typeof d.einstellungen.pausenAktiv !== "boolean") d.einstellungen.pausenAktiv = true;
   if (![5, 10, 15].includes(d.einstellungen.pausenIntervall)) d.einstellungen.pausenIntervall = 10;
+  const ki = istObjekt(d.einstellungen.ki) ? d.einstellungen.ki : {};
+  d.einstellungen.ki = {
+    erklaeren: ki.erklaeren === true, schrift: ki.schrift === true, aufsatz: ki.aufsatz === true,
+    bericht: ki.bericht === true, saetze: ki.saetze === true,
+  };
 
   if (!Array.isArray(d.protokoll)) d.protokoll = [];
 

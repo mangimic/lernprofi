@@ -5,6 +5,7 @@ import { ZEIT_STUFEN, SPIELE_SCHALTER, spielAktiv, zeitHeute, GESPRAECH_BEREICHE
 import { PAUSEN_INTERVALLE, TAGESFORM_MODI } from "../calc/tagesform.js";
 import { idbStorage } from "../idbShim.js";
 import { syncStatus, hochladen, herunterladen, konfliktUeberschreiben } from "../sync.js";
+import { kiStatus, kiDeckelSetzen } from "../ki.js";
 
 /* Elternbereich (eigener Tab, nur nach Entsperren mit dem Eltern-Passwort):
    Profil · Tagesziel · Stufen-Steuerung · neutrale Lern-Übersicht ·
@@ -121,6 +122,10 @@ export default function Eltern() {
   const [syncMeldung, setSyncMeldung] = useState("");
   const [frage, setFrage] = useState(null);         // "laden" | {typ:"konflikt", serverRev}
   useEffect(() => { syncStatus().then(setSync); }, []);
+
+  // 🤖 KI-Status (Deckel, Verbrauch)
+  const [ki, setKi] = useState(null);
+  useEffect(() => { kiStatus().then(setKi); }, []);
   const syncAktion = async (arbeit, erfolgsText) => {
     setSyncMeldung("⏳ Einen Moment …"); setFrage(null);
     const erg = await arbeit();
@@ -312,6 +317,66 @@ export default function Eltern() {
           Alles bleibt im verschlüsselten Tresor – die App speichert keine Antworten. Die Fragen sind
           an eine Coaching-Fragensammlung angelehnt und für 8–10 Jahre übersetzt.
         </p>
+      </Karte>
+
+      <Karte test="eltern-ki">
+        <b>🤖 KI-Funktionen</b>
+        <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          Jede Funktion einzeln freigeben (Standard: aus). Der Kostendeckel wird vom Server hart
+          durchgesetzt; der Schlüssel liegt nur dort. Antworten sind immer kurz: höchstens 2 Blasen,
+          eine Mach-Aufgabe – kein Lesestoff.
+        </p>
+        {[
+          { key: "erklaeren", name: "🦁 „Erklär es mir anders“ (nach Fehlversuchen)", da: true },
+          { key: "schrift", name: "🖐️ Schreib-Training (Foto)", da: false },
+          { key: "aufsatz", name: "✍️ Aufsatz-Feedback", da: false },
+          { key: "bericht", name: "📊 Wochenbericht", da: false },
+          { key: "saetze", name: "🔤 Persönliche Übungssätze", da: false },
+        ].map((f) => (
+          <div key={f.key} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, opacity: f.da ? 1 : 0.55 }}>
+            <span style={{ flex: 1, fontSize: "var(--schrift-klein)" }}>{f.name}{f.da ? "" : " · kommt als Nächstes"}</span>
+            <div style={{ flex: "0 0 128px" }}>
+              {f.da ? (
+                <Seg test={`ki-${f.key}`} werte={[{ v: 1, label: "An" }, { v: 0, label: "Aus" }]}
+                  aktiv={data.einstellungen.ki[f.key] ? 1 : 0}
+                  auf={(v) => einstellung({ ki: { ...data.einstellungen.ki, [f.key]: v === 1 } }, `KI „${f.key}“ ${v === 1 ? "freigegeben" : "ausgeschaltet"}`)} />
+              ) : (
+                <span style={{ fontSize: "var(--schrift-klein)", color: T.textLeise }}>bald</span>
+              )}
+            </div>
+          </div>
+        ))}
+        <div style={{ marginTop: 12 }}>
+          {ki === null ? (
+            <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>Prüfe KI-Server …</p>
+          ) : !ki.verfuegbar ? (
+            <p data-test="ki-meldung" style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+              {ki.grund === "kein-schluessel" ? "⚠️ Auf dem Server fehlt noch der API-Schlüssel (ANTHROPIC_API_KEY) – Anleitung: docs/DEPLOY-CLOUDFLARE.md."
+                : ki.grund === "kein-kv" ? "⚠️ Der KV-Namespace fehlt noch (gleicher Schritt wie beim Geräte-Abgleich) – docs/DEPLOY-CLOUDFLARE.md."
+                : ki.grund === "kein-zugang" ? "⚠️ Cloudflare Access hat die Anfrage nicht freigegeben – bitte neu anmelden."
+                : "Gerade keine Verbindung zum Server – die Schalter wirken, sobald er erreichbar ist."}
+            </p>
+          ) : (
+            <>
+              <p style={{ margin: "0 0 4px", fontSize: "var(--schrift-klein)" }}><b>Monatsdeckel</b></p>
+              <Seg test="ki-deckel" werte={[300, 500, 1000].filter((v) => v <= (ki.maxDeckelCent || 1000)).map((v) => ({ v, label: `${v / 100} €` }))}
+                aktiv={ki.deckelCent}
+                auf={async (v) => { const e = await kiDeckelSetzen(v); if (e.ok) setKi({ ...ki, deckelCent: e.deckelCent }); }} />
+              <p data-test="ki-verbrauch" style={{ margin: "10px 0 4px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+                {ki.monat}: <b>{(ki.verbrauchtCent / 100).toFixed(2).replace(".", ",")} €</b> von {(ki.deckelCent / 100).toFixed(2).replace(".", ",")} € verbraucht
+                {ki.verbrauchtCent >= ki.deckelCent * 0.8 ? " · ⚠️ Deckel fast erreicht" : ""}
+              </p>
+              <div style={{ height: 10, background: T.weich, borderRadius: 5, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${Math.min(100, (ki.verbrauchtCent / ki.deckelCent) * 100)}%`, background: ki.verbrauchtCent >= ki.deckelCent * 0.8 ? "var(--warn)" : "var(--ok)" }} />
+              </div>
+              {ki.posten?.length > 0 && (
+                <p style={{ margin: "8px 0 0", color: T.textLeise, fontSize: "12.5px" }}>
+                  Zuletzt: {ki.posten.slice(0, 4).map((p2) => `${p2.zweck} (${String(p2.cent).replace(".", ",")} ct)`).join(" · ")}
+                </p>
+              )}
+            </>
+          )}
+        </div>
       </Karte>
 
       <Karte test="eltern-sync">

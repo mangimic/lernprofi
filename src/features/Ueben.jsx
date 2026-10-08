@@ -14,6 +14,7 @@ import { auswahlPruefen } from "../calc/wortTippen.js";
 import { muenzenNachRunde, aufgabenZaehlen, heutigerTag, lernspur } from "../calc/lerntage.js";
 import { missionsOpts, tagesModus } from "../calc/tagesform.js";
 import Vorgang from "./Vorgang.jsx";
+import { kiErklaeren } from "../ki.js";
 
 /* Üben: drei Übungstypen über denselben Runden-/Stufen-/Münz-Mechanismus:
    - "mc":        Frage mit 2-3 Antwort-Knöpfen (Mathe, Sachkunde, Deutsch-MC, Stark)
@@ -145,6 +146,7 @@ export default function Ueben() {
       fertig: false,    // umstellen: Aufgabe gelöst
       fehlversuch: false,
       meldung: null,    // umstellen: { ok, text }
+      ki: null,         // 🦁 Erklärer: null | {laden} | {blasen, mach, offen} | {fehler}
       ergebnis: null,
     });
   };
@@ -254,11 +256,31 @@ export default function Ueben() {
     }
   };
 
+  // 🦁 „Erklär es mir anders“ (KI, Eltern-Freigabe nötig): holt höchstens
+  // 2 kurze Blasen + eine Mach-Aufgabe – selbst getaktet, Lösung bleibt geheim.
+  const erklaerungHolen = async () => {
+    const idx = runde.index;
+    const a = runde.aufgaben[idx];
+    setRunde((r) => ({ ...r, ki: { laden: true } }));
+    const istMc = runde.typ === "mc";
+    const erg = await kiErklaeren({
+      fach: fach.name, bereich: runde.name,
+      frage: istMc ? a.f : (a.frage || "Satzglieder umstellen"),
+      optionen: istMc ? [a.r, ...a.x] : undefined,
+      loesung: istMc ? a.r : (a.loesung || ""),
+      tipp: a.tipp || "", kontext: a.kontext || "",
+    });
+    setRunde((r) => {
+      if (r.index !== idx || !r.ki) return r;
+      return { ...r, ki: erg.ok ? { blasen: erg.blasen, mach: erg.mach, offen: 1 } : { fehler: erg.grund } };
+    });
+  };
+
   const weiter = () => {
     if (runde.index + 1 < runde.aufgaben.length) {
       setRunde({
         ...runde, index: runde.index + 1, gewaehlt: null, auswahl: [], geprueft: null,
-        folge: [], zoPhase: "zeit", fertig: false, fehlversuch: false, meldung: null,
+        folge: [], zoPhase: "zeit", fertig: false, fehlversuch: false, meldung: null, ki: null,
       });
       return;
     }
@@ -461,6 +483,48 @@ export default function Ueben() {
               )}
             </>
           )}
+
+          {(() => {
+            const falsch =
+              runde.typ === "mc" ? (runde.gewaehlt !== null && !antwortRichtig(a, runde.gewaehlt))
+              : runde.typ === "tippen" ? (runde.geprueft && !runde.geprueft.richtig)
+              : (runde.meldung && !runde.meldung.ok && !runde.fertig);
+            if (!data.einstellungen.ki.erklaeren || !falsch) return null;
+            const k = runde.ki;
+            if (!k) {
+              return (
+                <button data-test="ki-erklaer-knopf" onClick={erklaerungHolen}
+                  style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
+                  🦁 Erklär es mir anders
+                </button>
+              );
+            }
+            if (k.laden) return <p data-test="ki-laden" style={{ color: T.textLeise }}>🦁 Leo überlegt …</p>;
+            if (k.fehler) {
+              return (
+                <p data-test="ki-fehler" style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+                  {k.fehler === "deckel" ? "🦁 Leos Erklär-Budget ist für diesen Monat aufgebraucht – der Tipp oben hilft dir weiter!"
+                    : "🦁 Leo ist gerade nicht erreichbar – der Tipp oben hilft dir weiter!"}
+                </p>
+              );
+            }
+            return (
+              <div className="mut-dialog" data-test="ki-erklaerung">
+                <div className="mut-kopf">🦁 <b>Coach Leo</b> erklärt es anders</div>
+                {k.blasen.slice(0, k.offen).map((b, i) => (
+                  <div key={i} className="bubble coach" data-test="ki-blase">{b}</div>
+                ))}
+                {k.offen < k.blasen.length ? (
+                  <button data-test="ki-weiter" className="bw-knopf mut-weiter"
+                    onClick={() => setRunde({ ...runde, ki: { ...k, offen: k.offen + 1 } })}>
+                    💬 Weiter
+                  </button>
+                ) : (
+                  <div className="bubble kind" data-test="ki-mach">👆 <b>Mach-Aufgabe:</b> {k.mach}</div>
+                )}
+              </div>
+            );
+          })()}
 
           <button data-test="weiter-knopf" disabled={!beantwortet} onClick={weiter}
             style={{ ...primaerKnopf, marginTop: 8 }}>
