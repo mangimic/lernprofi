@@ -107,8 +107,13 @@ export function migrateData(alt, heute) {
       montag: wp.montag,
       bloecke: wp.bloecke.filter((b) => istObjekt(b)).slice(0, 60),
       belohnt: (Array.isArray(wp.belohnt) ? wp.belohnt : []).filter((t) => typeof t === "string").slice(-7),
+      ausfaelle: (Array.isArray(wp.ausfaelle) ? wp.ausfaelle : []).filter((a) => istObjekt(a)).slice(0, 20),
       naechste: istObjekt(wp.naechste) && typeof wp.naechste.montag === "string" && Array.isArray(wp.naechste.bloecke)
-        ? { montag: wp.naechste.montag, bloecke: wp.naechste.bloecke.filter((b) => istObjekt(b)).slice(0, 60) }
+        ? {
+          montag: wp.naechste.montag,
+          bloecke: wp.naechste.bloecke.filter((b) => istObjekt(b)).slice(0, 60),
+          ausfaelle: (Array.isArray(wp.naechste.ausfaelle) ? wp.naechste.ausfaelle : []).filter((a) => istObjekt(a)).slice(0, 20),
+        }
         : null,
     }
     : null;

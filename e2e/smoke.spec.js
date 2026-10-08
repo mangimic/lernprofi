@@ -981,6 +981,16 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await expect(page.getByTestId("plan-hinweise")).toHaveCount(0);
   await expect(page.getByTestId("plan-ok")).toBeVisible();
 
+  // ❌ Ausfall: fester Termin antippen → fällt diese Woche aus → Fenster wird frei → ↩️ holt ihn zurück
+  await page.getByTestId("fest-1-1020").click();
+  await expect(page.getByTestId("fest-dialog")).toContainText("Sport");
+  await page.getByTestId("fest-ausfall").click();
+  await expect(page.getByTestId("fest-1-1020")).toHaveCount(0);
+  await expect(page.getByTestId("slot-1-1020")).toContainText("Sport fällt aus");
+  await expect(page.getByTestId("slot-1-1050")).toBeVisible(); // zweites Fenster auch frei
+  await page.getByTestId("ausfall-zurueck").click();
+  await expect(page.getByTestId("fest-1-1020")).toContainText("Sport");
+
   // 🔁 Routine: Üben wiederholt sich – Freunde-Zeit wird sonntags neu verabredet.
   // Beim Platzieren fragt die App direkt, MIT WEM – der Name steht dann am Baustein.
   await bausteinZu("freunde", 2, 870);

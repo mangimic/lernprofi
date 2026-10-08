@@ -6,6 +6,7 @@ import {
   wochenMontag, tagDatum, planFuerWoche, leererPlan, blockHinzu, blockWeg, slotBelegt,
   termineDerWoche, planPruefung, wochenBilanz, festerTermin, SCHULE,
   kalenderWoche, routineAusPlan, routineAnwenden, schulZeilen, blockNotiz,
+  istAusgefallen, ausfallSetzen, ausfallAufheben,
 } from "../calc/wochenplan.js";
 
 /* 🗓️ MEIN WOCHENPLAN (Etappe 9): Felix setzt sein Pensum selbst.
@@ -37,14 +38,15 @@ function PaletteBaustein({ b, gewaehlt, aufTipp }) {
 
 /* Eine Stunde (14-19 Uhr) an einem Tag: leer = Ablagefläche (tippen
    oder hineinziehen), belegt = Baustein-Kärtchen mit ✖. */
-function StundenSlot({ tagIdx, slot, block, fest, wahlAktiv, aufTipp, aufWeg, aufEdit }) {
+function StundenSlot({ tagIdx, slot, block, fest, ausfall, wahlAktiv, aufTipp, aufWeg, aufEdit, aufFest, aufZurueck }) {
   const { T } = useApp();
   const { setNodeRef, isOver } = useDroppable({ id: `slot-${tagIdx}-${slot}`, disabled: !!fest });
   const info = block ? bausteinInfo(block.typ) : null;
   if (fest) {
     const fortsetzung = fest.beginn !== slot;
     return (
-      <div data-test={`fest-${tagIdx}-${slot}`} style={{
+      <div data-test={`fest-${tagIdx}-${slot}`} onClick={() => aufFest(fest)} style={{
+        cursor: "pointer",
         display: "flex", alignItems: "center", gap: 6, minHeight: 34, marginBottom: 3,
         borderRadius: 6, padding: "2px 6px", background: T.grund, color: T.text,
         border: `1.5px solid ${T.rand}`, borderTop: fortsetzung ? "none" : undefined,
@@ -87,6 +89,19 @@ function StundenSlot({ tagIdx, slot, block, fest, wahlAktiv, aufTipp, aufWeg, au
             ✖
           </button>
         </>
+      ) : ausfall ? (
+        <>
+          <span style={{ flex: 1, fontSize: "11.5px" }}>
+            frei · <s style={{ opacity: 0.8 }}>{ausfall.fest.emoji} {ausfall.fest.name} fällt aus</s>
+          </span>
+          {ausfall.istBeginn && (
+            <button data-test="ausfall-zurueck" onClick={(ev) => { ev.stopPropagation(); aufZurueck(ausfall.fest); }}
+              aria-label="Termin wieder einplanen" title="Doch nicht ausgefallen"
+              style={{ background: "transparent", color: "inherit", padding: 0, minHeight: 0, height: "auto", fontSize: 14 }}>
+              ↩️
+            </button>
+          )}
+        </>
       ) : (
         <span style={{ fontSize: "11.5px" }}>frei</span>
       )}
@@ -94,7 +109,7 @@ function StundenSlot({ tagIdx, slot, block, fest, wahlAktiv, aufTipp, aufWeg, au
   );
 }
 
-function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, pruefung, wahlAktiv, schuleAuf, aufTipp, aufWeg, aufEdit }) {
+function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, ausfaelle, pruefung, wahlAktiv, schuleAuf, aufTipp, aufWeg, aufEdit, aufFest, aufZurueck }) {
   const { T } = useApp();
   const p = pruefung.tage[idx];
   const ampel = p.status === "voll" ? "🔴" : p.status === "einseitig" ? "🟡" : p.lern + p.frei > 0 ? "🟢" : "";
@@ -134,11 +149,17 @@ function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, pruefung, wahlAktiv
           </div>
         );
       })}
-      {tagesStunden(idx).map((s) => (
-        <StundenSlot key={s} tagIdx={idx} slot={s} wahlAktiv={wahlAktiv}
-          fest={festerTermin(feste, idx, s)}
-          block={bloecke.find((b) => b.slot === s)} aufTipp={aufTipp} aufWeg={aufWeg} aufEdit={aufEdit} />
-      ))}
+      {tagesStunden(idx).map((s) => {
+        const f = festerTermin(feste, idx, s);
+        const weg = f && (ausfaelle || []).some((a) => a.tag === idx && a.beginn === f.beginn);
+        return (
+          <StundenSlot key={s} tagIdx={idx} slot={s} wahlAktiv={wahlAktiv}
+            fest={weg ? null : f}
+            ausfall={weg ? { fest: f, istBeginn: f.beginn === s } : null}
+            block={bloecke.find((b) => b.slot === s)}
+            aufTipp={aufTipp} aufWeg={aufWeg} aufEdit={aufEdit} aufFest={aufFest} aufZurueck={aufZurueck} />
+        );
+      })}
       {p.lern > 0 && (
         <div style={{ color: T.textLeise, fontSize: "12.5px" }}>⏱️ {p.lernMin} Min Lernen (10+5-Takt)</div>
       )}
@@ -162,6 +183,7 @@ export default function Wochenplan() {
   const [woche, setWoche] = useState("diese"); // Sonntags wird die NÄCHSTE Woche besprochen
   const [schuleAuf, setSchuleAuf] = useState(false); // 🏫 Vormittags-Stunden ein-/ausklappen
   const [editor, setEditor] = useState(null); // ✏️ Baustein-Notiz: { id, notiz }
+  const [festDialog, setFestDialog] = useState(null); // ❌ Ausfall-Frage für einen festen Termin
   const montagAktiv = wochenMontag(heute);
   const aktiv = planFuerWoche(data.lernstand.wochenplan, montagAktiv);
   const naechsteW = woche === "naechste";
@@ -169,7 +191,7 @@ export default function Wochenplan() {
   // Angezeigter Plan: aktive Woche ODER die Vorplanung der Folgewoche.
   const plan = naechsteW
     ? (aktiv.naechste?.montag === montag
-      ? { montag, bloecke: aktiv.naechste.bloecke, belohnt: [], naechste: null }
+      ? { montag, bloecke: aktiv.naechste.bloecke, belohnt: [], naechste: null, ausfaelle: aktiv.naechste.ausfaelle || [] }
       : leererPlan(montag))
     : aktiv;
   const heuteIdx = naechsteW ? -1 : WOCHENTAGE.findIndex((_, i) => tagDatum(montag, i) === heute);
@@ -181,7 +203,7 @@ export default function Wochenplan() {
   // Speichern: die aktive Woche direkt, die Folgewoche als „naechste“-Vorplanung.
   const speichern = (neuerPlan, text) => {
     const wochenplan = naechsteW
-      ? { ...aktiv, naechste: { montag, bloecke: neuerPlan.bloecke } }
+      ? { ...aktiv, naechste: { montag, bloecke: neuerPlan.bloecke, ausfaelle: neuerPlan.ausfaelle || [] } }
       : { ...neuerPlan, naechste: aktiv.naechste || null };
     logChange({ ...data, lernstand: { ...data.lernstand, wochenplan } }, "wochenplan", "geaendert", text);
   };
@@ -268,6 +290,9 @@ export default function Wochenplan() {
             {WOCHENTAGE.map((_, i) => (
               <TagSpalte key={i} idx={i} heuteIdx={heuteIdx} wahlAktiv={!!wahl} feste={feste} schuleAuf={schuleAuf}
                 aufEdit={(b) => setEditor({ id: b.id, notiz: b.notiz || "" })}
+                ausfaelle={plan.ausfaelle}
+                aufFest={(f) => setFestDialog(f)}
+                aufZurueck={(f) => speichern(ausfallAufheben(plan, f.tag, f.beginn), `${f.name} ist doch wieder da`)}
                 termine={termineJe[i]} bloecke={plan.bloecke.filter((b) => b.tag === i)}
                 pruefung={pruefung} aufTipp={slotGetippt}
                 aufWeg={(id) => speichern(blockWeg(plan, id), "Baustein entfernt")} />
@@ -297,6 +322,30 @@ export default function Wochenplan() {
           );
         })()}
       </div>
+      {festDialog && (
+        <div data-test="fest-dialog" onClick={() => setFestDialog(null)} style={{
+          position: "fixed", inset: 0, zIndex: 900, background: "rgba(38, 50, 72, 0.94)",
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 18,
+        }}>
+          <div onClick={(ev) => ev.stopPropagation()} style={{ maxWidth: 380, width: "100%", background: T.karte, borderRadius: T.radius, padding: T.abstand }}>
+            <h3 style={{ margin: "0 0 2px" }}>{festDialog.emoji} {festDialog.name}</h3>
+            <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+              {WOCHENTAGE[festDialog.tag]} · {uhr(festDialog.beginn)} Uhr · fester Termin
+            </p>
+            <p style={{ margin: "0 0 10px" }}>Fällt der Termin diese Woche aus? Das Fenster wird dann frei – nächste Woche ist er automatisch wieder da.</p>
+            <button data-test="fest-ausfall"
+              onClick={() => { speichern(ausfallSetzen(plan, festDialog.tag, festDialog.beginn), `${festDialog.name} fällt diese Woche aus`); setFestDialog(null); }}
+              style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+              ❌ Fällt diese Woche aus
+            </button>
+            <button data-test="fest-abbrechen" onClick={() => setFestDialog(null)}
+              style={{ width: "100%", marginTop: 6, background: "transparent", color: T.textLeise }}>
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      )}
+
       {editor && (() => {
         const block = plan.bloecke.find((b) => b.id === editor.id);
         if (!block) return null;

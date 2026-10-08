@@ -150,8 +150,23 @@ export function kalenderWoche(montag) {
 }
 
 export function leererPlan(montag) {
-  // bloecke: { id, tag: 0-6, slot: Minuten, typ, fertig? } · naechste: Vorplanung der Folgewoche
-  return { montag, bloecke: [], belohnt: [], naechste: null };
+  // bloecke: { id, tag, slot: Minuten, typ, fertig?, notiz? } · naechste: Vorplanung
+  // ausfaelle: feste Termine, die NUR DIESE WOCHE ausfallen ({ tag, beginn })
+  return { montag, bloecke: [], belohnt: [], naechste: null, ausfaelle: [] };
+}
+
+/* ❌ Ausfälle: Wenn Sport oder Tennis mal ausfällt, wird der feste
+   Termin für genau diese Woche freigegeben – nächste Woche ist er
+   automatisch wieder da. */
+export function istAusgefallen(plan, tag, beginn) {
+  return (plan.ausfaelle || []).some((a) => a.tag === tag && a.beginn === beginn);
+}
+export function ausfallSetzen(plan, tag, beginn) {
+  if (istAusgefallen(plan, tag, beginn)) return plan;
+  return { ...plan, ausfaelle: [...(plan.ausfaelle || []), { tag, beginn }].slice(0, 20) };
+}
+export function ausfallAufheben(plan, tag, beginn) {
+  return { ...plan, ausfaelle: (plan.ausfaelle || []).filter((a) => !(a.tag === tag && a.beginn === beginn)) };
 }
 
 /** Gültiger Plan für DIESE Woche – eine alte Woche startet frisch.
@@ -161,7 +176,10 @@ export function leererPlan(montag) {
 export function planFuerWoche(plan, montag) {
   if (plan && plan.montag !== montag && plan.naechste?.montag === montag && Array.isArray(plan.naechste.bloecke)) {
     // Wochenwechsel: die sonntags besprochene Vorplanung wird zur aktiven Woche.
-    return planFuerWoche({ montag, bloecke: plan.naechste.bloecke, belohnt: [], naechste: null }, montag);
+    return planFuerWoche({
+      montag, bloecke: plan.naechste.bloecke, belohnt: [], naechste: null,
+      ausfaelle: Array.isArray(plan.naechste.ausfaelle) ? plan.naechste.ausfaelle : [],
+    }, montag);
   }
   if (!(plan && plan.montag === montag && Array.isArray(plan.bloecke))) return leererPlan(montag);
   const gueltig = (b) => Number.isInteger(b.slot) && tagesStunden(b.tag).includes(b.slot);
@@ -265,8 +283,9 @@ export function planPruefung(plan, termine, zeitLimit, feste = []) {
   const tage = WOCHENTAGE.map((_, i) => {
     const am = plan.bloecke.filter((b) => b.tag === i);
     const lern = am.filter((b) => bausteinInfo(b.typ).lern).length;
-    // Feste Aktiv-Termine (Bandprobe, Sport, Tennis, Pfadfinder …) zählen als Ausgleich.
-    const frei = am.length - lern + (feste || []).filter((f) => f.tag === i && f.aktiv).length;
+    // Feste Aktiv-Termine zählen als Ausgleich – außer sie fallen diese Woche aus.
+    const frei = am.length - lern
+      + (feste || []).filter((f) => f.tag === i && f.aktiv && !istAusgefallen(plan, i, f.beginn)).length;
     let status = "ok";
     let hinweis = "";
     if (lern > maxLern) {

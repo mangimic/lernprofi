@@ -36,6 +36,21 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.31: Termin-Ausfälle ----------
+console.log("== v0.31: Termin-Ausfälle ==");
+test("v0.31: APP_VERSION mindestens 0.31.0", versionMindestens("0.31.0"));
+test("v0.31: Ausfall-Logik je Woche + Dialog + Zurückholen + Wächter ohne Ausfälle", (() => {
+  const w = quelle("src/calc/wochenplan.js");
+  const f = quelle("src/features/Wochenplan.jsx");
+  return w.includes("istAusgefallen") && w.includes("ausfallSetzen") && w.includes("ausfallAufheben")
+    && w.includes("!istAusgefallen(plan, i, f.beginn)")
+    && f.includes('data-test="fest-dialog"') && f.includes('data-test="fest-ausfall"')
+    && f.includes('data-test="ausfall-zurueck"') && f.includes("fällt aus")
+    && quelle("src/features/Start.jsx").includes("istAusgefallen")
+    && quelle("src/calc/migrateData.js").includes("ausfaelle")
+    && releaseNoteVorhanden("rn-042");
+})());
+
 // ---------- v0.30.2: Schulstunden mit Zeitfenstern ----------
 console.log("== v0.30.2: Schul-Zeitfenster ==");
 test("v0.30.2: Anzeige-Zeilen mit von-bis und einsortierten Pausen", (() => {

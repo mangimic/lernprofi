@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-042",
+    "version": "0.31.0",
+    "datum": "2026-10-08",
+    "titel": "Termine können ausfallen",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "❌ Feste Termine sind jetzt antippbar: „Fällt diese Woche aus?“ gibt das Zeitfenster für genau diese Woche frei (z. B. wenn Sport oder Tennis ausfällt) – es lässt sich sofort neu verplanen. Nächste Woche ist der Termin automatisch wieder da, und ↩️ holt ihn auch vorher zurück."
+      },
+      {
+        "type": "verbessert",
+        "text": "Der 🦁-Wächter rechnet ausgefallene Aktiv-Termine nicht mehr als Ausgleich, die Heute-Ansicht blendet sie aus, und beim Planen der nächsten Woche lassen sich Ausfälle schon vormerken."
+      }
+    ]
+  },
+  {
     "id": "rn-041",
     "version": "0.30.2",
     "datum": "2026-10-08",

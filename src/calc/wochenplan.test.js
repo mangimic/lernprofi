@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   BAUSTEINE, TERMIN_ARTEN, FESTE_TERMINE_STANDARD, festerTermin, blockNotiz, schulZeilen,
+  istAusgefallen, ausfallSetzen, ausfallAufheben,
   kalenderWoche, routineAusPlan, routineAnwenden, schulStunden, schulFaecher,
   wochenMontag, tagDatum, leererPlan, planFuerWoche,
   blockHinzu, blockWeg, blockFertig, tagGeschafft, heuteBelohnt, belohnungEintragen,
@@ -178,6 +179,31 @@ describe("wochenplan – Wochen-Rechnung", () => {
     p = blockHinzu(p, 0, "schrift", 870);
     expect(planPruefung(p, [], 20).tage[0].status).toBe("einseitig");
     expect(planPruefung(p, [], 20, FESTE_TERMINE_STANDARD).tage[0].status).toBe("ok");
+  });
+
+  it("Ausfälle: Termin fällt nur diese Woche aus, Wächter rechnet ohne ihn", () => {
+    let p = leererPlan("2026-10-05");
+    expect(istAusgefallen(p, 1, 1020)).toBe(false);
+    p = ausfallSetzen(p, 1, 1020); // Di Sport fällt aus
+    expect(istAusgefallen(p, 1, 1020)).toBe(true);
+    expect(ausfallSetzen(p, 1, 1020)).toBe(p); // idempotent
+    // Der Wächter zählt den ausgefallenen Sport nicht mehr als Ausgleich
+    p = blockHinzu(p, 1, "lernen", 900);
+    p = blockHinzu(p, 1, "schrift", 930);
+    expect(planPruefung(p, [], 20, FESTE_TERMINE_STANDARD).tage[1].frei).toBe(2); // Spielzeit + Schlagzeug
+    const zurueck = ausfallAufheben(p, 1, 1020);
+    expect(istAusgefallen(zurueck, 1, 1020)).toBe(false);
+    expect(planPruefung(zurueck, [], 20, FESTE_TERMINE_STANDARD).tage[1].frei).toBe(3); // + Sport
+    // Fallen ALLE Aktiv-Termine des Tages aus, wird ein reiner Lerntag „einseitig"
+    let nurLernen = ausfallSetzen(ausfallSetzen(ausfallSetzen(leererPlan("2026-10-05"), 1, 780), 1, 960), 1, 1020);
+    nurLernen = blockHinzu(nurLernen, 1, "lernen", 900);
+    expect(planPruefung(nurLernen, [], 20, FESTE_TERMINE_STANDARD).tage[1].status).toBe("einseitig");
+    // Vorplanung nimmt ihre Ausfälle mit in die neue Woche
+    const alt = {
+      montag: "2026-09-28", bloecke: [], belohnt: [],
+      naechste: { montag: "2026-10-05", bloecke: [], ausfaelle: [{ tag: 3, beginn: 1020 }] },
+    };
+    expect(istAusgefallen(planFuerWoche(alt, "2026-10-05"), 3, 1020)).toBe(true);
   });
 
   it("termineDerWoche gruppiert nur Termine dieser Woche; Stammdaten vollständig", () => {

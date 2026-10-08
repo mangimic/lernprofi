@@ -6,7 +6,7 @@ import { EINSTUFUNG_FELDER } from "../calc/einstufung.js";
 import { STARK_SAETZE } from "../calc/aufgaben/stark.js";
 import {
   wochenMontag, tagDatum, planFuerWoche, bausteinInfo, blockFertig,
-  tagGeschafft, heuteBelohnt, belohnungEintragen, WOCHENTAGE, slotLabel, schulFaecher,
+  tagGeschafft, heuteBelohnt, belohnungEintragen, WOCHENTAGE, slotLabel, schulFaecher, istAusgefallen,
 } from "../calc/wochenplan.js";
 
 /* Startseite: Begrüßung, Tages-Stand (Münzen, Missionen, Lernspur),
@@ -30,7 +30,8 @@ export default function Start() {
   const heuteIdx = WOCHENTAGE.findIndex((_, i) => tagDatum(montag, i) === heute);
   const heutePlan = [...plan.bloecke.filter((b) => b.tag === heuteIdx)]
     .sort((a, b) => (a.slot ?? 9) - (b.slot ?? 9));
-  const heuteFeste = [...(data.einstellungen.festeTermine || []).filter((f) => f.tag === heuteIdx)]
+  const heuteFeste = [...(data.einstellungen.festeTermine || [])
+    .filter((f) => f.tag === heuteIdx && !istAusgefallen(plan, heuteIdx, f.beginn))]
     .sort((a, b) => a.beginn - b.beginn);
   const planHaken = (id) => {
     const block = plan.bloecke.find((b) => b.id === id);
