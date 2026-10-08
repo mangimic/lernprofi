@@ -118,21 +118,43 @@ describe("kiApi – Routen", () => {
     const d = await r.json();
     expect(d.blasen.length).toBeLessThanOrEqual(2);
     expect(d.mach).toContain("LAUT");
-    expect(d.kostenCent).toBe(0.03);
-    expect(d.verbrauchtCent).toBe(0.03);
+    expect(d.kostenCent).toBe(0.5);
+    expect(d.verbrauchtCent).toBe(0.5);
     // Anfrage an Claude: richtiges Modell, Schlüssel-Header, Lösung mit Warnung
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toContain("api.anthropic.com");
     expect(init.headers["x-api-key"]).toBe("test-schluessel");
     const body = JSON.parse(init.body);
-    expect(body.model).toBe("claude-haiku-5-5");
-    expect(body.thinking).toEqual({ type: "disabled" }); // sonst frisst Vordenken das Budget
+    expect(body.model).toBe("claude-sonnet-5-5"); // Standard-Modell
+    expect(body.thinking).toEqual({ type: "between_tools" }); // Sonnet: so ist Vordenken aus
     expect(body.max_tokens).toBeGreaterThanOrEqual(400);
     expect(body.messages[0].content).toContain("NICHT verraten");
     // Status zeigt den Posten
     const s = await (await kiApi(anfrage("GET", "/api/ki/status"), env, JETZT)).json();
-    expect(s.verbrauchtCent).toBe(0.03);
-    expect(s.posten[0]).toMatchObject({ zweck: "erklaeren", cent: 0.03 });
+    expect(s.verbrauchtCent).toBe(0.5);
+    expect(s.posten[0]).toMatchObject({ zweck: "erklaeren", modell: "sonnet", cent: 0.5 });
+  });
+
+  it("Modell-Wahl: haiku ohne Vordenken, opus mit effort low; Unsinn fällt auf den Standard", async () => {
+    const env = mockEnv();
+    const fetchMock = claudeMock({ input: 1000, output: 300 });
+    vi.stubGlobal("fetch", fetchMock);
+    await kiApi(anfrage("POST", "/api/ki/erklaeren", { frage: "x?", modell: "haiku" }), env, JETZT);
+    let body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.model).toBe("claude-haiku-5-5");
+    expect(body.thinking).toEqual({ type: "disabled" });
+    await kiApi(anfrage("POST", "/api/ki/erklaeren", { frage: "x?", modell: "opus" }), env, JETZT);
+    body = JSON.parse(fetchMock.mock.calls[1][1].body);
+    expect(body.model).toBe("claude-opus-5-5");
+    expect(body.thinking).toBeUndefined(); // Opus denkt immer – kein disabled senden!
+    expect(body.output_config).toEqual({ effort: "low" });
+    expect(body.max_tokens).toBeGreaterThanOrEqual(1000);
+    const r = await kiApi(anfrage("POST", "/api/ki/erklaeren", { frage: "x?", modell: "quatsch" }), env, JETZT);
+    expect(JSON.parse(fetchMock.mock.calls[2][1].body).model).toBe("claude-sonnet-5-5");
+    expect(r.status).toBe(200);
+    // Kosten je Modell korrekt: haiku 0,03 + opus 1 + sonnet 0,5
+    const st = await (await kiApi(anfrage("GET", "/api/ki/status"), env, JETZT)).json();
+    expect(st.verbrauchtCent).toBe(1.53);
   });
 
   it("Deckel erreicht → 402, Claude wird gar nicht erst gerufen", async () => {

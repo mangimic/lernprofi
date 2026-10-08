@@ -346,6 +346,18 @@ export default function Eltern() {
             </div>
           </div>
         ))}
+        <p style={{ margin: "14px 0 4px", fontSize: "var(--schrift-klein)" }}><b>🧠 Leo-Modell</b></p>
+        <Seg test="ki-modell" werte={[
+          { v: "haiku", label: "Haiku · ~0,03 ct" },
+          { v: "sonnet", label: "Sonnet · ~0,5 ct" },
+          { v: "opus", label: "Opus · ~1 ct" },
+        ]}
+          aktiv={data.einstellungen.ki.modell}
+          auf={(v) => einstellung({ ki: { ...data.einstellungen.ki, modell: v } }, `Leo-Modell: ${v}`)} />
+        <p style={{ margin: "4px 0 0", color: T.textLeise, fontSize: "12.5px" }}>
+          Preis pro Erklärung. Haiku ist flott und günstig, Sonnet unser empfohlener
+          Mittelweg, Opus die beste Qualität – alle laufen unter demselben Monatsdeckel.
+        </p>
         <div style={{ marginTop: 12 }}>
           {ki === null ? (
             <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>Prüfe KI-Server …</p>

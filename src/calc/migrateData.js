@@ -43,6 +43,7 @@ export function leeresDokument(heute) {
       pausenIntervall: 10, // Minuten Fokuszeit bis zur Bewegungspause (5/10/15)
       ki: {                // KI-Funktionen: je Zweck eine Eltern-Freigabe (Standard: aus)
         erklaeren: false, schrift: false, aufsatz: false, bericht: false, saetze: false,
+        modell: "sonnet",  // Leo-Modell: haiku (günstig) | sonnet (empfohlen) | opus (Premium)
       },
       uebungsThema: "alltag", // Übungs-Welt der Satz-Übungen (Kind wählt selbst)
     },
@@ -120,6 +121,7 @@ export function migrateData(alt, heute) {
   d.einstellungen.ki = {
     erklaeren: ki.erklaeren === true, schrift: ki.schrift === true, aufsatz: ki.aufsatz === true,
     bericht: ki.bericht === true, saetze: ki.saetze === true,
+    modell: ["haiku", "sonnet", "opus"].includes(ki.modell) ? ki.modell : "sonnet",
   };
 
   if (!Array.isArray(d.protokoll)) d.protokoll = [];

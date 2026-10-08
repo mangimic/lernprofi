@@ -36,12 +36,23 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.22.5: Leo-Modell wählbar ----------
+console.log("== v0.22.5: Leo-Modell wählbar ==");
+test("v0.22.5: APP_VERSION mindestens 0.22.5", versionMindestens("0.22.5"));
+test("v0.22.5: drei Modelle mit je passender Denk-Konfiguration, Server-Whitelist, Eltern-Seg", (() => {
+  const k = quelle("server/_lib/kiApi.js");
+  return k.includes("MODELL_KONFIG") && k.includes("claude-sonnet-5-5") && k.includes("between_tools")
+    && k.includes('effort: "low"') && k.includes("modellWahl")
+    && quelle("src/features/Eltern.jsx").includes("ki-modell")
+    && quelle("src/calc/migrateData.js").includes('"haiku", "sonnet", "opus"');
+})());
+
 // ---------- v0.22.4: Erklärer-Antworten repariert ----------
 console.log("== v0.22.4: Erklärer-Antworten repariert ==");
 test("v0.22.4: APP_VERSION mindestens 0.22.4", versionMindestens("0.22.4"));
 test("v0.22.4: kein Vordenken bei Kurzantworten + Wort-Wächter mit Wortgrenzen", (() => {
   const k = quelle("server/_lib/kiApi.js");
-  return k.includes('thinking: { type: "disabled" }') && k.includes("maxTokens: 500")
+  return k.includes('thinking: { type: "disabled" }') && k.includes("max_tokens: 500")
     && k.includes("VERBOTEN_MUSTER") && k.includes("BEISPIEL");
 })());
 

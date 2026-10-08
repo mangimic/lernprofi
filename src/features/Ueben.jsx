@@ -320,6 +320,7 @@ export default function Ueben() {
       optionen: istMc ? [a.r, ...a.x] : undefined,
       loesung: istMc ? a.r : (a.loesung || ""),
       tipp: a.tipp || "", kontext: a.kontext || "",
+      modell: data.einstellungen.ki.modell,
     });
     setRunde((r) => {
       if (r.index !== idx || !r.ki) return r;

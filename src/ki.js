@@ -36,7 +36,8 @@ export async function kiDeckelSetzen(deckelCent) {
   } catch { return { ok: false }; }
 }
 
-/** 🦁 „Erklär es mir anders“: holt 1-2 Blasen + Mach-Aufgabe. */
+/** 🦁 „Erklär es mir anders“: holt 1-2 Blasen + Mach-Aufgabe.
+    aufgabe.modell: "haiku" | "sonnet" | "opus" (Eltern-Wahl). */
 export async function kiErklaeren(aufgabe) {
   try {
     const { status, daten } = await anfrage("/api/ki/erklaeren", {

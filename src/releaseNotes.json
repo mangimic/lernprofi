@@ -1,5 +1,15 @@
 [
   {
+    "id": "rn-030",
+    "version": "0.22.5",
+    "datum": "2026-10-08",
+    "titel": "Leo-Modell wählbar",
+    "entries": [
+      { "type": "neu", "text": "🧠 Eltern wählen jetzt das Leo-Modell: Haiku (flott & günstig, ~0,03 ct pro Erklärung) · Sonnet (empfohlener Mittelweg, ~0,5 ct) · Opus (beste Qualität, ~1 ct). Standard ist ab jetzt Sonnet – spürbar bessere Erklärungen, und alle Modelle laufen unter demselben Monatsdeckel." },
+      { "type": "technik", "text": "Der Server kennt je Modell die richtige Denk-Konfiguration und bucht die Kosten nach den echten Preisen des gewählten Modells; die Einzelposten zeigen jetzt auch das Modell." }
+    ]
+  },
+  {
     "id": "rn-029",
     "version": "0.22.4",
     "datum": "2026-10-08",

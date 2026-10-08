@@ -28,12 +28,22 @@ export function apiSchluessel(env) {
 }
 
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
-export const KI_MODELLE = {
-  erklaeren: "claude-haiku-5-5",
+/* Modell-Wahl (Eltern): jede Stufe braucht ihre eigene Denk-Konfiguration –
+   Haiku darf das Vordenken abschalten, Sonnet nur über "between_tools",
+   Opus denkt immer (dafür Stufe "low" und mehr Token-Luft). */
+export const MODELL_KONFIG = {
+  haiku: { id: "claude-haiku-5-5", koerper: { thinking: { type: "disabled" }, max_tokens: 500 } },
+  sonnet: { id: "claude-sonnet-5-5", koerper: { thinking: { type: "between_tools" }, max_tokens: 500 } },
+  opus: { id: "claude-opus-5-5", koerper: { output_config: { effort: "low" }, max_tokens: 1500 } },
 };
+export const MODELL_STANDARD = "sonnet";
+export function modellWahl(wunsch) {
+  return MODELL_KONFIG[wunsch] ? wunsch : MODELL_STANDARD;
+}
 // US-Dollar je Million Token (Ein-/Ausgabe); wir rechnen 1 $ ≈ 1 € und runden auf.
 export const PREISE_USD_MTOK = {
   "claude-haiku-5-5": { ein: 0.10, aus: 0.50 },
+  "claude-sonnet-5-5": { ein: 2.00, aus: 10.00 },
   "claude-opus-5-5": { ein: 4.00, aus: 20.00 },
 };
 export const MAX_BLASEN = 2;
@@ -107,7 +117,7 @@ REGELN (alle verbindlich):
 BEISPIEL (für eine Dativ-Aufgabe):
 {"blasen":["⚽ Beim Training gibst du den Ball – aber WEM?","Die Frage „wem?“ ist dein Spürhund für diesen Fall."],"mach":"Frag LAUT: Wem gibt er den Ball? Zeig auf die Antwort!"}`;
 
-async function claudeAnfragen(env, { modell, system, prompt, maxTokens }) {
+async function claudeAnfragen(env, { konfig, system, prompt }) {
   const antwort = await fetch(ANTHROPIC_URL, {
     method: "POST",
     headers: {
@@ -116,11 +126,8 @@ async function claudeAnfragen(env, { modell, system, prompt, maxTokens }) {
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: modell,
-      max_tokens: maxTokens,
-      // Kein internes Vordenken: Bei so kleinen Antworten frisst es sonst
-      // das Token-Budget, und es kommt gar kein Text an (→ Ersatztext).
-      thinking: { type: "disabled" },
+      model: konfig.id,
+      ...konfig.koerper,
       system,
       messages: [{ role: "user", content: prompt }],
     }),
@@ -200,16 +207,17 @@ export async function kiApi(request, env, jetzt = new Date()) {
       `Bisheriger Tipp (etwas ANDERES erklären): ${String(eingabe?.tipp || "").slice(0, 200)}`,
     ].filter(Boolean).join("\n");
 
-    const modell = KI_MODELLE.erklaeren;
+    const wahl = modellWahl(eingabe?.modell);
+    const konfig = MODELL_KONFIG[wahl];
     let roh;
     try {
-      roh = await claudeAnfragen(env, { modell, system: LEO_SYSTEM, prompt: teile, maxTokens: 500 });
+      roh = await claudeAnfragen(env, { konfig, system: LEO_SYSTEM, prompt: teile });
     } catch {
       return json(502, { grund: "ki-fehler", fehler: "Die KI hat gerade nicht geantwortet – später nochmal." });
     }
 
-    const mikro = kostenMikro(modell, roh.usage);
-    const posten = [...(stand.posten || []), { zeit: jetzt.toISOString(), zweck: "erklaeren", mikro }].slice(-20);
+    const mikro = kostenMikro(konfig.id, roh.usage);
+    const posten = [...(stand.posten || []), { zeit: jetzt.toISOString(), zweck: "erklaeren", modell: wahl, mikro }].slice(-20);
     await kv.put(`ki:monat:${monat}`, JSON.stringify({ mikro: stand.mikro + mikro, posten }));
 
     const sauber = antwortZurechtstutzen(roh.text);

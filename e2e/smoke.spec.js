@@ -747,6 +747,7 @@ test("KI-Erklärer: Eltern geben frei, Leo erklärt in getakteten Blasen mit Mac
   await expect(page.getByTestId("eltern-ki")).toBeVisible();
   await expect(page.getByTestId("ki-verbrauch")).toContainText("0,87 € von 5,00 €");
   await page.getByTestId("ki-erklaeren-1").click(); // 🦁 freigeben
+  await page.getByTestId("ki-modell-opus").click(); // Modell-Wahl vorhanden
   await page.getByTestId("ki-deckel-300").click();
 
   // Üben: falsche Antwort → Erklär-Knopf → Blase 1 → selbst weitertippen → Blase 2 + Mach-Aufgabe
