@@ -1,5 +1,33 @@
 [
   {
+    "id": "rn-035",
+    "version": "0.26.0",
+    "datum": "2026-10-08",
+    "titel": "Mein Wochenplan – du bestimmst dein Pensum",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🗓️ Mein Wochenplan (Etappe 9): Das Kind plant seine Woche SELBST – Bausteine wie Üben, Schreiben, Konzentration, Schlagzeug, Sport, Pfadfinder und Freunde-Zeit wandern per Antippen (Baustein → Tag) oder per Ziehen in die Wochentage. Lern-Bausteine sind feste 10-Minuten-Boxen mit 5 Minuten Pause danach (Trampolin, essen, trinken – keine Bildschirme)."
+      },
+      {
+        "type": "neu",
+        "text": "🦁 Überlastungs-Wächter: verbietet nichts, zeigt aber je Tag eine Ampel – zu viele Lernboxen (Limit folgt dem Zeitlimit), nur Lernen ohne etwas Schönes, und vor Klassenarbeiten empfiehlt Leo das Üben auf 2 Tage zu verteilen statt am Vorabend zu pauken."
+      },
+      {
+        "type": "neu",
+        "text": "📝 Termine (Elternbereich): Klassenarbeiten, Kompass-Tests und Wörter der Woche eintragen – sie erscheinen im Wochenplan des Kindes als Hinweis-Kärtchen."
+      },
+      {
+        "type": "fix",
+        "text": "⚠️ Wichtig behoben: Jeder Git-Deploy löschte die im Cloudflare-Dashboard angelegten Secrets (daher „Leo ist nicht erreichbar“). Die Konfiguration behält Dashboard-Einträge jetzt (keep_vars) – der Schlüssel muss einmalig neu gesetzt werden und bleibt dann stehen."
+      },
+      {
+        "type": "technik",
+        "text": "Neue Bibliothek @dnd-kit/core für Ziehen auf dem iPad; die Antippen-Bedienung funktioniert unabhängig davon. Neue reine Logik calc/wochenplan.js mit vollständig getestetem Wächter."
+      }
+    ]
+  },
+  {
     "id": "rn-034",
     "version": "0.25.0",
     "datum": "2026-10-08",

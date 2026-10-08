@@ -61,6 +61,7 @@ export default function Eltern() {
   const [meldung, setMeldung] = useState("");
   const [bericht, setBericht] = useState(null);
   const [pinNeu, setPinNeu] = useState({ pw: "", pin: "" });
+  const [terminNeu, setTerminNeu] = useState({ tag: "", art: "ka", fach: "" }); // 🗓️ Termin-Eingabe
 
   const feld = {
     width: "100%", minHeight: "var(--touch)", fontSize: "var(--schrift)",
@@ -421,6 +422,55 @@ export default function Eltern() {
               )}
             </>
           )}
+        </div>
+      </Karte>
+
+      <Karte test="eltern-termine">
+        <b>🗓️ Termine für den Wochenplan</b>
+        <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          Klassenarbeiten, Kompass-Tests und Wörter der Woche eintragen – sie erscheinen im
+          Wochenplan des Kindes, und der 🦁-Wächter empfiehlt, das Üben davor zu verteilen.
+        </p>
+        {data.einstellungen.termine.length > 0 && (
+          <div style={{ marginBottom: 8 }}>
+            {[...data.einstellungen.termine].sort((a, b) => a.tag.localeCompare(b.tag)).map((t) => (
+              <div key={t.id} data-test="termin-zeile" style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, fontSize: "var(--schrift-klein)" }}>
+                <span style={{ flex: 1 }}>
+                  {{ ka: "📝 Klassenarbeit", kompass: "🧭 Kompass-Test", wdw: "🔤 Wörter der Woche" }[t.art]}
+                  {t.fach ? ` · ${t.fach}` : ""} · {t.tag.split("-").reverse().join(".")}
+                </span>
+                <button data-test="termin-weg"
+                  onClick={() => einstellung({ termine: data.einstellungen.termine.filter((x) => x.id !== t.id) }, "Termin entfernt")}
+                  style={{ background: "transparent", color: T.textLeise, padding: 0, minHeight: 0, height: "auto" }}>
+                  ✖
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          <input data-test="termin-tag" type="date" value={terminNeu.tag}
+            onChange={(e) => setTerminNeu({ ...terminNeu, tag: e.target.value })}
+            style={{ ...feld, width: "auto", flex: "1 1 150px", marginBottom: 0 }} />
+          <select data-test="termin-art" value={terminNeu.art}
+            onChange={(e) => setTerminNeu({ ...terminNeu, art: e.target.value })}
+            style={{ ...feld, width: "auto", flex: "1 1 170px", marginBottom: 0 }}>
+            <option value="ka">📝 Klassenarbeit</option>
+            <option value="kompass">🧭 Kompass-Test</option>
+            <option value="wdw">🔤 Wörter der Woche</option>
+          </select>
+          <input data-test="termin-fach" type="text" maxLength={40} placeholder="Fach/Thema (optional)"
+            value={terminNeu.fach} onChange={(e) => setTerminNeu({ ...terminNeu, fach: e.target.value })}
+            style={{ ...feld, width: "auto", flex: "1 1 160px", marginBottom: 0 }} />
+          <button data-test="termin-plus" disabled={!/^\d{4}-\d{2}-\d{2}$/.test(terminNeu.tag)}
+            onClick={() => {
+              const id = data.einstellungen.termine.reduce((m, t) => Math.max(m, t.id), 0) + 1;
+              einstellung({ termine: [...data.einstellungen.termine, { id, ...terminNeu, fach: terminNeu.fach.trim() }].slice(0, 20) }, "Termin eingetragen");
+              setTerminNeu({ tag: "", art: "ka", fach: "" });
+            }}
+            style={{ flex: "0 0 auto", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+            + Eintragen
+          </button>
         </div>
       </Karte>
 

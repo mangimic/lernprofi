@@ -60,6 +60,10 @@ export default function Start() {
           style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
           ✍️ Aufsatz-Check (Leo liest dein Foto)
         </button>
+        <button data-test="zum-plan" onClick={() => navTo("plan")}
+          style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
+          🗓️ Mein Wochenplan (DU bestimmst dein Pensum)
+        </button>
       </div>
       {!einstufung ? (
         <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>

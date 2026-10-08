@@ -36,6 +36,37 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.26: Mein Wochenplan ----------
+console.log("== v0.26: Mein Wochenplan ==");
+test("v0.26: APP_VERSION mindestens 0.26.0", versionMindestens("0.26.0"));
+test("v0.26: Release-Note rn-035 vorhanden", releaseNoteVorhanden("rn-035"));
+test("v0.26: Plan-Logik – Bausteine, Wochen-Rechnung, Wächter mit Verteil-Empfehlung", (() => {
+  const w = quelle("src/calc/wochenplan.js");
+  return w.includes("BAUSTEINE") && w.includes("wochenMontag") && w.includes("planPruefung")
+    && w.includes("blockHinzu") && w.includes('"voll"') && w.includes('"einseitig"')
+    && w.includes("Verteilt") && w.includes("LERN_MINUTEN") && w.includes("TERMIN_ARTEN");
+})());
+test("v0.26: Plan-Seite – Antippen UND Ziehen (dnd-kit), Ampel, Hinweise", (() => {
+  const f = quelle("src/features/Wochenplan.jsx");
+  return f.includes("@dnd-kit/core") && f.includes("useDraggable") && f.includes("useDroppable")
+    && f.includes("baustein-") && f.includes('data-test="plan-block"') && f.includes("ampel-")
+    && f.includes('data-test="plan-wahl-hinweis"') && f.includes('data-test="plan-hinweise"')
+    && quelle("package.json").includes("@dnd-kit/core");
+})());
+test("v0.26: Termine im Elternbereich + Datenmodell (wochenplan, termine)", (() => {
+  const e = quelle("src/features/Eltern.jsx");
+  return e.includes('data-test="termin-plus"') && e.includes('data-test="termin-weg"')
+    && e.includes('data-test="termin-art"')
+    && quelle("src/calc/migrateData.js").includes("wochenplan")
+    && quelle("src/calc/migrateData.js").includes("termine")
+    && quelle("src/App.jsx").includes('route === "plan"')
+    && quelle("src/features/Start.jsx").includes('data-test="zum-plan"');
+})());
+test("v0.26: keep_vars schützt Dashboard-Secrets vor Git-Deploys", (() => {
+  return quelle("wrangler.jsonc").includes('"keep_vars": true')
+    && quelle("docs/DEPLOY-CLOUDFLARE.md").includes("keep_vars");
+})());
+
 // ---------- v0.25: Wochenbericht + persönliche Übungssätze ----------
 console.log("== v0.25: Wochenbericht + Übungssätze ==");
 test("v0.25: APP_VERSION mindestens 0.25.0", versionMindestens("0.25.0"));

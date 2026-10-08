@@ -32,6 +32,7 @@ export function leeresDokument(heute) {
       einstufung: null,          // letzter Einstufungstest: { tag, ergebnisse, empfehlung }
       schrift: null,             // Schreib-Training: { reise: [{tag, satz, buchstabe, thumb, gross}] }
       aufsatz: { tag: "" },      // Aufsatz-Check: letzter belohnter Tag (1 Münze/Tag)
+      wochenplan: null,          // 🗓️ selbst gesetztes Pensum: { montag, bloecke: [{id, tag, typ}] }
     },
     einstellungen: {
       thema: "hell",   // "hell" | "dunkel"
@@ -49,6 +50,7 @@ export function leeresDokument(heute) {
       },
       uebungsThema: "alltag", // Übungs-Welt der Satz-Übungen (Kind wählt selbst)
       eigeneSaetze: [],    // von den Eltern freigegebene Schreib-Sätze (max 12)
+      termine: [],         // 🗓️ Klassenarbeiten/Kompass-Tests/WDWs: { id, tag, art, fach }
     },
     protokoll: [],     // Änderungsprotokoll: { zeit, bereich, art, text }
   };
@@ -96,6 +98,10 @@ export function migrateData(alt, heute) {
   if (!istObjekt(d.lernstand.schrift)) d.lernstand.schrift = null;
   const aufsatz = istObjekt(d.lernstand.aufsatz) ? d.lernstand.aufsatz : {};
   d.lernstand.aufsatz = { tag: typeof aufsatz.tag === "string" ? aufsatz.tag : "" };
+  const wp = d.lernstand.wochenplan;
+  d.lernstand.wochenplan = istObjekt(wp) && typeof wp.montag === "string" && Array.isArray(wp.bloecke)
+    ? { montag: wp.montag, bloecke: wp.bloecke.filter((b) => istObjekt(b)).slice(0, 60) }
+    : null;
   const mut = istObjekt(d.lernstand.mutSatz) ? d.lernstand.mutSatz : {};
   d.lernstand.mutSatz = {
     tag: typeof mut.tag === "string" ? mut.tag : "",
@@ -126,6 +132,10 @@ export function migrateData(alt, heute) {
   d.einstellungen.eigeneSaetze = (Array.isArray(d.einstellungen.eigeneSaetze) ? d.einstellungen.eigeneSaetze : [])
     .filter((s) => typeof s === "string" && s.trim().length >= 1 && s.length <= 80)
     .map((s) => s.trim()).slice(0, 12);
+  d.einstellungen.termine = (Array.isArray(d.einstellungen.termine) ? d.einstellungen.termine : [])
+    .filter((t) => istObjekt(t) && /^\d{4}-\d{2}-\d{2}$/.test(t.tag) && ["ka", "kompass", "wdw"].includes(t.art))
+    .map((t, i) => ({ id: Number.isInteger(t.id) ? t.id : i + 1, tag: t.tag, art: t.art, fach: typeof t.fach === "string" ? t.fach.slice(0, 40) : "" }))
+    .slice(0, 20);
   const ki = istObjekt(d.einstellungen.ki) ? d.einstellungen.ki : {};
   d.einstellungen.ki = {
     erklaeren: ki.erklaeren === true, schrift: ki.schrift === true, aufsatz: ki.aufsatz === true,

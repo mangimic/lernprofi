@@ -9,11 +9,12 @@ import Konzentration from "./features/Konzentration.jsx";
 import Einstufung from "./features/Einstufung.jsx";
 import Schrift from "./features/Schrift.jsx";
 import Aufsatz from "./features/Aufsatz.jsx";
+import Wochenplan from "./features/Wochenplan.jsx";
 import Eltern from "./features/Eltern.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.25.0";
+export const APP_VERSION = "0.26.0";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -134,6 +135,7 @@ export default function App() {
          route === "konz" ? <Konzentration /> :
          route === "schrift" ? <Schrift /> :
          route === "aufsatz" ? <Aufsatz /> :
+         route === "plan" ? <Wochenplan /> :
          route === "einstufung" ? <Einstufung /> :
          route === "eltern" && tresor.elternModus ? <Eltern /> : <Start />}
       </main>

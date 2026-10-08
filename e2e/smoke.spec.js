@@ -917,6 +917,63 @@ test("Wochenbericht + persönliche Übungssätze: Eltern geben frei, prüfen und
   await expect(page.getByTestId("eigene-saetze")).toHaveCount(0);
 });
 
+test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan überlebt Neustart", async ({ page }) => {
+  await tresorAnlegen(page);
+
+  // Eltern tragen eine Klassenarbeit am Freitag dieser Woche ein
+  const isoLokal = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const freitag = new Date();
+  freitag.setDate(freitag.getDate() - ((freitag.getDay() + 6) % 7) + 4);
+  await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("termin-tag").fill(isoLokal(freitag));
+  await page.selectOption('[data-test="termin-art"]', "ka");
+  await page.getByTestId("termin-fach").fill("Mathe");
+  await page.getByTestId("termin-plus").click();
+  await expect(page.getByTestId("termin-zeile")).toContainText("Klassenarbeit · Mathe");
+
+  // Kind plant: Termin sichtbar, Wächter empfiehlt Verteilen
+  await page.getByTestId("nav-start").click();
+  await page.getByTestId("zum-plan").click();
+  await expect(page.getByTestId("termin-chip")).toContainText("Klassenarbeit Mathe");
+  await expect(page.getByTestId("plan-hinweise")).toContainText("Klassenarbeit");
+
+  // Antippen: Baustein → Tag (Dienstag). 3 Lernboxen überladen den Tag (Limit 2 bei 20 Min)
+  const lernboxZu = async (tag) => {
+    await page.getByTestId("baustein-lernen").click();
+    await expect(page.getByTestId("plan-wahl-hinweis")).toBeVisible();
+    await page.getByTestId(`tag-${tag}`).click();
+  };
+  await lernboxZu(1);
+  await lernboxZu(1);
+  await expect(page.getByTestId("plan-block")).toHaveCount(2);
+  await lernboxZu(1);
+  await expect(page.getByTestId("ampel-1")).toHaveText("🔴");
+  await expect(page.getByTestId("tag-hinweis-1")).toContainText("Schieb");
+
+  // Eine Box wieder weg → gelb (nur Lernen); Sport dazu → grün
+  await page.getByTestId("block-weg").first().click();
+  await expect(page.getByTestId("ampel-1")).toHaveText("🟡");
+  await page.getByTestId("baustein-sport").click();
+  await page.getByTestId("tag-1").click();
+  await expect(page.getByTestId("ampel-1")).toHaveText("🟢");
+
+  // Zweiter Übungstag (Mittwoch) + Freunde → Wächter zufrieden
+  await lernboxZu(2);
+  await page.getByTestId("baustein-freunde").click();
+  await page.getByTestId("tag-2").click();
+  await expect(page.getByTestId("plan-hinweise")).toHaveCount(0);
+  await expect(page.getByTestId("plan-ok")).toBeVisible();
+
+  // Plan überlebt den Neustart
+  await page.waitForTimeout(600);
+  await page.reload();
+  await page.getByTestId("pin-eingabe").fill(PIN);
+  await page.getByTestId("pin-ok").click();
+  await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
+  await page.getByTestId("zum-plan").click();
+  await expect(page.getByTestId("plan-block")).toHaveCount(5);
+});
+
 test("KI-Karte ohne Server: ehrliche Meldung statt Absturz, Schalter bleiben bedienbar", async ({ page }) => {
   await tresorAnlegen(page);
   await page.getByTestId("nav-eltern").click();
