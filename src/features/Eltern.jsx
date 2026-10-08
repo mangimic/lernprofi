@@ -351,7 +351,7 @@ export default function Eltern() {
             <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>Prüfe KI-Server …</p>
           ) : !ki.verfuegbar ? (
             <p data-test="ki-meldung" style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-              {ki.grund === "kein-schluessel" ? "⚠️ Auf dem Server fehlt noch der API-Schlüssel (ANTHROPIC_API_KEY) – Anleitung: docs/DEPLOY-CLOUDFLARE.md."
+              {ki.grund === "kein-schluessel" ? "⚠️ Der Worker findet den API-Schlüssel nicht. Er muss als Secret (nicht Text!) unter dem Namen „lernprofiapi“ in den Worker-Settings → Variables and Secrets liegen – Anleitung: docs/DEPLOY-CLOUDFLARE.md."
                 : ki.grund === "kein-kv" ? "⚠️ Der KV-Namespace fehlt noch (gleicher Schritt wie beim Geräte-Abgleich) – docs/DEPLOY-CLOUDFLARE.md."
                 : ki.grund === "kein-zugang" ? "⚠️ Cloudflare Access hat die Anfrage nicht freigegeben – bitte neu anmelden."
                 : "Gerade keine Verbindung zum Server – die Schalter wirken, sobald er erreichbar ist."}

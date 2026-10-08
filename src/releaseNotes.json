@@ -1,5 +1,14 @@
 [
   {
+    "id": "rn-028",
+    "version": "0.22.3",
+    "datum": "2026-10-08",
+    "titel": "Klarere Schlüssel-Meldung",
+    "entries": [
+      { "type": "fix", "text": "Die Meldung bei fehlendem KI-Schlüssel nennt jetzt den richtigen Secret-Namen („lernprofiapi“) und weist darauf hin, dass es ein Secret (kein Text-Eintrag) sein muss." }
+    ]
+  },
+  {
     "id": "rn-027",
     "version": "0.22.2",
     "datum": "2026-10-08",

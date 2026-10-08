@@ -36,6 +36,14 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.22.3: klare Schlüssel-Meldung ----------
+console.log("== v0.22.3: klare Schlüssel-Meldung ==");
+test("v0.22.3: APP_VERSION mindestens 0.22.3", versionMindestens("0.22.3"));
+test("v0.22.3: Meldung nennt lernprofiapi und Secret-Pflicht", (() => {
+  const e = quelle("src/features/Eltern.jsx");
+  return e.includes("lernprofiapi") && e.includes("nicht Text");
+})());
+
 // ---------- v0.22.2: KV-Namespace verbunden ----------
 console.log("== v0.22.2: KV-Namespace verbunden ==");
 test("v0.22.2: APP_VERSION mindestens 0.22.2", versionMindestens("0.22.2"));
