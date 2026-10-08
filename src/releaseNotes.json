@@ -1,5 +1,14 @@
 [
   {
+    "id": "rn-027",
+    "version": "0.22.2",
+    "datum": "2026-10-08",
+    "titel": "Geräte-Abgleich & KI-Zähler angeschlossen",
+    "entries": [
+      { "type": "technik", "text": "Der KV-Namespace ist mit dem Worker verbunden – damit sind ☁️ Geräte-Abgleich und der 🤖 KI-Kostenzähler scharf. Zusammen mit Cloudflare Access und dem API-Schlüssel ist die Server-Seite jetzt komplett eingerichtet." }
+    ]
+  },
+  {
     "id": "rn-026",
     "version": "0.22.1",
     "datum": "2026-10-08",

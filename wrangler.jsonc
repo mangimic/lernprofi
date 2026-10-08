@@ -11,10 +11,7 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS"
-  }
-  // ☁️ Geräte-Abgleich aktivieren (einmalig):
-  // 1. Dashboard → Storage & Databases → KV → Namespace „lernprofi-tresor" anlegen
-  // 2. Die Namespace-ID unten eintragen und die Zeilen einkommentieren:
-  // ,"kv_namespaces": [{ "binding": "TRESOR", "id": "HIER-DIE-KV-ID-EINTRAGEN" }]
-  // Bis dahin antwortet /api/* mit 503 und die App zeigt „noch nicht eingerichtet".
+  },
+  // ☁️ KV-Namespace „lernprofi-tresor": Tresor-Sync + KI-Kostenzähler.
+  "kv_namespaces": [{ "binding": "TRESOR", "id": "c9f78f3652c046b1a2b6cc18635f5676" }]
 }

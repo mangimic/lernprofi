@@ -36,6 +36,15 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.22.2: KV-Namespace verbunden ----------
+console.log("== v0.22.2: KV-Namespace verbunden ==");
+test("v0.22.2: APP_VERSION mindestens 0.22.2", versionMindestens("0.22.2"));
+test("v0.22.2: TRESOR-Binding mit echter Namespace-ID (kein Platzhalter)", (() => {
+  const w = quelle("wrangler.jsonc");
+  return w.includes('"binding": "TRESOR"') && /"id": "[0-9a-f]{32}"/.test(w)
+    && !w.includes("HIER-DIE-KV-ID-EINTRAGEN");
+})());
+
 // ---------- v0.22.1: KI-Schlüssel (Secret-Name) ----------
 console.log("== v0.22.1: KI-Schlüssel (Secret-Name) ==");
 test("v0.22.1: APP_VERSION mindestens 0.22.1", versionMindestens("0.22.1"));
