@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-068",
+    "version": "0.53.1",
+    "datum": "2026-10-09",
+    "titel": "Kartentexte mittig",
+    "entries": [
+      {
+        "type": "fix",
+        "text": "Auf den Karteikarten sitzt der Inhalt jetzt sauber in der Mitte zwischen Kopf- und Fußzeile – kein an den unteren Rand gedrückter Text und keine großen weißen Löcher mehr."
+      }
+    ]
+  },
+  {
     "id": "rn-067",
     "version": "0.53.0",
     "datum": "2026-10-09",

@@ -24,16 +24,16 @@ function Zelle({ karte, seite }) {
         </span>
       </div>
       {seite === "vs" ? (
-        <>
+        <div className="kk-mitte">
           <div className="kk-frage">{karte.vs}</div>
           {karte.hinweis && <div className="kk-hinweis">{karte.hinweis}</div>}
-        </>
+        </div>
       ) : (
-        <>
+        <div className="kk-mitte">
           <div className="kk-antwort">{karte.rs}</div>
           {karte.bild && <div className="kk-bild"><AufgabenBild b={karte.bild} /></div>}
           <div className="kk-merk">🧠 {karte.merk}</div>
-        </>
+        </div>
       )}
       <div className="kk-fuss">Lernprofi · Kompass 4</div>
     </div>
@@ -78,20 +78,24 @@ export default function Karteikarten() {
           --ok: #2e9e52; --karte: #ffffff; --grund: #eef4fb; --rand: #c9d8ec; --radius-klein: 8px; }
         .kk-zelle { border: 1.5px dashed #9aa7b8; margin: -0.75px; padding: 3% 5%; display: flex;
           flex-direction: column; text-align: center; position: relative; overflow: hidden; min-height: 0; box-sizing: border-box; }
-        .kk-bild [data-test="aufgaben-bild"] { margin: 4px 0; padding: 6px 8px; }
+        .kk-bild { width: 100%; }
+        .kk-bild [data-test="aufgaben-bild"] { margin: 0; padding: 6px 8px; }
         .kk-bild svg { max-height: 30mm; }
         .kk-zelle.deutsch { border-top: 10px solid #2f6fde; }
         .kk-zelle.mathe { border-top: 10px solid #2e9e52; }
-        .kk-kopf { font-size: 12px; font-weight: 700; color: #5d7390; margin-bottom: auto;
+        .kk-kopf { font-size: 12px; font-weight: 700; color: #5d7390;
           display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+        /* 🎯 Der Inhalt sitzt MITTIG zwischen Kopf- und Fußzeile */
+        .kk-mitte { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column;
+          justify-content: center; align-items: center; gap: 8px; width: 100%; }
         .kk-art { border-radius: 20px; padding: 2px 10px; font-weight: 800; }
         .kk-art.aufgabe { background: #dbe7f6; color: #1c3a63; }
         .kk-art.loesung { background: #d9f0e1; color: #1f7a3f; }
-        .kk-frage { font-size: 21px; font-weight: 800; margin: auto 0 4px; }
-        .kk-hinweis { font-size: 13px; color: #5d7390; margin-bottom: auto; }
-        .kk-antwort { font-size: 21px; font-weight: 800; color: #1f7a3f; margin: auto 0 8px; }
-        .kk-merk { font-size: 12.5px; background: #eef4fb; border-radius: 8px; padding: 6px 8px; margin: 0 0 auto; }
-        .kk-fuss { font-size: 9px; color: #9aa7b8; margin-top: 6px; }
+        .kk-frage { font-size: 21px; font-weight: 800; margin: 0; }
+        .kk-hinweis { font-size: 13px; color: #5d7390; margin: 0; }
+        .kk-antwort { font-size: 21px; font-weight: 800; color: #1f7a3f; margin: 0; }
+        .kk-merk { font-size: 12.5px; background: #eef4fb; border-radius: 8px; padding: 6px 8px; margin: 0; }
+        .kk-fuss { font-size: 9px; color: #9aa7b8; margin-top: 4px; }
         .kk-blattinfo { text-align: center; color: var(--text-leise); font-size: 12px; margin: 0 0 4px; }
         @media print {
           header, [data-test="nav-leiste"], .nur-schirm { display: none !important; }

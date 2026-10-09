@@ -36,6 +36,13 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.53.1: Kartentexte mittig ----------
+test("v0.53.1: Karten-Inhalt zentriert im kk-mitte-Container", (() => {
+  const f = quelle("src/features/Karteikarten.jsx");
+  return f.includes("kk-mitte") && f.includes("justify-content: center")
+    && !f.includes("margin: auto 0") && releaseNoteVorhanden("rn-068");
+})());
+
 // ---------- v0.53: Grafik-Lösungen & Druck-Härtung ----------
 console.log("== v0.53: Karten-Grafiken ==");
 test("v0.53: bild-Feld auf Karten, Rückseiten-Grafik in Druck + Kasten, A4-Härtung", (() => {
