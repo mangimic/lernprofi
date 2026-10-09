@@ -95,6 +95,10 @@ export default function Start() {
           style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
           ✍️ Aufsatz-Check (Leo liest dein Foto)
         </button>
+        <button data-test="zum-kasten" onClick={() => navTo("kasten")}
+          style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
+          🗃️ Karteikasten (5 Karten ziehen · Gewusst wandert weiter)
+        </button>
         <button data-test="zum-plan" onClick={() => navTo("plan")}
           style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
           🗓️ Mein Wochenplan (DU bestimmst dein Pensum)

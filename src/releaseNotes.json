@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-065",
+    "version": "0.51.0",
+    "datum": "2026-10-09",
+    "titel": "Aufgaben-Fundus & digitaler Karteikasten",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "📚 Fundus aus der Kompass-Übungssammlung eingebaut: ein neuer Lesetext (Büchertauschstation) mit 9 Fragen im Lese-Detektiv und über 30 weitere Aufgaben in Ableiten & Verlängern (g/k, b/p, eu/äu mit Hilfswörtern), Wortfamilien (unpassendes Wort finden), Wörter & Artikel (Mehrzahl, Plural-Regel), Adjektive steigern (auch nicht steigerbare!) und Verbformen (lesen/denken/fahren/springen, sein & haben)."
+      },
+      {
+        "type": "neu",
+        "text": "🗃️ Der Karteikasten ist jetzt auch DIGITAL (Kachel auf der Startseite): 3 Leitner-Fächer (jeden Tag · alle 3 Tage · alle 7 Tage), eine Runde zieht 5 fällige Karten – wackligste zuerst. Erst laut antworten, dann umdrehen, dann selbst werten: „Gewusst“ wandert weiter, „Nochmal“ kommt ans Runden-Ende und zurück in Fach 1. +24 neue Karten (56 gesamt), der Stand synct über den Tresor, pro Runde gibt es eine Münze."
+      }
+    ]
+  },
+  {
     "id": "rn-064",
     "version": "0.50.1",
     "datum": "2026-10-09",

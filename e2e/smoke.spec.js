@@ -1357,14 +1357,43 @@ test("🧭 Kompass-Countdown: Termine automatisch im Plan, Wochen-Fahrplan, Chip
   await expect(page.getByTestId("kompass-seite")).toBeVisible();
 });
 
+test("🗃️ Digitaler Karteikasten: Runde ziehen, werten, Nochmal kommt wieder, Stand überlebt Neustart", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("zum-kasten").click();
+  await expect(page.getByTestId("kasten-fach-1")).toContainText("56"); // alle Karten starten in Fach 1
+  await page.getByTestId("kasten-start").click();
+  // Karte 1: „Nochmal“ → bleibt in Fach 1 und kommt am Ende der Runde noch einmal
+  await page.getByTestId("karte-umdrehen").click();
+  await expect(page.getByTestId("kasten-antwort")).toBeVisible();
+  await page.getByTestId("karte-nochmal").click();
+  for (let i = 0; i < 4; i++) {
+    await page.getByTestId("karte-umdrehen").click();
+    await page.getByTestId("karte-gewusst").click();
+  }
+  await expect(page.getByTestId("kasten-karte")).toContainText("nochmal"); // ⏮️ Wiederholung …
+  await page.getByTestId("karte-umdrehen").click();
+  await page.getByTestId("karte-weiter").click(); // … ohne zweite Wertung
+  await expect(page.getByTestId("kasten-ergebnis")).toContainText("4 von 5");
+  await page.getByTestId("kasten-fertig").click();
+  await expect(page.getByTestId("kasten-fach-2")).toContainText("4");
+  // Stand überlebt den Neustart (Tresor); als Kind kommt erst die Tagesform-Frage
+  await page.reload();
+  await page.getByTestId("pin-eingabe").fill(PIN);
+  await page.getByTestId("pin-ok").click();
+  await page.getByTestId("zum-kasten").click();
+  await page.getByTestId("tf-gruen").click();
+  await expect(page.getByTestId("kasten-fach-2")).toContainText("4");
+  await expect(page.getByTestId("kasten-fach-1")).toContainText("52");
+});
+
 test("🗃️ Karteikarten: 4 je A4-Blatt, Rückseiten gespiegelt, Fach-Filter und Druck-Knopf", async ({ page }) => {
   await tresorAnlegen(page);
   await page.getByTestId("nav-eltern").click();
   await page.getByTestId("karten-oeffnen").click();
   await expect(page.getByTestId("karten-seite")).toBeVisible();
-  await expect(page.getByTestId("karten-blatt")).toHaveCount(16); // 32 Karten → 8× Vorder- + 8× Rückseiten
-  await expect(page.getByTestId("karte-vs")).toHaveCount(32);
-  await expect(page.getByTestId("karte-rs")).toHaveCount(32);
+  await expect(page.getByTestId("karten-blatt")).toHaveCount(28); // 56 Karten → 14× Vorder- + 14× Rückseiten
+  await expect(page.getByTestId("karte-vs")).toHaveCount(56);
+  await expect(page.getByTestId("karte-rs")).toHaveCount(56);
   await expect(page.getByTestId("karte-vs").first()).toContainText("❓ Aufgabe");
   await expect(page.getByTestId("karte-rs").first()).toContainText("✅ Lösung");
   // Duplex-Spiegelung: Karte 1 (vorn links) hat ihre Antwort auf dem Rückseiten-Blatt RECHTS
@@ -1373,9 +1402,9 @@ test("🗃️ Karteikarten: 4 je A4-Blatt, Rückseiten gespiegelt, Fach-Filter u
   await expect(blatt2.getByTestId("karte-rs").nth(0)).toContainText("braun");
   // Fach-Filter halbiert den Stapel
   await page.getByTestId("karten-wahl-mathe").click();
-  await expect(page.getByTestId("karten-blatt")).toHaveCount(8);
+  await expect(page.getByTestId("karten-blatt")).toHaveCount(12);
   await expect(page.getByTestId("karte-vs").first()).toContainText("7 · 8");
-  await expect(page.getByTestId("karten-drucken")).toContainText("8 Seiten · 16 Karten");
+  await expect(page.getByTestId("karten-drucken")).toContainText("12 Seiten · 24 Karten");
 });
 
 test("Auto-Sicherung: Änderungen wandern near-realtime im Hintergrund zum Server", async ({ page }) => {

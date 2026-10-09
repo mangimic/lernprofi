@@ -36,6 +36,24 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.51: Fundus & digitaler Karteikasten ----------
+console.log("== v0.51: Fundus & Kasten ==");
+test("v0.51: Fundus-Aufgaben, Leitner-Logik, Kasten-Route, Karten-IDs, Migration", (() => {
+  const kd = quelle("src/calc/aufgaben/kompassDeutsch.js");
+  const kk = quelle("src/calc/karteikasten.js");
+  const ka = quelle("src/calc/karteikarten.js");
+  const f = quelle("src/features/KartenKasten.jsx");
+  const a = quelle("src/App.jsx");
+  return kd.includes("FUNDUS") && kd.includes("Büchertauschstation") && kd.includes("LESEN_DATEN.hard.push")
+    && kk.includes("KASTEN_ABSTAND = { 1: 1, 2: 3, 3: 7 }") && kk.includes("karteWerten")
+    && ka.includes('id: "d32"') && ka.includes('id: "m24"')
+    && f.includes('data-test="kasten-start"') && f.includes("karte-gewusst") && f.includes("wiederholung")
+    && a.includes('route === "kasten"') && a.includes('"kasten"].includes(route)')
+    && quelle("src/calc/migrateData.js").includes("karteikasten")
+    && quelle("src/features/Start.jsx").includes('data-test="zum-kasten"')
+    && releaseNoteVorhanden("rn-065");
+})());
+
 // ---------- v0.50.1: Aufgabe/Lösung-Abzeichen ----------
 test("v0.50.1: jede Karte trägt das Aufgabe- bzw. Lösungs-Abzeichen", (() => {
   const f = quelle("src/features/Karteikarten.jsx");

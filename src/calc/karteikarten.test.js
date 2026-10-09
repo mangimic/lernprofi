@@ -2,9 +2,10 @@ import { describe, it, expect } from "vitest";
 import { KARTEIKARTEN, kartenSeiten } from "./karteikarten.js";
 
 describe("karteikarten", () => {
-  it("Kartensatz: je 16 Karten pro Fach, druckfertige Längen, saubere Sprache", () => {
-    expect(KARTEIKARTEN.filter((k) => k.fach === "deutsch").length).toBe(16);
-    expect(KARTEIKARTEN.filter((k) => k.fach === "mathe").length).toBe(16);
+  it("Kartensatz: 32 Deutsch + 24 Mathe, eindeutige IDs, druckfertige Längen, saubere Sprache", () => {
+    expect(KARTEIKARTEN.filter((k) => k.fach === "deutsch").length).toBe(32);
+    expect(KARTEIKARTEN.filter((k) => k.fach === "mathe").length).toBe(24);
+    expect(new Set(KARTEIKARTEN.map((k) => k.id)).size).toBe(KARTEIKARTEN.length);
     expect(KARTEIKARTEN.length % 4).toBe(0); // volle A4-Blätter
     for (const k of KARTEIKARTEN) {
       expect(k.vs.length, k.vs).toBeLessThanOrEqual(80);
@@ -29,5 +30,41 @@ describe("karteikarten", () => {
     expect(rest.length).toBe(2);
     expect(rest[1].vorne).toEqual([KARTEIKARTEN[4], null, null, null]);
     expect(rest[1].hinten).toEqual([null, KARTEIKARTEN[4], null, null]);
+  });
+});
+
+import { faelligeKarten, karteWerten, kastenZaehler, istFaellig, RUNDEN_GROESSE } from "./karteikasten.js";
+
+describe("karteikasten (digital, Leitner)", () => {
+  const HEUTE = "2026-10-09";
+  const MINI = [{ id: "a" }, { id: "b" }, { id: "c" }, { id: "d" }, { id: "e" }, { id: "f" }];
+
+  it("neu = fällig; Fach-Abstände 1/3/7 Tage; heute Geübtes ruht", () => {
+    expect(istFaellig({}, "a", HEUTE)).toBe(true);
+    expect(istFaellig({ a: { fach: 1, zuletzt: "2026-10-08" } }, "a", HEUTE)).toBe(true);
+    expect(istFaellig({ a: { fach: 1, zuletzt: HEUTE } }, "a", HEUTE)).toBe(false);
+    expect(istFaellig({ a: { fach: 2, zuletzt: "2026-10-07" } }, "a", HEUTE)).toBe(false); // erst nach 3 Tagen
+    expect(istFaellig({ a: { fach: 2, zuletzt: "2026-10-06" } }, "a", HEUTE)).toBe(true);
+    expect(istFaellig({ a: { fach: 3, zuletzt: "2026-10-03" } }, "a", HEUTE)).toBe(false);
+    expect(istFaellig({ a: { fach: 3, zuletzt: "2026-10-02" } }, "a", HEUTE)).toBe(true);
+  });
+
+  it("Runde: höchstens 5 Karten, wackligste (Fach 1) zuerst, deterministisch", () => {
+    const stand = { a: { fach: 3, zuletzt: "2026-10-01" }, b: { fach: 2, zuletzt: "2026-10-01" } };
+    const runde = faelligeKarten(MINI, stand, HEUTE);
+    expect(runde.length).toBe(RUNDEN_GROESSE);
+    expect(runde.map((k) => k.id)).toEqual(["c", "d", "e", "f", "b"]); // neue zuerst, dann Fach 2, Fach 3 fliegt raus
+  });
+
+  it("Werten: Gewusst wandert vor (max Fach 3), Nochmal zurück in Fach 1", () => {
+    let stand = {};
+    stand = karteWerten(stand, "a", true, HEUTE);
+    expect(stand.a).toEqual({ fach: 2, zuletzt: HEUTE });
+    stand = karteWerten(stand, "a", true, HEUTE);
+    stand = karteWerten(stand, "a", true, HEUTE);
+    expect(stand.a.fach).toBe(3); // Deckel
+    stand = karteWerten(stand, "a", false, HEUTE);
+    expect(stand.a.fach).toBe(1);
+    expect(kastenZaehler(MINI, stand)).toEqual({ 1: 6, 2: 0, 3: 0 });
   });
 });

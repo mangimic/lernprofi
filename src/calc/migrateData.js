@@ -34,6 +34,7 @@ export function leeresDokument(heute) {
       schrift: null,             // Schreib-Training: { reise: [{tag, satz, buchstabe, thumb, gross}] }
       aufsatz: { tag: "" },      // Aufsatz-Check: letzter belohnter Tag (1 Münze/Tag)
       wochenplan: null,          // 🗓️ selbst gesetztes Pensum: { montag, bloecke: [{id, tag, typ}] }
+      karteikasten: { stand: {}, runden: 0 }, // 🗃️ Leitner-Kasten: Karte → { fach 1-3, zuletzt }
     },
     einstellungen: {
       thema: "hell",   // "hell" | "dunkel"
@@ -213,6 +214,17 @@ export function migrateData(alt, heute) {
     bericht: ki.bericht === true, saetze: ki.saetze === true,
     modell: ["haiku", "sonnet", "opus"].includes(ki.modell) ? ki.modell : "sonnet",
   };
+
+  const kk = istObjekt(d.lernstand.karteikasten) ? d.lernstand.karteikasten : {};
+  const kkStand = {};
+  if (istObjekt(kk.stand)) {
+    for (const [id, e] of Object.entries(kk.stand).slice(0, 500)) {
+      if (istObjekt(e) && [1, 2, 3].includes(e.fach) && /^\d{4}-\d{2}-\d{2}$/.test(e.zuletzt)) {
+        kkStand[id.slice(0, 8)] = { fach: e.fach, zuletzt: e.zuletzt };
+      }
+    }
+  }
+  d.lernstand.karteikasten = { stand: kkStand, runden: Number.isInteger(kk.runden) && kk.runden >= 0 ? kk.runden : 0 };
 
   if (!Array.isArray(d.protokoll)) d.protokoll = [];
 

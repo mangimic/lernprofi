@@ -225,3 +225,86 @@ export const KOMPASS_DEUTSCH_DATEN = {
   steigern: STEIGERN_DATEN,
   verbform: VERBFORM_DATEN,
 };
+
+// ═══ 📚 FUNDUS aus der Kompass-Übungssammlung (mit Lösungsteil) ═══
+// Der Bericht über die Büchertauschstation + die Strategie-/Grammatik-
+// Aufgaben, umgesetzt ins 3-Antworten-Format. Absatzweise Kontexte,
+// damit der Lese-Detektiv nie einen Riesen-Text auf einmal zeigt.
+const F_B1 = "(1) An der Lindenwegschule verschwanden früher viele gelesene Bücher in Schränken. Die Kinder der Klasse 4b wollten, dass andere sie auch lesen können. Deshalb planten sie eine Büchertauschstation. Jedes Kind durfte ein gut erhaltenes Buch mitbringen. Niemand musste dafür Geld bezahlen.";
+const F_B2 = "(2) Zunächst suchte die Klasse einen geeigneten Platz. Auf dem Schulhof hätten Regen und Wind die Bücher beschädigen können. Schließlich durfte die Station im Eingangsbereich neben der Treppe stehen. Dort kommen morgens viele Kinder vorbei.";
+const F_B3 = "(3) Mira und Yusuf sortierten die Bücher nach Themen. Tiergeschichten bekamen einen grünen Punkt, Abenteuer einen roten und Sachbücher einen blauen. Beschädigte Bücher wollten die Kinder zuerst reparieren. Fehlende Seiten konnten sie allerdings nicht ersetzen.";
+const F_B4 = "(4) Für die Station gelten zwei Regeln: Wer ein Buch mitnimmt, bringt ein anderes zurück. Außerdem sollen alle sorgfältig mit den Büchern umgehen. Jeden Freitag prüfen zwei Kinder das Regal und stellen verrutschte Bücher aufrecht hin.";
+const F_B5 = "(5) Nach vier Wochen stellte die Klasse fest, dass besonders Tiergeschichten beliebt waren. Auch Kinder aus anderen Klassen nutzten das Angebot. Als Nächstes möchte die Klasse eine Ecke für Buchtipps einrichten.";
+
+LESEN_DATEN.easy.push(
+  { kontext: F_B1, f: "Was musste man für ein Buch bezahlen?", r: "Nichts – der Tausch ist kostenlos", x: ["Einen Euro pro Buch", "Das steht nicht im Text"], tipp: "„Niemand musste dafür Geld bezahlen.“" },
+  { kontext: F_B4, f: "An welchem Tag wird das Regal geprüft?", r: "Jeden Freitag", x: ["Jeden Montag", "Nur in den Ferien"], tipp: "Der Kontrolltag steht im vorletzten Satz." },
+);
+LESEN_DATEN.hard.push(
+  { kontext: F_B1, f: "Warum richtete die Klasse die Tauschstation ein?", r: "Andere Kinder sollten gelesene Bücher weiterverwenden", x: ["Die Bücher sollten verkauft werden", "Die Klasse brauchte Platz für Hefte"], tipp: "Der zweite Satz nennt den Wunsch der Klasse." },
+  { kontext: F_B2, f: "Warum steht das Regal im Eingangsbereich?", r: "Dort sind die Bücher vor Regen geschützt und gut erreichbar", x: ["Auf dem Schulhof darf niemand lesen", "Neben der Treppe ist es immer still"], tipp: "Vergleiche: Was wäre auf dem Schulhof passiert?" },
+  { kontext: F_B3, f: "Was bedeutet ein blauer Punkt?", r: "Das Buch ist ein Sachbuch", x: ["Das Buch ist eine Tiergeschichte", "Das Buch ist beschädigt"], tipp: "Drei Farben, drei Themen – such die Zuordnung." },
+  { kontext: F_B3, f: "Stimmt das? „Die Kinder ersetzen alle fehlenden Seiten.“", r: "Stimmt nicht – fehlende Seiten können sie nicht ersetzen", x: ["Stimmt – sie reparieren alles", "Das steht nicht im Text"], tipp: "Das Wort „allerdings“ leitet die Einschränkung ein." },
+  { kontext: F_B4, f: "Welche Regel gilt beim Mitnehmen eines Buches?", r: "Wer eins mitnimmt, bringt ein anderes zurück", x: ["Man zahlt einen Euro Pfand", "Man fragt zuerst die Lehrerin"], tipp: "Die erste Regel steht direkt nach dem Doppelpunkt." },
+  { kontext: F_B5, f: "Was plant die Klasse als Nächstes?", r: "Eine Ecke für Buchtipps", x: ["Einen Bücherverkauf", "Ein zweites Regal im Schulhof"], tipp: "Der letzte Satz verrät den Plan." },
+);
+
+STRATEGIE_DATEN.easy.push(
+  { f: "die R_der (am Fahrrad) – a oder ä? Strategie?", r: "Ableiten: das Rad → die Räder", x: ["Verlängern: die Räderer", "Merken"], tipp: "ä kommt von a: Rad → Räder." },
+  { f: "Das Boot sin_t – g oder k?", r: "k – Verlängern: sinken", x: ["g – Verlängern: singen", "g – Merken"], tipp: "Das Boot geht unter → sinken. Mila SINGT ein Lied (singen)." },
+  { f: "Der Kleber kle_t – b oder p?", r: "b – Verlängern: kleben", x: ["p – Verlängern: klepen", "p – Merken"], tipp: "Die Grundform macht den Laut hörbar: kle-ben." },
+  { f: "die H_ser (in der Straße) – au oder äu?", r: "äu – Ableiten: das Haus", x: ["eu – Merken", "äu – Verlängern: Häusers"], tipp: "Haus mit au → Häuser mit äu." },
+  { f: "der B_r (ein großes Wildtier) – welche Strategie?", r: "Merken: Bär mit ä", x: ["Ableiten von „bar“", "Verlängern: die Bären"], tipp: "Nicht jedes ä lässt sich ableiten – Bär ist ein Merkwort." },
+);
+STRATEGIE_DATEN.hard.push(
+  { f: "der Stau_ (auf dem Regal) – b oder p? Hilfswort?", r: "b – Verlängern: staubig", x: ["p – Merken", "b – Ableiten: der Stapel"], tipp: "staubig macht das b hörbar." },
+  { f: "das Kal_ (ein junges Rind) – b oder p?", r: "b – Verlängern: die Kälber", x: ["p – Verlängern: die Kälper", "p – Merken"], tipp: "Käl-ber – deutlich ein b." },
+  { f: "kräfti_ (g oder k)? Und welches Hilfswort?", r: "g – Verlängern: kräftige", x: ["k – Verlängern: kräftike", "g – Ableiten: die Kraft"], tipp: "Hier geht es um das LETZTE g – „kräftige“ macht es hörbar. (Das ä erklärt „Kraft“.)" },
+  { f: "die Kr_ter (im Beet) – eu oder äu?", r: "äu – Ableiten: das Kraut", x: ["eu – Merken", "äu – Verlängern: Kräuterer"], tipp: "Kraut mit au → Kräuter mit äu." },
+  { f: "Welches Wort schreibst du mit eu (nicht äu)?", r: "die Beute", x: ["die H_user (Haus)", "die M_use (Maus)"], tipp: "Beute hat KEIN verwandtes au-Wort – darum eu." },
+);
+
+WORTFAM_DATEN.easy.push(
+  { f: "Welches Nomen gehört zur Familie von „glücken“?", r: "das Glück", x: ["die Glocke", "der Klecks"], tipp: "glücken – das Glück – glücklich: ein Stamm." },
+  { f: "Welches Verb gehört zur Familie von „der Bruch“?", r: "brechen", x: ["brauchen", "backen"], tipp: "Der Stamm wechselt den Selbstlaut: brech/brich/bruch – eine Familie." },
+  { f: "Streiche das unpassende Wort: gehen – der Gang – gegen – der Gehweg", r: "gegen", x: ["der Gang", "der Gehweg"], tipp: "„gegen“ klingt ähnlich, hat aber nichts mit gehen zu tun." },
+);
+WORTFAM_DATEN.hard.push(
+  { f: "Streiche das unpassende Wort: käuflich – verkaufen – verlaufen – der Kaufladen", r: "verlaufen", x: ["käuflich", "der Kaufladen"], tipp: "verlaufen gehört zur Familie LAUFEN, der Rest zu KAUFEN." },
+  { f: "Streiche das unpassende Wort: arbeitslos – arbeiten – malen – bearbeiten", r: "malen", x: ["arbeitslos", "bearbeiten"], tipp: "Such den Stamm arbeit- in jedem Wort." },
+  { f: "Welches Adjektiv gehört zur Familie von „schlafen“?", r: "schläfrig", x: ["schlau", "schlaff"], tipp: "Schlaf → schläfrig: a wird zu ä, der Stamm bleibt." },
+);
+
+ZUSNOMEN_DATEN.easy.push(
+  { f: "Welcher bestimmte Artikel passt: ___ Fenster?", r: "das", x: ["der", "die"], tipp: "das Fenster – ein Fenster." },
+  { f: "Mehrzahl von „der Hut“?", r: "die Hüte", x: ["die Huten", "die Hüter"], tipp: "u wird zu ü: Hut → Hüte." },
+  { f: "Im Nominativ Plural lautet der bestimmte Artikel immer …?", r: "die", x: ["der", "das"], tipp: "die Vögel, die Länder, die Kinder – immer „die“." },
+);
+ZUSNOMEN_DATEN.hard.push(
+  { f: "Mehrzahl von „das Museum“?", r: "die Museen", x: ["die Museums", "die Musen"], tipp: "Fremdwort-Besonderheit: Museum → Museen." },
+  { f: "Mehrzahl von „das Land“?", r: "die Länder", x: ["die Lande", "die Länden"], tipp: "a → ä und -er: Länder." },
+  { f: "Warum ist „die Freiheit“ ein Nomen?", r: "Es hat die typische Nomen-Endung -heit", x: ["Es beschreibt eine Tätigkeit", "Es ist ein Begleiter"], tipp: "-heit, -keit, -ung, -nis: typische Nomen-Endungen." },
+);
+
+STEIGERN_DATEN.easy.push(
+  { f: "schmal – ? – am schmalsten", r: "schmaler (auch „schmäler“ ist richtig)", x: ["schmalerer", "mehr schmal"], tipp: "Seltener Fall mit zwei richtigen Formen: schmaler oder schmäler." },
+  { f: "glücklich – glücklicher – ?", r: "am glücklichsten", x: ["am glücklichesten", "am meisten glücklich"], tipp: "Auch lange Adjektive steigern mit -er/-sten." },
+);
+STEIGERN_DATEN.hard.push(
+  { f: "Wie steigert man „tot“?", r: "Gar nicht – tot ist nicht steigerbar", x: ["tot – toter – am totesten", "tot – töter – am tötesten"], tipp: "Wörtlich gebraucht gibt es kein „töter“ – entweder tot oder nicht." },
+  { f: "Wie steigert man „einzig“?", r: "Gar nicht – einzig ist nicht steigerbar", x: ["einzig – einziger – am einzigsten", "einzig – mehr einzig"], tipp: "„Einzig“ heißt schon: nur eins. Mehr geht nicht." },
+  { f: "Welches Wortpaar ist Synonym UND Antonym zu „tapfer“ (in dieser Reihenfolge)?", r: "mutig · feige", x: ["feige · mutig", "stark · groß"], tipp: "Synonym = ähnliche Bedeutung, Antonym = Gegenteil." },
+);
+
+VERBFORM_DATEN.easy.push(
+  { f: "„Heute ___ Amir am liebsten Abenteuer.“ (lesen, Präsens)", r: "liest", x: ["las", "lasen"], tipp: "Heute = jetzt → Präsens: er liest." },
+  { f: "„Gestern ___ Lea eine spannende Geschichte.“ (lesen)", r: "las", x: ["liest", "lest"], tipp: "Gestern = Vergangenheit → Präteritum: sie las." },
+  { f: "„du bist“ im Präteritum?", r: "du warst", x: ["du bistest", "du wardst"], tipp: "sein ist besonders: bin/bist – war/warst." },
+);
+VERBFORM_DATEN.hard.push(
+  { f: "„Früher ___ die Kinder gemeinsam Bücher.“ (lesen, Präteritum wir/sie)", r: "lasen", x: ["lesten", "liesen"], tipp: "lesen – las – wir/sie lasen." },
+  { f: "„Damals ___ manche Erwachsene anders über Comics.“ (denken, Präteritum)", r: "dachten", x: ["denkten", "gedacht"], tipp: "denken – dachte: unregelmäßig mit ch." },
+  { f: "„es hat“ im Präteritum?", r: "es hatte", x: ["es hattete", "es gehabt"], tipp: "haben – hatte – gehabt." },
+  { f: "„Letzten Dienstag ___ wir mit dem Bus zum Hallenbad.“ (fahren)", r: "fuhren", x: ["fahrten", "gefahren"], tipp: "fahren – fuhr – wir fuhren: a → u." },
+  { f: "„Einige Kinder ___ vom Startblock ins Wasser.“ (springen, Präteritum)", r: "sprangen", x: ["springten", "gesprungen"], tipp: "springen – sprang – gesprungen: i → a." },
+);
