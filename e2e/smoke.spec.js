@@ -1008,6 +1008,22 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await page.getByTestId("termin-entfernen").click();
   await expect(page.getByTestId("tag-0").getByTestId("termin-chip")).toHaveCount(0);
 
+  // 🔁 Serientermin: 4 Wochen „Wörter der Woche" montags – gilt auch nächste Woche, Serie komplett löschbar
+  await page.getByTestId("kind-termin").click();
+  await page.getByTestId("kt-art-wdw").click();
+  await page.getByTestId("kt-tag-0").click();
+  await page.getByTestId("kt-serie-4").click();
+  await page.getByTestId("kt-ok").click();
+  await expect(page.getByTestId("tag-0").getByTestId("termin-chip")).toHaveCount(1);
+  await page.getByTestId("woche-naechste").click();
+  await expect(page.getByTestId("tag-0").getByTestId("termin-chip")).toHaveCount(1); // Serie läuft weiter
+  await page.getByTestId("tag-0").getByTestId("termin-chip").click();
+  await expect(page.getByTestId("termin-dialog")).toContainText("Serie");
+  await page.getByTestId("serie-entfernen").click();
+  await expect(page.getByTestId("tag-0").getByTestId("termin-chip")).toHaveCount(0);
+  await page.getByTestId("woche-diese").click();
+  await expect(page.getByTestId("tag-0").getByTestId("termin-chip")).toHaveCount(0); // ganze Serie weg
+
   // ❌ Ausfall: fester Termin antippen → fällt diese Woche aus → Fenster wird frei → ↩️ holt ihn zurück
   await page.getByTestId("fest-1-1020").click();
   await expect(page.getByTestId("fest-dialog")).toContainText("Sport");

@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-053",
+    "version": "0.40.0",
+    "datum": "2026-10-09",
+    "titel": "Serientermine",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🔁 Serientermine: Beim Eintragen eines Termins lässt sich jetzt „Wiederholen“ wählen – 4 Wochen, 12 Wochen oder das ganze Schuljahr (z. B. „Wörter der Woche jeden Freitag“). Termine, die auf Ferien oder Feiertage fallen würden, werden automatisch übersprungen."
+      },
+      {
+        "type": "neu",
+        "text": "Jeder Serien-Termin ist einzeln löschbar; im Termin-Kärtchen gibt es zusätzlich „Ganze Serie entfernen“."
+      }
+    ]
+  },
+  {
     "id": "rn-052",
     "version": "0.39.1",
     "datum": "2026-10-09",

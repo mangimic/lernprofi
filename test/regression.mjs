@@ -36,6 +36,18 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.40: Serientermine ----------
+console.log("== v0.40: Serientermine ==");
+test("v0.40: terminSerie überspringt Ferien, Serie gemeinsam löschbar, Migration erhält serie", (() => {
+  const w = quelle("src/calc/wochenplan.js");
+  const f = quelle("src/features/Wochenplan.jsx");
+  return w.includes("terminSerie") && w.includes("schulfreiAm(d)) continue")
+    && f.includes("kt-serie-") && f.includes('data-test="serie-entfernen"')
+    && f.includes('"schuljahr" ? SCHULJAHR.bis')
+    && quelle("src/calc/migrateData.js").includes("t.serie")
+    && releaseNoteVorhanden("rn-053");
+})());
+
 // ---------- v0.39.1: Heute-Sprung überall ----------
 console.log("== v0.39.1: Heute-Fix ==");
 test("v0.39.1: Heute setzt Woche UND Monat; Wochen-Pfeile nur in der Wochenansicht", (() => {

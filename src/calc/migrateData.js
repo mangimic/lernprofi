@@ -182,7 +182,11 @@ export function migrateData(alt, heute) {
     .map((r) => ({ tag: r.tag, slot: r.slot, typ: r.typ.slice(0, 20) })).slice(0, 60);
   d.einstellungen.termine = (Array.isArray(d.einstellungen.termine) ? d.einstellungen.termine : [])
     .filter((t) => istObjekt(t) && /^\d{4}-\d{2}-\d{2}$/.test(t.tag) && ["ka", "kompass", "wdw"].includes(t.art))
-    .map((t, i) => ({ id: Number.isInteger(t.id) ? t.id : i + 1, tag: t.tag, art: t.art, fach: typeof t.fach === "string" ? t.fach.slice(0, 40) : "" }))
+    .map((t, i) => ({
+      id: Number.isInteger(t.id) ? t.id : i + 1, tag: t.tag, art: t.art,
+      fach: typeof t.fach === "string" ? t.fach.slice(0, 40) : "",
+      ...(Number.isInteger(t.serie) ? { serie: t.serie } : {}),
+    }))
     .slice(0, 60); // ein ganzes Schuljahr voller Termine
   const ki = istObjekt(d.einstellungen.ki) ? d.einstellungen.ki : {};
   d.einstellungen.ki = {

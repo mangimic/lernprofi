@@ -385,6 +385,21 @@ export function termineDerWoche(termine, montag) {
   return je;
 }
 
+/* 🔁 Serientermin: „Wörter der Woche jeden Freitag" & Co. Die Serie
+   wird als einzelne Termine materialisiert (einzeln löschbar), alle
+   tragen dieselbe serie-Nummer (→ „ganze Serie entfernen"). Termine,
+   die auf Ferien oder Feiertage fielen, werden übersprungen. */
+export function terminSerie(bestehend, ersterTag, art, fach, bisDatum) {
+  const basisId = bestehend.reduce((m, t) => Math.max(m, t.id), 0);
+  const serie = basisId + 1;
+  const neue = [];
+  for (let d = ersterTag; d <= bisDatum; d = tagDatum(d, 7)) {
+    if (schulfreiAm(d)) continue;
+    neue.push({ id: basisId + 1 + neue.length, tag: d, art, fach, serie });
+  }
+  return [...bestehend, ...neue].slice(0, 60);
+}
+
 /* 🌅 Auffrischung: Steht an einem Tag ein Test (Klassenarbeit, Kompass,
    Wörter der Woche), gehört morgens VOR der Schule ein kurzer
    Auffrisch-Moment in den Plan – 5 Minuten anschauen reicht, geübt

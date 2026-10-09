@@ -7,7 +7,7 @@ import {
   termineDerWoche, planPruefung, wochenBilanz, festerTermin, SCHULE, auffrischungen,
   kalenderWoche, routineAusPlan, routineAnwenden, schulZeilen, blockNotiz,
   istAusgefallen, ausfallSetzen, ausfallAufheben, blockVerschieben, wocheKopieren,
-  blockDauer, blockDauerVon, slotBelegt as slotBelegtCalc, planSchreiben,
+  blockDauer, blockDauerVon, slotBelegt as slotBelegtCalc, planSchreiben, terminSerie,
 } from "../calc/wochenplan.js";
 import { schulfreiAm, ferienAm, monatsGitter, monatsName, monatSchritt, FERIEN_BW, SCHULJAHR } from "../calc/kalender.js";
 
@@ -267,7 +267,7 @@ export default function Wochenplan() {
   const [editor, setEditor] = useState(null); // ✏️ Baustein-Notiz: { id, notiz }
   const [festDialog, setFestDialog] = useState(null); // ❌ Ausfall-Frage für einen festen Termin
   const [verschieben, setVerschieben] = useState(null); // 📍 Baustein-Id, die ein neues Fenster sucht
-  const [kindTermin, setKindTermin] = useState(null); // 📝 Eingabe: { art, fach, tag }
+  const [kindTermin, setKindTermin] = useState(null); // 📝 Eingabe: { art, fach, tag, serie }
   const [fenster, setFenster] = useState(null); // 🪟 Direkt-Wahl fürs Fenster: { tag, slot, suche }
   const [terminDialog, setTerminDialog] = useState(null); // eingetragenen Termin ansehen/entfernen
   const montagAktiv = wochenMontag(heute);
@@ -393,7 +393,7 @@ export default function Wochenplan() {
               ➡️ Für nächste Woche übernehmen
             </button>
           )}
-          <button data-test="kind-termin" onClick={() => setKindTermin({ art: "ka", fach: "", tag: null })}
+          <button data-test="kind-termin" onClick={() => setKindTermin({ art: "ka", fach: "", tag: null, serie: "nein" })}
             style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: T.weich, color: T.text }}>
             📝 Termin eintragen
           </button>
@@ -580,13 +580,30 @@ export default function Wochenplan() {
                 </button>
               ))}
             </div>
+            <p style={{ margin: "0 0 4px", fontSize: "var(--schrift-klein)", color: T.textLeise }}>🔁 Wiederholen?</p>
+            <div style={{ display: "flex", gap: 4, marginBottom: 8 }}>
+              {[["nein", "einmalig"], ["4", "4 Wochen"], ["12", "12 Wochen"], ["schuljahr", "ganzes Schuljahr"]].map(([k, label]) => (
+                <button key={k} data-test={`kt-serie-${k}`} onClick={() => setKindTermin({ ...kindTermin, serie: k })}
+                  style={{ flex: 1, height: "auto", minHeight: 0, padding: "8px 2px", fontWeight: 700, fontSize: "12.5px",
+                    background: kindTermin.serie === k ? T.primaer : T.weich, color: kindTermin.serie === k ? T.primaerText : T.text }}>
+                  {label}
+                </button>
+              ))}
+            </div>
             <input data-test="kt-fach" type="text" maxLength={40} placeholder="Fach oder Thema (z. B. Mathe)"
               value={kindTermin.fach} onChange={(e) => setKindTermin({ ...kindTermin, fach: e.target.value })}
               style={{ width: "100%", boxSizing: "border-box", minHeight: "var(--touch)", borderRadius: T.radiusKlein, border: `1px solid ${T.rand}`, padding: "0 12px", background: T.grund, color: T.text }} />
             <button data-test="kt-ok" disabled={kindTermin.tag === null}
               onClick={() => {
-                const id = data.einstellungen.termine.reduce((m, t) => Math.max(m, t.id), 0) + 1;
-                const neu = [...data.einstellungen.termine, { id, tag: tagDatum(plan.montag, kindTermin.tag), art: kindTermin.art, fach: kindTermin.fach.trim() }].slice(0, 60);
+                const ersterTag = tagDatum(plan.montag, kindTermin.tag);
+                let neu;
+                if (kindTermin.serie === "nein") {
+                  const id = data.einstellungen.termine.reduce((m, t) => Math.max(m, t.id), 0) + 1;
+                  neu = [...data.einstellungen.termine, { id, tag: ersterTag, art: kindTermin.art, fach: kindTermin.fach.trim() }].slice(0, 60);
+                } else {
+                  const bis = kindTermin.serie === "schuljahr" ? SCHULJAHR.bis : tagDatum(ersterTag, (parseInt(kindTermin.serie, 10) - 1) * 7);
+                  neu = terminSerie(data.einstellungen.termine, ersterTag, kindTermin.art, kindTermin.fach.trim(), bis);
+                }
                 logChange({ ...data, einstellungen: { ...data.einstellungen, termine: neu } }, "wochenplan", "neu", "Termin selbst eingetragen");
                 setKindTermin(null);
               }}
@@ -611,8 +628,18 @@ export default function Wochenplan() {
               {TERMIN_ARTEN[terminDialog.art]?.emoji} {TERMIN_ARTEN[terminDialog.art]?.name}{terminDialog.fach ? ` · ${terminDialog.fach}` : ""}
             </h3>
             <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-              am {terminDialog.tag.split("-").reverse().join(".")}
+              am {terminDialog.tag.split("-").reverse().join(".")}{Number.isInteger(terminDialog.serie) ? " · Teil einer 🔁 Serie" : ""}
             </p>
+            {Number.isInteger(terminDialog.serie) && (
+              <button data-test="serie-entfernen"
+                onClick={() => {
+                  logChange({ ...data, einstellungen: { ...data.einstellungen, termine: data.einstellungen.termine.filter((x) => x.serie !== terminDialog.serie) } }, "wochenplan", "geaendert", "Ganze Termin-Serie entfernt");
+                  setTerminDialog(null);
+                }}
+                style={{ width: "100%", marginBottom: 6, background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+                🔁🗑️ Ganze Serie entfernen
+              </button>
+            )}
             <button data-test="termin-entfernen"
               onClick={() => {
                 logChange({ ...data, einstellungen: { ...data.einstellungen, termine: data.einstellungen.termine.filter((x) => x.id !== terminDialog.id) } }, "wochenplan", "geaendert", "Termin entfernt");

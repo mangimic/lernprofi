@@ -3,7 +3,7 @@ import {
   FERIEN_BW, FEIERTAGE_BW, SCHULJAHR, ferienAm, feiertagAm, schulfreiAm,
   monatsGitter, monatsName, monatSchritt,
 } from "./kalender.js";
-import { tagesStunden, planFuerWoche, planSchreiben, blockHinzu, leererPlan, planPruefung, FESTE_TERMINE_STANDARD } from "./wochenplan.js";
+import { tagesStunden, planFuerWoche, planSchreiben, blockHinzu, leererPlan, planPruefung, FESTE_TERMINE_STANDARD, terminSerie } from "./wochenplan.js";
 
 describe("kalender – Schuljahr 2026/27 (BW)", () => {
   it("Ferien und Feiertage: Ränder stimmen, Lücken sind Schule", () => {
@@ -42,6 +42,18 @@ describe("kalender – Schuljahr 2026/27 (BW)", () => {
     expect(monatsName(2026, 10)).toBe("Oktober 2026");
     expect(monatSchritt(2026, 12, 1)).toEqual({ jahr: 2027, monat: 1 });
     expect(monatSchritt(2027, 1, -1)).toEqual({ jahr: 2026, monat: 12 });
+  });
+
+  it("Serientermin: wöchentlich, Ferien übersprungen, gemeinsame Serie, Limit 60", () => {
+    const s = terminSerie([{ id: 3, tag: "2026-10-05", art: "ka", fach: "x" }], "2026-10-16", "wdw", "Wörter", "2026-11-13");
+    const neue = s.filter((t) => t.serie);
+    expect(neue.map((t) => t.tag)).toEqual(["2026-10-16", "2026-10-23", "2026-11-06", "2026-11-13"]); // 30.10. = Herbstferien
+    expect(new Set(neue.map((t) => t.serie)).size).toBe(1);
+    expect(neue.every((t) => t.id > 3)).toBe(true);
+    // ganzes Schuljahr bleibt unter dem Limit
+    const jahr = terminSerie([], "2026-10-16", "wdw", "", "2027-09-12");
+    expect(jahr.length).toBeLessThanOrEqual(60);
+    expect(jahr.some((t) => t.tag >= "2027-07-29" && t.tag <= "2027-09-11")).toBe(false); // Sommerferien frei
   });
 
   it("Mehr-Wochen-Dokument: jede Woche eigener Plan, Alt-Format wird gehoben", () => {
