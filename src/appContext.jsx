@@ -60,7 +60,22 @@ export function isoHeute(jetzt = new Date()) {
 export function AppProvider({ children }) {
   const heute = useMemo(() => isoHeute(), []);
   const [data, setData] = useState(() => migrateData(null, heute));
-  const [route, setRoute] = useState("start");
+  const [route, setRouteRoh] = useState("start");
+  // 🧭 Herkunft merken: Wer von einer Seite in eine andere springt (z. B.
+  // Kompass → Übung), kommt mit navZurueck wieder dort an – nicht auf Start.
+  const herkunftRef = useRef([]);
+  const setRoute = (r) => {
+    setRouteRoh((alt) => {
+      if (r !== alt) herkunftRef.current = [...herkunftRef.current.slice(-9), alt];
+      return r;
+    });
+  };
+  const navZurueck = () => {
+    const h = herkunftRef.current;
+    const ziel = h.length ? h[h.length - 1] : "start";
+    herkunftRef.current = h.slice(0, -1);
+    setRouteRoh(ziel);
+  };
   const [uebenZiel, setUebenZiel] = useState(null); // Lernfeld-Key: Üben startet direkt dort (Trainingsplan)
   const [tresorStatus, setTresorStatus] = useState("laden");
   const [elternModus, setElternModus] = useState(false);
@@ -299,7 +314,7 @@ export function AppProvider({ children }) {
 
   const wert = {
     data, update, logChange, rueckgaengig, T, heute, route, navTo: setRoute, isMobile, tresor, fokus,
-    uebenZiel, uebenZielSetzen: setUebenZiel, autoSync,
+    uebenZiel, uebenZielSetzen: setUebenZiel, autoSync, navZurueck,
   };
   return <AppContext.Provider value={wert}>{children}</AppContext.Provider>;
 }

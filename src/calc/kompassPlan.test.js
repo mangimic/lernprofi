@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { tageBis, kompassTermine, kompassWochen, KOMPASS_STANDARD } from "./kompassPlan.js";
+import { tageBis, kompassTermine, kompassWochen, KOMPASS_STANDARD, kompassUebernehmen } from "./kompassPlan.js";
+import { planFuerWoche, blockHinzu, blockFertig, FESTE_TERMINE_STANDARD, leererPlan, planSchreiben } from "./wochenplan.js";
 
 // Fixes Test-Datum: 6 Wochen vor den Kompass-Terminen (fiktive Daten, kein Kind-Bezug).
 const HEUTE = "2026-10-09";
@@ -50,5 +51,48 @@ describe("kompassPlan", () => {
     const w = kompassWochen(HEUTE, [], stufen);
     expect(w[4].deutsch).toEqual(["steigern", "verbform"]);
     expect(w[4].mathe).toEqual(["mgeo", "mdaten"]);
+  });
+});
+
+describe("kompassUebernehmen", () => {
+  const LEER = { plaene: {} };
+
+  it("Pflicht zuerst: Hausaufgaben + Schlagzeug stehen vor dem Kompass-Thema", () => {
+    const wochen = kompassWochen(HEUTE, [], {});
+    const erg = kompassUebernehmen(LEER, wochen.slice(0, 1), FESTE_TERMINE_STANDARD);
+    const plan = planFuerWoche(erg.doc, wochen[0].montag);
+    const mo = plan.bloecke.filter((b) => b.tag === 0).sort((a, b) => a.slot - b.slot);
+    expect(mo.map((b) => b.typ)).toEqual(["hausaufgaben", "schlagzeug", "deutsch"]);
+    expect(mo[2].notiz).toBe("Lese-Detektiv");
+    expect(mo[2].slot).toBeGreaterThan(mo[1].slot); // Thema HINTER der Pflicht
+    // Dienstag: die feste Schlagzeug-Stunde zählt – kein Extra-Baustein nötig
+    const di = plan.bloecke.filter((b) => b.tag === 1);
+    expect(di.some((b) => b.typ === "schlagzeug")).toBe(false);
+    expect(di.some((b) => b.typ === "hausaufgaben")).toBe(true);
+    const diDeutsch = di.find((b) => b.typ === "deutsch");
+    expect(diDeutsch.notiz).toBe("Ableiten & Verlängern");
+    expect(diDeutsch.slot).toBeGreaterThanOrEqual(990); // nach der Schlagzeug-Stunde (16:00–16:30)
+    expect(erg.eingeplant).toBe(4);
+
+    // Idempotent: zweiter Lauf plant nichts doppelt
+    const nochmal = kompassUebernehmen(erg.doc, wochen.slice(0, 1), FESTE_TERMINE_STANDARD);
+    expect(nochmal.eingeplant).toBe(0);
+  });
+
+  it("Kompass hat Vorrang: ersetzt Freizeit, nie Erledigtes", () => {
+    const montag = "2026-10-05";
+    let plan = leererPlan(montag);
+    plan = blockHinzu(plan, 0, "hausaufgaben", 780);
+    plan = blockHinzu(plan, 0, "schlagzeug", 810);
+    for (let slot = 840; slot < 1140; slot += 30) plan = blockHinzu(plan, 0, "freunde", slot); // Tag voll
+    plan = blockFertig(plan, 3); // 14:00-Freunde ist erledigt → tabu
+    const doc = planSchreiben(LEER, plan);
+    const erg = kompassUebernehmen(doc, [{ montag, deutsch: ["lesen"], mathe: [] }], []);
+    const neu = planFuerWoche(erg.doc, montag);
+    expect(erg.ersetzt).toBe(1);
+    expect(neu.bloecke.find((b) => b.slot === 840).typ).toBe("freunde");  // fertig bleibt
+    const thema = neu.bloecke.find((b) => b.typ === "deutsch");
+    expect(thema.slot).toBe(870); // erster ersetzbarer Freizeit-Block danach
+    expect(thema.notiz).toBe("Lese-Detektiv");
   });
 });

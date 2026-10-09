@@ -724,6 +724,12 @@ test("🖼️ Aufgaben-Bilder: Zahlenstrahl, Figur, Kugel-Säcke und Verkehrssch
   await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
   await page.getByTestId("weiter-knopf").click();
   await expect(page.locator('[data-test="aufgaben-bild"][data-art="schilder"]')).toBeVisible();
+  // 🧠 Merk-Bild erscheint erst NACH der Antwort (Karten: Deutschland mit BW-Punkt)
+  await page.getByTestId("abbrechen").click();
+  await page.getByTestId("bereich-skarte").click();
+  await expect(page.locator('[data-test="aufgaben-bild"][data-art="dkarte"]')).toHaveCount(0);
+  await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+  await expect(page.locator('[data-test="aufgaben-bild"][data-art="dkarte"][data-merk="1"]')).toBeVisible();
 });
 
 test("Zahlenblöcke: Stellenwert-Aufgaben zeigen das Dienes-Material als Grafik", async ({ page }) => {
@@ -789,6 +795,8 @@ test("Einstufungstest: adaptiv testen, Stufen einstellen, Trainingsplan führt z
   await expect(page.getByTestId("frage-karte")).toContainText("das oder dass?");
   await expect(page.getByTestId("frage-karte")).toContainText("Stufe 1");
   await page.getByTestId("abbrechen").click();
+  await expect(page.getByTestId("trainingsplan")).toBeVisible(); // 🧭 zurück zur Herkunft (Start), nicht in der Bereichs-Wahl
+  await page.getByTestId("nav-ueben").click();
   // 🎯-Abzeichen: an der Gruppe UND am Bereich, Mathe nach Einstufung auf Stufe 3
   await expect(page.getByTestId("gruppe-schreiben")).toContainText("🎯 empfohlen");
   await page.getByTestId("gruppe-schreiben").click();
@@ -1329,11 +1337,24 @@ test("🧭 Kompass-Countdown: Termine automatisch im Plan, Wochen-Fahrplan, Chip
   await page.getByTestId("nav-eltern").click();
   await expect(page.getByTestId("termin-zeile")).toHaveCount(2);
   await expect(page.getByTestId("termin-zeile").first()).toContainText("Kompass-Test");
-  // Ein Fokus-Chip startet die Übung direkt (Lese-Detektiv mit Textabschnitt)
+  // 📅 Fahrplan übernehmen: Pflicht zuerst (HA + Schlagzeug), Thema dahinter – doppelt sicher
+  await page.getByTestId("nav-start").click();
+  await page.getByTestId("kompass-karte").click();
+  await page.getByTestId("kp-in-plan").click();
+  await expect(page.getByTestId("kp-in-plan-ergebnis")).toContainText("eingeplant");
+  await page.getByTestId("kp-in-plan").click();
+  await expect(page.getByTestId("kp-in-plan-ergebnis")).toContainText("nichts doppelt");
+  await page.getByTestId("nav-plan").click();
+  await expect(page.getByTestId("tag-0")).toContainText("Hausaufgaben");
+  await expect(page.getByTestId("tag-0")).toContainText("Schlagzeug");
+  await expect(page.getByTestId("tag-0")).toContainText("Lese-Detektiv");
+  // Ein Fokus-Chip startet die Übung direkt – und Abbrechen führt ZURÜCK zum Kompass
   await page.getByTestId("nav-start").click();
   await page.getByTestId("kompass-karte").click();
   await page.locator('[data-test="kp-fokus-lesen"]').first().click();
   await expect(page.getByTestId("frage-kontext")).toBeVisible();
+  await page.getByTestId("abbrechen").click();
+  await expect(page.getByTestId("kompass-seite")).toBeVisible();
 });
 
 test("Auto-Sicherung: Änderungen wandern near-realtime im Hintergrund zum Server", async ({ page }) => {

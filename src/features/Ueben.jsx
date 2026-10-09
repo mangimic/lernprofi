@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useApp } from "../appContext.jsx";
 import { MATHE_DATEN, MATHE_BEREICHE } from "../calc/aufgaben/mathe.js";
 import { SACH_DATEN, SACH_BEREICHE } from "../calc/aufgaben/sachkunde.js";
@@ -155,7 +155,7 @@ function faecherBauen(thema) {
 }
 
 export default function Ueben() {
-  const { data, logChange, T, heute, fokus, uebenZiel, uebenZielSetzen } = useApp();
+  const { data, logChange, T, heute, fokus, uebenZiel, uebenZielSetzen, navZurueck } = useApp();
   const [fachId, setFachId] = useState("deutsch");
   const [gruppe, setGruppe] = useState(null); // 🗂️ geöffnete Deutsch-Gruppe (weniger Auswahl auf einmal)
   const [runde, setRunde] = useState(null);
@@ -193,9 +193,16 @@ export default function Ueben() {
     });
   };
 
-  // 🎯 Trainingsplan-Deep-Link: Startseite wählt ein Lernfeld vor
+  // 🎯 Deep-Link (Startseite/Kompass wählt ein Lernfeld vor): Herkunft merken,
+  // damit Abbrechen/Fertig wieder DORT landet – nicht in der Bereichs-Wahl.
+  const kamVonAussen = useRef(false);
+  const rundeZu = () => {
+    setRunde(null);
+    if (kamVonAussen.current) { kamVonAussen.current = false; navZurueck(); }
+  };
   useEffect(() => {
     if (!uebenZiel || runde) return;
+    kamVonAussen.current = true;
     for (const f of faecher) {
       const b = f.bereiche.find((x) => x.key === uebenZiel);
       if (b) { setFachId(f.id); starten(b, f); break; }
@@ -360,7 +367,7 @@ export default function Ueben() {
 
   // --- Modul (Vorgangsbeschreibung): eigene Ansicht statt Runde ---
   if (runde?.typ === "modul") {
-    return <Vorgang zurueck={() => setRunde(null)} />;
+    return <Vorgang zurueck={rundeZu} />;
   }
 
   // --- Ergebnis-Karte ---
@@ -387,7 +394,7 @@ export default function Ueben() {
           <button data-test="nochmal-knopf" onClick={() => starten(runde)} style={{ ...primaerKnopf, marginBottom: 8 }}>
             🔁 Noch eine Runde
           </button>
-          <button data-test="zu-bereichen" onClick={() => setRunde(null)}
+          <button data-test="zu-bereichen" onClick={rundeZu}
             style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
             ← Andere Übung wählen
           </button>
@@ -451,6 +458,7 @@ export default function Ueben() {
                   {antwortRichtig(a, runde.gewaehlt) ? "Richtig! 🌟 " : <>Fast! Richtig ist <b>{a.r}</b>. 💡 </>}{a.tipp}
                 </p>
               )}
+              {beantwortet && a.merkbild && <AufgabenBild b={a.merkbild} merk />}
             </>
           ) : runde.typ === "umstellen" ? (
             <>
@@ -623,7 +631,7 @@ export default function Ueben() {
             {runde.index + 1 < runde.aufgaben.length ? "Weiter" : "Runde abschließen"}
           </button>
         </div>
-        <button data-test="abbrechen" onClick={() => setRunde(null)}
+        <button data-test="abbrechen" onClick={rundeZu}
           style={{ background: "transparent", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           ← Abbrechen (zählt nicht)
         </button>

@@ -170,13 +170,14 @@ describe("aufgabenRunde", () => {
   });
 
   it("🖼️ Aufgaben-Bilder: jede bild-Angabe hat eine bekannte Art und gültige Felder", () => {
-    const ARTEN = ["strahl", "folge", "mauer", "form", "buchstaben", "kaestchen", "wuerfelturm", "netz", "uhr", "kugeln", "rad", "balken", "striche", "schilder"];
+    const ARTEN = ["strahl", "folge", "mauer", "form", "buchstaben", "kaestchen", "wuerfelturm", "netz", "uhr", "kugeln", "rad", "balken", "striche", "schilder", "stromkreis", "kompassrose", "sonne", "dkarte"];
     const alle = [MATHE_DATEN, SACH_DATEN].flatMap((daten) =>
       Object.values(daten).flatMap((pool) => [...pool.easy, ...pool.hard]));
-    const mitBild = alle.filter((a) => a.bild);
-    expect(mitBild.length).toBeGreaterThanOrEqual(55); // Mathe + Radfahrprüfung sind illustriert
-    for (const a of mitBild) {
-      const b = a.bild;
+    const mitBild = alle.flatMap((a) => [a.bild, a.merkbild].filter(Boolean).map((b) => ({ ...b, f: a.f })));
+    expect(mitBild.length).toBeGreaterThanOrEqual(70); // Mathe + Sachkunde sind illustriert
+    expect(alle.filter((a) => a.merkbild).length).toBeGreaterThanOrEqual(12); // 🧠 Merk-Bilder nach der Antwort
+    for (const b of mitBild) {
+      const a = b;
       expect(ARTEN, a.f).toContain(b.art);
       if (b.art === "strahl") {
         expect(b.von).toBeLessThan(b.bis);
@@ -195,6 +196,8 @@ describe("aufgabenRunde", () => {
       if (b.art === "schilder") {
         for (const sch of b.schilder) expect(["vorfahrt-achten", "stopp", "vorfahrtsstrasse", "ampel-rot", "zebrastreifen"], a.f).toContain(sch);
       }
+      if (b.art === "dkarte") expect(["n", "no", "o", "so", "s", "sw", "w", "mitte"], a.f).toContain(b.punkt);
+      if (b.art === "sonne") expect(["osten", "sueden", "westen"], a.f).toContain(b.wo);
     }
   });
 

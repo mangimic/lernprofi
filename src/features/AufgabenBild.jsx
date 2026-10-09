@@ -301,22 +301,113 @@ function Schilder({ b }) {
   );
 }
 
+/* ⚡ Einfacher Stromkreis: Batterie → Kabel → Schalter → Lampe. */
+function Stromkreis({ b }) {
+  const an = b.an !== false;
+  return (
+    <svg width="190" height="110" viewBox="0 0 190 110" role="img" aria-label={`Stromkreis, Lampe ${an ? "leuchtet" : "aus"}`}>
+      <rect x="14" y="14" width="162" height="82" rx="10" fill="none" stroke={LINIE} strokeWidth="2.5" />
+      {/* Batterie links */}
+      <rect x="4" y="38" width="20" height="34" rx="3" fill={FLAECHE} stroke={LINIE} strokeWidth="2" />
+      <rect x="9" y="32" width="10" height="6" fill={LINIE} />
+      <text x="14" y="60" textAnchor="middle" fontSize="11" fontWeight="800" fill={LINIE}>+</text>
+      {/* Schalter unten */}
+      <circle cx="78" cy="96" r="3.5" fill={LINIE} />
+      <circle cx="112" cy="96" r="3.5" fill={LINIE} />
+      {an
+        ? <line x1="78" y1="96" x2="112" y2="96" stroke={LINIE} strokeWidth="3" />
+        : <line x1="78" y1="96" x2="106" y2="78" stroke={LINIE} strokeWidth="3" />}
+      {!an && <rect x="80" y="92" width="30" height="8" fill="var(--grund)" />}
+      {/* Lampe rechts */}
+      <circle cx="176" cy="55" r="15" fill={an ? "#ffd34d" : "var(--karte)"} stroke={LINIE} strokeWidth="2.5" />
+      <line x1="166" y1="45" x2="186" y2="65" stroke={LINIE} strokeWidth="2" />
+      <line x1="186" y1="45" x2="166" y2="65" stroke={LINIE} strokeWidth="2" />
+      {an && [0, 45, 90, 135, 180, 225, 270, 315].map((g) => {
+        const a = (g * Math.PI) / 180;
+        return <line key={g} x1={176 + 19 * Math.cos(a)} y1={55 + 19 * Math.sin(a)}
+          x2={176 + 25 * Math.cos(a)} y2={55 + 25 * Math.sin(a)} stroke="#e8a21a" strokeWidth="2.5" strokeLinecap="round" />;
+      })}
+    </svg>
+  );
+}
+
+/* 🧭 Kompassrose mit den vier Himmelsrichtungen. */
+function Kompassrose({ b }) {
+  const pos = { N: [55, 16], O: [96, 57], S: [55, 98], W: [14, 57] };
+  return (
+    <svg width="110" height="112" viewBox="0 0 110 112" role="img" aria-label="Kompassrose">
+      <circle cx="55" cy="57" r="32" fill="var(--karte)" stroke={LINIE} strokeWidth="2.5" />
+      <polygon points="55,33 60,57 55,81 50,57" fill="#d9534f" transform="rotate(0 55 57)" />
+      <polygon points="55,33 60,57 55,57 50,57" fill="#9aa7b8" transform="rotate(180 55 57)" />
+      {Object.entries(pos).map(([r, [x, y]]) => (
+        <text key={r} x={x} y={y + 5} textAnchor="middle" fontSize="16" fontWeight="800"
+          fill={b.markiert === r ? WARN : LINIE}>{r}</text>
+      ))}
+    </svg>
+  );
+}
+
+/* 🌅 Sonnenlauf: Osten auf → Süden mittags → Westen unter. */
+function Sonne({ b }) {
+  const sonnen = { osten: [30, 62, "O"], sueden: [95, 24, "S"], westen: [160, 62, "W"] };
+  return (
+    <svg width="190" height="92" viewBox="0 0 190 92" role="img" aria-label="Sonnenlauf von Osten nach Westen">
+      <line x1="8" y1="78" x2="182" y2="78" stroke={LINIE} strokeWidth="2.5" />
+      <path d="M 30 70 Q 95 2 160 70" fill="none" stroke={LEISE} strokeWidth="2" strokeDasharray="5 5" />
+      {Object.entries(sonnen).map(([wo, [x, y, label]]) => {
+        const aktiv = b.wo === wo;
+        return (
+          <g key={wo}>
+            <circle cx={x} cy={y} r={aktiv ? 11 : 7} fill={aktiv ? "#ffd34d" : "var(--karte)"} stroke={aktiv ? "#e8a21a" : LEISE} strokeWidth="2" />
+            <text x={x} y={y - (aktiv ? 16 : 12)} textAnchor="middle" fontSize="13" fontWeight="800"
+              fill={aktiv ? WARN : LEISE}>{label}</text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+/* 🗺️ Stark vereinfachte Deutschland-Silhouette mit Merk-Punkt. */
+const D_UMRISS = "30,8 44,3 54,9 63,5 70,12 67,22 74,31 69,42 78,53 73,66 80,80 71,93 76,107 61,117 47,111 35,119 25,107 29,95 21,85 27,71 19,59 25,46 17,35 25,23 23,12";
+const D_PUNKTE = { n: [47, 17], no: [61, 31], o: [66, 58], so: [62, 100], s: [51, 110], sw: [37, 101], w: [27, 56], mitte: [48, 62] };
+function DKarte({ b }) {
+  const [x, y] = D_PUNKTE[b.punkt] || D_PUNKTE.mitte;
+  return (
+    <svg width="120" height="128" viewBox="0 0 100 128" role="img" aria-label={`Deutschlandkarte: ${b.name || b.punkt}`}>
+      <polygon points={D_UMRISS} fill={FLAECHE} stroke={LINIE} strokeWidth="2" strokeLinejoin="round" />
+      <circle cx={x} cy={y} r="6" fill={WARN} stroke="var(--karte)" strokeWidth="2" />
+      {b.name && (
+        <text x={x} y={y - 10} textAnchor="middle" fontSize="11" fontWeight="800" fill={LINIE}
+          stroke="var(--karte)" strokeWidth="3" paintOrder="stroke">{b.name}</text>
+      )}
+    </svg>
+  );
+}
+
 const ARTEN = {
   strahl: Strahl, folge: Folge, mauer: Mauer, form: Form, buchstaben: Buchstaben,
   kaestchen: Kaestchen, wuerfelturm: Wuerfelturm, netz: Netz, uhr: Uhr,
   kugeln: Kugeln, rad: Rad, balken: Balken, striche: Striche, schilder: Schilder,
+  stromkreis: Stromkreis, kompassrose: Kompassrose, sonne: Sonne, dkarte: DKarte,
 };
 export const BILD_ARTEN = Object.keys(ARTEN);
 
-export default function AufgabenBild({ b }) {
+export default function AufgabenBild({ b, merk }) {
   const Teil = b && ARTEN[b.art];
   if (!Teil) return null;
   return (
-    <div data-test="aufgaben-bild" data-art={b.art} style={{
-      display: "flex", justifyContent: "center", overflowX: "auto",
+    <div data-test="aufgaben-bild" data-art={b.art} data-merk={merk ? "1" : undefined} style={{
       background: "var(--grund)", borderRadius: "var(--radius-klein)", padding: "12px 14px", margin: "10px 0",
     }}>
-      <Teil b={b} />
+      {merk && (
+        <p style={{ margin: "0 0 6px", textAlign: "center", fontSize: "var(--schrift-klein)", fontWeight: 800, color: LEISE }}>
+          🧠 Merk-Bild – schau es dir kurz an!
+        </p>
+      )}
+      <div style={{ display: "flex", justifyContent: "center", overflowX: "auto" }}>
+        <Teil b={b} />
+      </div>
     </div>
   );
 }

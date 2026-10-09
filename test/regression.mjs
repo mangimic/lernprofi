@@ -36,6 +36,25 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.49: Fahrplan-Übernahme, Merk-Bilder, Zurück-Navigation ----------
+console.log("== v0.49: Fahrplan & Merk-Bilder ==");
+test("v0.49: kompassUebernehmen mit Pflicht-zuerst-Regel, Merk-Bilder, navZurueck", (() => {
+  const k = quelle("src/calc/kompassPlan.js");
+  const f = quelle("src/features/KompassPlan.jsx");
+  const ab = quelle("src/features/AufgabenBild.jsx");
+  const u = quelle("src/features/Ueben.jsx");
+  const ac = quelle("src/appContext.jsx");
+  const sk = quelle("src/calc/aufgaben/sachkunde.js");
+  return k.includes("export function kompassUebernehmen")
+    && k.includes("pflichtSichern") && k.includes('"hausaufgaben"') && k.includes('name.includes("Schlagzeug")')
+    && k.includes("ERSETZBAR") && k.includes("!b.fertig")
+    && f.includes('data-test="kp-in-plan"')
+    && ["stromkreis", "kompassrose", "sonne", "dkarte"].every((a) => ab.includes(`${a}:`))
+    && u.includes("a.merkbild && <AufgabenBild") && (sk.match(/merkbild:\{/g) || []).length >= 12
+    && ac.includes("navZurueck") && u.includes("kamVonAussen")
+    && releaseNoteVorhanden("rn-062");
+})());
+
 // ---------- v0.48: Leo-Pädagogik & Lese-Darstellung ----------
 console.log("== v0.48: Leo-Pädagogik ==");
 test("v0.48: 3-Blasen-Aufbau (Anker/Schritt/Selbst-Check), Lese-Sätze einzeln, Methodik-Doku", (() => {

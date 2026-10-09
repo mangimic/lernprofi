@@ -3,9 +3,9 @@
 export const SACH_DATEN={
   sstrom:{
     easy:[
-      {f:"Wann leuchtet die Lampe im Stromkreis?", r:"Wenn der Stromkreis geschlossen ist", x:["Wenn der Stromkreis unterbrochen ist","Wenn die Batterie fehlt"], tipp:"Der Strom braucht einen geschlossenen Kreis – wie eine Rennbahn ohne Lücke."},
+      {f:"Wann leuchtet die Lampe im Stromkreis?", r:"Wenn der Stromkreis geschlossen ist", x:["Wenn der Stromkreis unterbrochen ist","Wenn die Batterie fehlt"], tipp:"Der Strom braucht einen geschlossenen Kreis – wie eine Rennbahn ohne Lücke.", merkbild:{art:"stromkreis",an:true}},
       {f:"Was ist eine Stromquelle?", r:"Batterie", x:["Kabel","Glühlampe"], tipp:"Die Batterie liefert den Strom – Kabel und Lampe brauchen ihn nur."},
-      {f:"Was macht ein Schalter?", r:"Er öffnet und schließt den Stromkreis", x:["Er macht den Strom stärker","Er lädt die Batterie auf"], tipp:"Schalter aus = Kreis unterbrochen = Lampe aus."},
+      {f:"Was macht ein Schalter?", r:"Er öffnet und schließt den Stromkreis", x:["Er macht den Strom stärker","Er lädt die Batterie auf"], tipp:"Schalter aus = Kreis unterbrochen = Lampe aus.", merkbild:{art:"stromkreis",an:false}},
       {f:"Welcher Stoff leitet Strom?", r:"Metall", x:["Holz","Plastik"], tipp:"Metalle wie Kupfer und Eisen sind Leiter – deshalb sind Kabel innen aus Metall."},
       {f:"Welcher Stoff leitet KEINEN Strom?", r:"Gummi", x:["Kupferdraht","Alufolie"], tipp:"Gummi und Plastik sind Nichtleiter – darum sind Kabel außen damit ummantelt."},
       {f:"Was darfst du NIEMALS in eine Steckdose stecken?", r:"Gegenstände wie Stifte oder Nägel", x:["Einen passenden Stecker","Ein Nachtlicht"], tipp:"In der Steckdose ist starker Strom – der ist lebensgefährlich. Nur echte Stecker gehören hinein!"},
@@ -17,11 +17,11 @@ export const SACH_DATEN={
     hard:[
       {kontext:"Zwei Lampen hängen HINTEREINANDER im Stromkreis (Reihenschaltung). Eine Lampe geht kaputt.", f:"Was passiert mit der anderen Lampe?", r:"Sie geht auch aus", x:["Sie leuchtet weiter","Sie leuchtet doppelt hell"], tipp:"In der Reihe unterbricht die kaputte Lampe den ganzen Kreis – wie eine Brücke, die fehlt."},
       {kontext:"Zwei Lampen hängen NEBENEINANDER im Stromkreis (Parallelschaltung). Eine Lampe geht kaputt.", f:"Was passiert mit der anderen Lampe?", r:"Sie leuchtet weiter", x:["Sie geht auch aus","Sie blinkt"], tipp:"Parallel hat jede Lampe ihren eigenen Weg – so ist es auch bei dir zu Hause."},
-      {f:"Mit einem Prüf-Stromkreis (Batterie, Lampe, zwei Kabelenden) testest du eine Schere aus Metall. Was passiert?", r:"Die Lampe leuchtet – Metall leitet", x:["Nichts – Scheren leiten nie","Die Batterie wird leer"], tipp:"Hältst du die Kabelenden an einen Leiter, schließt er den Kreis."},
+      {f:"Mit einem Prüf-Stromkreis (Batterie, Lampe, zwei Kabelenden) testest du eine Schere aus Metall. Was passiert?", r:"Die Lampe leuchtet – Metall leitet", x:["Nichts – Scheren leiten nie","Die Batterie wird leer"], tipp:"Hältst du die Kabelenden an einen Leiter, schließt er den Kreis.", merkbild:{art:"stromkreis",an:true}},
       {f:"Welche Energiequellen nennt man ERNEUERBAR?", r:"Sonne, Wind und Wasser", x:["Kohle und Erdgas","Benzin und Diesel"], tipp:"Erneuerbar heißt: Sie gehen nicht aus – die Sonne scheint immer wieder."},
       {f:"Warum sollen wir sparsam mit Kohle und Erdgas umgehen?", r:"Sie gehen irgendwann zur Neige und belasten die Umwelt", x:["Sie sind zu billig","Sie machen zu hellen Strom"], tipp:"Was Millionen Jahre zum Entstehen brauchte, ist schnell verbraucht."},
       {f:"Der Fernseher ist „aus“, aber das rote Lämpchen leuchtet noch (Standby). Was stimmt?", r:"Er verbraucht weiter ein bisschen Strom", x:["Er verbraucht gar nichts mehr","Er lädt sich dabei auf"], tipp:"Standby heißt Bereitschaft – richtig sparen heißt: ganz ausschalten."},
-      {f:"Woraus besteht ein einfacher Stromkreis mindestens?", r:"Stromquelle, Kabel und Lampe (Verbraucher)", x:["Nur aus Kabeln","Steckdose und Schalter"], tipp:"Quelle → Kabel hin → Verbraucher → Kabel zurück. Der Kreis muss sich schließen."},
+      {f:"Woraus besteht ein einfacher Stromkreis mindestens?", r:"Stromquelle, Kabel und Lampe (Verbraucher)", x:["Nur aus Kabeln","Steckdose und Schalter"], tipp:"Quelle → Kabel hin → Verbraucher → Kabel zurück. Der Kreis muss sich schließen.", merkbild:{art:"stromkreis",an:true}},
       {kontext:"Leo fragt: „Warum passiert Vögeln auf der Stromleitung nichts?“", f:"Was ist die Antwort?", r:"Der Strom fließt nicht durch den Vogel – sein Körper schließt keinen Kreis", x:["Vögel sind aus Gummi","Auf Leitungen ist nie Strom"], tipp:"Der Vogel sitzt nur auf EINEM Draht – erst eine Verbindung zu Erde oder zweitem Draht wäre gefährlich."},
       {f:"Ein Gerät hat ein beschädigtes Kabel – blanker Draht ist zu sehen. Was ist richtig?", r:"Nicht benutzen und einem Erwachsenen Bescheid sagen", x:["Mit Klebeband selbst reparieren","Einfach vorsichtig weiterbenutzen"], tipp:"Blanke Drähte sind gefährlich – das prüfen und reparieren Erwachsene bzw. Fachleute."},
       {f:"Welcher Weg beschreibt, wie Strom zu uns nach Hause kommt?", r:"Kraftwerk → Leitungen → Steckdose", x:["Steckdose → Kraftwerk → Lampe","Batterie → Steckdose → Kraftwerk"], tipp:"Im Kraftwerk wird Strom erzeugt, Leitungen bringen ihn ins Haus."}
@@ -55,27 +55,27 @@ export const SACH_DATEN={
   },
   skarte:{
     easy:[
-      {f:"Wie heißen die vier Himmelsrichtungen im Uhrzeigersinn?", r:"Norden, Osten, Süden, Westen", x:["Norden, Westen, Süden, Osten","Oben, unten, links, rechts"], tipp:"Merkspruch: „Nie Ohne Seife Waschen“ – N, O, S, W."},
-      {f:"Wohin zeigt die Kompassnadel?", r:"Nach Norden", x:["Nach Süden","Zur Sonne"], tipp:"Die magnetische Nadel richtet sich nach Norden aus."},
-      {f:"Wo geht die Sonne auf?", r:"Im Osten", x:["Im Westen","Im Norden"], tipp:"Im Osten geht die Sonne auf, im Süden nimmt sie ihren Lauf, im Westen wird sie untergehen …"},
-      {f:"Welche Himmelsrichtung ist auf Karten meistens oben?", r:"Norden", x:["Süden","Westen"], tipp:"Karten sind fast immer „genordet“."},
+      {f:"Wie heißen die vier Himmelsrichtungen im Uhrzeigersinn?", r:"Norden, Osten, Süden, Westen", x:["Norden, Westen, Süden, Osten","Oben, unten, links, rechts"], tipp:"Merkspruch: „Nie Ohne Seife Waschen“ – N, O, S, W.", merkbild:{art:"kompassrose"}},
+      {f:"Wohin zeigt die Kompassnadel?", r:"Nach Norden", x:["Nach Süden","Zur Sonne"], tipp:"Die magnetische Nadel richtet sich nach Norden aus.", merkbild:{art:"kompassrose",markiert:"N"}},
+      {f:"Wo geht die Sonne auf?", r:"Im Osten", x:["Im Westen","Im Norden"], tipp:"Im Osten geht die Sonne auf, im Süden nimmt sie ihren Lauf, im Westen wird sie untergehen …", merkbild:{art:"sonne",wo:"osten"}},
+      {f:"Welche Himmelsrichtung ist auf Karten meistens oben?", r:"Norden", x:["Süden","Westen"], tipp:"Karten sind fast immer „genordet“.", merkbild:{art:"kompassrose",markiert:"N"}},
       {f:"Was bedeutet eine blaue Fläche auf der Karte?", r:"Wasser (See oder Fluss)", x:["Wald","Straße"], tipp:"Blau = Wasser, Grün = Wald/Wiese, Grau/Rot = Häuser und Straßen."},
-      {f:"Wie heißt die Landeshauptstadt von Baden-Württemberg?", r:"Stuttgart", x:["München","Karlsruhe"], tipp:"Stuttgart ist die größte Stadt im Land – dort sitzt die Landesregierung."},
+      {f:"Wie heißt die Landeshauptstadt von Baden-Württemberg?", r:"Stuttgart", x:["München","Karlsruhe"], tipp:"Stuttgart ist die größte Stadt im Land – dort sitzt die Landesregierung.", merkbild:{art:"dkarte",punkt:"sw",name:"Stuttgart"}},
       {f:"Was erklärt dir die Legende (Zeichenerklärung) einer Karte?", r:"Was die Farben und Zeichen bedeuten", x:["Eine alte Sage","Wie das Wetter wird"], tipp:"Ohne Legende weißt du nicht, was die Symbole heißen."},
-      {f:"In welchem Bundesland liegt deine Schule?", r:"Baden-Württemberg", x:["Bayern","Berlin"], tipp:"Du wohnst in Baden-Württemberg – im Südwesten Deutschlands."},
-      {f:"Wie heißt die Hauptstadt von Deutschland?", r:"Berlin", x:["Hamburg","Stuttgart"], tipp:"Berlin – dort arbeiten Bundestag und Bundesregierung."},
+      {f:"In welchem Bundesland liegt deine Schule?", r:"Baden-Württemberg", x:["Bayern","Berlin"], tipp:"Du wohnst in Baden-Württemberg – im Südwesten Deutschlands.", merkbild:{art:"dkarte",punkt:"sw",name:"BW"}},
+      {f:"Wie heißt die Hauptstadt von Deutschland?", r:"Berlin", x:["Hamburg","Stuttgart"], tipp:"Berlin – dort arbeiten Bundestag und Bundesregierung.", merkbild:{art:"dkarte",punkt:"no",name:"Berlin"}},
       {f:"Was ist der Schwarzwald?", r:"Ein großes Waldgebirge in Baden-Württemberg", x:["Ein Fluss","Eine Stadt"], tipp:"Berühmt für Tannen, Kuckucksuhren und Kirschtorte!"}
     ],
     hard:[
-      {f:"Wo liegt Baden-Württemberg in Deutschland?", r:"Im Südwesten", x:["Im Norden","Im Osten"], tipp:"Ganz unten links auf der Deutschlandkarte."},
+      {f:"Wo liegt Baden-Württemberg in Deutschland?", r:"Im Südwesten", x:["Im Norden","Im Osten"], tipp:"Ganz unten links auf der Deutschlandkarte.", merkbild:{art:"dkarte",punkt:"sw",name:"BW"}},
       {f:"Welcher Fluss bildet die Grenze zwischen Baden-Württemberg und Frankreich?", r:"Der Rhein", x:["Der Neckar","Die Donau"], tipp:"Der Rhein fließt im Westen des Landes – drüben liegt Frankreich."},
       {f:"Welcher Fluss fließt durch Stuttgart und Heidelberg?", r:"Der Neckar", x:["Der Rhein","Die Elbe"], tipp:"Der Neckar schlängelt sich mitten durch Baden-Württemberg."},
-      {f:"Wie heißt der große See im Süden von Baden-Württemberg?", r:"Der Bodensee", x:["Der Chiemsee","Der Titisee"], tipp:"Am Bodensee treffen sich Deutschland, Österreich und die Schweiz."},
+      {f:"Wie heißt der große See im Süden von Baden-Württemberg?", r:"Der Bodensee", x:["Der Chiemsee","Der Titisee"], tipp:"Am Bodensee treffen sich Deutschland, Österreich und die Schweiz.", merkbild:{art:"dkarte",punkt:"s",name:"Bodensee"}},
       {f:"Wie heißt der höchste Berg Baden-Württembergs?", r:"Der Feldberg", x:["Die Zugspitze","Der Brocken"], tipp:"Der Feldberg im Schwarzwald – fast 1500 m hoch. Die Zugspitze ist zwar höher, steht aber in Bayern!"},
       {f:"Welche NACHBARLÄNDER grenzen an Baden-Württemberg?", r:"Frankreich, die Schweiz und Österreich", x:["Italien und Spanien","Polen und Dänemark"], tipp:"Frankreich im Westen, die Schweiz im Süden, Österreich am Bodensee."},
       {f:"Wie viele Bundesländer hat Deutschland?", r:"16", x:["10","25"], tipp:"16 Länder – Baden-Württemberg ist eines davon."},
       {f:"Auf der Karte steht der Maßstab 1 : 100 000. Was bedeutet das?", r:"1 cm auf der Karte ist in echt 100 000 cm (1 km)", x:["Die Karte ist 100 000 cm groß","Man braucht 100 000 Karten"], tipp:"Der Maßstab verrät, wie stark die Karte verkleinert."},
-      {f:"Die Sonne steht mittags im Süden. Dein Schatten zeigt dann nach …", r:"Norden", x:["Süden","Osten"], tipp:"Der Schatten fällt immer auf die sonnenabgewandte Seite."},
+      {f:"Die Sonne steht mittags im Süden. Dein Schatten zeigt dann nach …", r:"Norden", x:["Süden","Osten"], tipp:"Der Schatten fällt immer auf die sonnenabgewandte Seite.", merkbild:{art:"sonne",wo:"sueden"}},
       {f:"Welche Donau-Aussage stimmt?", r:"Die Donau entspringt in Baden-Württemberg und fließt nach Osten", x:["Die Donau fließt in die Nordsee","Die Donau ist ein See"], tipp:"Bei Donaueschingen im Schwarzwald beginnt die Donau ihre lange Reise Richtung Schwarzes Meer."}
     ]
   },

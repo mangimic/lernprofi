@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useApp } from "../appContext.jsx";
-import { kompassTermine, kompassWochen, tageBis, PHASEN_NAMEN, KOMPASS_STANDARD } from "../calc/kompassPlan.js";
+import { kompassTermine, kompassWochen, tageBis, PHASEN_NAMEN, KOMPASS_STANDARD, kompassUebernehmen } from "../calc/kompassPlan.js";
 import { tagDatum } from "../calc/wochenplan.js";
 import { MATHE_BEREICHE } from "../calc/aufgaben/mathe.js";
 import { KOMPASS_DEUTSCH_BEREICHE } from "../calc/aufgaben/kompassDeutsch.js";
@@ -27,6 +27,7 @@ export default function KompassPlan() {
   const ziele = kompassTermine(termine, heute);
   const wochen = kompassWochen(heute, termine, data.lernstand.stufen);
   const montagHeute = wochen[0]?.montag;
+  const [uebernommen, setUebernommen] = useState(null); // 📅 Ergebnis der Fahrplan-Übernahme
 
   // 📝 Einmalig: die amtlichen Termine automatisch in den Plan übernehmen.
   const fehlen = ziele.length > 0 && !ziele[0].eingetragen;
@@ -80,6 +81,26 @@ export default function KompassPlan() {
               Dein Fahrplan als <b>Vorschlag</b> – kein Muss: jede Übung nur 10 Minuten, danach Pause.
               Ein Tipp auf einen Baustein startet die Übung sofort.
             </p>
+            <button data-test="kp-in-plan"
+              onClick={() => {
+                const erg = kompassUebernehmen(data.lernstand.wochenplan, wochen, data.einstellungen.festeTermine);
+                if (erg.eingeplant > 0) {
+                  logChange({ ...data, lernstand: { ...data.lernstand, wochenplan: erg.doc } },
+                    "wochenplan", "neu", `Kompass-Fahrplan übernommen (${erg.eingeplant} Übungen)`);
+                }
+                setUebernommen(erg);
+              }}
+              style={{ width: "100%", marginTop: 10, background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+              📅 Fahrplan in meinen Wochenplan übernehmen
+            </button>
+            {uebernommen && (
+              <p data-test="kp-in-plan-ergebnis" style={{ margin: "8px 0 0", fontWeight: 700, color: T.ok }}>
+                {uebernommen.eingeplant > 0
+                  ? `✅ ${uebernommen.eingeplant} Übungen eingeplant${uebernommen.ersetzt > 0 ? ` (dafür ${uebernommen.ersetzt} Freizeit-Fenster ersetzt)` : ""} – 📚 Hausaufgaben und 🥁 Schlagzeug stehen jeweils davor.`
+                  : "✅ Alles schon im Plan – nichts doppelt eingeplant."}
+                {uebernommen.uebersprungen > 0 ? ` ${uebernommen.uebersprungen} Übung(en) fanden keinen Platz.` : ""}
+              </p>
+            )}
           </>
         )}
       </div>

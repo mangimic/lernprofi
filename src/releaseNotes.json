@@ -1,5 +1,25 @@
 [
   {
+    "id": "rn-062",
+    "version": "0.49.0",
+    "datum": "2026-10-09",
+    "titel": "Fahrplan in den Plan, Merk-Bilder, Zurück-Navigation",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "📅 „Fahrplan in meinen Wochenplan übernehmen“: Ein Knopf im Kompass-Countdown plant alle Wochen ein – nach der Familienregel stehen 📚 Hausaufgaben und 🥁 Schlagzeug IMMER zuerst am Tag (die feste Schlagzeug-Stunde zählt mit), erst dahinter kommt das Kompass-Thema. Ist kein Fenster frei, hat Kompass Vorrang und ersetzt einen Freizeit-Baustein – nie feste Termine, nie Erledigtes. Doppelt tippen plant nichts doppelt."
+      },
+      {
+        "type": "neu",
+        "text": "🧠 Sachkunde mit Merk-Bildern NACH der Antwort: Deutschlandkarte mit markiertem Punkt (BW, Stuttgart, Berlin, Bodensee), Kompassrose, Sonnenlauf und leuchtender Stromkreis – das Bild hilft beim Behalten."
+      },
+      {
+        "type": "fix",
+        "text": "🧭 Zurück führt jetzt zur Herkunft: Wer vom Kompass (oder vom Trainingsplan auf der Startseite) in eine Übung springt, landet mit „Abbrechen“ oder nach der Runde wieder genau dort – nicht mehr in der Bereichs-Übersicht."
+      }
+    ]
+  },
+  {
     "id": "rn-061",
     "version": "0.48.0",
     "datum": "2026-10-09",

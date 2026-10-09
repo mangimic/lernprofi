@@ -3,8 +3,12 @@
    „heute" kommt als Parameter, alles ist deterministisch testbar.
    Drei Phasen: Grundlagen-Rotation → gezielt üben (2 Wochen davor,
    mit Papier-Generalprobe) → Testwoche (nur kurz auffrischen). */
-import { wochenMontag, tagDatum, kalenderWoche } from "./wochenplan.js";
-import { ferienAm } from "./kalender.js";
+import {
+  wochenMontag, tagDatum, kalenderWoche, planFuerWoche, planSchreiben,
+  blockHinzu, blockNotiz, blockTyp, blockDauer, blockDauerVon,
+  tagesStunden, festerTermin, istAusgefallen, slotBelegt,
+} from "./wochenplan.js";
+import { schulfreiAm, ferienAm } from "./kalender.js";
 
 /** Haupttermine Kompass 4 im Schuljahr 2026/27 (amtlich). */
 export const KOMPASS_STANDARD = [
@@ -75,3 +79,106 @@ export const PHASEN_NAMEN = {
   gezielt: "🎯 Gezielt üben – da, wo es noch hakt",
   test: "🌟 Testwoche – locker bleiben",
 };
+
+/** Anzeigenamen der Fokus-Felder (≤24 Zeichen – passt in die Baustein-Notiz). */
+export const KOMPASS_FELD_NAMEN = {
+  lesen: "Lese-Detektiv", strategie: "Ableiten & Verlängern", wortfam: "Wortfamilien & Stamm",
+  zusnomen: "Wörter zusammenbauen", steigern: "Adjektive steigern", verbform: "Verbformen bilden",
+  gws: "Grundwortschatz", zeit: "Zeitformen",
+  mrechnen: "Rechnen", mzahlen: "Zahlen-Profi", mgeo: "Formen & Flächen",
+  mgroessen: "Größen & Sachaufgaben", mdaten: "Daten & Zufall",
+};
+
+// ─── 📅 Fahrplan → Wochenplan übernehmen ───
+// Regeln (Familien-Vereinbarung):
+// 1. Erst müssen 📚 Hausaufgaben und 🥁 Schlagzeug am Tag stehen (Block oder
+//    fester Schlagzeug-Termin) – erst DANACH kommt ein Kompass-Thema dahinter.
+//    (Hausaufgaben entfallen an schulfreien Tagen – Ferien/Feiertag.)
+// 2. Kompass hat Vorrang: Ist kein Fenster mehr frei, ersetzt das Thema einen
+//    Freizeit-Baustein (nie feste Termine, nie Pflicht-/Lern-Blöcke, nie Erledigtes).
+// 3. Läuft doppelt sicher: Was schon drinsteht, wird nicht noch einmal eingeplant.
+
+const UEBEN_TAGE = [0, 1, 3, 4]; // Mo, Di, Do, Fr – Mi hat die Lernbetreuung
+const ERSETZBAR = new Set(["sport", "angeln", "pfadfinder", "freunde", "frei", "eigen"]);
+
+function slotFrei(plan, feste, tag, slot) {
+  if (slotBelegt(plan, tag, slot)) return false;
+  const f = festerTermin(feste, tag, slot);
+  return !f || istAusgefallen(plan, tag, f.beginn);
+}
+
+function ersterFreierSlot(plan, feste, tag, datum, abMin = 0) {
+  for (const slot of tagesStunden(tag, datum)) {
+    if (slot >= abMin && slotFrei(plan, feste, tag, slot)) return slot;
+  }
+  return null;
+}
+
+/** Stellt einen Pflicht-Baustein am Tag sicher; gibt { plan, ende } zurück (ende=null wenn unmöglich). */
+function pflichtSichern(plan, feste, tag, datum, typ) {
+  const block = plan.bloecke.find((b) => b.tag === tag && b.typ === typ);
+  if (block) return { plan, ende: block.slot + blockDauerVon(block) };
+  if (typ === "schlagzeug") {
+    // Ein fester Schlagzeug-Termin zählt wie ein Baustein (gleiche Regel wie der 🦁-Wächter).
+    for (const slot of tagesStunden(tag, datum)) {
+      const f = festerTermin(feste, tag, slot);
+      if (f && f.beginn === slot && f.name.includes("Schlagzeug") && !istAusgefallen(plan, tag, f.beginn)) {
+        return { plan, ende: f.beginn + (f.dauer || 30) };
+      }
+    }
+  }
+  const slot = ersterFreierSlot(plan, feste, tag, datum);
+  if (slot === null) return { plan, ende: null };
+  return { plan: blockHinzu(plan, tag, typ, slot), ende: slot + 30 };
+}
+
+/** Übernimmt den ganzen Fahrplan in den Mehr-Wochen-Plan.
+    Ergebnis: { doc, eingeplant, ersetzt, uebersprungen }. */
+export function kompassUebernehmen(doc, wochen, feste) {
+  let eingeplant = 0, ersetzt = 0, uebersprungen = 0;
+  for (const w of wochen) {
+    let plan = planFuerWoche(doc, w.montag);
+    const fokus = [
+      ...w.deutsch.map((k) => ({ typ: "deutsch", notiz: KOMPASS_FELD_NAMEN[k] || k })),
+      ...w.mathe.map((k) => ({ typ: "mathe", notiz: KOMPASS_FELD_NAMEN[k] || k })),
+    ];
+    fokus.forEach((f, i) => {
+      if (plan.bloecke.some((b) => b.typ === f.typ && b.notiz === f.notiz)) return; // schon drin
+      // Tage der Reihe nach probieren, beginnend beim Stamm-Tag
+      for (let v = 0; v < UEBEN_TAGE.length; v++) {
+        const tag = UEBEN_TAGE[(i + v) % UEBEN_TAGE.length];
+        const datum = tagDatum(w.montag, tag);
+        // 1. Pflicht zuerst: Hausaufgaben (außer schulfrei) und Schlagzeug
+        let p = plan, abMin = 0;
+        if (!schulfreiAm(datum)) {
+          const ha = pflichtSichern(p, feste, tag, datum, "hausaufgaben");
+          if (ha.ende === null) continue;
+          p = ha.plan; abMin = Math.max(abMin, ha.ende);
+        }
+        const sz = pflichtSichern(p, feste, tag, datum, "schlagzeug");
+        if (sz.ende === null) continue;
+        p = sz.plan; abMin = Math.max(abMin, sz.ende);
+        // 2. Kompass-Thema HINTER die Pflicht legen – freies Fenster zuerst …
+        const slot = ersterFreierSlot(p, feste, tag, datum, abMin);
+        if (slot !== null) {
+          plan = blockNotiz(blockHinzu(p, tag, f.typ, slot), p.bloecke.length
+            ? Math.max(...p.bloecke.map((b) => b.id)) + 1 : 1, f.notiz);
+          eingeplant++;
+          return;
+        }
+        // … sonst hat Kompass Vorrang: einen Freizeit-Baustein ersetzen
+        const opfer = p.bloecke
+          .filter((b) => b.tag === tag && b.slot >= abMin && !b.fertig && ERSETZBAR.has(b.typ))
+          .sort((a, b) => a.slot - b.slot)[0];
+        if (opfer) {
+          plan = blockNotiz(blockDauer(blockTyp(p, opfer.id, f.typ), opfer.id, 30), opfer.id, f.notiz);
+          eingeplant++; ersetzt++;
+          return;
+        }
+      }
+      uebersprungen++;
+    });
+    doc = planSchreiben(doc, plan);
+  }
+  return { doc, eingeplant, ersetzt, uebersprungen };
+}
