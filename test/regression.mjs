@@ -36,6 +36,18 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.57: Einmaleins-Karten ----------
+console.log("== v0.57: Einmaleins-Karten ==");
+test("v0.57: kleines & großes 1x1 als Karten mit je drei Aufgaben, Zähler auf 64", (() => {
+  const ka = quelle("src/calc/karteikarten.js");
+  const sm = quelle("e2e/smoke.spec.js");
+  return ka.includes("KARTEIKARTEN_EINMALEINS") && ka.includes('id: "m25"') && ka.includes('id: "m32"')
+    && (ka.match(/Großes 1x1:/g) || []).length === 4
+    && (ka.match(/9er-Reihe:/g) || []).length >= 1
+    && sm.includes("16 Seiten · 32 Karten") && sm.includes("64 aktiv")
+    && releaseNoteVorhanden("rn-072");
+})());
+
 // ---------- v0.56: Uhrzeiten Schritt für Schritt ----------
 console.log("== v0.56: Uhr-Rechenweg ==");
 test("v0.56: uhrplus mit Start-Uhr, Dauer-Pfeil, ?-Ziel-Uhr und Minuten-Bogen", (() => {

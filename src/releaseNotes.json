@@ -1,5 +1,25 @@
 [
   {
+    "id": "rn-072",
+    "version": "0.57.0",
+    "datum": "2026-10-09",
+    "titel": "Einmaleins-Karten",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "✖️ Acht neue Mathe-Karteikarten für das kleine und große Einmaleins – mit je DREI Aufgaben pro Karte. Der Kartensatz wächst von 56 auf 64 Karten (weiterhin volle A4-Blätter)."
+      },
+      {
+        "type": "neu",
+        "text": "Kleines 1x1 nach Tricks gebündelt: die 9er-Reihe (erst ·10, dann einmal weg), die schwersten Kernaufgaben (Merksatz 5-6-7-8), Quadratzahlen als Anker und Verdoppeln für die 4er-Reihe."
+      },
+      {
+        "type": "neu",
+        "text": "Großes 1x1 mit Zerlegungs-Strategien: ·11 (·10 und einmal dazu), ·15 (·10 plus die Hälfte), Zerlegen (12·12 = 120 + 24) und runde Zahl nehmen (19·6 = 20·6 − 6)."
+      }
+    ]
+  },
+  {
     "id": "rn-071",
     "version": "0.56.0",
     "datum": "2026-10-09",

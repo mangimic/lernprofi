@@ -2,9 +2,9 @@ import { describe, it, expect } from "vitest";
 import { KARTEIKARTEN, kartenSeiten, aktiveKarten } from "./karteikarten.js";
 
 describe("karteikarten", () => {
-  it("Kartensatz: 32 Deutsch + 24 Mathe, eindeutige IDs, druckfertige Längen, saubere Sprache", () => {
+  it("Kartensatz: 32 Deutsch + 32 Mathe, eindeutige IDs, druckfertige Längen, saubere Sprache", () => {
     expect(KARTEIKARTEN.filter((k) => k.fach === "deutsch").length).toBe(32);
-    expect(KARTEIKARTEN.filter((k) => k.fach === "mathe").length).toBe(24);
+    expect(KARTEIKARTEN.filter((k) => k.fach === "mathe").length).toBe(32);
     expect(new Set(KARTEIKARTEN.map((k) => k.id)).size).toBe(KARTEIKARTEN.length);
     expect(KARTEIKARTEN.length % 4).toBe(0); // volle A4-Blätter
     for (const k of KARTEIKARTEN) {
@@ -19,6 +19,11 @@ describe("karteikarten", () => {
     const mitBild = KARTEIKARTEN.filter((k) => k.bild);
     expect(mitBild.length).toBeGreaterThanOrEqual(8);
     for (const k of mitBild) expect(ARTEN, k.id).toContain(k.bild.art);
+    // ✖️ Einmaleins-Karten (m25–m32): je GENAU drei Aufgaben, 4× kleines + 4× großes 1x1
+    const einmaleins = KARTEIKARTEN.filter((k) => /^m(2[5-9]|3[0-2])$/.test(k.id));
+    expect(einmaleins.length).toBe(8);
+    for (const k of einmaleins) expect(k.vs.split("?").length - 1, k.id).toBe(3);
+    expect(einmaleins.filter((k) => k.vs.startsWith("Großes 1x1:")).length).toBe(4);
   });
 
   it("kartenSeiten: Rückseiten je Zeile gespiegelt (beidseitiger Druck, lange Kante)", () => {

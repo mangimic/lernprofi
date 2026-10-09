@@ -72,6 +72,21 @@ export const KARTEIKARTEN_FUNDUS = [
 ];
 KARTEIKARTEN.push(...KARTEIKARTEN_FUNDUS);
 
+/* ✖️ EINMALEINS-KARTEN (kleines & großes 1x1): drei Aufgaben je Karte,
+   nach Rechen-Trick gebündelt statt stur nach Reihen – die Merkhilfe
+   nennt genau EINEN Trick, der für alle drei Aufgaben trägt. */
+export const KARTEIKARTEN_EINMALEINS = [
+  { id: "m25", fach: "mathe", vs: "9er-Reihe: 9 · 6 = ? · 9 · 7 = ? · 9 · 8 = ?", rs: "54 · 63 · 72", merk: "Trick: erst ·10, dann einmal weg. 9·6 = 60 − 6 = 54." },
+  { id: "m26", fach: "mathe", vs: "7 · 8 = ? · 6 · 7 = ? · 8 · 8 = ?", rs: "56 · 42 · 64", merk: "Merksatz 5-6-7-8: 56 = 7·8. Und 8·8 = 64 – Quadratzahl!" },
+  { id: "m27", fach: "mathe", vs: "6 · 6 = ? · 7 · 7 = ? · 6 · 8 = ?", rs: "36 · 49 · 48", merk: "Quadratzahlen als Anker: 6·6 = 36, 7·7 = 49. Nachbar: 6·8 = 36 + 12." },
+  { id: "m28", fach: "mathe", vs: "4 · 7 = ? · 3 · 8 = ? · 4 · 9 = ?", rs: "28 · 24 · 36", merk: "·4 heißt: verdoppeln und nochmal verdoppeln. 7 → 14 → 28." },
+  { id: "m29", fach: "mathe", vs: "Großes 1x1: 11 · 7 = ? · 11 · 9 = ? · 12 · 6 = ?", rs: "77 · 99 · 72", merk: "·11 = ·10 und einmal dazu: 11·7 = 70 + 7 = 77." },
+  { id: "m30", fach: "mathe", vs: "Großes 1x1: 15 · 4 = ? · 15 · 6 = ? · 15 · 8 = ?", rs: "60 · 90 · 120", merk: "15 = 10 + 5: erst ·10, dann die Hälfte davon dazu. 15·4 = 40 + 20." },
+  { id: "m31", fach: "mathe", vs: "Großes 1x1: 12 · 12 = ? · 13 · 4 = ? · 14 · 5 = ?", rs: "144 · 52 · 70", merk: "Zerlegen: 12·12 = 120 + 24 = 144. 13·4 = 40 + 12." },
+  { id: "m32", fach: "mathe", vs: "Großes 1x1: 20 · 7 = ? · 19 · 6 = ? · 18 · 5 = ?", rs: "140 · 114 · 90", merk: "Runde Zahl nehmen: 19·6 = 20·6 − 6 = 114. 18·5 = 90." },
+];
+KARTEIKARTEN.push(...KARTEIKARTEN_EINMALEINS);
+
 /** Der wirksame Kartensatz: Standard + eigene Eltern-Karten, minus
     ausgeblendete. Gilt für Druck UND digitalen Kasten gleichermassen. */
 export function aktiveKarten(einstellungen) {
