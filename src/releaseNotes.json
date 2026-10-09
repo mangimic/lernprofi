@@ -1,5 +1,25 @@
 [
   {
+    "id": "rn-074",
+    "version": "0.58.0",
+    "datum": "2026-10-09",
+    "titel": "Merkhilfen geprüft",
+    "entries": [
+      {
+        "type": "fix",
+        "text": "✖️ Die Merkhilfen der Einmaleins-Karten wurden geprüft: Jetzt passt der Trick auf JEDER Karte zu allen drei Aufgaben. Die 4er-Karte übt nur noch die 4er-Reihe (4·6 statt 3·8), die 11er-Karte nur die 11er-Reihe (11·8 statt 12·6)."
+      },
+      {
+        "type": "fix",
+        "text": "Aus der Kernaufgaben-Karte wurde die 8er-Reihe (8·6, 8·7, 8·8) mit dem Trick „dreimal verdoppeln“. Das schwere 6·7 sitzt jetzt auf der Quadratzahlen-Karte, wo es wirklich passt: 6·7 = 6·6 + 6."
+      },
+      {
+        "type": "fix",
+        "text": "Die Karten „Zerlegen“ und „Runde Zahl“ erklären jetzt den Rechenweg statt nur das Ergebnis (18·5 = 20·5 − 10), und 20·7 wich 19·4 – denn an einer schon runden Zahl gibt es nichts zu runden."
+      }
+    ]
+  },
+  {
     "id": "rn-073",
     "version": "0.57.1",
     "datum": "2026-10-09",

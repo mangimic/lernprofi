@@ -36,13 +36,25 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.58: Merkhilfen validiert ----------
+console.log("== v0.58: Merkhilfen der Mal-Karten ==");
+test("v0.58: jede Einmaleins-Merkhilfe trägt ALLE drei Aufgaben ihrer Karte", (() => {
+  const ka = quelle("src/calc/karteikarten.js");
+  return ka.includes("8er-Reihe:") && ka.includes("dreimal verdoppeln")
+    && ka.includes('vs: "4er-Reihe:\\n4 · 6 = ?\\n4 · 7 = ?\\n4 · 9 = ?"')
+    && ka.includes("11 · 8 = ?") && ka.includes("19 · 4 = ?")
+    && ka.includes("Dazwischen: 6·7 = 36 + 6")
+    && ka.includes("18·5 = 20·5 − 10")
+    && releaseNoteVorhanden("rn-074");
+})());
+
 // ---------- v0.57.1: Aufgaben untereinander ----------
 test("v0.57.1: Mehrfach-Aufgaben zeilenweise, Karten rendern Zeilenumbrüche", (() => {
   const ka = quelle("src/calc/karteikarten.js");
   const f = quelle("src/features/Karteikarten.jsx");
   const kk = quelle("src/features/KartenKasten.jsx");
-  return ka.includes('vs: "7 · 8 = ?\\n6 · 7 = ?\\n8 · 8 = ?"')
-    && ka.includes('rs: "7 · 8 = 56\\n6 · 7 = 42\\n8 · 8 = 64"')
+  return (ka.includes('vs: "7 · 8 = ?\\n6 · 7 = ?\\n8 · 8 = ?"') || ka.includes('vs: "8er-Reihe:\\n8 · 6 = ?\\n8 · 7 = ?\\n8 · 8 = ?"'))
+    && (ka.includes('rs: "7 · 8 = 56\\n6 · 7 = 42\\n8 · 8 = 64"') || ka.includes('rs: "8 · 6 = 48\\n8 · 7 = 56\\n8 · 8 = 64"'))
     && ka.includes('vs: "1 m = ? cm\\n1 km = ? m\\n1 € = ? ct"')
     && (f.match(/white-space: pre-line/g) || []).length >= 2
     && (kk.match(/whiteSpace: "pre-line"/g) || []).length >= 2

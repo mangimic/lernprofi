@@ -77,13 +77,13 @@ KARTEIKARTEN.push(...KARTEIKARTEN_FUNDUS);
    nennt genau EINEN Trick, der für alle drei Aufgaben trägt. */
 export const KARTEIKARTEN_EINMALEINS = [
   { id: "m25", fach: "mathe", vs: "9er-Reihe:\n9 · 6 = ?\n9 · 7 = ?\n9 · 8 = ?", rs: "9 · 6 = 54\n9 · 7 = 63\n9 · 8 = 72", merk: "Trick: erst ·10, dann einmal weg. 9·6 = 60 − 6 = 54." },
-  { id: "m26", fach: "mathe", vs: "7 · 8 = ?\n6 · 7 = ?\n8 · 8 = ?", rs: "7 · 8 = 56\n6 · 7 = 42\n8 · 8 = 64", merk: "Merksatz 5-6-7-8: 56 = 7·8. Und 8·8 = 64 – Quadratzahl!" },
-  { id: "m27", fach: "mathe", vs: "6 · 6 = ?\n7 · 7 = ?\n6 · 8 = ?", rs: "6 · 6 = 36\n7 · 7 = 49\n6 · 8 = 48", merk: "Quadratzahlen als Anker: 6·6 = 36, 7·7 = 49. Nachbar: 6·8 = 36 + 12." },
-  { id: "m28", fach: "mathe", vs: "4 · 7 = ?\n3 · 8 = ?\n4 · 9 = ?", rs: "4 · 7 = 28\n3 · 8 = 24\n4 · 9 = 36", merk: "·4 heißt: verdoppeln und nochmal verdoppeln. 7 → 14 → 28." },
-  { id: "m29", fach: "mathe", vs: "Großes 1x1:\n11 · 7 = ?\n11 · 9 = ?\n12 · 6 = ?", rs: "11 · 7 = 77\n11 · 9 = 99\n12 · 6 = 72", merk: "·11 = ·10 und einmal dazu: 11·7 = 70 + 7 = 77." },
+  { id: "m26", fach: "mathe", vs: "8er-Reihe:\n8 · 6 = ?\n8 · 7 = ?\n8 · 8 = ?", rs: "8 · 6 = 48\n8 · 7 = 56\n8 · 8 = 64", merk: "·8 heißt dreimal verdoppeln: 7 → 14 → 28 → 56." },
+  { id: "m27", fach: "mathe", vs: "6 · 6 = ?\n7 · 7 = ?\n6 · 7 = ?", rs: "6 · 6 = 36\n7 · 7 = 49\n6 · 7 = 42", merk: "Quadratzahlen als Anker: 6·6 = 36, 7·7 = 49. Dazwischen: 6·7 = 36 + 6." },
+  { id: "m28", fach: "mathe", vs: "4er-Reihe:\n4 · 6 = ?\n4 · 7 = ?\n4 · 9 = ?", rs: "4 · 6 = 24\n4 · 7 = 28\n4 · 9 = 36", merk: "·4 heißt: verdoppeln und nochmal verdoppeln. 6 → 12 → 24." },
+  { id: "m29", fach: "mathe", vs: "Großes 1x1:\n11 · 7 = ?\n11 · 8 = ?\n11 · 9 = ?", rs: "11 · 7 = 77\n11 · 8 = 88\n11 · 9 = 99", merk: "·11 = ·10 und einmal dazu: 11·8 = 80 + 8 = 88." },
   { id: "m30", fach: "mathe", vs: "Großes 1x1:\n15 · 4 = ?\n15 · 6 = ?\n15 · 8 = ?", rs: "15 · 4 = 60\n15 · 6 = 90\n15 · 8 = 120", merk: "15 = 10 + 5: erst ·10, dann die Hälfte davon dazu. 15·4 = 40 + 20." },
-  { id: "m31", fach: "mathe", vs: "Großes 1x1:\n12 · 12 = ?\n13 · 4 = ?\n14 · 5 = ?", rs: "12 · 12 = 144\n13 · 4 = 52\n14 · 5 = 70", merk: "Zerlegen: 12·12 = 120 + 24 = 144. 13·4 = 40 + 12." },
-  { id: "m32", fach: "mathe", vs: "Großes 1x1:\n20 · 7 = ?\n19 · 6 = ?\n18 · 5 = ?", rs: "20 · 7 = 140\n19 · 6 = 114\n18 · 5 = 90", merk: "Runde Zahl nehmen: 19·6 = 20·6 − 6 = 114. 18·5 = 90." },
+  { id: "m31", fach: "mathe", vs: "Großes 1x1:\n12 · 12 = ?\n13 · 4 = ?\n14 · 5 = ?", rs: "12 · 12 = 144\n13 · 4 = 52\n14 · 5 = 70", merk: "In Zehner und Einer zerlegen: 12·12 = 120 + 24. 14·5 = 50 + 20." },
+  { id: "m32", fach: "mathe", vs: "Großes 1x1:\n19 · 4 = ?\n19 · 6 = ?\n18 · 5 = ?", rs: "19 · 4 = 76\n19 · 6 = 114\n18 · 5 = 90", merk: "Runde Zahl nehmen, Rest weg: 19·6 = 20·6 − 6. 18·5 = 20·5 − 10." },
 ];
 KARTEIKARTEN.push(...KARTEIKARTEN_EINMALEINS);
 
