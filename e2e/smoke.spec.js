@@ -1396,6 +1396,8 @@ test("🗃️ Karteikarten: 4 je A4-Blatt, Rückseiten gespiegelt, Fach-Filter u
   await expect(page.getByTestId("karte-rs")).toHaveCount(56);
   await expect(page.getByTestId("karte-vs").first()).toContainText("❓ Aufgabe");
   await expect(page.getByTestId("karte-rs").first()).toContainText("✅ Lösung");
+  // 🖼️ Grafik-Lösungen: mindestens 8 Rückseiten tragen ein Bild (Zahlenstrahl, Uhr, Säcke …)
+  expect(await page.locator('[data-test="karte-rs"] [data-test="aufgaben-bild"]').count()).toBeGreaterThanOrEqual(8);
   // Duplex-Spiegelung: Karte 1 (vorn links) hat ihre Antwort auf dem Rückseiten-Blatt RECHTS
   const blatt2 = page.getByTestId("karten-blatt").nth(1);
   await expect(blatt2.getByTestId("karte-rs").nth(1)).toContainText("weiß (ß)");

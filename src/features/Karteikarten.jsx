@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useApp } from "../appContext.jsx";
 import { KARTEIKARTEN, kartenSeiten, aktiveKarten } from "../calc/karteikarten.js";
 import { kartenFach } from "../calc/karteikasten.js";
+import AufgabenBild from "./AufgabenBild.jsx";
 
 /* 🗃️ KARTEIKARTEN DRUCKEN: 4 Karten je A4-Blatt (je ~A6). Je Vorderseiten-
    Blatt folgt das passende Rückseiten-Blatt mit je Zeile getauschten
@@ -30,6 +31,7 @@ function Zelle({ karte, seite }) {
       ) : (
         <>
           <div className="kk-antwort">{karte.rs}</div>
+          {karte.bild && <div className="kk-bild"><AufgabenBild b={karte.bild} /></div>}
           <div className="kk-merk">🧠 {karte.merk}</div>
         </>
       )}
@@ -67,10 +69,17 @@ export default function Karteikarten() {
     <div data-test="karten-seite">
       <style>{`
         .kk-blatt { background: #fff; color: #1c2e4a; width: 100%; max-width: 760px; margin: 0 auto 14px;
-          aspect-ratio: 210 / 297; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
-          border: 1px solid var(--rand); border-radius: 8px; overflow: hidden; }
-        .kk-zelle { border: 1.5px dashed #9aa7b8; margin: -0.75px; padding: 4% 5%; display: flex;
-          flex-direction: column; text-align: center; position: relative; }
+          aspect-ratio: 210 / 297; display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+          border: 1px solid var(--rand); border-radius: 8px; overflow: hidden; box-sizing: border-box;
+          /* Die Karten-Grafiken (AufgabenBild) malen mit CSS-Variablen – auf dem
+             weißen Blatt gelten IMMER die hellen Farben, auch im Dunkel-Modus. */
+          --text: #1c3a63; --text-leise: #5d7390; --primaer: #2f6fde; --warn: #d9822b;
+          --ok: #2e9e52; --karte: #ffffff; --grund: #eef4fb; --rand: #c9d8ec; --radius-klein: 8px; }
+        .kk-zelle { border: 1.5px dashed #9aa7b8; margin: -0.75px; padding: 3% 5%; display: flex;
+          flex-direction: column; text-align: center; position: relative; overflow: hidden; min-height: 0; box-sizing: border-box; }
+        .kk-bild [data-test="aufgaben-bild"] { margin: 4px 0; padding: 6px 8px; }
+        .kk-bild svg { max-height: 30mm; }
         .kk-zelle.deutsch { border-top: 10px solid #2f6fde; }
         .kk-zelle.mathe { border-top: 10px solid #2e9e52; }
         .kk-kopf { font-size: 12px; font-weight: 700; color: #5d7390; margin-bottom: auto;
@@ -90,7 +99,9 @@ export default function Karteikarten() {
           @page { size: A4 portrait; margin: 7mm; }
           .kk-blattinfo { display: none; }
           .kk-blatt { max-width: none; border: none; border-radius: 0; aspect-ratio: auto;
-            height: 281mm; page-break-after: always; break-after: page; }
+            height: 280mm; page-break-after: always; break-after: page; }
+          .kk-zelle { page-break-inside: avoid; break-inside: avoid; }
+          .kk-bild svg { max-height: 32mm; }
           .kk-frage, .kk-antwort { font-size: 24pt; }
           .kk-hinweis, .kk-merk { font-size: 11pt; }
           .kk-kopf { font-size: 10pt; }

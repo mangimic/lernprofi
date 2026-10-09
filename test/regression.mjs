@@ -36,6 +36,19 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.53: Grafik-Lösungen & Druck-Härtung ----------
+console.log("== v0.53: Karten-Grafiken ==");
+test("v0.53: bild-Feld auf Karten, Rückseiten-Grafik in Druck + Kasten, A4-Härtung", (() => {
+  const k = quelle("src/calc/karteikarten.js");
+  const f = quelle("src/features/Karteikarten.jsx");
+  const kk = quelle("src/features/KartenKasten.jsx");
+  return (k.match(/bild:\{/g) || []).length >= 8
+    && f.includes("karte.bild && <div className=\"kk-bild\"") && f.includes("--text: #1c3a63")
+    && f.includes("minmax(0, 1fr)") && f.includes("break-inside: avoid") && f.includes("height: 280mm")
+    && kk.includes("karte.bild && <AufgabenBild")
+    && releaseNoteVorhanden("rn-067");
+})());
+
 // ---------- v0.52: Karten-Verwaltung ----------
 console.log("== v0.52: Karten-Verwaltung ==");
 test("v0.52: aktiveKarten (aus/eigene), Verwaltung mit Fach-Stand, Kasten nutzt den Satz", (() => {

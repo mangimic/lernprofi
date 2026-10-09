@@ -14,6 +14,11 @@ describe("karteikarten", () => {
       if (k.typ === "schreiben") expect(k.vs.startsWith("🔊")).toBe(true);
     }
     expect(/ADHS|Störung|dumm|Versager/i.test(JSON.stringify(KARTEIKARTEN))).toBe(false);
+    // 🖼️ Grafik-Lösungen: bekannte Bild-Arten, mindestens 8 Karten illustriert
+    const ARTEN = ["strahl", "folge", "mauer", "form", "buchstaben", "kaestchen", "wuerfelturm", "netz", "uhr", "kugeln", "rad", "balken", "striche", "schilder", "stromkreis", "kompassrose", "sonne", "dkarte"];
+    const mitBild = KARTEIKARTEN.filter((k) => k.bild);
+    expect(mitBild.length).toBeGreaterThanOrEqual(8);
+    for (const k of mitBild) expect(ARTEN, k.id).toContain(k.bild.art);
   });
 
   it("kartenSeiten: Rückseiten je Zeile gespiegelt (beidseitiger Druck, lange Kante)", () => {

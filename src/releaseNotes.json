@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-067",
+    "version": "0.53.0",
+    "datum": "2026-10-09",
+    "titel": "Bilder auf den Lösungs-Karten",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🖼️ Die Lösungs-Rückseiten der Karteikarten zeigen jetzt die passende Grafik aus den Übungen: Zahlenstrahl mit markierter Zahl, Zahlenmauer, analoge Uhr, Kugel-Säcke, Würfelnetz und Glücksrad – auf den Druckblättern UND im digitalen Kasten."
+      },
+      {
+        "type": "fix",
+        "text": "🖨️ Druck-Layout gehärtet: 4 Karten passen garantiert auf ein A4-Blatt (beidseitig) – feste Blatthöhe, kein Zellen-Umbruch, Grafiken in der Größe gedeckelt, und die Bilder drucken immer dunkel auf weiß, auch wenn die App im Dunkel-Modus läuft."
+      }
+    ]
+  },
+  {
     "id": "rn-066",
     "version": "0.52.0",
     "datum": "2026-10-09",
