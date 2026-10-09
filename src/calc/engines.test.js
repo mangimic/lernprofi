@@ -169,6 +169,35 @@ describe("aufgabenRunde", () => {
     expect(leoWahl([{ key: "m", typ: "modul" }], {})).toBe(null);
   });
 
+  it("🖼️ Aufgaben-Bilder: jede bild-Angabe hat eine bekannte Art und gültige Felder", () => {
+    const ARTEN = ["strahl", "folge", "mauer", "form", "buchstaben", "kaestchen", "wuerfelturm", "netz", "uhr", "kugeln", "rad", "balken", "striche", "schilder"];
+    const alle = [MATHE_DATEN, SACH_DATEN].flatMap((daten) =>
+      Object.values(daten).flatMap((pool) => [...pool.easy, ...pool.hard]));
+    const mitBild = alle.filter((a) => a.bild);
+    expect(mitBild.length).toBeGreaterThanOrEqual(55); // Mathe + Radfahrprüfung sind illustriert
+    for (const a of mitBild) {
+      const b = a.bild;
+      expect(ARTEN, a.f).toContain(b.art);
+      if (b.art === "strahl") {
+        expect(b.von).toBeLessThan(b.bis);
+        expect((b.bis - b.von) % b.schritt, a.f).toBe(0); // Striche treffen die Ränder
+        for (const t of [...(b.marken || []), ...(b.frage || [])]) {
+          expect(t >= b.von && t <= b.bis, a.f).toBe(true);
+        }
+      }
+      if (b.art === "folge") expect(b.zahlen.length).toBeGreaterThanOrEqual(3);
+      if (b.art === "mauer") expect(b.reihe.length).toBeGreaterThanOrEqual(2);
+      if (b.art === "uhr") expect(b.zeit, a.f).toMatch(/^\d{1,2}:\d{2}$/);
+      if (b.art === "kugeln") expect(b.saecke.length).toBeGreaterThanOrEqual(1);
+      if (b.art === "kaestchen") {
+        for (const fig of b.figuren) expect(new Set(fig.map((z) => z.length)).size, a.f).toBe(1); // rechteckige Matrix
+      }
+      if (b.art === "schilder") {
+        for (const sch of b.schilder) expect(["vorfahrt-achten", "stopp", "vorfahrtsstrasse", "ampel-rot", "zebrastreifen"], a.f).toContain(sch);
+      }
+    }
+  });
+
   it("Stark-mit-Leo-Pool und Mut-Sätze sind vollständig", () => {
     expect(poolGesund(STARK_DATEN)).toBe(true);
     expect(STARK_DATEN.easy.length).toBe(17);

@@ -702,6 +702,29 @@ test("Tagesform & Fokus: roter Tag macht Missionen kürzer, Bewegungspause kommt
   await expect(page.getByTestId("fokus-pause")).toHaveCount(0);
 });
 
+test("🖼️ Aufgaben-Bilder: Zahlenstrahl, Figur, Kugel-Säcke und Verkehrsschilder", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("zum-ueben").click();
+  await page.getByTestId("ueben-fach-mathe").click();
+  await page.getByTestId("bereich-mzahlen").click(); // Stufe 2: erste Aufgabe = Nachbarzehner von 7496
+  await expect(page.locator('[data-test="aufgaben-bild"][data-art="strahl"]')).toBeVisible();
+  await expect(page.getByTestId("aufgaben-bild")).toContainText("7480"); // Strahl beschriftet – die Nachbarzehner bleiben „?“
+  await expect(page.getByTestId("aufgaben-bild")).not.toContainText("7490"); // Lösung wird nicht verraten
+  await page.getByTestId("abbrechen").click();
+  await page.getByTestId("bereich-mgeo").click(); // Stufe 2: Spiegelachsen des Kreises – mit Kreis-Bild
+  await expect(page.locator('[data-test="aufgaben-bild"][data-art="form"]')).toBeVisible();
+  await page.getByTestId("abbrechen").click();
+  await page.getByTestId("bereich-mdaten").click(); // Stufe 2: Sack A gegen Sack B
+  await expect(page.locator('[data-test="aufgaben-bild"][data-art="kugeln"]')).toBeVisible();
+  await expect(page.getByTestId("aufgaben-bild")).toContainText("Sack A");
+  await page.getByTestId("abbrechen").click();
+  await page.getByTestId("ueben-fach-sachkunde").click();
+  await page.getByTestId("bereich-srad").click(); // Aufgabe 2 fragt nach dem Vorfahrt-gewähren-Schild
+  await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+  await page.getByTestId("weiter-knopf").click();
+  await expect(page.locator('[data-test="aufgaben-bild"][data-art="schilder"]')).toBeVisible();
+});
+
 test("Zahlenblöcke: Stellenwert-Aufgaben zeigen das Dienes-Material als Grafik", async ({ page }) => {
   await tresorAnlegen(page);
   await page.getByTestId("nav-ueben").click();

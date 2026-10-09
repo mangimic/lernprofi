@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-059",
+    "version": "0.46.0",
+    "datum": "2026-10-09",
+    "titel": "Bilder zu den Aufgaben",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🖼️ Über 60 Aufgaben zeigen jetzt ein Bild zum Denken: Zahlenstrahl (Nachbarzehner als „?“ – ohne die Lösung zu verraten), Zahlenfolgen-Kette, Zahlenmauer, Formen, Würfelnetz und Würfelgebäude, Kästchen-Flächen, analoge Uhr, Kugel-Säcke, Glücksrad, Weitsprung-Balken, Strichliste und Buchstaben-Spiegel."
+      },
+      {
+        "type": "neu",
+        "text": "🚸 Radfahrprüfung mit echten Verkehrszeichen als Grafik: Vorfahrt gewähren, Stopp, Vorfahrtsstraße, rote Ampel und Fußgängerüberweg."
+      }
+    ]
+  },
+  {
     "id": "rn-058",
     "version": "0.45.0",
     "datum": "2026-10-09",

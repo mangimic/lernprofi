@@ -7,6 +7,7 @@ import { subjektPool, praedikatPool, gkPool } from "../calc/aufgaben/saetze.js";
 import { umstellenPool, umSatzText, umstellenPruefen } from "../calc/aufgaben/satzglieder.js";
 import { KOMPASS_DEUTSCH_DATEN, KOMPASS_DEUTSCH_BEREICHE } from "../calc/aufgaben/kompassDeutsch.js";
 import { DEUTSCH_GRUPPEN, leoWahl } from "../calc/uebenGruppen.js";
+import AufgabenBild from "./AufgabenBild.jsx";
 import { zeitPool, wortartenPool, faellePool, redePool, gwsPool } from "../calc/aufgaben/deutschKonverter.js";
 import { STARK_DATEN, STARK_BEREICHE } from "../calc/aufgaben/stark.js";
 import { rngAusSeed } from "../calc/rng.js";
@@ -420,6 +421,7 @@ export default function Ueben() {
               )}
               <p data-test="frage-text" style={{ fontSize: "var(--schrift-gross)", fontWeight: 700, margin: "10px 0" }}>{a.f}</p>
               {a.bloecke && <ZahlenBloecke b={a.bloecke} />}
+              {a.bild && <AufgabenBild b={a.bild} />}
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {runde.optionen[runde.index].map((o) => (
                   <button key={o} data-test="antwort-opt" data-richtig={o === a.r ? "1" : undefined}

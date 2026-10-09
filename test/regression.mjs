@@ -36,6 +36,23 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.46: Aufgaben-Bilder ----------
+console.log("== v0.46: Aufgaben-Bilder ==");
+test("v0.46: AufgabenBild-Komponente mit 14 Arten, Pools illustriert, im Üben eingebunden", (() => {
+  const bk = quelle("src/features/AufgabenBild.jsx");
+  const u = quelle("src/features/Ueben.jsx");
+  const m = quelle("src/calc/aufgaben/mathe.js");
+  const sk = quelle("src/calc/aufgaben/sachkunde.js");
+  return ["strahl", "folge", "mauer", "form", "buchstaben", "kaestchen", "wuerfelturm", "netz", "uhr", "kugeln", "rad", "balken", "striche", "schilder"]
+    .every((a) => bk.includes(`${a}:`))
+    && bk.includes('data-test="aufgaben-bild"') && bk.includes("data-art")
+    && u.includes("<AufgabenBild")
+    && (m.match(/bild:\{/g) || []).length >= 50
+    && (sk.match(/bild:\{/g) || []).length >= 4
+    && sk.includes("vorfahrt-achten")
+    && releaseNoteVorhanden("rn-059");
+})());
+
 // ---------- v0.45: Gruppen & Leo-Wahl ----------
 console.log("== v0.45: Weniger Auswahl ==");
 test("v0.45: 5 Deutsch-Gruppen in calc, Leo-Wahl-Knopf und Gruppen-Navigation im Üben", (() => {
