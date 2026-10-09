@@ -5,6 +5,7 @@ import { zeitUebrigMin } from "../calc/elternWerkzeuge.js";
 import { EINSTUFUNG_FELDER } from "../calc/einstufung.js";
 import { STARK_SAETZE } from "../calc/aufgaben/stark.js";
 import { schulfreiAm } from "../calc/kalender.js";
+import { kompassTermine, tageBis } from "../calc/kompassPlan.js";
 import {
   wochenMontag, tagDatum, planFuerWoche, planSchreiben, bausteinInfo, bausteinAnzeige, blockFertig, blockUnfertig,
   tagGeschafft, heuteBelohnt, belohnungEintragen, WOCHENTAGE, slotLabel, schulFaecher, istAusgefallen, blockDauerVon, uhr, auffrischungen,
@@ -179,6 +180,24 @@ export default function Start() {
           )}
         </div>
       )}
+      {(() => {
+        // 🧭 Kompass-Countdown-Karte: erscheint, sobald ein Test in Sicht ist (≤ 10 Wochen)
+        const ziele = kompassTermine(data.einstellungen.termine, heute);
+        if (!ziele.length || tageBis(heute, ziele[0].tag) > 70) return null;
+        return (
+          <button data-test="kompass-karte" onClick={() => navTo("kompass")} style={{
+            width: "100%", textAlign: "left", display: "block", height: "auto",
+            background: T.karte, color: T.text, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand,
+            border: `1px solid ${T.rand}`,
+          }}>
+            <b>🧭 Kompass-Countdown</b>
+            <span style={{ float: "right", color: T.primaer, fontWeight: 800 }}>noch {tageBis(heute, ziele[0].tag)} Tage</span>
+            <span style={{ display: "block", marginTop: 4, color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+              Dein Lernplan bis zu den Tests – Woche für Woche, ein Tipp startet die Übung.
+            </span>
+          </button>
+        );
+      })()}
       {!einstufung ? (
         <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
           <b>🧪 Einstufungstest</b>

@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-060",
+    "version": "0.47.0",
+    "datum": "2026-10-09",
+    "titel": "Kompass-Countdown",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🧭 Neuer Bereich „Kompass-Countdown“ (Karte auf der Startseite, sobald ein Test in Sicht ist): Countdown für Deutsch (18.11.) und Mathe (19.11.), dazu ein Wochen-Fahrplan als Vorschlag – Grundlagen-Rotation, dann 2 Wochen gezielt üben (mit Papier-Generalprobe), in der Testwoche nur noch locker auffrischen. Jeder Baustein startet die passende Übung mit einem Tipp."
+      },
+      {
+        "type": "neu",
+        "text": "📝 Die beiden amtlichen Kompass-Termine werden beim ersten Öffnen automatisch in den Wochenplan übernommen – 🦁-Wächter und Morgen-Auffrischung greifen dann von selbst. Ferienwochen erkennt der Fahrplan und nimmt den Druck raus."
+      }
+    ]
+  },
+  {
     "id": "rn-059",
     "version": "0.46.0",
     "datum": "2026-10-09",

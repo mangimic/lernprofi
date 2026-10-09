@@ -36,6 +36,21 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.47: Kompass-Countdown ----------
+console.log("== v0.47: Kompass-Countdown ==");
+test("v0.47: kompassPlan-Logik, eigener Bereich mit Route, Start-Karte, Auto-Termine", (() => {
+  const k = quelle("src/calc/kompassPlan.js");
+  const f = quelle("src/features/KompassPlan.jsx");
+  const a = quelle("src/App.jsx");
+  const st = quelle("src/features/Start.jsx");
+  return k.includes("2026-11-18") && k.includes("2026-11-19")
+    && k.includes("export function kompassWochen") && k.includes('"gezielt"') && k.includes('"test"')
+    && f.includes('data-test="kp-woche"') && f.includes("kp-fokus-") && f.includes("Kompass-Termine automatisch")
+    && a.includes('route === "kompass"')
+    && st.includes('data-test="kompass-karte"')
+    && releaseNoteVorhanden("rn-060");
+})());
+
 // ---------- v0.46: Aufgaben-Bilder ----------
 console.log("== v0.46: Aufgaben-Bilder ==");
 test("v0.46: AufgabenBild-Komponente mit 14 Arten, Pools illustriert, im Üben eingebunden", (() => {

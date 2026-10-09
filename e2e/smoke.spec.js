@@ -1307,6 +1307,27 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await expect(page.getByTestId("slot-6-960")).toContainText("Oma besuchen");
 });
 
+test("🧭 Kompass-Countdown: Termine automatisch im Plan, Wochen-Fahrplan, Chip startet Übung", async ({ page }) => {
+  await tresorAnlegen(page);
+  // Nach dem 19.11.2026 steht kein Test mehr an – dann ruht dieser Ablauf.
+  if (!(await page.getByTestId("kompass-karte").count())) test.skip(true, "Kompass-Termine liegen in der Vergangenheit");
+  await expect(page.getByTestId("kompass-karte")).toContainText("Tage");
+  await page.getByTestId("kompass-karte").click();
+  await expect(page.getByTestId("kp-ziel")).toHaveCount(2);
+  await expect(page.getByTestId("kp-ziel").first()).toContainText("Deutsch");
+  await expect(page.getByTestId("kp-ziel").first()).toContainText("steht im Wochenplan"); // automatisch eingetragen
+  await expect(page.getByTestId("kp-woche").last()).toContainText("Testwoche");
+  // … wirklich im Plan: der Elternbereich zeigt beide Kompass-Einträge
+  await page.getByTestId("nav-eltern").click();
+  await expect(page.getByTestId("termin-zeile")).toHaveCount(2);
+  await expect(page.getByTestId("termin-zeile").first()).toContainText("Kompass-Test");
+  // Ein Fokus-Chip startet die Übung direkt (Lese-Detektiv mit Textabschnitt)
+  await page.getByTestId("nav-start").click();
+  await page.getByTestId("kompass-karte").click();
+  await page.locator('[data-test="kp-fokus-lesen"]').first().click();
+  await expect(page.getByTestId("frage-kontext")).toBeVisible();
+});
+
 test("Auto-Sicherung: Änderungen wandern near-realtime im Hintergrund zum Server", async ({ page }) => {
   let rev = 0;
   let puts = 0;
