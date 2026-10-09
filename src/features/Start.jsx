@@ -6,7 +6,7 @@ import { EINSTUFUNG_FELDER } from "../calc/einstufung.js";
 import { STARK_SAETZE } from "../calc/aufgaben/stark.js";
 import { schulfreiAm } from "../calc/kalender.js";
 import {
-  wochenMontag, tagDatum, planFuerWoche, planSchreiben, bausteinInfo, blockFertig, blockUnfertig,
+  wochenMontag, tagDatum, planFuerWoche, planSchreiben, bausteinInfo, bausteinAnzeige, blockFertig, blockUnfertig,
   tagGeschafft, heuteBelohnt, belohnungEintragen, WOCHENTAGE, slotLabel, schulFaecher, istAusgefallen, blockDauerVon, uhr, auffrischungen,
 } from "../calc/wochenplan.js";
 
@@ -134,7 +134,7 @@ export default function Start() {
               </div>
             ))}
             {heutePlan.map((b) => {
-              const info = bausteinInfo(b.typ);
+              const info = bausteinAnzeige(b.typ, data.einstellungen);
               const ziel = planZiel[b.typ];
               return (
                 <div key={b.id} data-test="heute-block" style={{

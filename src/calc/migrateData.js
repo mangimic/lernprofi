@@ -54,6 +54,7 @@ export function leeresDokument(heute) {
       termine: [],         // 🗓️ Klassenarbeiten/Kompass-Tests/WDWs: { id, tag, art, fach }
       festeTermine: FESTE_TERMINE_STANDARD, // 🔒 wöchentlich feste Termine (Minuten-Slots)
       planRoutine: [],     // 🔁 Wochen-Routine: { tag, slot, typ } (ohne Freunde-Zeit)
+      bausteine: { aus: [], namen: {}, eigene: [] }, // 🧩 Plan-Kategorien: ausgeblendet/umbenannt/eigene
     },
     protokoll: [],     // Änderungsprotokoll: { zeit, bereich, art, text }
   };
@@ -188,6 +189,24 @@ export function migrateData(alt, heute) {
       ...(Number.isInteger(t.serie) ? { serie: t.serie } : {}),
     }))
     .slice(0, 60); // ein ganzes Schuljahr voller Termine
+  const bst = istObjekt(d.einstellungen.bausteine) ? d.einstellungen.bausteine : {};
+  const bstNamen = {};
+  if (istObjekt(bst.namen)) {
+    for (const [k, v] of Object.entries(bst.namen)) {
+      if (typeof v === "string" && v.trim()) bstNamen[k.slice(0, 20)] = v.trim().slice(0, 18);
+    }
+  }
+  d.einstellungen.bausteine = {
+    aus: (Array.isArray(bst.aus) ? bst.aus : []).filter((x) => typeof x === "string").map((x) => x.slice(0, 20)).slice(0, 30),
+    namen: bstNamen,
+    eigene: (Array.isArray(bst.eigene) ? bst.eigene : [])
+      .filter((k) => istObjekt(k) && typeof k.name === "string" && k.name.trim())
+      .map((k, i) => ({
+        id: Number.isInteger(k.id) ? k.id : i + 1,
+        name: k.name.trim().slice(0, 18),
+        emoji: typeof k.emoji === "string" && k.emoji.trim() ? k.emoji.trim().slice(0, 4) : "⭐",
+      })).slice(0, 20),
+  };
   const ki = istObjekt(d.einstellungen.ki) ? d.einstellungen.ki : {};
   d.einstellungen.ki = {
     erklaeren: ki.erklaeren === true, schrift: ki.schrift === true, aufsatz: ki.aufsatz === true,

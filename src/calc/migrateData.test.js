@@ -69,6 +69,22 @@ describe("migrateData", () => {
     expect(gut.lernstand.mutSatz).toEqual({ tag: HEUTE, idx: 2 });
   });
 
+  it("Plan-Kategorien: kaputte Einträge fliegen raus, gute bleiben", () => {
+    const d = migrateData({ einstellungen: { bausteine: {
+      aus: ["pfadfinder", 7, "x".repeat(40)],
+      namen: { angeln: "  Fliegenfischen  ", sport: "", mathe: 3 },
+      eigene: [{ id: 1, name: " Lego-Zeit ", emoji: "🧱" }, { name: "" }, "quatsch", { id: 2, name: "a".repeat(30) }],
+    } } }, HEUTE);
+    const b = d.einstellungen.bausteine;
+    expect(b.aus).toEqual(["pfadfinder", "x".repeat(20)]);
+    expect(b.namen).toEqual({ angeln: "Fliegenfischen" });
+    expect(b.eigene).toEqual([
+      { id: 1, name: "Lego-Zeit", emoji: "🧱" },
+      { id: 2, name: "a".repeat(18), emoji: "⭐" },
+    ]);
+    expect(migrateData({}, HEUTE).einstellungen.bausteine).toEqual({ aus: [], namen: {}, eigene: [] });
+  });
+
   it("leeresDokument ist bereits migriert", () => {
     const leer = leeresDokument(HEUTE);
     expect(migrateData(leer, HEUTE)).toEqual(leer);

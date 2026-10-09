@@ -36,6 +36,20 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.43: Aufgeräumter Plan & eigene Kategorien ----------
+console.log("== v0.43: Plan-Kategorien ==");
+test("v0.43: Palette hinter dem Termin-Knopf, bausteinListe/-Anzeige, Eltern-Kategorien, Migration", (() => {
+  const w = quelle("src/calc/wochenplan.js");
+  const f = quelle("src/features/Wochenplan.jsx");
+  const e = quelle("src/features/Eltern.jsx");
+  return w.includes("export function bausteinListe") && w.includes("export function bausteinAnzeige")
+    && f.includes('data-test="kat-suche"') && f.includes('data-test="kat-frei"') && f.includes('data-test="kat-termin"')
+    && f.includes("palette &&")
+    && e.includes('data-test="kat-bearbeiten"') && e.includes("kat-eigen-plus") && e.includes("kat-speichern")
+    && quelle("src/calc/migrateData.js").includes("d.einstellungen.bausteine")
+    && releaseNoteVorhanden("rn-056");
+})());
+
 // ---------- v0.42: Einträge bearbeiten ----------
 console.log("== v0.42: Einträge bearbeiten ==");
 test("v0.42: blockTyp in calc, Wechsel-Modus im Fenster-Dialog, Termin-Bearbeiten (Plan + Eltern)", (() => {
@@ -181,7 +195,9 @@ test("v0.34: Kind trägt Termine selbst ein und entfernt sie per Kärtchen-Dialo
   const f = quelle("src/features/Wochenplan.jsx");
   return f.includes('data-test="kind-termin"') && f.includes("kt-art-") && f.includes("kt-tag-")
     && f.includes('data-test="kt-ok"') && f.includes('data-test="termin-dialog"')
-    && f.includes('data-test="termin-entfernen"') && f.includes("verborgen");
+    && f.includes('data-test="termin-entfernen"')
+    // Verborgen-Filter lebte erst in der Oberfläche, seit v0.43 in calc/bausteinListe
+    && (f.includes("verborgen") || quelle("src/calc/wochenplan.js").includes("!b.verborgen && !aus.includes(b.typ)"));
 })());
 
 // ---------- v0.33: Verschieben, Familienregel, Ausfall-Liste, Vorlage ----------

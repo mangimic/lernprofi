@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-056",
+    "version": "0.43.0",
+    "datum": "2026-10-09",
+    "titel": "Aufgeräumter Plan & eigene Kategorien",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🧹 Der Wochenplan-Kopf ist aufgeräumt: Die Kategorien erscheinen erst nach „📝 Termin eintragen“ – mit Suche, Freitext (⭐ eigener Eintrag) und dem Weg zu Klassenarbeit, Kompass-Test und Wörtern der Woche."
+      },
+      {
+        "type": "neu",
+        "text": "🧩 Eltern können die Plan-Kategorien jetzt anpassen: Standard-Kategorien umbenennen oder ausblenden und bis zu 20 eigene Kategorien (mit Emoji) ergänzen – alles im Elternbereich, platzierte Bausteine folgen dem neuen Namen."
+      }
+    ]
+  },
+  {
     "id": "rn-055",
     "version": "0.42.0",
     "datum": "2026-10-09",

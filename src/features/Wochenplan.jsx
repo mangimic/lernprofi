@@ -2,13 +2,13 @@ import { Fragment, useState } from "react";
 import { DndContext, useDraggable, useDroppable, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { useApp } from "../appContext.jsx";
 import {
-  WOCHENTAGE, BAUSTEINE, TERMIN_ARTEN, LERN_MINUTEN, tagesStunden, uhr, bausteinInfo,
-  wochenMontag, tagDatum, planFuerWoche, leererPlan, blockHinzu, blockWeg, slotBelegt,
+  WOCHENTAGE, TERMIN_ARTEN, LERN_MINUTEN, tagesStunden, uhr, bausteinInfo,
+  wochenMontag, tagDatum, planFuerWoche, blockHinzu, blockWeg, slotBelegt,
   termineDerWoche, planPruefung, wochenBilanz, festerTermin, SCHULE, auffrischungen,
   kalenderWoche, routineAusPlan, routineAnwenden, schulZeilen, blockNotiz,
   istAusgefallen, ausfallSetzen, ausfallAufheben, blockVerschieben, wocheKopieren,
   blockDauer, blockDauerVon, slotBelegt as slotBelegtCalc, planSchreiben, terminSerie,
-  blockSerie, blockSerieEntfernen, blockTyp,
+  blockSerie, blockSerieEntfernen, blockTyp, bausteinListe, bausteinAnzeige,
 } from "../calc/wochenplan.js";
 import { schulfreiAm, ferienAm, monatsGitter, monatsName, monatSchritt, FERIEN_BW, SCHULJAHR } from "../calc/kalender.js";
 
@@ -42,11 +42,11 @@ function PaletteBaustein({ b, gewaehlt, aufTipp }) {
 /* Eine Stunde (14-19 Uhr) an einem Tag: leer = Ablagefläche (tippen
    oder hineinziehen), belegt = Baustein-Kärtchen mit ✖. */
 function StundenSlot({ tagIdx, slot, block, blockStart, fest, wahlAktiv, aufTipp, aufWeg, aufEdit, aufFest }) {
-  const { T } = useApp();
+  const { T, data } = useApp();
   const { setNodeRef, isOver } = useDroppable({ id: `slot-${tagIdx}-${slot}`, disabled: !!fest });
   // Platzierte Bausteine sind selbst ziehbar (umplanen ohne Löschen).
   const zieh = useDraggable({ id: `block-${block?.id ?? `leer-${tagIdx}-${slot}`}`, disabled: !block || !blockStart });
-  const info = block ? bausteinInfo(block.typ) : null;
+  const info = block ? bausteinAnzeige(block.typ, data.einstellungen) : null;
   if (fest) {
     const fortsetzung = fest.beginn !== slot;
     return (
@@ -271,6 +271,8 @@ export default function Wochenplan() {
   const [kindTermin, setKindTermin] = useState(null); // 📝 Eingabe: { art, fach, tag, serie }
   const [fenster, setFenster] = useState(null); // 🪟 Direkt-Wahl fürs Fenster: { tag, slot, suche }
   const [terminDialog, setTerminDialog] = useState(null); // eingetragenen Termin ansehen/entfernen
+  const [palette, setPalette] = useState(false); // 📝 Kategorien erst nach „Termin eintragen" zeigen
+  const [katSuche, setKatSuche] = useState(""); // 🔍 Suche/Freitext in der Kategorien-Auswahl
   const montagAktiv = wochenMontag(heute);
   const montag = montagAnzeige;
   const plan = planFuerWoche(data.lernstand.wochenplan, montag);
@@ -285,12 +287,16 @@ export default function Wochenplan() {
     const wochenplan = planSchreiben(data.lernstand.wochenplan, neuerPlan);
     logChange({ ...data, lernstand: { ...data.lernstand, wochenplan } }, "wochenplan", "geaendert", text);
   };
-  const hinzu = (tagIdx, slot, typ) => {
-    const neu = blockHinzu(plan, tagIdx, typ, slot);
+  // `was` ist ein Baustein-Typ – oder { typ: "eigen", notiz } für Freitext/eigene Kategorien.
+  const hinzu = (tagIdx, slot, was) => {
+    const typ = typeof was === "string" ? was : was.typ;
+    let neu = blockHinzu(plan, tagIdx, typ, slot);
     if (neu !== plan) {
+      const id = neu.bloecke[neu.bloecke.length - 1].id;
+      if (typeof was !== "string" && was.notiz) neu = blockNotiz(neu, id, was.notiz);
       speichern(neu, `Baustein ${typ} am ${WOCHENTAGE[tagIdx]} um ${uhr(slot)} Uhr eingeplant`);
       // Freunde-Zeit lebt von der Verabredung, Sport von der Sportart: direkt fragen.
-      if (typ === "freunde" || typ === "sport") setEditor({ id: neu.bloecke[neu.bloecke.length - 1].id, notiz: "" });
+      if (typ === "freunde" || typ === "sport") setEditor({ id, notiz: "" });
     }
   };
   const slotGetippt = (tagIdx, slot) => {
@@ -394,8 +400,8 @@ export default function Wochenplan() {
               ➡️ Für nächste Woche übernehmen
             </button>
           )}
-          <button data-test="kind-termin" onClick={() => setKindTermin({ art: "ka", fach: "", tag: null, serie: "nein" })}
-            style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: T.weich, color: T.text }}>
+          <button data-test="kind-termin" onClick={() => { setPalette(true); setKatSuche(""); }}
+            style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: palette ? T.primaer : T.weich, color: palette ? T.primaerText : T.text }}>
             📝 Termin eintragen
           </button>
           <button data-test="schule-zeigen" onClick={() => setSchuleAuf(!schuleAuf)}
@@ -410,18 +416,56 @@ export default function Wochenplan() {
         ) : (<>
         <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           DU bestimmst dein Pensum – wochentags ab <b>13 Uhr</b> (🎲 erst Spielzeit nach dem Essen),
-          am Wochenende <b>ab 9 Uhr</b>. Tippe ein freies Fenster direkt an (Auswahl mit Suche + eigener Text) – oder erst einen Baustein und dann ein Fenster (je 30 Minuten),
-          oder zieh ihn rüber. Eine Lernbox = {LERN_MINUTEN} Minuten, danach 5 Minuten Pause
+          am Wochenende <b>ab 9 Uhr</b>. Tippe ein freies Fenster direkt an (Auswahl mit Suche + eigener Text) – oder hol dir über „📝 Termin eintragen“ eine Kategorie
+          und tippe dann ein Fenster (je 30 Minuten), oder zieh sie rüber. Eine Lernbox = {LERN_MINUTEN} Minuten, danach 5 Minuten Pause
           (Trampolin, essen, trinken – keine Bildschirme).
           {" "}🦁 Tipp: Sonntags besprecht ihr die nächste Woche – das Üben bleibt Routine,
           die Freunde-Zeit kommt je Verabredung neu dazu.
         </p>
         <DndContext sensors={sensoren} onDragEnd={ziehenEnde}>
-          <div data-test="plan-palette" style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
-            {BAUSTEINE.filter((b) => !b.verborgen).map((b) => (
-              <PaletteBaustein key={b.typ} b={b} gewaehlt={wahl === b.typ} aufTipp={(typ) => setWahl(wahl === typ ? null : typ)} />
-            ))}
-          </div>
+          {palette && (() => {
+            const suche = katSuche.trim().toLowerCase();
+            const kats = bausteinListe(data.einstellungen).filter((b) => !suche || b.name.toLowerCase().includes(suche));
+            const eigene = (data.einstellungen.bausteine?.eigene || []).filter((k) => !suche || k.name.toLowerCase().includes(suche));
+            return (
+              <div data-test="plan-palette" style={{ background: T.grund, borderRadius: T.radiusKlein, padding: 10, marginBottom: 10 }}>
+                <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}>
+                  <input data-test="kat-suche" type="text" maxLength={24} placeholder="Suchen oder frei eintragen …"
+                    value={katSuche} onChange={(e) => setKatSuche(e.target.value)}
+                    style={{ flex: 1, boxSizing: "border-box", minHeight: "var(--touch)", borderRadius: T.radiusKlein, border: `1px solid ${T.rand}`, padding: "0 12px", background: T.karte, color: T.text }} />
+                  <button data-test="kat-zu" aria-label="Auswahl schließen" onClick={() => { setPalette(false); setKatSuche(""); }}
+                    style={{ background: "transparent", color: T.textLeise, padding: "0 6px", minHeight: 0, height: "auto", fontSize: 18 }}>
+                    ✖
+                  </button>
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {kats.map((b) => (
+                    <PaletteBaustein key={b.typ} b={b} gewaehlt={wahl === b.typ}
+                      aufTipp={(typ) => { setWahl(wahl === typ ? null : typ); setPalette(false); setKatSuche(""); }} />
+                  ))}
+                  {eigene.map((k) => (
+                    <button key={k.id} data-test={`kat-eigen-${k.id}`}
+                      onClick={() => { setWahl({ typ: "eigen", notiz: k.name }); setPalette(false); setKatSuche(""); }}
+                      style={{ height: "auto", minHeight: "var(--touch)", padding: "6px 10px", background: T.weich, color: T.text, fontWeight: 700 }}>
+                      {k.emoji} {k.name}
+                    </button>
+                  ))}
+                  {katSuche.trim() && (
+                    <button data-test="kat-frei"
+                      onClick={() => { setWahl({ typ: "eigen", notiz: katSuche.trim() }); setPalette(false); setKatSuche(""); }}
+                      style={{ height: "auto", minHeight: "var(--touch)", padding: "6px 10px", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+                      ⭐ „{katSuche.trim()}“ eintragen
+                    </button>
+                  )}
+                </div>
+                <button data-test="kat-termin"
+                  onClick={() => { setPalette(false); setKatSuche(""); setKindTermin({ art: "ka", fach: "", tag: null, serie: "nein" }); }}
+                  style={{ width: "100%", marginTop: 8, height: "auto", minHeight: "var(--touch)", background: T.weich, color: T.text, fontWeight: 700 }}>
+                  📝 Klassenarbeit, Kompass-Test oder Wörter der Woche eintragen
+                </button>
+              </div>
+            );
+          })()}
           {verschieben && (
             <p data-test="verschieb-hinweis" style={{ margin: "0 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
               📍 Tipp auf ein freies Fenster – dahin wandert der Baustein.{" "}
@@ -433,7 +477,7 @@ export default function Wochenplan() {
           )}
           {wahl && (
             <p data-test="plan-wahl-hinweis" style={{ margin: "0 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-              👆 Und jetzt: Tipp auf eine freie Stunde, in der „{bausteinInfo(wahl).name}“ stattfinden soll!
+              👆 Und jetzt: Tipp auf eine freie Stunde, in der „{typeof wahl === "string" ? bausteinAnzeige(wahl, data.einstellungen).name : wahl.notiz}“ stattfinden soll!
             </p>
           )}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "stretch", background: T.grund, borderRadius: T.radiusKlein, padding: 8 }}>
@@ -505,7 +549,8 @@ export default function Wochenplan() {
       </div>
       {fenster && (() => {
         const suche = fenster.suche.trim().toLowerCase();
-        const treffer = BAUSTEINE.filter((b) => !b.verborgen && (!suche || b.name.toLowerCase().includes(suche)));
+        const treffer = bausteinListe(data.einstellungen).filter((b) => !suche || b.name.toLowerCase().includes(suche));
+        const eigeneKat = (data.einstellungen.bausteine?.eigene || []).filter((k) => !suche || k.name.toLowerCase().includes(suche));
         const zu = () => setFenster(null);
         // 🔄 Wechsel-Modus: ein bestehender Baustein wird in einen anderen Typ geändert
         // (Fenster, Dauer, Notiz und Haken bleiben erhalten).
@@ -558,6 +603,20 @@ export default function Wochenplan() {
                     onClick={() => { if (fenster.wechselId != null) { wechseln(b.typ); } else { hinzu(fenster.tag, fenster.slot, b.typ); zu(); } }}
                     style={{ textAlign: "left", height: "auto", minHeight: "var(--touch)", padding: "8px 12px", fontWeight: 700, background: T.weich, color: T.text }}>
                     {b.emoji} {b.name}{(b.lern && b.box !== false) || b.kurz ? ` · ${LERN_MINUTEN} Min` : ""}
+                  </button>
+                ))}
+                {eigeneKat.map((k) => (
+                  <button key={`eigen-${k.id}`} data-test={`fenster-eigen-${k.id}`}
+                    onClick={() => {
+                      if (fenster.wechselId != null) {
+                        speichern(blockNotiz(blockTyp(plan, fenster.wechselId, "eigen"), fenster.wechselId, k.name), `Baustein in „${k.name}“ geändert`);
+                      } else {
+                        hinzu(fenster.tag, fenster.slot, { typ: "eigen", notiz: k.name });
+                      }
+                      zu();
+                    }}
+                    style={{ textAlign: "left", height: "auto", minHeight: "var(--touch)", padding: "8px 12px", fontWeight: 700, background: T.weich, color: T.text }}>
+                    {k.emoji} {k.name}
                   </button>
                 ))}
                 {fenster.suche.trim() && (
@@ -726,7 +785,7 @@ export default function Wochenplan() {
       {editor && (() => {
         const block = plan.bloecke.find((b) => b.id === editor.id);
         if (!block) return null;
-        const info = bausteinInfo(block.typ);
+        const info = bausteinAnzeige(block.typ, data.einstellungen);
         const zu = () => setEditor(null);
         return (
           <div data-test="block-editor" onClick={zu} style={{

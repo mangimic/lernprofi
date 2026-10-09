@@ -939,12 +939,16 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await expect(page.getByTestId("termin-chip")).toContainText("Klassenarbeit Mathe");
   await expect(page.getByTestId("fest-0-780")).toContainText("Mittag & Spielzeit");
   await expect(page.getByTestId("fest-6-780")).toContainText("Mittag & Spielzeit"); // auch am Wochenende
+  // Kategorien erscheinen erst nach „📝 Termin eintragen“ – vorher ist die Leiste aufgeräumt
+  await expect(page.getByTestId("plan-palette")).toHaveCount(0);
+  await page.getByTestId("kind-termin").click();
   await expect(page.getByTestId("baustein-arzt")).toContainText("Arzttermin");
   await expect(page.getByTestId("plan-legende")).toContainText("blockiert");
   await expect(page.getByTestId("fest-1-960")).toContainText("Schlagzeug-Stunde");
   await expect(page.getByTestId("fest-1-990")).toHaveCount(0); // Schlagzeug nur 30 Min
   await expect(page.getByTestId("fest-0-990")).toContainText("↳"); // Musikalische Spiele läuft 60 Min
   await expect(page.getByTestId("baustein-hausaufgaben")).toContainText("Hausaufgaben");
+  await page.getByTestId("kat-zu").click(); // Auswahl wieder schließen
   await expect(page.getByTestId("fest-3-1110")).toContainText("Pfadfinder");
   await expect(page.getByTestId("tag-0")).toContainText("Schule 7:50");
   await expect(page.getByTestId("tag-4")).toContainText("7:50–13:00"); // Fr: Sport bis 13 Uhr
@@ -963,6 +967,7 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
 
   // Antippen: Baustein → freies 30-Minuten-Fenster. Samstag ab 9 Uhr; 3 Lernboxen überladen (Limit 2 bei 20 Min)
   const bausteinZu = async (typ, tag, slot) => {
+    await page.getByTestId("kind-termin").click(); // Kategorien-Auswahl öffnen
     await page.getByTestId(`baustein-${typ}`).click();
     await expect(page.getByTestId("plan-wahl-hinweis")).toBeVisible();
     await page.getByTestId(`slot-${tag}-${slot}`).click();
@@ -982,8 +987,10 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await page.getByTestId("notiz-feld").fill("BJJ");
   await page.getByTestId("notiz-ok").click();
   await expect(page.getByTestId("tag-5")).toContainText("Sport · BJJ");
+  await page.getByTestId("kind-termin").click();
   await expect(page.getByTestId("baustein-angeln")).toContainText("Angeln"); // 🎣 neu in der Palette
   await expect(page.getByTestId("baustein-schlagzeug")).toContainText("10 Min"); // Schlagzeug = 10-Minuten-Einheit
+  await page.getByTestId("kat-zu").click();
   await expect(page.getByTestId("ampel-5")).toHaveText("🟡"); // Sport reicht nicht – Reihenfolge fehlt
   await expect(page.getByTestId("tag-hinweis-5")).toContainText("Hausaufgaben");
   await bausteinZu("hausaufgaben", 5, 570);
@@ -998,6 +1005,7 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
 
   // 📝 Felix trägt selbst einen Termin ein (Wörter der Woche, Montag) – und entfernt ihn wieder
   await page.getByTestId("kind-termin").click();
+  await page.getByTestId("kat-termin").click();
   await page.getByTestId("kt-art-wdw").click();
   await page.getByTestId("kt-tag-0").click();
   await page.getByTestId("kt-fach").fill("Herbstwörter");
@@ -1010,6 +1018,7 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
 
   // 🔁 Serientermin: 4 Wochen „Wörter der Woche" montags – gilt auch nächste Woche, Serie komplett löschbar
   await page.getByTestId("kind-termin").click();
+  await page.getByTestId("kat-termin").click();
   await page.getByTestId("kt-art-wdw").click();
   await page.getByTestId("kt-tag-0").click();
   await page.getByTestId("kt-serie-4").click();
@@ -1032,6 +1041,7 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await expect(page.getByTestId("slot-1-1020")).toContainText("frei"); // Fenster ist einfach frei …
   await expect(page.getByTestId("ausfall-liste")).toContainText("Sport"); // … der Ausfall steht unterm Board
   // das freie Fenster lässt sich sofort neu verplanen
+  await page.getByTestId("kind-termin").click();
   await page.getByTestId("baustein-freunde").click();
   await page.getByTestId("slot-1-1050").click();
   await page.getByTestId("notiz-feld").fill("Oma");
@@ -1164,7 +1174,9 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await page.getByTestId("woche-diese").click();
   await expect(page.getByTestId("monat-titel")).toHaveText(titelJetzt);
   await page.getByTestId("ansicht-monat").click(); // zurück zur Wochenansicht
+  await page.getByTestId("kind-termin").click();
   await expect(page.getByTestId("plan-palette")).toBeVisible();
+  await page.getByTestId("kat-zu").click();
 
   // 🔁 Baustein-Serie: Schlagzeug So 14:00 in die nächsten 4 Wochen – und ab Folgewoche wieder raus
   await page.getByTestId("slot-6-840").click();
@@ -1197,6 +1209,36 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await page.getByTestId("fenster-wahl-angeln").click();
   await expect(page.getByTestId("slot-6-840")).toContainText("Angeln");
   await expect(page.getByTestId("slot-6-840")).not.toContainText("Schlagzeug");
+
+  // 🧩 Plan-Kategorien: Eltern benennen um, blenden aus und ergänzen eine eigene
+  // (nach dem PIN-Neustart ist die App im Kind-Modus – erst als Eltern entsperren)
+  await page.reload();
+  await page.getByTestId("eltern-zugang").click();
+  await page.getByTestId("pw-eingabe").fill(PW);
+  await page.getByTestId("pw-ok").click();
+  await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
+  await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("kat-bearbeiten").click();
+  await page.getByTestId("kat-name-angeln").fill("Fliegenfischen");
+  await page.getByTestId("kat-an-pfadfinder").click(); // ausblenden
+  await page.getByTestId("kat-eigen-name").fill("Lego-Zeit");
+  await page.getByTestId("kat-eigen-plus").click();
+  await page.getByTestId("kat-speichern").click();
+  await page.getByTestId("nav-plan").click();
+  await page.getByTestId("kind-termin").click();
+  await expect(page.getByTestId("baustein-angeln")).toContainText("Fliegenfischen"); // umbenannt
+  await expect(page.getByTestId("baustein-pfadfinder")).toHaveCount(0); // ausgeblendet
+  await expect(page.getByTestId("slot-6-840")).toContainText("Fliegenfischen"); // platzierte Bausteine folgen dem Namen
+  await page.getByTestId("kat-eigen-1").click(); // eigene Kategorie wählen …
+  await page.getByTestId("slot-6-900").click(); // … und platzieren
+  await expect(page.getByTestId("slot-6-900")).toContainText("Lego-Zeit");
+
+  // ⭐ Freitext direkt aus der Auswahl: suchen → eigener Eintrag
+  await page.getByTestId("kind-termin").click();
+  await page.getByTestId("kat-suche").fill("Oma besuchen");
+  await page.getByTestId("kat-frei").click();
+  await page.getByTestId("slot-6-960").click();
+  await expect(page.getByTestId("slot-6-960")).toContainText("Oma besuchen");
 });
 
 test("Auto-Sicherung: Änderungen wandern near-realtime im Hintergrund zum Server", async ({ page }) => {

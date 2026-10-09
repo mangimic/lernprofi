@@ -7,6 +7,7 @@ import { idbStorage } from "../idbShim.js";
 import { syncStatus, hochladen, herunterladen, konfliktUeberschreiben } from "../sync.js";
 import { kiStatus, kiDeckelSetzen, kiErklaeren, kiBericht, kiSaetze } from "../ki.js";
 import { berichtDaten } from "../calc/bericht.js";
+import { BAUSTEINE } from "../calc/wochenplan.js";
 
 /* Elternbereich (eigener Tab, nur nach Entsperren mit dem Eltern-Passwort):
    Profil · Tagesziel · Stufen-Steuerung · neutrale Lern-Übersicht ·
@@ -62,6 +63,7 @@ export default function Eltern() {
   const [bericht, setBericht] = useState(null);
   const [pinNeu, setPinNeu] = useState({ pw: "", pin: "" });
   const [terminNeu, setTerminNeu] = useState({ tag: "", art: "ka", fach: "" }); // 🗓️ Termin-Eingabe
+  const [katEntwurf, setKatEntwurf] = useState(null); // 🧩 Plan-Kategorien im Bearbeiten-Modus
 
   const feld = {
     width: "100%", minHeight: "var(--touch)", fontSize: "var(--schrift)",
@@ -488,6 +490,97 @@ export default function Eltern() {
             </button>
           )}
         </div>
+      </Karte>
+
+      <Karte test="eltern-kategorien">
+        <b>🧩 Plan-Kategorien</b>
+        <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          Die Kategorien im Wochenplan anpassen: umbenennen, ausblenden oder eigene ergänzen.
+          Eigene Kategorien erscheinen in der Auswahl und landen als ⭐-Eintrag im Plan.
+        </p>
+        {!katEntwurf ? (
+          <button data-test="kat-bearbeiten"
+            onClick={() => {
+              const o = data.einstellungen.bausteine || {};
+              setKatEntwurf({
+                aus: [...(o.aus || [])], namen: { ...o.namen },
+                eigene: (o.eigene || []).map((k) => ({ ...k })), neuName: "", neuEmoji: "",
+              });
+            }}
+            style={{ background: T.weich, color: T.text, fontWeight: 700 }}>
+            ✏️ Kategorien anpassen
+          </button>
+        ) : (
+          <>
+            {BAUSTEINE.filter((b) => !b.verborgen).map((b) => (
+              <div key={b.typ} data-test="kat-zeile" style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                <input type="checkbox" data-test={`kat-an-${b.typ}`}
+                  checked={!katEntwurf.aus.includes(b.typ)}
+                  onChange={() => setKatEntwurf({
+                    ...katEntwurf,
+                    aus: katEntwurf.aus.includes(b.typ) ? katEntwurf.aus.filter((x) => x !== b.typ) : [...katEntwurf.aus, b.typ],
+                  })}
+                  style={{ width: 20, height: 20 }} />
+                <span style={{ width: 24, textAlign: "center" }}>{b.emoji}</span>
+                <input data-test={`kat-name-${b.typ}`} type="text" maxLength={18} placeholder={b.name}
+                  value={katEntwurf.namen[b.typ] || ""}
+                  onChange={(e) => setKatEntwurf({ ...katEntwurf, namen: { ...katEntwurf.namen, [b.typ]: e.target.value } })}
+                  style={{ ...feld, marginBottom: 0, flex: 1, width: "auto", minHeight: 36 }} />
+              </div>
+            ))}
+            {katEntwurf.eigene.map((k) => (
+              <div key={k.id} data-test="kat-eigen-zeile" style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                <span style={{ width: 28 }} />
+                <span style={{ width: 24, textAlign: "center" }}>{k.emoji}</span>
+                <span style={{ flex: 1, fontWeight: 700 }}>{k.name}</span>
+                <button data-test={`kat-eigen-weg-${k.id}`} aria-label="Eigene Kategorie entfernen"
+                  onClick={() => setKatEntwurf({ ...katEntwurf, eigene: katEntwurf.eigene.filter((x) => x.id !== k.id) })}
+                  style={{ background: "transparent", color: T.textLeise, padding: 0, minHeight: 0, height: "auto" }}>
+                  ✖
+                </button>
+              </div>
+            ))}
+            <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+              <input data-test="kat-eigen-emoji" type="text" maxLength={4} placeholder="⭐"
+                value={katEntwurf.neuEmoji} onChange={(e) => setKatEntwurf({ ...katEntwurf, neuEmoji: e.target.value })}
+                style={{ ...feld, marginBottom: 0, width: 64, textAlign: "center" }} />
+              <input data-test="kat-eigen-name" type="text" maxLength={18} placeholder="Eigene Kategorie (z. B. Lego-Zeit)"
+                value={katEntwurf.neuName} onChange={(e) => setKatEntwurf({ ...katEntwurf, neuName: e.target.value })}
+                style={{ ...feld, marginBottom: 0, flex: 1, width: "auto" }} />
+              <button data-test="kat-eigen-plus" disabled={!katEntwurf.neuName.trim()}
+                onClick={() => {
+                  const id = katEntwurf.eigene.reduce((m, k) => Math.max(m, k.id), 0) + 1;
+                  setKatEntwurf({
+                    ...katEntwurf, neuName: "", neuEmoji: "",
+                    eigene: [...katEntwurf.eigene, { id, name: katEntwurf.neuName.trim().slice(0, 18), emoji: katEntwurf.neuEmoji.trim() || "⭐" }].slice(0, 20),
+                  });
+                }}
+                style={{ flex: "0 0 auto", background: T.weich, color: T.text, fontWeight: 700, opacity: katEntwurf.neuName.trim() ? 1 : 0.5 }}>
+                + Hinzu
+              </button>
+            </div>
+            <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+              <button data-test="kat-speichern"
+                onClick={() => {
+                  const namen = {};
+                  for (const [typ, name] of Object.entries(katEntwurf.namen)) {
+                    const t = String(name).trim().slice(0, 18);
+                    const original = BAUSTEINE.find((b) => b.typ === typ);
+                    if (t && original && t !== original.name) namen[typ] = t;
+                  }
+                  einstellung({ bausteine: { aus: katEntwurf.aus, namen, eigene: katEntwurf.eigene } }, "Plan-Kategorien angepasst");
+                  setKatEntwurf(null);
+                }}
+                style={{ flex: 1, background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+                ✓ Kategorien speichern
+              </button>
+              <button data-test="kat-abbrechen" onClick={() => setKatEntwurf(null)}
+                style={{ flex: 1, background: "transparent", color: T.textLeise }}>
+                Abbrechen
+              </button>
+            </div>
+          </>
+        )}
       </Karte>
 
       <Karte test="eltern-bericht">

@@ -6,7 +6,7 @@ import {
   kalenderWoche, routineAusPlan, routineAnwenden, schulStunden, schulFaecher,
   wochenMontag, tagDatum, leererPlan, planFuerWoche,
   blockHinzu, blockWeg, blockFertig, tagGeschafft, heuteBelohnt, belohnungEintragen,
-  wochenBilanz, termineDerWoche, planPruefung, bausteinInfo, blockTyp,
+  wochenBilanz, termineDerWoche, planPruefung, bausteinInfo, blockTyp, bausteinListe, bausteinAnzeige,
 } from "./wochenplan.js";
 
 describe("wochenplan – Wochen-Rechnung", () => {
@@ -66,6 +66,20 @@ describe("wochenplan – Wochen-Rechnung", () => {
     expect(neu.bloecke[0]).toMatchObject({ typ: "angeln", tag: 5, slot: 540, dauer: 60, notiz: "kleines Konzert", fertig: true });
     expect(blockTyp(p, 1, "quatsch")).toBe(p); // unbekannter Typ ändert nichts
     expect(p.bloecke[0].typ).toBe("schlagzeug"); // Original unangetastet
+  });
+
+  it("bausteinListe/bausteinAnzeige: Eltern können umbenennen und ausblenden", () => {
+    const einst = { bausteine: { aus: ["pfadfinder"], namen: { angeln: "Fliegenfischen" }, eigene: [{ id: 1, name: "Lego-Zeit", emoji: "🧱" }] } };
+    const liste = bausteinListe(einst);
+    expect(liste.some((b) => b.typ === "pfadfinder")).toBe(false); // ausgeblendet
+    expect(liste.some((b) => b.verborgen)).toBe(false);            // Legacy bleibt draußen
+    expect(liste.find((b) => b.typ === "angeln").name).toBe("Fliegenfischen");
+    expect(liste.find((b) => b.typ === "angeln").emoji).toBe("🎣"); // Verhalten/Emoji bleiben
+    expect(bausteinAnzeige("angeln", einst).name).toBe("Fliegenfischen");
+    expect(bausteinAnzeige("angeln", {}).name).toBe("Angeln"); // ohne Einstellung: Standard
+    expect(bausteinAnzeige("mathe", einst).lern).toBe(true);
+    // ohne Einstellungen: alle sichtbaren Standard-Kategorien
+    expect(bausteinListe(undefined).length).toBe(BAUSTEINE.filter((b) => !b.verborgen).length);
   });
 
   it("Wächter: zu viele Lernboxen → voll; nur Lernen → einseitig; sonst ok", () => {

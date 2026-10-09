@@ -49,6 +49,22 @@ export function bausteinInfo(typ) {
   return BAUSTEINE.find((b) => b.typ === typ) || { typ, name: typ, emoji: "⬜", lern: false };
 }
 
+/** Sichtbare Kategorien für Palette und Fenster-Auswahl: Eltern können
+    Standard-Bausteine umbenennen oder ausblenden (einstellungen.bausteine). */
+export function bausteinListe(einstellungen) {
+  const o = (einstellungen && einstellungen.bausteine) || {};
+  const aus = Array.isArray(o.aus) ? o.aus : [];
+  return BAUSTEINE.filter((b) => !b.verborgen && !aus.includes(b.typ))
+    .map((b) => (o.namen && o.namen[b.typ] ? { ...b, name: o.namen[b.typ] } : b));
+}
+
+/** Wie bausteinInfo, aber mit Eltern-Umbenennung – fürs Anzeigen platzierter Bausteine. */
+export function bausteinAnzeige(typ, einstellungen) {
+  const info = bausteinInfo(typ);
+  const name = einstellungen && einstellungen.bausteine && einstellungen.bausteine.namen && einstellungen.bausteine.namen[typ];
+  return name ? { ...info, name } : info;
+}
+
 /** Der Montag der Woche, in der `heute` liegt (ISO-Datum). */
 export function wochenMontag(heute) {
   const [j, m, t] = String(heute).split("-").map((x) => parseInt(x, 10));
