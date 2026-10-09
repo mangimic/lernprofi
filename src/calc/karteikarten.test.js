@@ -15,7 +15,7 @@ describe("karteikarten", () => {
     }
     expect(/ADHS|Störung|dumm|Versager/i.test(JSON.stringify(KARTEIKARTEN))).toBe(false);
     // 🖼️ Grafik-Lösungen: bekannte Bild-Arten, mindestens 8 Karten illustriert
-    const ARTEN = ["strahl", "folge", "mauer", "form", "buchstaben", "kaestchen", "wuerfelturm", "netz", "uhr", "kugeln", "rad", "balken", "striche", "schilder", "stromkreis", "kompassrose", "sonne", "dkarte", "wuerfel", "spielwuerfel", "laengen"];
+    const ARTEN = ["strahl", "folge", "mauer", "form", "buchstaben", "kaestchen", "wuerfelturm", "netz", "uhr", "kugeln", "rad", "balken", "striche", "schilder", "stromkreis", "kompassrose", "sonne", "dkarte", "wuerfel", "spielwuerfel", "laengen", "uhrplus"];
     const mitBild = KARTEIKARTEN.filter((k) => k.bild);
     expect(mitBild.length).toBeGreaterThanOrEqual(8);
     for (const k of mitBild) expect(ARTEN, k.id).toContain(k.bild.art);

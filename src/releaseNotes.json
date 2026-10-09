@@ -1,5 +1,25 @@
 [
   {
+    "id": "rn-071",
+    "version": "0.56.0",
+    "datum": "2026-10-09",
+    "titel": "Uhrzeiten Schritt für Schritt",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🕐 Alle „Uhrzeit + Minuten“-Aufgaben zeigen jetzt zwei Uhren: links die Start-Uhr, dazwischen der Pfeil mit der Dauer, rechts die Ziel-Uhr – vor der Antwort nur mit einem „?“."
+      },
+      {
+        "type": "neu",
+        "text": "Nach der Antwort erklärt das Merk-Bild den Rechenweg sichtbar: Der Weg des Minutenzeigers liegt als farbiger Bogen auf der Ziel-Uhr – orange bis zur vollen Stunde, blau der Rest. Darunter steht der Weg in Worten, z. B. „Erst 42 Min bis 17:00 (orange), dann noch 3 Min (blau)“. Bei vollen Stunden heißt es: „Die Minuten bleiben gleich!“"
+      },
+      {
+        "type": "neu",
+        "text": "Auch die Uhrzeit-Karteikarte zeigt auf der Lösungsseite jetzt beide Uhren mit dem farbigen Rechenweg statt nur der End-Uhr."
+      }
+    ]
+  },
+  {
     "id": "rn-070",
     "version": "0.55.0",
     "datum": "2026-10-09",

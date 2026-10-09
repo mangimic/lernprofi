@@ -29,7 +29,7 @@ export const KARTEIKARTEN = [
   { id: "m3", fach: "mathe", vs: "Trick: 478 − 97 = ?", rs: "478 − 100 + 3 = 381", merk: "Erst 100 weg (3 zu viel!), dann 3 wieder dazu." },
   { id: "m4", fach: "mathe", vs: "5 · 18 = ?", rs: "90", merk: "5·20 − 5·2 = 100 − 10. Runde Zahl nehmen, Rest abziehen." },
   { id: "m5", fach: "mathe", vs: "Zahlenmauer: Wann wird der Deckstein am größten?", rs: "Größte Zahl in die MITTE", merk: "Die mittlere Zahl wird zweimal mitgezählt." , bild:{art:"mauer",reihe:[20,25,30]}},
-  { id: "m6", fach: "mathe", vs: "16:18 Uhr + 45 Minuten = ?", rs: "17:03 Uhr", merk: "Erst bis 17:00 (42 Min), dann noch 3 Minuten." , bild:{art:"uhr",zeit:"17:03"}},
+  { id: "m6", fach: "mathe", vs: "16:18 Uhr + 45 Minuten = ?", rs: "17:03 Uhr", merk: "Erst bis 17:00 (42 Min), dann noch 3 Minuten." , bild:{art:"uhrplus",von:"16:18",plus:45,zeigt:true}},
   { id: "m7", fach: "mathe", vs: "1 m = ? cm · 1 km = ? m · 1 € = ? ct", rs: "100 cm · 1000 m · 100 ct", merk: "Kilo heißt tausend – Meter und Euro teilen in 100." },
   { id: "m8", fach: "mathe", vs: "Würfel zeigt eine 7 – sicher, möglich oder unmöglich?", rs: "unmöglich", merk: "Auf dem Würfel stehen nur 1 bis 6." , bild:{art:"spielwuerfel",reihe:true}},
   { id: "m9", fach: "mathe", vs: "Wie hoch ist eine Tür? Wie breit ein Finger?", rs: "≈ 2 m · ≈ 1 cm", merk: "Anker: Tür 2 m · Finger 1 cm · Bleistiftspitze 1 mm · Fußballplatz 100 m." , bild:{art:"laengen",dinge:["tuer","finger"],zahlen:true}},

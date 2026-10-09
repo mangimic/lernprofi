@@ -98,21 +98,21 @@ export const MATHE_DATEN={
   mgroessen:{
     easy:[
       {f:"1 Euro = ? Cent", r:"100 Cent", x:["10 Cent","1000 Cent"], tipp:"1 € = 100 ct."},
-      {f:"7:30 Uhr + 30 Minuten = ?", r:"8:00 Uhr", x:["7:60 Uhr","8:30 Uhr"], tipp:"30+30=60 Minuten = eine volle Stunde.", bild:{art:"uhr",zeit:"7:30"}},
+      {f:"7:30 Uhr + 30 Minuten = ?", r:"8:00 Uhr", x:["7:60 Uhr","8:30 Uhr"], tipp:"30+30=60 Minuten = eine volle Stunde.", bild:{art:"uhrplus",von:"7:30",plus:30}, merkbild:{art:"uhrplus",von:"7:30",plus:30,zeigt:true}},
       {f:"1 m = ? cm", r:"100 cm", x:["10 cm","1000 cm"], tipp:"1 Meter = 100 Zentimeter."},
       {f:"Wie lang ist etwa ein Schul-Lineal?", r:"30 cm", x:["30 mm","3 m"], tipp:"Ein Lineal ist ungefähr so lang wie dein Unterarm.", bild:{art:"laengen",dinge:["lineal"]}, merkbild:{art:"laengen",dinge:["lineal"],zahlen:true}},
       {f:"3 € + 2,50 € = ?", r:"5,50 €", x:["5,80 €","6,50 €"], tipp:"3+2=5 Euro und 50 Cent dazu."},
-      {f:"10:15 Uhr + 1 Stunde = ?", r:"11:15 Uhr", x:["10:75 Uhr","11:45 Uhr"], tipp:"Nur die Stunde ändert sich.", bild:{art:"uhr",zeit:"10:15"}},
+      {f:"10:15 Uhr + 1 Stunde = ?", r:"11:15 Uhr", x:["10:75 Uhr","11:45 Uhr"], tipp:"Nur die Stunde ändert sich.", bild:{art:"uhrplus",von:"10:15",plus:60}, merkbild:{art:"uhrplus",von:"10:15",plus:60,zeigt:true}},
       {f:"Wie schwer ist etwa eine Tafel Schokolade?", r:"100 g", x:["1 kg","10 g"], tipp:"Steht sogar auf der Packung!"},
       {f:"1 km = ? m", r:"1000 m", x:["100 m","10 m"], tipp:"Kilo bedeutet tausend."},
       {f:"Du bezahlst 7 € mit einem 10-€-Schein. Wie viel Rückgeld bekommst du?", r:"3 €", x:["2 €","4 €"], tipp:"7+3=10."},
       {f:"Eine halbe Stunde = ? Minuten", r:"30 Minuten", x:["50 Minuten","15 Minuten"], tipp:"Eine Stunde hat 60 Minuten."},
       {f:"2 m = ? cm", r:"200 cm", x:["20 cm","2000 cm"], tipp:"1 m = 100 cm, also 2·100."},
-      {f:"Eine Viertelstunde nach 9:00 Uhr ist es …?", r:"9:15 Uhr", x:["9:45 Uhr","9:25 Uhr"], tipp:"Eine Viertelstunde = 15 Minuten.", bild:{art:"uhr",zeit:"9:00"}}
+      {f:"Eine Viertelstunde nach 9:00 Uhr ist es …?", r:"9:15 Uhr", x:["9:45 Uhr","9:25 Uhr"], tipp:"Eine Viertelstunde = 15 Minuten.", bild:{art:"uhrplus",von:"9:00",plus:15}, merkbild:{art:"uhrplus",von:"9:00",plus:15,zeigt:true}}
     ],
     hard:[
       {f:"Kai fährt eine Strecke von 286 km. 174 km ist er schon gefahren. Wie viele km muss er noch fahren?", r:"112 km", x:["122 km","102 km"], tipp:"286−174: erst −100, dann −74."},
-      {f:"Samira geht um 16:18 Uhr los und braucht 45 Minuten. Wann kommt sie an?", r:"17:03 Uhr", x:["16:63 Uhr","17:13 Uhr"], tipp:"16:18 + 42 Min = 17:00, dann noch 3 Minuten.", bild:{art:"uhr",zeit:"16:18"}},
+      {f:"Samira geht um 16:18 Uhr los und braucht 45 Minuten. Wann kommt sie an?", r:"17:03 Uhr", x:["16:63 Uhr","17:13 Uhr"], tipp:"16:18 + 42 Min = 17:00, dann noch 3 Minuten.", bild:{art:"uhrplus",von:"16:18",plus:45}, merkbild:{art:"uhrplus",von:"16:18",plus:45,zeigt:true}},
       {f:"4 Personen essen je 2 Kugeln Eis. Eine Kugel kostet 1,50 €. Was kostet das zusammen?", r:"12 €", x:["8 €","10 €"], tipp:"8 Kugeln · 1,50 € – oder 8 · 1 € + 8 · 50 ct."},
       {f:"Das Eis kostet 12 €. Bezahlt wird mit einem 50-€-Schein. Wie viel Geld gibt es zurück?", r:"38 €", x:["48 €","42 €"], tipp:"12+38=50. Ergänze von 12 bis 50."},
       {f:"Wie hoch ist ungefähr eine Zimmertür?", r:"2 m", x:["1 m","10 m"], tipp:"Ein Erwachsener passt aufrecht durch – mit etwas Platz.", bild:{art:"laengen",dinge:["tuer"]}, merkbild:{art:"laengen",dinge:["tuer"],zahlen:true}},
@@ -121,7 +121,7 @@ export const MATHE_DATEN={
       {f:"Wie lang ist ungefähr ein Fußballplatz?", r:"100 m", x:["10 km","100 cm"], tipp:"Etwa so weit wie 100 große Schritte.", bild:{art:"laengen",dinge:["platz"]}, merkbild:{art:"laengen",dinge:["platz"],zahlen:true}},
       {f:"Tom springt 2,80 m weit, Alex 2,10 m. Wie viele cm ist Tom weiter gesprungen?", r:"70 cm", x:["7 cm","60 cm"], tipp:"2,80 m − 2,10 m = 0,70 m = 70 cm.", bild:{art:"balken",werte:[["Tom",280,"2,80 m"],["Alex",210,"2,10 m"]]}},
       {f:"3,5 km = ? m", r:"3500 m", x:["350 m","3050 m"], tipp:"3 km = 3000 m und 0,5 km = 500 m."},
-      {f:"Der Film beginnt um 19:45 Uhr und dauert 90 Minuten. Wann ist er zu Ende?", r:"21:15 Uhr", x:["20:75 Uhr","21:35 Uhr"], tipp:"19:45 + 15 Min = 20:00, dann noch 75 Minuten.", bild:{art:"uhr",zeit:"19:45"}},
+      {f:"Der Film beginnt um 19:45 Uhr und dauert 90 Minuten. Wann ist er zu Ende?", r:"21:15 Uhr", x:["20:75 Uhr","21:35 Uhr"], tipp:"19:45 + 15 Min = 20:00, dann noch 75 Minuten.", bild:{art:"uhrplus",von:"19:45",plus:90}, merkbild:{art:"uhrplus",von:"19:45",plus:90,zeigt:true}},
       {f:"250 cm = ? m", r:"2,50 m", x:["25 m","2,05 m"], tipp:"100 cm = 1 m, also 250 cm = 2 m und 50 cm."}
     ]
   },

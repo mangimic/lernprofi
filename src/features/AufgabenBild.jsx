@@ -160,25 +160,91 @@ function Netz({ b }) {
   );
 }
 
-function Uhr({ b }) {
-  const [h, min] = b.zeit.split(":").map((x) => parseInt(x, 10));
-  const wink = (grad) => ((grad - 90) * Math.PI) / 180;
+const UHR_WINK = (grad) => ((grad - 90) * Math.PI) / 180;
+/* Ziffernblatt mit Zeigern; `bogen` = Minuten-Bögen [{von,bis,farbe}]
+   außen am Rand (zeigen den Weg des Minutenzeigers), `frage` = nur „?"
+   statt Zeigern (die Ziel-Uhr vor der Antwort). */
+function UhrBild({ zeit, bogen, frage }) {
+  const [h, min] = (zeit || "12:00").split(":").map((x) => parseInt(x, 10));
   const zeiger = (grad, laenge, breite) => (
-    <line x1="48" y1="48" x2={48 + laenge * Math.cos(wink(grad))} y2={48 + laenge * Math.sin(wink(grad))}
+    <line x1="48" y1="48" x2={48 + laenge * Math.cos(UHR_WINK(grad))} y2={48 + laenge * Math.sin(UHR_WINK(grad))}
       stroke={LINIE} strokeWidth={breite} strokeLinecap="round" />
   );
+  const bogenPfad = (von, bis, r) => {
+    const a1 = UHR_WINK(von * 6), a2 = UHR_WINK(bis * 6);
+    const dauer = (((bis - von) % 60) + 60) % 60;
+    return `M ${48 + r * Math.cos(a1)} ${48 + r * Math.sin(a1)} A ${r} ${r} 0 ${dauer > 30 ? 1 : 0} 1 ${48 + r * Math.cos(a2)} ${48 + r * Math.sin(a2)}`;
+  };
   return (
-    <svg width="96" height="96" viewBox="0 0 96 96" role="img" aria-label={`Uhr: ${b.zeit} Uhr`}>
+    <svg width="96" height="96" viewBox="0 0 96 96" role="img" aria-label={frage ? "Uhr mit Fragezeichen" : `Uhr: ${zeit} Uhr`}>
       <circle cx="48" cy="48" r="44" fill="var(--karte)" stroke={LINIE} strokeWidth="2.5" />
       {Array.from({ length: 12 }, (_, i) => {
-        const a = wink(i * 30);
+        const a = UHR_WINK(i * 30);
         return <line key={i} x1={48 + 38 * Math.cos(a)} y1={48 + 38 * Math.sin(a)}
           x2={48 + 43 * Math.cos(a)} y2={48 + 43 * Math.sin(a)} stroke={LEISE} strokeWidth={i % 3 === 0 ? 3 : 1.5} />;
       })}
-      {zeiger(((h % 12) + min / 60) * 30, 22, 4.5)}
-      {zeiger(min * 6, 33, 3)}
-      <circle cx="48" cy="48" r="3.5" fill={LINIE} />
+      {(bogen || []).map((bg, i) => (((bg.bis - bg.von) % 60) + 60) % 60 > 0 && (
+        <path key={i} d={bogenPfad(bg.von, bg.bis, 33)} fill="none" stroke={bg.farbe}
+          strokeWidth="5" strokeLinecap="round" opacity="0.85" />
+      ))}
+      {frage ? (
+        <text x="48" y="60" textAnchor="middle" fontSize="34" fontWeight="800" fill={WARN}>?</text>
+      ) : (<>
+        {zeiger(((h % 12) + min / 60) * 30, 22, 4.5)}
+        {zeiger(min * 6, bogen && bogen.length ? 29 : 33, 3)}
+        <circle cx="48" cy="48" r="3.5" fill={LINIE} />
+      </>)}
     </svg>
+  );
+}
+function Uhr({ b }) {
+  return <UhrBild zeit={b.zeit} />;
+}
+
+/* 🕐 Uhrzeit PLUS Minuten – als Bild erklärt: Start-Uhr, ein Pfeil mit
+   der Dauer und die Ziel-Uhr. Vor der Antwort zeigt die Ziel-Uhr nur
+   ein „?". Mit `zeigt` (Merk-Bild nach der Antwort) erscheinen die
+   Zeiger UND der Weg des Minutenzeigers als farbiger Bogen: orange bis
+   zur vollen Stunde, blau der Rest – genau die Rechen-Strategie
+   „erst zur vollen Stunde, dann weiter". */
+function Uhrplus({ b }) {
+  const [h, m] = b.von.split(":").map((x) => parseInt(x, 10));
+  const gesamt = h * 60 + m + b.plus;
+  const zh = Math.floor(gesamt / 60) % 24, zm = gesamt % 60;
+  const ziel = `${zh}:${String(zm).padStart(2, "0")}`;
+  const bisVoll = (60 - m) % 60;
+  const rest = b.plus - bisVoll;
+  const volleStd = b.plus % 60 === 0;
+  const dauerText = volleStd ? `+ ${b.plus / 60} Stunde${b.plus > 60 ? "n" : ""}` : `+ ${b.plus} Min`;
+  const bogen = !b.zeigt || volleStd ? [] : [
+    ...(bisVoll > 0 ? [{ von: m, bis: 0, farbe: WARN }] : []),
+    ...(rest > 0 ? [{ von: 0, bis: zm, farbe: PRIMAER }] : []),
+  ];
+  const erklaerung = volleStd
+    ? "Volle Stunden: Die Minuten bleiben gleich!"
+    : bisVoll === 0
+      ? `${b.plus} Min ab ${b.von} Uhr.`
+      : rest > 0
+        ? `Erst ${bisVoll} Min bis ${(h + 1) % 24}:00 (orange), dann noch ${rest} Min (blau).`
+        : `Genau ${bisVoll} Min bis zur vollen Stunde!`;
+  const beschriftung = { fontSize: "var(--schrift-klein)", fontWeight: 800 };
+  return (
+    <div style={{ textAlign: "center" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+        <div>
+          <UhrBild zeit={b.von} />
+          <div style={beschriftung}>{b.von} Uhr</div>
+        </div>
+        <div style={{ fontWeight: 800, color: WARN, whiteSpace: "nowrap" }}>{dauerText} →</div>
+        <div>
+          <UhrBild zeit={ziel} bogen={bogen} frage={!b.zeigt} />
+          <div style={{ ...beschriftung, color: b.zeigt ? "var(--text)" : LEISE }}>{b.zeigt ? `${ziel} Uhr` : "?"}</div>
+        </div>
+      </div>
+      {b.zeigt && (
+        <div style={{ fontSize: "var(--schrift-klein)", color: "var(--text)", marginTop: 4 }}>{erklaerung}</div>
+      )}
+    </div>
   );
 }
 
@@ -554,7 +620,7 @@ const ARTEN = {
   kaestchen: Kaestchen, wuerfelturm: Wuerfelturm, netz: Netz, uhr: Uhr,
   kugeln: Kugeln, rad: Rad, balken: Balken, striche: Striche, schilder: Schilder,
   stromkreis: Stromkreis, kompassrose: Kompassrose, sonne: Sonne, dkarte: DKarte,
-  wuerfel: Wuerfel, spielwuerfel: Spielwuerfel, laengen: Laengen,
+  wuerfel: Wuerfel, spielwuerfel: Spielwuerfel, laengen: Laengen, uhrplus: Uhrplus,
 };
 export const BILD_ARTEN = Object.keys(ARTEN);
 

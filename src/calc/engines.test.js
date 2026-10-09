@@ -170,7 +170,7 @@ describe("aufgabenRunde", () => {
   });
 
   it("🖼️ Aufgaben-Bilder: jede bild-Angabe hat eine bekannte Art und gültige Felder", () => {
-    const ARTEN = ["strahl", "folge", "mauer", "form", "buchstaben", "kaestchen", "wuerfelturm", "netz", "uhr", "kugeln", "rad", "balken", "striche", "schilder", "stromkreis", "kompassrose", "sonne", "dkarte", "wuerfel", "spielwuerfel", "laengen"];
+    const ARTEN = ["strahl", "folge", "mauer", "form", "buchstaben", "kaestchen", "wuerfelturm", "netz", "uhr", "kugeln", "rad", "balken", "striche", "schilder", "stromkreis", "kompassrose", "sonne", "dkarte", "wuerfel", "spielwuerfel", "laengen", "uhrplus"];
     const alle = [MATHE_DATEN, SACH_DATEN].flatMap((daten) =>
       Object.values(daten).flatMap((pool) => [...pool.easy, ...pool.hard]));
     const mitBild = alle.flatMap((a) => [a.bild, a.merkbild].filter(Boolean).map((b) => ({ ...b, f: a.f })));
@@ -203,6 +203,10 @@ describe("aufgabenRunde", () => {
       if (b.art === "laengen") {
         expect(b.dinge.length, a.f).toBeGreaterThanOrEqual(1);
         for (const d of b.dinge) expect(["tuer", "finger", "stift", "lineal", "platz"], a.f).toContain(d);
+      }
+      if (b.art === "uhrplus") {
+        expect(b.von, a.f).toMatch(/^\d{1,2}:\d{2}$/);
+        expect(b.plus, a.f).toBeGreaterThanOrEqual(5);
       }
     }
   });

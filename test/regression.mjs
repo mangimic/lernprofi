@@ -36,6 +36,24 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.56: Uhrzeiten Schritt für Schritt ----------
+console.log("== v0.56: Uhr-Rechenweg ==");
+test("v0.56: uhrplus mit Start-Uhr, Dauer-Pfeil, ?-Ziel-Uhr und Minuten-Bogen", (() => {
+  const b = quelle("src/features/AufgabenBild.jsx");
+  return b.includes("uhrplus: Uhrplus") && b.includes("function UhrBild")
+    && b.includes("frage={!b.zeigt}") && b.includes("bogenPfad")
+    && b.includes("Volle Stunden: Die Minuten bleiben gleich!")
+    && b.includes("bis zur vollen Stunde");
+})());
+test("v0.56: alle Uhr-Rechenaufgaben und die Uhrzeit-Karteikarte nutzen uhrplus", (() => {
+  const m = quelle("src/calc/aufgaben/mathe.js");
+  const k = quelle("src/calc/karteikarten.js");
+  return (m.match(/art:"uhrplus"/g) || []).length >= 10
+    && (m.match(/art:"uhrplus",von:"[^"]+",plus:\d+,zeigt:true/g) || []).length >= 5
+    && k.includes("bild:{art:\"uhrplus\",von:\"16:18\",plus:45,zeigt:true}")
+    && releaseNoteVorhanden("rn-071");
+})());
+
 // ---------- v0.55: Längen-Anker & Merkhilfe ----------
 console.log("== v0.55: Längen-Anker ==");
 test("v0.55: Längen-Anker mit Messpfeil, fünf Alltagsdinge, Zahlen nur im Merk-Bild", (() => {
