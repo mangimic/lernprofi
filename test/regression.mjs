@@ -36,6 +36,19 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.57.1: Aufgaben untereinander ----------
+test("v0.57.1: Mehrfach-Aufgaben zeilenweise, Karten rendern Zeilenumbrüche", (() => {
+  const ka = quelle("src/calc/karteikarten.js");
+  const f = quelle("src/features/Karteikarten.jsx");
+  const kk = quelle("src/features/KartenKasten.jsx");
+  return ka.includes('vs: "7 · 8 = ?\\n6 · 7 = ?\\n8 · 8 = ?"')
+    && ka.includes('rs: "7 · 8 = 56\\n6 · 7 = 42\\n8 · 8 = 64"')
+    && ka.includes('vs: "1 m = ? cm\\n1 km = ? m\\n1 € = ? ct"')
+    && (f.match(/white-space: pre-line/g) || []).length >= 2
+    && (kk.match(/whiteSpace: "pre-line"/g) || []).length >= 2
+    && releaseNoteVorhanden("rn-073");
+})());
+
 // ---------- v0.57: Einmaleins-Karten ----------
 console.log("== v0.57: Einmaleins-Karten ==");
 test("v0.57: kleines & großes 1x1 als Karten mit je drei Aufgaben, Zähler auf 64", (() => {

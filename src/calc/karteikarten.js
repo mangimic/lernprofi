@@ -30,7 +30,7 @@ export const KARTEIKARTEN = [
   { id: "m4", fach: "mathe", vs: "5 · 18 = ?", rs: "90", merk: "5·20 − 5·2 = 100 − 10. Runde Zahl nehmen, Rest abziehen." },
   { id: "m5", fach: "mathe", vs: "Zahlenmauer: Wann wird der Deckstein am größten?", rs: "Größte Zahl in die MITTE", merk: "Die mittlere Zahl wird zweimal mitgezählt." , bild:{art:"mauer",reihe:[20,25,30]}},
   { id: "m6", fach: "mathe", vs: "16:18 Uhr + 45 Minuten = ?", rs: "17:03 Uhr", merk: "Erst bis 17:00 (42 Min), dann noch 3 Minuten." , bild:{art:"uhrplus",von:"16:18",plus:45,zeigt:true}},
-  { id: "m7", fach: "mathe", vs: "1 m = ? cm · 1 km = ? m · 1 € = ? ct", rs: "100 cm · 1000 m · 100 ct", merk: "Kilo heißt tausend – Meter und Euro teilen in 100." },
+  { id: "m7", fach: "mathe", vs: "1 m = ? cm\n1 km = ? m\n1 € = ? ct", rs: "1 m = 100 cm\n1 km = 1000 m\n1 € = 100 ct", merk: "Kilo heißt tausend – Meter und Euro teilen in 100." },
   { id: "m8", fach: "mathe", vs: "Würfel zeigt eine 7 – sicher, möglich oder unmöglich?", rs: "unmöglich", merk: "Auf dem Würfel stehen nur 1 bis 6." , bild:{art:"spielwuerfel",reihe:true}},
   { id: "m9", fach: "mathe", vs: "Wie hoch ist eine Tür? Wie breit ein Finger?", rs: "≈ 2 m · ≈ 1 cm", merk: "Anker: Tür 2 m · Finger 1 cm · Bleistiftspitze 1 mm · Fußballplatz 100 m." , bild:{art:"laengen",dinge:["tuer","finger"],zahlen:true}},
   { id: "m10", fach: "mathe", vs: "Sack A: 1 von 2 weiß · Sack B: 2 von 4 weiß – wo gewinnst du eher?", rs: "In beiden gleich", merk: "Beides ist die Hälfte – Anteile vergleichen, nicht Anzahlen!" , bild:{art:"kugeln",saecke:[{w:1,b:1},{w:2,b:2}]}},
@@ -67,7 +67,7 @@ export const KARTEIKARTEN_FUNDUS = [
   { id: "m20", fach: "mathe", vs: "3,5 km = ? m", rs: "3500 m", merk: "3 km = 3000 m und 0,5 km = 500 m." },
   { id: "m21", fach: "mathe", vs: "Glücksrad: 3 blaue, 2 rote, 1 gelbes Feld – was kommt am ehesten?", rs: "Blau", merk: "Die Farbe mit den meisten Feldern gewinnt am öftesten – sicher ist es nie!" , bild:{art:"rad",felder:{b:3,r:2,g:1}}},
   { id: "m22", fach: "mathe", vs: "Wie rundest du auf den Hunderter?", rs: "Zehnerziffer 0–4 → ab, 5–9 → auf", merk: "3467 → 3500, denn die 6 sagt: aufrunden." , bild:{art:"strahl",von:3400,bis:3500,schritt:50,marken:[3467]}},
-  { id: "m23", fach: "mathe", vs: "halbe Stunde = ? Min · Viertelstunde = ? Min", rs: "30 Minuten · 15 Minuten", merk: "Eine Stunde hat 60 Minuten – halbieren, vierteln." },
+  { id: "m23", fach: "mathe", vs: "halbe Stunde = ? Min\nViertelstunde = ? Min", rs: "halbe = 30 Minuten\nViertel = 15 Minuten", merk: "Eine Stunde hat 60 Minuten – halbieren, vierteln." },
   { id: "m24", fach: "mathe", vs: "9 · 7 = ?", rs: "63", merk: "Trick: 10·7 − 7 = 70 − 7." },
 ];
 KARTEIKARTEN.push(...KARTEIKARTEN_FUNDUS);
@@ -76,14 +76,14 @@ KARTEIKARTEN.push(...KARTEIKARTEN_FUNDUS);
    nach Rechen-Trick gebündelt statt stur nach Reihen – die Merkhilfe
    nennt genau EINEN Trick, der für alle drei Aufgaben trägt. */
 export const KARTEIKARTEN_EINMALEINS = [
-  { id: "m25", fach: "mathe", vs: "9er-Reihe: 9 · 6 = ? · 9 · 7 = ? · 9 · 8 = ?", rs: "54 · 63 · 72", merk: "Trick: erst ·10, dann einmal weg. 9·6 = 60 − 6 = 54." },
-  { id: "m26", fach: "mathe", vs: "7 · 8 = ? · 6 · 7 = ? · 8 · 8 = ?", rs: "56 · 42 · 64", merk: "Merksatz 5-6-7-8: 56 = 7·8. Und 8·8 = 64 – Quadratzahl!" },
-  { id: "m27", fach: "mathe", vs: "6 · 6 = ? · 7 · 7 = ? · 6 · 8 = ?", rs: "36 · 49 · 48", merk: "Quadratzahlen als Anker: 6·6 = 36, 7·7 = 49. Nachbar: 6·8 = 36 + 12." },
-  { id: "m28", fach: "mathe", vs: "4 · 7 = ? · 3 · 8 = ? · 4 · 9 = ?", rs: "28 · 24 · 36", merk: "·4 heißt: verdoppeln und nochmal verdoppeln. 7 → 14 → 28." },
-  { id: "m29", fach: "mathe", vs: "Großes 1x1: 11 · 7 = ? · 11 · 9 = ? · 12 · 6 = ?", rs: "77 · 99 · 72", merk: "·11 = ·10 und einmal dazu: 11·7 = 70 + 7 = 77." },
-  { id: "m30", fach: "mathe", vs: "Großes 1x1: 15 · 4 = ? · 15 · 6 = ? · 15 · 8 = ?", rs: "60 · 90 · 120", merk: "15 = 10 + 5: erst ·10, dann die Hälfte davon dazu. 15·4 = 40 + 20." },
-  { id: "m31", fach: "mathe", vs: "Großes 1x1: 12 · 12 = ? · 13 · 4 = ? · 14 · 5 = ?", rs: "144 · 52 · 70", merk: "Zerlegen: 12·12 = 120 + 24 = 144. 13·4 = 40 + 12." },
-  { id: "m32", fach: "mathe", vs: "Großes 1x1: 20 · 7 = ? · 19 · 6 = ? · 18 · 5 = ?", rs: "140 · 114 · 90", merk: "Runde Zahl nehmen: 19·6 = 20·6 − 6 = 114. 18·5 = 90." },
+  { id: "m25", fach: "mathe", vs: "9er-Reihe:\n9 · 6 = ?\n9 · 7 = ?\n9 · 8 = ?", rs: "9 · 6 = 54\n9 · 7 = 63\n9 · 8 = 72", merk: "Trick: erst ·10, dann einmal weg. 9·6 = 60 − 6 = 54." },
+  { id: "m26", fach: "mathe", vs: "7 · 8 = ?\n6 · 7 = ?\n8 · 8 = ?", rs: "7 · 8 = 56\n6 · 7 = 42\n8 · 8 = 64", merk: "Merksatz 5-6-7-8: 56 = 7·8. Und 8·8 = 64 – Quadratzahl!" },
+  { id: "m27", fach: "mathe", vs: "6 · 6 = ?\n7 · 7 = ?\n6 · 8 = ?", rs: "6 · 6 = 36\n7 · 7 = 49\n6 · 8 = 48", merk: "Quadratzahlen als Anker: 6·6 = 36, 7·7 = 49. Nachbar: 6·8 = 36 + 12." },
+  { id: "m28", fach: "mathe", vs: "4 · 7 = ?\n3 · 8 = ?\n4 · 9 = ?", rs: "4 · 7 = 28\n3 · 8 = 24\n4 · 9 = 36", merk: "·4 heißt: verdoppeln und nochmal verdoppeln. 7 → 14 → 28." },
+  { id: "m29", fach: "mathe", vs: "Großes 1x1:\n11 · 7 = ?\n11 · 9 = ?\n12 · 6 = ?", rs: "11 · 7 = 77\n11 · 9 = 99\n12 · 6 = 72", merk: "·11 = ·10 und einmal dazu: 11·7 = 70 + 7 = 77." },
+  { id: "m30", fach: "mathe", vs: "Großes 1x1:\n15 · 4 = ?\n15 · 6 = ?\n15 · 8 = ?", rs: "15 · 4 = 60\n15 · 6 = 90\n15 · 8 = 120", merk: "15 = 10 + 5: erst ·10, dann die Hälfte davon dazu. 15·4 = 40 + 20." },
+  { id: "m31", fach: "mathe", vs: "Großes 1x1:\n12 · 12 = ?\n13 · 4 = ?\n14 · 5 = ?", rs: "12 · 12 = 144\n13 · 4 = 52\n14 · 5 = 70", merk: "Zerlegen: 12·12 = 120 + 24 = 144. 13·4 = 40 + 12." },
+  { id: "m32", fach: "mathe", vs: "Großes 1x1:\n20 · 7 = ?\n19 · 6 = ?\n18 · 5 = ?", rs: "20 · 7 = 140\n19 · 6 = 114\n18 · 5 = 90", merk: "Runde Zahl nehmen: 19·6 = 20·6 − 6 = 114. 18·5 = 90." },
 ];
 KARTEIKARTEN.push(...KARTEIKARTEN_EINMALEINS);
 

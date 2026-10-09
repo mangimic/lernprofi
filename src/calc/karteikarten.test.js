@@ -22,7 +22,12 @@ describe("karteikarten", () => {
     // ✖️ Einmaleins-Karten (m25–m32): je GENAU drei Aufgaben, 4× kleines + 4× großes 1x1
     const einmaleins = KARTEIKARTEN.filter((k) => /^m(2[5-9]|3[0-2])$/.test(k.id));
     expect(einmaleins.length).toBe(8);
-    for (const k of einmaleins) expect(k.vs.split("?").length - 1, k.id).toBe(3);
+    for (const k of einmaleins) {
+      expect(k.vs.split("?").length - 1, k.id).toBe(3);
+      expect(k.vs.split("\n").length, k.id).toBeGreaterThanOrEqual(3); // Aufgaben untereinander
+      expect(k.rs.split("\n").length, k.id).toBe(3); // Lösungen als drei ganze Gleichungen
+      for (const zeile of k.rs.split("\n")) expect(zeile, k.id).toContain("=");
+    }
     expect(einmaleins.filter((k) => k.vs.startsWith("Großes 1x1:")).length).toBe(4);
   });
 

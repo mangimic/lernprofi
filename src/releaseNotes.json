@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-073",
+    "version": "0.57.1",
+    "datum": "2026-10-09",
+    "titel": "Aufgaben untereinander",
+    "entries": [
+      {
+        "type": "fix",
+        "text": "✖️ Auf den Einmaleins-Karten stehen die drei Aufgaben jetzt untereinander statt nebeneinander – kein Verwechseln des Trennpunkts mit dem Mal-Punkt mehr. Die Lösungsseite zeigt drei ganze Gleichungen (7 · 8 = 56) statt nur der Ergebnisse."
+      },
+      {
+        "type": "fix",
+        "text": "Auch die Einheiten-Karte (m, km, €) und die Stunden-Karte zeigen ihre Teilaufgaben jetzt zeilenweise – im Druck und im digitalen Kasten."
+      }
+    ]
+  },
+  {
     "id": "rn-072",
     "version": "0.57.0",
     "datum": "2026-10-09",

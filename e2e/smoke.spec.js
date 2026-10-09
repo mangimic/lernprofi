@@ -1407,9 +1407,9 @@ test("🗃️ Karteikarten: 4 je A4-Blatt, Rückseiten gespiegelt, Fach-Filter u
   await expect(page.getByTestId("karten-blatt")).toHaveCount(16);
   await expect(page.getByTestId("karte-vs").first()).toContainText("7 · 8");
   await expect(page.getByTestId("karten-drucken")).toContainText("16 Seiten · 32 Karten");
-  // ✖️ Einmaleins-Karten: drei Aufgaben auf einer Karte, großes 1x1 dabei
+  // ✖️ Einmaleins-Karten: drei Aufgaben untereinander, Lösungen als ganze Gleichungen
   await expect(page.getByTestId("karte-vs").filter({ hasText: "Großes 1x1: 15 · 4" })).toHaveCount(1);
-  await expect(page.getByTestId("karte-rs").filter({ hasText: "60 · 90 · 120" })).toHaveCount(1);
+  await expect(page.getByTestId("karte-rs").filter({ hasText: "15 · 4 = 60" })).toHaveCount(1);
 
   // ⚙️ Eltern-Kontrolle: Karte ausblenden, eigene Karte anlegen – wirkt auf Druck UND Kasten
   await page.getByTestId("karten-wahl-alle").click();

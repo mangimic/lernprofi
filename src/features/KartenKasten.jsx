@@ -100,7 +100,7 @@ export default function KartenKasten() {
           <span style={{ display: "inline-block", background: T.weich, borderRadius: 20, padding: "3px 12px", fontSize: "var(--schrift-klein)", fontWeight: 700, marginBottom: 10 }}>
             {deko.emoji} {deko.name} · Karte {runde.index + 1} von {runde.stapel.length}{wiederholung ? " · ⏮️ nochmal" : ""}
           </span>
-          <p data-test="kasten-frage" style={{ fontSize: "var(--schrift-gross)", fontWeight: 800, margin: "6px 0 4px" }}>{karte.vs}</p>
+          <p data-test="kasten-frage" style={{ fontSize: "var(--schrift-gross)", fontWeight: 800, margin: "6px 0 4px", whiteSpace: "pre-line" }}>{karte.vs}</p>
           {karte.hinweis && <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>{karte.hinweis}</p>}
           {!runde.offen ? (
             <>
@@ -114,7 +114,7 @@ export default function KartenKasten() {
             </>
           ) : (
             <>
-              <p data-test="kasten-antwort" style={{ fontSize: "var(--schrift-gross)", fontWeight: 800, color: T.ok, margin: "8px 0" }}>{karte.rs}</p>
+              <p data-test="kasten-antwort" style={{ fontSize: "var(--schrift-gross)", fontWeight: 800, color: T.ok, margin: "8px 0", whiteSpace: "pre-line" }}>{karte.rs}</p>
               {karte.bild && <AufgabenBild b={karte.bild} />}
               <p style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "8px 12px", fontSize: "var(--schrift-klein)", margin: "0 0 12px" }}>
                 🧠 <b>Merkhilfe:</b> {karte.merk}

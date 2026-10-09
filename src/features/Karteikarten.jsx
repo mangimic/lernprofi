@@ -91,9 +91,9 @@ export default function Karteikarten() {
         .kk-art { border-radius: 20px; padding: 2px 10px; font-weight: 800; }
         .kk-art.aufgabe { background: #dbe7f6; color: #1c3a63; }
         .kk-art.loesung { background: #d9f0e1; color: #1f7a3f; }
-        .kk-frage { font-size: 21px; font-weight: 800; margin: 0; }
+        .kk-frage { font-size: 21px; font-weight: 800; margin: 0; white-space: pre-line; }
         .kk-hinweis { font-size: 13px; color: #5d7390; margin: 0; }
-        .kk-antwort { font-size: 21px; font-weight: 800; color: #1f7a3f; margin: 0; }
+        .kk-antwort { font-size: 21px; font-weight: 800; color: #1f7a3f; margin: 0; white-space: pre-line; }
         .kk-merk { font-size: 12.5px; background: #eef4fb; border-radius: 8px; padding: 6px 8px; margin: 0; }
         .kk-fuss { font-size: 9px; color: #9aa7b8; margin-top: 4px; }
         .kk-blattinfo { text-align: center; color: var(--text-leise); font-size: 12px; margin: 0 0 4px; }
