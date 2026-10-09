@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-057",
+    "version": "0.44.0",
+    "datum": "2026-10-09",
+    "titel": "Kompass-Training Deutsch",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🧭 Sechs neue Deutsch-Bereiche decken jetzt alle Aufgabenformate des Kompass-4-Tests ab: 🔍 Lese-Detektiv (kurze Sachtexte mit Verständnisfragen), 🧰 Ableiten & Verlängern, 🌱 Wortfamilien & Stamm, 🧩 Wörter zusammenbauen, 📈 Adjektive steigern und 🔧 Verbformen bilden – je mit Aufwärm- und Profi-Stufe, Paketen, Kronen und Leo-Tipps wie gewohnt."
+      },
+      {
+        "type": "neu",
+        "text": "Alle Texte des Lese-Detektivs sind eigene, kindgerechte Sachtexte (Angeln, Schlagzeug, Tiere, Alltag) – die Fragen trainieren genau die Testformate: Stimmt das?, Reihenfolge, passende Überschrift, Wortbedeutung aus dem Zusammenhang."
+      }
+    ]
+  },
+  {
     "id": "rn-056",
     "version": "0.43.0",
     "datum": "2026-10-09",

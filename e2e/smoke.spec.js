@@ -202,6 +202,28 @@ test("Neue Deutsch-Bereiche: Zeitformen (3 Optionen) und Grundwortschatz mit Reg
   await expect(page.getByTestId("feedback")).toContainText("Richtig");
 });
 
+test("🧭 Kompass-Training: Lese-Detektiv mit Textabschnitt, Steigern und Verbformen", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("zum-ueben").click();
+  // 🔍 Lese-Detektiv: Klasse 4 startet auf Stufe 2 – erster Abschnitt ist der Honig-Text
+  await page.getByTestId("bereich-lesen").click();
+  await expect(page.getByTestId("frage-kontext")).toContainText("Honig");
+  await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+  await expect(page.getByTestId("feedback")).toContainText("Richtig");
+  await page.getByTestId("abbrechen").click();
+  // 📈 Adjektive steigern
+  await page.getByTestId("bereich-steigern").click();
+  await expect(page.getByTestId("frage-text")).toContainText("klüger");
+  await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+  await expect(page.getByTestId("feedback")).toContainText("Richtig");
+  await page.getByTestId("abbrechen").click();
+  // 🔧 Verbformen bilden
+  await page.getByTestId("bereich-verbform").click();
+  await expect(page.getByTestId("frage-text")).toContainText("Grundform");
+  await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+  await expect(page.getByTestId("feedback")).toContainText("Richtig");
+});
+
 test("Spielhalle: Münze einlösen und im echten See-Abenteuer einen Fisch fangen", async ({ page }) => {
   await tresorAnlegen(page);
   // Ohne Münze: Spiel gesperrt

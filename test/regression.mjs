@@ -36,6 +36,19 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.44: Kompass-Training Deutsch ----------
+console.log("== v0.44: Kompass-Training ==");
+test("v0.44: 6 Kompass-Bereiche vorhanden, in der Übungs-Liste verdrahtet, mit Wozu-Ankern", (() => {
+  const k = quelle("src/calc/aufgaben/kompassDeutsch.js");
+  const u = quelle("src/features/Ueben.jsx");
+  const w = quelle("src/calc/wozu.js");
+  return ["lesen", "strategie", "wortfam", "zusnomen", "steigern", "verbform"].every((key) => k.includes(`key: "${key}"`) && w.includes(`${key}:`))
+    && k.includes("LESEN_DATEN") && k.includes("kontext: L_")
+    && u.includes("KOMPASS_DEUTSCH_DATEN") && u.includes("KOMPASS_DEUTSCH_BEREICHE")
+    && u.includes('data-test="frage-kontext"')
+    && releaseNoteVorhanden("rn-057");
+})());
+
 // ---------- v0.43: Aufgeräumter Plan & eigene Kategorien ----------
 console.log("== v0.43: Plan-Kategorien ==");
 test("v0.43: Palette hinter dem Termin-Knopf, bausteinListe/-Anzeige, Eltern-Kategorien, Migration", (() => {

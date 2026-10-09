@@ -5,6 +5,7 @@ import { SACH_DATEN, SACH_BEREICHE } from "../calc/aufgaben/sachkunde.js";
 import { GESCH_DATEN, ddPool, doppelPool, DEUTSCH_BEREICHE } from "../calc/aufgaben/deutsch.js";
 import { subjektPool, praedikatPool, gkPool } from "../calc/aufgaben/saetze.js";
 import { umstellenPool, umSatzText, umstellenPruefen } from "../calc/aufgaben/satzglieder.js";
+import { KOMPASS_DEUTSCH_DATEN, KOMPASS_DEUTSCH_BEREICHE } from "../calc/aufgaben/kompassDeutsch.js";
 import { zeitPool, wortartenPool, faellePool, redePool, gwsPool } from "../calc/aufgaben/deutschKonverter.js";
 import { STARK_DATEN, STARK_BEREICHE } from "../calc/aufgaben/stark.js";
 import { rngAusSeed } from "../calc/rng.js";
@@ -31,6 +32,7 @@ function deutschDaten(thema) {
     subj: subjektPool(thema), praed: praedikatPool(thema), gk: gkPool(thema), rede: redePool(thema),
     zeit: zeitPool(thema), wa: wortartenPool(thema), faelle: faellePool(thema), gws: gwsPool(),
     gesch: GESCH_DATEN, dd: ddPool(), doppel: doppelPool(), satzglied: umstellenPool(),
+    ...KOMPASS_DEUTSCH_DATEN, // 🧭 Kompass-Training (themenfrei)
   };
 }
 const DEUTSCH_LISTE = [
@@ -44,6 +46,7 @@ const DEUTSCH_LISTE = [
   { key: "gk", emoji: "🔠", name: "Groß & Klein", typ: "tippen" },
   { key: "gws", emoji: "📖", name: "Grundwortschatz" },
   ...DEUTSCH_BEREICHE,
+  ...KOMPASS_DEUTSCH_BEREICHE, // 🧭 die Aufgabenformate aus dem Kompass-4-Test
   { key: "vorgang", emoji: "📝", name: "Vorgangsbeschreibung", typ: "modul" },
 ];
 
@@ -411,7 +414,7 @@ export default function Ueben() {
           {runde.typ === "mc" ? (
             <>
               {a.kontext && (
-                <p style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px" }}>{a.kontext}</p>
+                <p data-test="frage-kontext" style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px" }}>{a.kontext}</p>
               )}
               <p data-test="frage-text" style={{ fontSize: "var(--schrift-gross)", fontWeight: 700, margin: "10px 0" }}>{a.f}</p>
               {a.bloecke && <ZahlenBloecke b={a.bloecke} />}

@@ -10,6 +10,7 @@ import { STARK_DATEN, STARK_SAETZE } from "./aufgaben/stark.js";
 import { subjektPool, praedikatPool, gkPool } from "./aufgaben/saetze.js";
 import { zeitPool, wortartenPool, faellePool, redePool, gwsPool, ZEIT_NAMEN, FALL_NAMEN } from "./aufgaben/deutschKonverter.js";
 import { auswahlPruefen, tippenPoolGesund } from "./wortTippen.js";
+import { KOMPASS_DEUTSCH_DATEN, KOMPASS_DEUTSCH_BEREICHE, LESEN_DATEN } from "./aufgaben/kompassDeutsch.js";
 import { spielStartbar, muenzeEinloesen, blitzFragen, wurfWerten, fischFuerSerie, SEE_WUERFE } from "./spiele.js";
 
 // Fiktive Fixtures – niemals echte Daten.
@@ -111,7 +112,7 @@ describe("aufgabenRunde", () => {
   it("keine Beschämungs-/Diagnosesprache in den Pools", () => {
     const alles = JSON.stringify(MATHE_DATEN) + JSON.stringify(SACH_DATEN)
       + JSON.stringify(GESCH_DATEN) + JSON.stringify(STARK_DATEN)
-      + JSON.stringify(ddPool()) + JSON.stringify(doppelPool());
+      + JSON.stringify(ddPool()) + JSON.stringify(doppelPool()) + JSON.stringify(KOMPASS_DEUTSCH_DATEN);
     expect(/ADHS|Störung|unmotiviert|Versager|dumm/i.test(alles)).toBe(false);
   });
 
@@ -130,6 +131,24 @@ describe("aufgabenRunde", () => {
     expect(dp.easy.length).toBeGreaterThanOrEqual(24);
     // Doppel: die richtige Schreibweise ist länger als die falsche (Doppelbuchstabe)
     expect(dp.easy.every((a) => a.r.length === a.x[0].length + 1)).toBe(true);
+  });
+
+  it("🧭 Kompass-Training Deutsch: 6 Bereiche, gesunde Pools, Lese-Detektiv immer mit Textabschnitt", () => {
+    expect(KOMPASS_DEUTSCH_BEREICHE.map((b) => b.key))
+      .toEqual(["lesen", "strategie", "wortfam", "zusnomen", "steigern", "verbform"]);
+    for (const b of KOMPASS_DEUTSCH_BEREICHE) {
+      const pool = KOMPASS_DEUTSCH_DATEN[b.key];
+      expect(poolGesund(pool), b.key).toBe(true);
+      expect(pool.easy.length, b.key).toBeGreaterThanOrEqual(12);
+      expect(pool.hard.length, b.key).toBeGreaterThanOrEqual(12);
+      // Klasse 4 bekommt damit überall Stufe 2/3 (hard vorhanden)
+      expect(stufenMax(pool), b.key).toBe(3);
+    }
+    // Lese-Detektiv: jede Aufgabe trägt ihren Textabschnitt – und fragt NUR zum Abschnitt
+    for (const a of [...LESEN_DATEN.easy, ...LESEN_DATEN.hard]) {
+      expect(typeof a.kontext).toBe("string");
+      expect(a.kontext.length).toBeGreaterThan(80);
+    }
   });
 
   it("Stark-mit-Leo-Pool und Mut-Sätze sind vollständig", () => {
