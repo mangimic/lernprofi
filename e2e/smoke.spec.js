@@ -1179,6 +1179,24 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await expect(page.getByTestId("slot-6-840")).not.toContainText("Schlagzeug");
   await page.getByTestId("woche-diese").click();
   await expect(page.getByTestId("slot-6-840")).toContainText("Schlagzeug"); // Ursprungs-Woche bleibt
+
+  // ✏️ Vorhandene Einträge bearbeiten: Termin umziehen & umbenennen statt löschen + neu
+  await page.getByTestId("tag-4").getByTestId("termin-chip").click();
+  await page.getByTestId("termin-bearbeiten").click();
+  await expect(page.getByTestId("kt-fach")).toHaveValue("Mathe"); // vorbefüllt
+  await page.getByTestId("kt-tag-3").click();
+  await page.getByTestId("kt-fach").fill("Deutsch");
+  await page.getByTestId("kt-ok").click();
+  await expect(page.getByTestId("tag-3")).toContainText("Klassenarbeit Deutsch");
+  await expect(page.getByTestId("tag-4").getByTestId("termin-chip")).toHaveCount(0);
+
+  // 🔄 Baustein ändern: aus dem Sonntags-Schlagzeug wird Angeln – Fenster und Zeit bleiben
+  await page.getByTestId("slot-6-840").click();
+  await page.getByTestId("block-wechsel").click();
+  await expect(page.getByTestId("fenster-dialog")).toContainText("ändern in");
+  await page.getByTestId("fenster-wahl-angeln").click();
+  await expect(page.getByTestId("slot-6-840")).toContainText("Angeln");
+  await expect(page.getByTestId("slot-6-840")).not.toContainText("Schlagzeug");
 });
 
 test("Auto-Sicherung: Änderungen wandern near-realtime im Hintergrund zum Server", async ({ page }) => {

@@ -333,6 +333,12 @@ export function wocheKopieren(ziel, quelle) {
   return p;
 }
 
+/** Einen bestehenden Baustein in einen anderen Typ ändern – Fenster, Dauer, Notiz und Haken bleiben. */
+export function blockTyp(plan, id, typ) {
+  if (!BAUSTEINE.some((b) => b.typ === typ)) return plan;
+  return { ...plan, bloecke: plan.bloecke.map((b) => (b.id === id ? { ...b, typ } : b)) };
+}
+
 /** Notiz an einem Baustein (z. B. der Name des Freundes, das Übe-Thema). */
 export function blockNotiz(plan, id, notiz) {
   const t = String(notiz || "").trim().slice(0, 24);

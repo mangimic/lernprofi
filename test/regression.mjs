@@ -36,6 +36,19 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.42: Einträge bearbeiten ----------
+console.log("== v0.42: Einträge bearbeiten ==");
+test("v0.42: blockTyp in calc, Wechsel-Modus im Fenster-Dialog, Termin-Bearbeiten (Plan + Eltern)", (() => {
+  const w = quelle("src/calc/wochenplan.js");
+  const f = quelle("src/features/Wochenplan.jsx");
+  const e = quelle("src/features/Eltern.jsx");
+  return w.includes("export function blockTyp")
+    && f.includes('data-test="block-wechsel"') && f.includes("wechselId")
+    && f.includes('data-test="termin-bearbeiten"') && f.includes("editId")
+    && e.includes('data-test="termin-edit"')
+    && releaseNoteVorhanden("rn-055");
+})());
+
 // ---------- v0.41: Serien für Bausteine ----------
 console.log("== v0.41: Baustein-Serien ==");
 test("v0.41: blockSerie/blockSerieEntfernen mit Marker, HA-Ferien-Skip, Editor-Knöpfe", (() => {

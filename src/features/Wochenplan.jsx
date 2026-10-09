@@ -8,7 +8,7 @@ import {
   kalenderWoche, routineAusPlan, routineAnwenden, schulZeilen, blockNotiz,
   istAusgefallen, ausfallSetzen, ausfallAufheben, blockVerschieben, wocheKopieren,
   blockDauer, blockDauerVon, slotBelegt as slotBelegtCalc, planSchreiben, terminSerie,
-  blockSerie, blockSerieEntfernen,
+  blockSerie, blockSerieEntfernen, blockTyp,
 } from "../calc/wochenplan.js";
 import { schulfreiAm, ferienAm, monatsGitter, monatsName, monatSchritt, FERIEN_BW, SCHULJAHR } from "../calc/kalender.js";
 
@@ -507,9 +507,25 @@ export default function Wochenplan() {
         const suche = fenster.suche.trim().toLowerCase();
         const treffer = BAUSTEINE.filter((b) => !b.verborgen && (!suche || b.name.toLowerCase().includes(suche)));
         const zu = () => setFenster(null);
+        // 🔄 Wechsel-Modus: ein bestehender Baustein wird in einen anderen Typ geändert
+        // (Fenster, Dauer, Notiz und Haken bleiben erhalten).
+        const wechseln = (typ) => {
+          const neu = blockTyp(plan, fenster.wechselId, typ);
+          speichern(neu, `Baustein in ${bausteinInfo(typ).name} geändert`);
+          zu();
+          if (typ === "freunde" || typ === "sport") {
+            const b = neu.bloecke.find((x) => x.id === fenster.wechselId);
+            setEditor({ id: fenster.wechselId, notiz: b?.notiz || "" });
+          }
+        };
         const eigenesEintragen = () => {
           const text = fenster.suche.trim();
           if (!text) return;
+          if (fenster.wechselId != null) {
+            speichern(blockNotiz(blockTyp(plan, fenster.wechselId, "eigen"), fenster.wechselId, text), `Baustein in „${text}“ geändert`);
+            zu();
+            return;
+          }
           let neu = blockHinzu(plan, fenster.tag, "eigen", fenster.slot);
           if (neu !== plan) {
             neu = blockNotiz(neu, neu.bloecke[neu.bloecke.length - 1].id, text);
@@ -523,9 +539,13 @@ export default function Wochenplan() {
             display: "flex", alignItems: "center", justifyContent: "center", padding: 18,
           }}>
             <div onClick={(ev) => ev.stopPropagation()} style={{ maxWidth: 420, width: "100%", background: T.karte, borderRadius: T.radius, padding: T.abstand }}>
-              <h3 style={{ margin: "0 0 2px" }}>🪟 {WOCHENTAGE[fenster.tag]} · {uhr(fenster.slot)} Uhr</h3>
+              <h3 style={{ margin: "0 0 2px" }}>
+                {fenster.wechselId != null ? "🔄" : "🪟"} {WOCHENTAGE[fenster.tag]} · {uhr(fenster.slot)} Uhr{fenster.wechselId != null ? " – ändern in …" : ""}
+              </h3>
               <p style={{ margin: "0 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-                Was soll hier stattfinden? Suchen, antippen – oder einfach frei tippen.
+                {fenster.wechselId != null
+                  ? "Was soll hier stattdessen stehen? Zeit, Dauer und Notiz bleiben."
+                  : "Was soll hier stattfinden? Suchen, antippen – oder einfach frei tippen."}
               </p>
               <input data-test="fenster-suche" type="text" maxLength={24} autoFocus
                 value={fenster.suche} onChange={(e) => setFenster({ ...fenster, suche: e.target.value })}
@@ -535,7 +555,7 @@ export default function Wochenplan() {
               <div style={{ display: "grid", gap: 6, marginTop: 8, maxHeight: "44vh", overflowY: "auto" }}>
                 {treffer.map((b) => (
                   <button key={b.typ} data-test={`fenster-wahl-${b.typ}`}
-                    onClick={() => { hinzu(fenster.tag, fenster.slot, b.typ); zu(); }}
+                    onClick={() => { if (fenster.wechselId != null) { wechseln(b.typ); } else { hinzu(fenster.tag, fenster.slot, b.typ); zu(); } }}
                     style={{ textAlign: "left", height: "auto", minHeight: "var(--touch)", padding: "8px 12px", fontWeight: 700, background: T.weich, color: T.text }}>
                     {b.emoji} {b.name}{(b.lern && b.box !== false) || b.kurz ? ` · ${LERN_MINUTEN} Min` : ""}
                   </button>
@@ -543,7 +563,7 @@ export default function Wochenplan() {
                 {fenster.suche.trim() && (
                   <button data-test="fenster-frei" onClick={eigenesEintragen}
                     style={{ textAlign: "left", height: "auto", minHeight: "var(--touch)", padding: "8px 12px", fontWeight: 700, background: T.primaer, color: T.primaerText }}>
-                    ⭐ „{fenster.suche.trim()}“ eintragen
+                    ⭐ „{fenster.suche.trim()}“ {fenster.wechselId != null ? "daraus machen" : "eintragen"}
                   </button>
                 )}
               </div>
@@ -561,7 +581,7 @@ export default function Wochenplan() {
           display: "flex", alignItems: "center", justifyContent: "center", padding: 18,
         }}>
           <div onClick={(ev) => ev.stopPropagation()} style={{ maxWidth: 420, width: "100%", background: T.karte, borderRadius: T.radius, padding: T.abstand }}>
-            <h3 style={{ margin: "0 0 8px" }}>📝 Termin eintragen</h3>
+            <h3 style={{ margin: "0 0 8px" }}>{kindTermin.editId != null ? "✏️ Termin bearbeiten" : "📝 Termin eintragen"}</h3>
             <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
               {Object.entries(TERMIN_ARTEN).map(([k, art]) => (
                 <button key={k} data-test={`kt-art-${k}`} onClick={() => setKindTermin({ ...kindTermin, art: k })}
@@ -581,16 +601,24 @@ export default function Wochenplan() {
                 </button>
               ))}
             </div>
-            <p style={{ margin: "0 0 4px", fontSize: "var(--schrift-klein)", color: T.textLeise }}>🔁 Wiederholen?</p>
-            <div style={{ display: "flex", gap: 4, marginBottom: 8 }}>
-              {[["nein", "einmalig"], ["4", "4 Wochen"], ["12", "12 Wochen"], ["schuljahr", "ganzes Schuljahr"]].map(([k, label]) => (
-                <button key={k} data-test={`kt-serie-${k}`} onClick={() => setKindTermin({ ...kindTermin, serie: k })}
-                  style={{ flex: 1, height: "auto", minHeight: 0, padding: "8px 2px", fontWeight: 700, fontSize: "12.5px",
-                    background: kindTermin.serie === k ? T.primaer : T.weich, color: kindTermin.serie === k ? T.primaerText : T.text }}>
-                  {label}
-                </button>
-              ))}
-            </div>
+            {kindTermin.editId == null ? (
+              <>
+                <p style={{ margin: "0 0 4px", fontSize: "var(--schrift-klein)", color: T.textLeise }}>🔁 Wiederholen?</p>
+                <div style={{ display: "flex", gap: 4, marginBottom: 8 }}>
+                  {[["nein", "einmalig"], ["4", "4 Wochen"], ["12", "12 Wochen"], ["schuljahr", "ganzes Schuljahr"]].map(([k, label]) => (
+                    <button key={k} data-test={`kt-serie-${k}`} onClick={() => setKindTermin({ ...kindTermin, serie: k })}
+                      style={{ flex: 1, height: "auto", minHeight: 0, padding: "8px 2px", fontWeight: 700, fontSize: "12.5px",
+                        background: kindTermin.serie === k ? T.primaer : T.weich, color: kindTermin.serie === k ? T.primaerText : T.text }}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <p style={{ margin: "0 0 8px", fontSize: "var(--schrift-klein)", color: T.textLeise }}>
+                Die Änderung gilt nur für diesen einen Termin.
+              </p>
+            )}
             <input data-test="kt-fach" type="text" maxLength={40} placeholder="Fach oder Thema (z. B. Mathe)"
               value={kindTermin.fach} onChange={(e) => setKindTermin({ ...kindTermin, fach: e.target.value })}
               style={{ width: "100%", boxSizing: "border-box", minHeight: "var(--touch)", borderRadius: T.radiusKlein, border: `1px solid ${T.rand}`, padding: "0 12px", background: T.grund, color: T.text }} />
@@ -598,18 +626,23 @@ export default function Wochenplan() {
               onClick={() => {
                 const ersterTag = tagDatum(plan.montag, kindTermin.tag);
                 let neu;
-                if (kindTermin.serie === "nein") {
+                if (kindTermin.editId != null) {
+                  neu = data.einstellungen.termine.map((t) =>
+                    t.id === kindTermin.editId ? { ...t, tag: ersterTag, art: kindTermin.art, fach: kindTermin.fach.trim() } : t);
+                } else if (kindTermin.serie === "nein") {
                   const id = data.einstellungen.termine.reduce((m, t) => Math.max(m, t.id), 0) + 1;
                   neu = [...data.einstellungen.termine, { id, tag: ersterTag, art: kindTermin.art, fach: kindTermin.fach.trim() }].slice(0, 60);
                 } else {
                   const bis = kindTermin.serie === "schuljahr" ? SCHULJAHR.bis : tagDatum(ersterTag, (parseInt(kindTermin.serie, 10) - 1) * 7);
                   neu = terminSerie(data.einstellungen.termine, ersterTag, kindTermin.art, kindTermin.fach.trim(), bis);
                 }
-                logChange({ ...data, einstellungen: { ...data.einstellungen, termine: neu } }, "wochenplan", "neu", "Termin selbst eingetragen");
+                logChange({ ...data, einstellungen: { ...data.einstellungen, termine: neu } }, "wochenplan",
+                  kindTermin.editId != null ? "geaendert" : "neu",
+                  kindTermin.editId != null ? "Termin bearbeitet" : "Termin selbst eingetragen");
                 setKindTermin(null);
               }}
               style={{ width: "100%", marginTop: 10, background: T.primaer, color: T.primaerText, fontWeight: 700, opacity: kindTermin.tag === null ? 0.5 : 1 }}>
-              ✓ Eintragen
+              {kindTermin.editId != null ? "✓ Speichern" : "✓ Eintragen"}
             </button>
             <button onClick={() => setKindTermin(null)}
               style={{ width: "100%", marginTop: 6, background: "transparent", color: T.textLeise }}>
@@ -631,13 +664,22 @@ export default function Wochenplan() {
             <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
               am {terminDialog.tag.split("-").reverse().join(".")}{Number.isInteger(terminDialog.serie) ? " · Teil einer 🔁 Serie" : ""}
             </p>
+            <button data-test="termin-bearbeiten"
+              onClick={() => {
+                const idx = WOCHENTAGE.findIndex((_, i) => tagDatum(plan.montag, i) === terminDialog.tag);
+                setKindTermin({ art: terminDialog.art, fach: terminDialog.fach || "", tag: idx >= 0 ? idx : null, serie: "nein", editId: terminDialog.id });
+                setTerminDialog(null);
+              }}
+              style={{ width: "100%", marginBottom: 6, background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+              ✏️ Bearbeiten
+            </button>
             {Number.isInteger(terminDialog.serie) && (
               <button data-test="serie-entfernen"
                 onClick={() => {
                   logChange({ ...data, einstellungen: { ...data.einstellungen, termine: data.einstellungen.termine.filter((x) => x.serie !== terminDialog.serie) } }, "wochenplan", "geaendert", "Ganze Termin-Serie entfernt");
                   setTerminDialog(null);
                 }}
-                style={{ width: "100%", marginBottom: 6, background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+                style={{ width: "100%", marginBottom: 6, background: T.weich, color: T.text, fontWeight: 700 }}>
                 🔁🗑️ Ganze Serie entfernen
               </button>
             )}
@@ -772,6 +814,11 @@ export default function Wochenplan() {
                   </button>
                 )}
               </div>
+              <button data-test="block-wechsel"
+                onClick={() => { setFenster({ tag: block.tag, slot: block.slot, suche: "", wechselId: block.id }); zu(); }}
+                style={{ width: "100%", marginTop: 6, background: T.weich, color: T.text, fontWeight: 700 }}>
+                🔄 In etwas anderes ändern
+              </button>
               <button data-test="block-verschieben"
                 onClick={() => { setVerschieben(block.id); zu(); }}
                 style={{ width: "100%", marginTop: 6, background: T.weich, color: T.text, fontWeight: 700 }}>

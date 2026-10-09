@@ -439,6 +439,11 @@ export default function Eltern() {
                   {{ ka: "📝 Klassenarbeit", kompass: "🧭 Kompass-Test", wdw: "🔤 Wörter der Woche" }[t.art]}
                   {t.fach ? ` · ${t.fach}` : ""} · {t.tag.split("-").reverse().join(".")}
                 </span>
+                <button data-test="termin-edit" aria-label="Termin bearbeiten"
+                  onClick={() => setTerminNeu({ tag: t.tag, art: t.art, fach: t.fach || "", editId: t.id })}
+                  style={{ background: "transparent", color: T.textLeise, padding: 0, minHeight: 0, height: "auto" }}>
+                  ✏️
+                </button>
                 <button data-test="termin-weg"
                   onClick={() => einstellung({ termine: data.einstellungen.termine.filter((x) => x.id !== t.id) }, "Termin entfernt")}
                   style={{ background: "transparent", color: T.textLeise, padding: 0, minHeight: 0, height: "auto" }}>
@@ -464,13 +469,24 @@ export default function Eltern() {
             style={{ ...feld, width: "auto", flex: "1 1 160px", marginBottom: 0 }} />
           <button data-test="termin-plus" disabled={!/^\d{4}-\d{2}-\d{2}$/.test(terminNeu.tag)}
             onClick={() => {
-              const id = data.einstellungen.termine.reduce((m, t) => Math.max(m, t.id), 0) + 1;
-              einstellung({ termine: [...data.einstellungen.termine, { id, ...terminNeu, fach: terminNeu.fach.trim() }].slice(0, 60) }, "Termin eingetragen");
+              const eintrag = { tag: terminNeu.tag, art: terminNeu.art, fach: terminNeu.fach.trim() };
+              if (terminNeu.editId != null) {
+                einstellung({ termine: data.einstellungen.termine.map((t) => (t.id === terminNeu.editId ? { ...t, ...eintrag } : t)) }, "Termin bearbeitet");
+              } else {
+                const id = data.einstellungen.termine.reduce((m, t) => Math.max(m, t.id), 0) + 1;
+                einstellung({ termine: [...data.einstellungen.termine, { id, ...eintrag }].slice(0, 60) }, "Termin eingetragen");
+              }
               setTerminNeu({ tag: "", art: "ka", fach: "" });
             }}
             style={{ flex: "0 0 auto", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
-            + Eintragen
+            {terminNeu.editId != null ? "✓ Speichern" : "+ Eintragen"}
           </button>
+          {terminNeu.editId != null && (
+            <button data-test="termin-edit-abbruch" onClick={() => setTerminNeu({ tag: "", art: "ka", fach: "" })}
+              style={{ flex: "0 0 auto", background: "transparent", color: T.textLeise }}>
+              Abbrechen
+            </button>
+          )}
         </div>
       </Karte>
 

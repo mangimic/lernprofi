@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-055",
+    "version": "0.42.0",
+    "datum": "2026-10-09",
+    "titel": "Einträge bearbeiten",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "✏️ Termine lassen sich jetzt bearbeiten statt nur löschen: Termin-Kärtchen im Plan antippen → „Bearbeiten“ – Art, Tag und Fach ändern, fertig. Auch im Elternbereich hat jeder Termin einen ✏️-Stift."
+      },
+      {
+        "type": "neu",
+        "text": "🔄 Bausteine können in etwas anderes geändert werden: Baustein antippen → „In etwas anderes ändern“ – das Fenster, die Dauer, die Notiz und der Haken bleiben dabei erhalten. Auch freier Text ist möglich."
+      }
+    ]
+  },
+  {
     "id": "rn-054",
     "version": "0.41.0",
     "datum": "2026-10-09",

@@ -6,7 +6,7 @@ import {
   kalenderWoche, routineAusPlan, routineAnwenden, schulStunden, schulFaecher,
   wochenMontag, tagDatum, leererPlan, planFuerWoche,
   blockHinzu, blockWeg, blockFertig, tagGeschafft, heuteBelohnt, belohnungEintragen,
-  wochenBilanz, termineDerWoche, planPruefung, bausteinInfo,
+  wochenBilanz, termineDerWoche, planPruefung, bausteinInfo, blockTyp,
 } from "./wochenplan.js";
 
 describe("wochenplan – Wochen-Rechnung", () => {
@@ -55,6 +55,17 @@ describe("wochenplan – Wochen-Rechnung", () => {
     expect(mitNotiz.bloecke[0].notiz).toBe("mit dem Nachbarsjungen v");
     expect(blockNotiz(p, 1, "").bloecke[0].notiz).toBe("");
     expect(p.bloecke[0].notiz).toBeUndefined();
+  });
+
+  it("blockTyp: Baustein ändern – Fenster, Dauer, Notiz und Haken bleiben", () => {
+    let p = leererPlan("2026-10-05");
+    p = blockHinzu(p, 5, "schlagzeug", 540, 60);
+    p = blockNotiz(p, 1, "kleines Konzert");
+    p = blockFertig(p, 1);
+    const neu = blockTyp(p, 1, "angeln");
+    expect(neu.bloecke[0]).toMatchObject({ typ: "angeln", tag: 5, slot: 540, dauer: 60, notiz: "kleines Konzert", fertig: true });
+    expect(blockTyp(p, 1, "quatsch")).toBe(p); // unbekannter Typ ändert nichts
+    expect(p.bloecke[0].typ).toBe("schlagzeug"); // Original unangetastet
   });
 
   it("Wächter: zu viele Lernboxen → voll; nur Lernen → einseitig; sonst ok", () => {
