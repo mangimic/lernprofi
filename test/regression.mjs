@@ -36,6 +36,17 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.45: Gruppen & Leo-Wahl ----------
+console.log("== v0.45: Weniger Auswahl ==");
+test("v0.45: 5 Deutsch-Gruppen in calc, Leo-Wahl-Knopf und Gruppen-Navigation im Üben", (() => {
+  const g = quelle("src/calc/uebenGruppen.js");
+  const u = quelle("src/features/Ueben.jsx");
+  return ["lesen", "schreiben", "woerter", "saetze", "texte"].every((k) => g.includes(`key: "${k}"`))
+    && g.includes("export function leoWahl") && g.includes('typ === "modul"')
+    && u.includes('data-test="leo-wahl"') && u.includes("gruppe-zurueck") && u.includes("DEUTSCH_GRUPPEN")
+    && releaseNoteVorhanden("rn-058");
+})());
+
 // ---------- v0.44: Kompass-Training Deutsch ----------
 console.log("== v0.44: Kompass-Training ==");
 test("v0.44: 6 Kompass-Bereiche vorhanden, in der Übungs-Liste verdrahtet, mit Wozu-Ankern", (() => {

@@ -6,6 +6,7 @@ import { GESCH_DATEN, ddPool, doppelPool, DEUTSCH_BEREICHE } from "../calc/aufga
 import { subjektPool, praedikatPool, gkPool } from "../calc/aufgaben/saetze.js";
 import { umstellenPool, umSatzText, umstellenPruefen } from "../calc/aufgaben/satzglieder.js";
 import { KOMPASS_DEUTSCH_DATEN, KOMPASS_DEUTSCH_BEREICHE } from "../calc/aufgaben/kompassDeutsch.js";
+import { DEUTSCH_GRUPPEN, leoWahl } from "../calc/uebenGruppen.js";
 import { zeitPool, wortartenPool, faellePool, redePool, gwsPool } from "../calc/aufgaben/deutschKonverter.js";
 import { STARK_DATEN, STARK_BEREICHE } from "../calc/aufgaben/stark.js";
 import { rngAusSeed } from "../calc/rng.js";
@@ -155,6 +156,7 @@ function faecherBauen(thema) {
 export default function Ueben() {
   const { data, logChange, T, heute, fokus, uebenZiel, uebenZielSetzen } = useApp();
   const [fachId, setFachId] = useState("deutsch");
+  const [gruppe, setGruppe] = useState(null); // 🗂️ geöffnete Deutsch-Gruppe (weniger Auswahl auf einmal)
   const [runde, setRunde] = useState(null);
   const thema = data.einstellungen.uebungsThema;
   const faecher = useMemo(() => faecherBauen(thema), [thema]);
@@ -622,7 +624,7 @@ export default function Ueben() {
     <div data-test="ueben-bereiche">
       <div style={{ display: "flex", gap: 8, marginBottom: T.abstand }}>
         {faecher.map((f) => (
-          <button key={f.id} data-test={`ueben-fach-${f.id}`} onClick={() => setFachId(f.id)}
+          <button key={f.id} data-test={`ueben-fach-${f.id}`} onClick={() => { setFachId(f.id); setGruppe(null); }}
             style={{
               flex: 1, fontWeight: 700, padding: "0 4px",
               background: f.id === fachId ? T.primaer : T.weich,
@@ -632,7 +634,7 @@ export default function Ueben() {
           </button>
         ))}
       </div>
-      {fachId === "deutsch" && (
+      {fachId === "deutsch" && !gruppe && (
         <div style={{ ...karte, paddingTop: 12, paddingBottom: 12 }}>
           <p style={{ margin: "0 0 8px", fontSize: "var(--schrift-klein)" }}>
             <b>🎨 Deine Übungs-Welt</b> <span style={{ color: T.textLeise }}>– für die Satz-Übungen (Subjekte bis Die 4 Fälle)</span>
@@ -653,21 +655,71 @@ export default function Ueben() {
           </div>
         </div>
       )}
-      {fach.bereiche.map((b) => {
-        const fortschritt = data.lernstand.stufen[b.key];
-        const stufe = b.typ === "modul" ? null
-          : aktiveStufe(fortschritt, data.profil.klasse, fach.daten[b.key], stufenVorgabe(data.einstellungen, b.key));
-        return (
-          <button key={b.key} data-test={`bereich-${b.key}`} onClick={() => starten(b)}
-            style={{ ...karte, width: "100%", textAlign: "left", display: "block", border: `1px solid ${T.rand}` }}>
-            <b>{b.emoji} {b.name}</b>
-            <span style={{ float: "right", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-              {data.lernstand.einstufung?.empfehlung?.includes(b.key) ? "🎯 empfohlen · " : ""}
-              {stufe === null ? "✏️ Üben + Schreiben" : <>🎯 Stufe {stufe}{fortschritt?.krone ? " 👑" : ""}</>}
-            </span>
+      {(() => {
+        // Ein Bereichs-Knopf (unverändertes Aussehen, überall wiederverwendet)
+        const bereichKnopf = (b) => {
+          const fortschritt = data.lernstand.stufen[b.key];
+          const stufe = b.typ === "modul" ? null
+            : aktiveStufe(fortschritt, data.profil.klasse, fach.daten[b.key], stufenVorgabe(data.einstellungen, b.key));
+          return (
+            <button key={b.key} data-test={`bereich-${b.key}`} onClick={() => starten(b)}
+              style={{ ...karte, width: "100%", textAlign: "left", display: "block", border: `1px solid ${T.rand}` }}>
+              <b>{b.emoji} {b.name}</b>
+              <span style={{ float: "right", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+                {data.lernstand.einstufung?.empfehlung?.includes(b.key) ? "🎯 empfohlen · " : ""}
+                {stufe === null ? "✏️ Üben + Schreiben" : <>🎯 Stufe {stufe}{fortschritt?.krone ? " 👑" : ""}</>}
+              </span>
+            </button>
+          );
+        };
+        // 🦁 Ein Knopf statt vieler: Leo nimmt den Bereich mit den wenigsten Runden.
+        const wahl = leoWahl(fach.bereiche, data.lernstand.stufen);
+        const leoKnopf = fach.bereiche.length > 1 && wahl && (
+          <button data-test="leo-wahl" onClick={() => starten(wahl)}
+            style={{ ...karte, width: "100%", textAlign: "left", display: "block", background: T.primaer, color: T.primaerText, border: "none" }}>
+            <b>🦁 Einfach loslegen – Leo wählt für dich</b>
+            <span style={{ float: "right", fontSize: "var(--schrift-klein)", opacity: 0.9 }}>heute: {wahl.emoji} {wahl.name}</span>
           </button>
         );
-      })}
+        if (fachId !== "deutsch") {
+          return (<>{leoKnopf}{fach.bereiche.map(bereichKnopf)}</>);
+        }
+        if (gruppe) {
+          const g = DEUTSCH_GRUPPEN.find((x) => x.key === gruppe);
+          return (
+            <>
+              <button data-test="gruppe-zurueck" onClick={() => setGruppe(null)}
+                style={{ background: "transparent", color: T.textLeise, fontSize: "var(--schrift-klein)", paddingLeft: 0 }}>
+                ← Alle Gruppen
+              </button>
+              <p style={{ margin: "4px 0 8px", fontWeight: 800 }}>{g.emoji} {g.name}</p>
+              {g.felder.map((key) => fach.bereiche.find((b) => b.key === key)).filter(Boolean).map(bereichKnopf)}
+            </>
+          );
+        }
+        // Übersicht: Leo-Knopf + 5 Gruppen – eine Ein-Feld-Gruppe startet sofort.
+        return (
+          <>
+            {leoKnopf}
+            {DEUTSCH_GRUPPEN.map((g) => {
+              const felder = g.felder.map((key) => fach.bereiche.find((b) => b.key === key)).filter(Boolean);
+              const kronen = felder.filter((b) => data.lernstand.stufen[b.key]?.krone).length;
+              const empfohlen = felder.some((b) => data.lernstand.einstufung?.empfehlung?.includes(b.key));
+              return (
+                <button key={g.key} data-test={`gruppe-${g.key}`}
+                  onClick={() => (felder.length === 1 ? starten(felder[0]) : setGruppe(g.key))}
+                  style={{ ...karte, width: "100%", textAlign: "left", display: "block", border: `1px solid ${T.rand}` }}>
+                  <b>{g.emoji} {g.name}</b>
+                  <span style={{ float: "right", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+                    {empfohlen ? "🎯 empfohlen · " : ""}
+                    {felder.length === 1 ? "los geht’s!" : `${felder.length} Übungen`}{kronen > 0 ? ` · 👑 ${kronen}` : ""}
+                  </span>
+                </button>
+              );
+            })}
+          </>
+        );
+      })()}
       <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
         Tipp: Eine fehlerfreie Runde schaltet die nächste Stufe frei – und jede
         Runde bringt eine 🪙 Münze für die Spielhalle.

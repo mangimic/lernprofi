@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-058",
+    "version": "0.45.0",
+    "datum": "2026-10-09",
+    "titel": "Weniger Auswahl, klarer Start",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🦁 „Einfach loslegen – Leo wählt für dich“: Ein großer Knopf oben in jedem Fach startet sofort die Übung, die am wenigsten dran war. Kein Grübeln, kein Scrollen – ein Tipp und los."
+      },
+      {
+        "type": "neu",
+        "text": "🗂️ Deutsch zeigt statt 15 Bereichen jetzt 5 klare Gruppen: 🔍 Lesen & Verstehen (startet direkt), ✍️ Richtig schreiben, 🏷️ Wörter & Wortarten, 🧲 Sätze & Satzglieder, 📚 Texte schreiben. Erst die Gruppe, dann höchstens 6 Übungen – mit 👑-Zähler und 🎯-Empfehlung an der Gruppe."
+      }
+    ]
+  },
+  {
     "id": "rn-057",
     "version": "0.44.0",
     "datum": "2026-10-09",

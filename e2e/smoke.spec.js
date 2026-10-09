@@ -20,6 +20,21 @@ async function tresorAnlegen(page) {
   await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
 }
 
+// 🗂️ Seit v0.45 liegen die Deutsch-Bereiche in Gruppen (weniger Auswahl auf einmal).
+// Der Helfer öffnet die passende Gruppe; eine Ein-Feld-Gruppe (Lesen) startet direkt.
+const GRUPPE_VON = {
+  lesen: "lesen",
+  gk: "schreiben", gws: "schreiben", dd: "schreiben", doppel: "schreiben", strategie: "schreiben", wortfam: "schreiben",
+  wa: "woerter", zeit: "woerter", verbform: "woerter", steigern: "woerter", zusnomen: "woerter", faelle: "woerter",
+  subj: "saetze", praed: "saetze", satzglied: "saetze", rede: "saetze",
+  gesch: "texte", vorgang: "texte",
+};
+async function deutschBereich(page, key) {
+  if (await page.getByTestId("gruppe-zurueck").count()) await page.getByTestId("gruppe-zurueck").click();
+  await page.getByTestId(`gruppe-${GRUPPE_VON[key]}`).click();
+  if (GRUPPE_VON[key] !== "lesen") await page.getByTestId(`bereich-${key}`).click();
+}
+
 test("Tresor anlegen, Kind entsperrt nach Neustart selbständig per PIN", async ({ page }) => {
   const fehler = [];
   page.on("pageerror", (e) => fehler.push(String(e)));
@@ -152,9 +167,13 @@ test("Sachkunde-Runde zählt falsch beantwortete Aufgaben nicht als gelöst", as
 test("Deutsch: dass/das-Frage hat genau 2 Antworten, Stark mit Leo ist da", async ({ page }) => {
   await tresorAnlegen(page);
   await page.getByTestId("zum-ueben").click();
-  // Deutsch ist der Standard-Tab
+  // Deutsch ist der Standard-Tab: Leo-Knopf + Gruppen statt 15 Einzel-Bereiche
+  await expect(page.getByTestId("leo-wahl")).toContainText("Leo wählt");
+  await expect(page.getByTestId("gruppe-texte")).toBeVisible();
+  await page.getByTestId("gruppe-texte").click();
   await expect(page.getByTestId("bereich-gesch")).toBeVisible();
-  await page.getByTestId("bereich-dd").click();
+  await page.getByTestId("gruppe-zurueck").click();
+  await deutschBereich(page, "dd");
   await expect(page.getByTestId("frage-karte")).toBeVisible();
   await expect(page.getByTestId("frage-text")).toContainText("___");
   await expect(page.locator('[data-test="antwort-opt"]')).toHaveCount(2);
@@ -170,7 +189,7 @@ test("Deutsch: dass/das-Frage hat genau 2 Antworten, Stark mit Leo ist da", asyn
 test("Wörter antippen: Subjekt finden, Lösung wird markiert", async ({ page }) => {
   await tresorAnlegen(page);
   await page.getByTestId("zum-ueben").click();
-  await page.getByTestId("bereich-subj").click();
+  await deutschBereich(page, "subj");
   await expect(page.getByTestId("frage-karte")).toBeVisible();
   await expect(page.getByTestId("frage-text")).toContainText(/Wer oder was/);
 
@@ -192,11 +211,11 @@ test("Wörter antippen: Subjekt finden, Lösung wird markiert", async ({ page })
 test("Neue Deutsch-Bereiche: Zeitformen (3 Optionen) und Grundwortschatz mit Regel", async ({ page }) => {
   await tresorAnlegen(page);
   await page.getByTestId("zum-ueben").click();
-  await page.getByTestId("bereich-zeit").click();
+  await deutschBereich(page, "zeit");
   await expect(page.getByTestId("frage-text")).toContainText("Zeitform");
   await expect(page.locator('[data-test="antwort-opt"]')).toHaveCount(3);
   await page.getByTestId("abbrechen").click();
-  await page.getByTestId("bereich-gws").click();
+  await deutschBereich(page, "gws");
   await expect(page.getByTestId("frage-karte")).toContainText("Regel:");
   await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
   await expect(page.getByTestId("feedback")).toContainText("Richtig");
@@ -206,19 +225,19 @@ test("🧭 Kompass-Training: Lese-Detektiv mit Textabschnitt, Steigern und Verbf
   await tresorAnlegen(page);
   await page.getByTestId("zum-ueben").click();
   // 🔍 Lese-Detektiv: Klasse 4 startet auf Stufe 2 – erster Abschnitt ist der Honig-Text
-  await page.getByTestId("bereich-lesen").click();
+  await deutschBereich(page, "lesen");
   await expect(page.getByTestId("frage-kontext")).toContainText("Honig");
   await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
   await expect(page.getByTestId("feedback")).toContainText("Richtig");
   await page.getByTestId("abbrechen").click();
   // 📈 Adjektive steigern
-  await page.getByTestId("bereich-steigern").click();
+  await deutschBereich(page, "steigern");
   await expect(page.getByTestId("frage-text")).toContainText("klüger");
   await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
   await expect(page.getByTestId("feedback")).toContainText("Richtig");
   await page.getByTestId("abbrechen").click();
   // 🔧 Verbformen bilden
-  await page.getByTestId("bereich-verbform").click();
+  await deutschBereich(page, "verbform");
   await expect(page.getByTestId("frage-text")).toContainText("Grundform");
   await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
   await expect(page.getByTestId("feedback")).toContainText("Richtig");
@@ -233,7 +252,7 @@ test("Spielhalle: Münze einlösen und im echten See-Abenteuer einen Fisch fange
 
   // Eine Übungsrunde → 1 Münze (schnellste: dass/das mit 10 Fragen)
   await page.getByTestId("nav-ueben").click();
-  await page.getByTestId("bereich-dd").click();
+  await deutschBereich(page, "dd");
   for (let i = 0; i < 10; i++) {
     await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
     await page.getByTestId("weiter-knopf").click();
@@ -274,7 +293,7 @@ test("Blockwelt: Block verdienen (streng bei Fehlern), setzen und abbauen", asyn
   await tresorAnlegen(page);
   // 1 Münze verdienen
   await page.getByTestId("zum-ueben").click();
-  await page.getByTestId("bereich-dd").click();
+  await deutschBereich(page, "dd");
   for (let i = 0; i < 10; i++) {
     await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
     await page.getByTestId("weiter-knopf").click();
@@ -382,7 +401,7 @@ test("Konzentration: Blitzlesen-Runde im Zeitraffer + Mut-Satz des Tages bleibt"
 
 async function muenzeVerdienen(page) {
   await page.getByTestId("nav-ueben").click();
-  await page.getByTestId("bereich-dd").click();
+  await deutschBereich(page, "dd");
   for (let i = 0; i < 10; i++) {
     await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
     await page.getByTestId("weiter-knopf").click();
@@ -498,7 +517,7 @@ test("Schach: Schule spielt Züge vor, Taktik-Aufgabe, echter Zug gegen den Comp
 test("Satzglieder umstellen: Umstellprobe mit Regel-Feedback und Zeit/Ort-Erkennung", async ({ page }) => {
   await tresorAnlegen(page);
   await page.getByTestId("nav-ueben").click();
-  await page.getByTestId("bereich-satzglied").click();
+  await deutschBereich(page, "satzglied");
 
   const chip = (i) => page.locator(`[data-test="um-chip"][data-i="${i}"]`);
   // Aufgabe 1: erst der Ausgangssatz (Fehlversuch), dann richtig umgestellt
@@ -535,7 +554,7 @@ test("Satzglieder umstellen: Umstellprobe mit Regel-Feedback und Zeit/Ort-Erkenn
 test("Vorgangsbeschreibung: Ablauf wählen, drei Spiele, Arbeitsblatt, Lösungs-Hürde, Selbst-Check", async ({ page }) => {
   await tresorAnlegen(page);
   await page.getByTestId("nav-ueben").click();
-  await page.getByTestId("bereich-vorgang").click();
+  await deutschBereich(page, "vorgang");
   await expect(page.getByTestId("vorgang")).toBeVisible();
 
   // 📋 Ablauf: Toast wählen und loslegen
@@ -658,7 +677,7 @@ test("Tagesform & Fokus: roter Tag macht Missionen kürzer, Bewegungspause kommt
 
   // 10 Aufgaben fehlerfrei: rot → Missionen à 3 (=3 Missionen, Ziel 3 erreicht),
   // aber KEINE neue Stufe – dafür die 🔥 Fokus-Serie als Rekord
-  await page.getByTestId("bereich-dd").click();
+  await deutschBereich(page, "dd");
   for (let i = 0; i < 10; i++) {
     await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
     await page.getByTestId("weiter-knopf").click();
@@ -746,7 +765,9 @@ test("Einstufungstest: adaptiv testen, Stufen einstellen, Trainingsplan führt z
   await expect(page.getByTestId("frage-karte")).toContainText("das oder dass?");
   await expect(page.getByTestId("frage-karte")).toContainText("Stufe 1");
   await page.getByTestId("abbrechen").click();
-  // 🎯-Abzeichen in der Bereichs-Wahl, Mathe nach Einstufung auf Stufe 3
+  // 🎯-Abzeichen: an der Gruppe UND am Bereich, Mathe nach Einstufung auf Stufe 3
+  await expect(page.getByTestId("gruppe-schreiben")).toContainText("🎯 empfohlen");
+  await page.getByTestId("gruppe-schreiben").click();
   await expect(page.getByTestId("bereich-dd")).toContainText("🎯 empfohlen");
   await page.getByTestId("ueben-fach-mathe").click();
   await expect(page.getByTestId("bereich-mzahlen")).toContainText("Stufe 3");
@@ -779,7 +800,7 @@ test("KI-Erklärer: Eltern geben frei, Leo erklärt in getakteten Blasen mit Mac
 
   // Üben: falsche Antwort → Erklär-Knopf → Blase 1 → selbst weitertippen → Blase 2 + Mach-Aufgabe
   await page.getByTestId("nav-ueben").click();
-  await page.getByTestId("bereich-dd").click();
+  await deutschBereich(page, "dd");
   await page.locator('[data-test="antwort-opt"]:not([data-richtig])').first().click();
   await page.getByTestId("ki-erklaer-knopf").click();
   await expect(page.getByTestId("ki-blase")).toHaveCount(1);
@@ -1316,13 +1337,13 @@ test("Übungs-Welt, Wozu-Anker, Zeitstrahl und Lehrer-Moment", async ({ page }) 
 
   // 🎨 Welt „Angeln“ wählen → Groß/Klein-Sätze kommen vom See
   await page.getByTestId("thema-angeln").click();
-  await page.getByTestId("bereich-gk").click();
+  await deutschBereich(page, "gk");
   await expect(page.getByTestId("wozu-anker")).toContainText("Wozu?");
   await expect(page.getByTestId("frage-karte")).toContainText("angler");
   await page.getByTestId("abbrechen").click();
 
   // ⏳ Zeitformen zeigen den Zeitstrahl
-  await page.getByTestId("bereich-zeit").click();
+  await deutschBereich(page, "zeit");
   await expect(page.getByTestId("zeit-strahl")).toBeVisible();
   await expect(page.getByTestId("frage-karte")).toContainText("Zeitform");
   await page.getByTestId("abbrechen").click();

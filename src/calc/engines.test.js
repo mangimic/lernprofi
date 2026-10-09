@@ -11,6 +11,7 @@ import { subjektPool, praedikatPool, gkPool } from "./aufgaben/saetze.js";
 import { zeitPool, wortartenPool, faellePool, redePool, gwsPool, ZEIT_NAMEN, FALL_NAMEN } from "./aufgaben/deutschKonverter.js";
 import { auswahlPruefen, tippenPoolGesund } from "./wortTippen.js";
 import { KOMPASS_DEUTSCH_DATEN, KOMPASS_DEUTSCH_BEREICHE, LESEN_DATEN } from "./aufgaben/kompassDeutsch.js";
+import { DEUTSCH_GRUPPEN, gruppeVonFeld, leoWahl } from "./uebenGruppen.js";
 import { spielStartbar, muenzeEinloesen, blitzFragen, wurfWerten, fischFuerSerie, SEE_WUERFE } from "./spiele.js";
 
 // Fiktive Fixtures – niemals echte Daten.
@@ -149,6 +150,23 @@ describe("aufgabenRunde", () => {
       expect(typeof a.kontext).toBe("string");
       expect(a.kontext.length).toBeGreaterThan(80);
     }
+  });
+
+  it("🗂️ Übungs-Gruppen decken alle 19 Deutsch-Felder genau einmal ab; Leo wählt fair", () => {
+    const alleFelder = DEUTSCH_GRUPPEN.flatMap((g) => g.felder);
+    expect(alleFelder.length).toBe(new Set(alleFelder).size); // kein Feld doppelt
+    expect([...alleFelder].sort()).toEqual([
+      "dd", "doppel", "faelle", "gesch", "gk", "gws", "lesen", "praed", "rede", "satzglied",
+      "steigern", "strategie", "subj", "verbform", "vorgang", "wa", "wortfam", "zeit", "zusnomen",
+    ]);
+    expect(gruppeVonFeld("lesen").felder).toEqual(["lesen"]); // Ein-Feld-Gruppe startet direkt
+    expect(gruppeVonFeld("mrechnen")).toBe(null);
+    // Leo nimmt das Feld mit den wenigsten Runden, überspringt Module, rotiert bei Gleichstand per Reihenfolge
+    const bereiche = [{ key: "a" }, { key: "b" }, { key: "m", typ: "modul" }, { key: "c" }];
+    expect(leoWahl(bereiche, { a: { runden: 2 }, b: { runden: 1 }, c: { runden: 3 } }).key).toBe("b");
+    expect(leoWahl(bereiche, { a: { runden: 1 } }).key).toBe("b"); // b hat 0 Runden
+    expect(leoWahl(bereiche, {}).key).toBe("a"); // Gleichstand → erstes Feld
+    expect(leoWahl([{ key: "m", typ: "modul" }], {})).toBe(null);
   });
 
   it("Stark-mit-Leo-Pool und Mut-Sätze sind vollständig", () => {
