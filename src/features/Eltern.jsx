@@ -57,7 +57,7 @@ function Seg({ werte, aktiv, auf, test }) {
 }
 
 export default function Eltern() {
-  const { data, logChange, T, tresor, heute, autoSync } = useApp();
+  const { data, logChange, T, tresor, heute, autoSync, navTo } = useApp();
   const datei = useRef(null);
   const [meldung, setMeldung] = useState("");
   const [bericht, setBericht] = useState(null);
@@ -581,6 +581,18 @@ export default function Eltern() {
             </div>
           </>
         )}
+      </Karte>
+
+      <Karte test="eltern-karten">
+        <b>🗃️ Karteikarten (Kompass-Vorbereitung)</b>
+        <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          32 Abruf-Karten für Deutsch und Mathe – 4 pro A4-Blatt, beidseitig drucken, schneiden,
+          im 3-Fächer-Kasten üben (3–5 Karten pro Runde, erst laut antworten, dann umdrehen).
+        </p>
+        <button data-test="karten-oeffnen" onClick={() => navTo("karten")}
+          style={{ background: T.weich, color: T.text, fontWeight: 700 }}>
+          🖨️ Karten ansehen &amp; drucken
+        </button>
       </Karte>
 
       <Karte test="eltern-bericht">

@@ -1357,6 +1357,25 @@ test("🧭 Kompass-Countdown: Termine automatisch im Plan, Wochen-Fahrplan, Chip
   await expect(page.getByTestId("kompass-seite")).toBeVisible();
 });
 
+test("🗃️ Karteikarten: 4 je A4-Blatt, Rückseiten gespiegelt, Fach-Filter und Druck-Knopf", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("karten-oeffnen").click();
+  await expect(page.getByTestId("karten-seite")).toBeVisible();
+  await expect(page.getByTestId("karten-blatt")).toHaveCount(16); // 32 Karten → 8× Vorder- + 8× Rückseiten
+  await expect(page.getByTestId("karte-vs")).toHaveCount(32);
+  await expect(page.getByTestId("karte-rs")).toHaveCount(32);
+  // Duplex-Spiegelung: Karte 1 (vorn links) hat ihre Antwort auf dem Rückseiten-Blatt RECHTS
+  const blatt2 = page.getByTestId("karten-blatt").nth(1);
+  await expect(blatt2.getByTestId("karte-rs").nth(1)).toContainText("weiß (ß)");
+  await expect(blatt2.getByTestId("karte-rs").nth(0)).toContainText("braun");
+  // Fach-Filter halbiert den Stapel
+  await page.getByTestId("karten-wahl-mathe").click();
+  await expect(page.getByTestId("karten-blatt")).toHaveCount(8);
+  await expect(page.getByTestId("karte-vs").first()).toContainText("7 · 8");
+  await expect(page.getByTestId("karten-drucken")).toContainText("8 Seiten · 16 Karten");
+});
+
 test("Auto-Sicherung: Änderungen wandern near-realtime im Hintergrund zum Server", async ({ page }) => {
   let rev = 0;
   let puts = 0;

@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-063",
+    "version": "0.50.0",
+    "datum": "2026-10-09",
+    "titel": "Karteikarten zum Ausdrucken",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🗃️ Neuer Bereich im Elternmenü: 32 Karteikarten für die Kompass-Vorbereitung (16 Deutsch, 16 Mathe) – Lernwörter, Einmaleins-Tricks, Regeln und Merksätze, inklusive ✍️ Schreib-Karten zum Diktieren. 4 Karten pro A4-Blatt, die Rückseiten sind fürs beidseitige Drucken gespiegelt – drucken, an den Linien schneiden, fertig ist der 3-Fächer-Karteikasten."
+      },
+      {
+        "type": "neu",
+        "text": "Mit Fach-Filter (nur Deutsch / nur Mathe) und Spielregeln nach bewährter Methode: 3–5 Karten pro Runde, erst laut antworten, dann umdrehen, Karten wandern bei „Gewusst“ ein Fach weiter."
+      }
+    ]
+  },
+  {
     "id": "rn-062",
     "version": "0.49.0",
     "datum": "2026-10-09",

@@ -36,6 +36,22 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.50: Karteikarten zum Ausdrucken ----------
+console.log("== v0.50: Karteikarten ==");
+test("v0.50: 32 Karten, Duplex-Spiegelung, Druck-Route, Eltern-Einstieg", (() => {
+  const k = quelle("src/calc/karteikarten.js");
+  const f = quelle("src/features/Karteikarten.jsx");
+  const a = quelle("src/App.jsx");
+  const e = quelle("src/features/Eltern.jsx");
+  return k.includes("KARTEIKARTEN") && k.includes("kartenSeiten")
+    && k.includes("[vier[1], vier[0], vier[3], vier[2]]")
+    && f.includes("@media print") && f.includes("size: A4") && f.includes("window.print()")
+    && f.includes('data-test="karten-blatt"')
+    && a.includes('route === "karten"')
+    && e.includes('data-test="karten-oeffnen"')
+    && releaseNoteVorhanden("rn-063");
+})());
+
 // ---------- v0.49: Fahrplan-Übernahme, Merk-Bilder, Zurück-Navigation ----------
 console.log("== v0.49: Fahrplan & Merk-Bilder ==");
 test("v0.49: kompassUebernehmen mit Pflicht-zuerst-Regel, Merk-Bilder, navZurueck", (() => {
