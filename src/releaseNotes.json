@@ -1,5 +1,25 @@
 [
   {
+    "id": "rn-070",
+    "version": "0.55.0",
+    "datum": "2026-10-09",
+    "titel": "Längen zum Anfassen",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "📏 Die Schätz-Aufgaben zu Längen zeigen jetzt Anker-Bilder aus dem Alltag: Tür mit Kind daneben (2 m), Finger (1 cm), Bleistiftspitze (1 mm), Lineal (30 cm) und Fußballplatz (100 m). Ein orangefarbener Doppelpfeil zeigt immer, welche Länge gemeint ist – vor der Antwort ohne Zahl, danach als Merk-Bild mit Maß."
+      },
+      {
+        "type": "neu",
+        "text": "Die Karteikarte zu den Längen-Ankern zeigt Tür und Finger jetzt als Bild mit Maßangabe."
+      },
+      {
+        "type": "fix",
+        "text": "🧠 Das Gehirn auf den Lösungsseiten heißt jetzt klar „Merkhilfe“ – der kleine Trick, mit dem man sich die Lösung merkt (auf den Druckkarten und im digitalen Kasten)."
+      }
+    ]
+  },
+  {
     "id": "rn-069",
     "version": "0.54.0",
     "datum": "2026-10-09",

@@ -468,12 +468,93 @@ function Spielwuerfel({ b }) {
   return <WuerfelSeite n={b.augen || 6} gr={84} />;
 }
 
+/* 📏 Längen-Anker: Alltagsdinge als Größen-Vergleich (Tür 2 m,
+   Finger 1 cm, Bleistiftspitze 1 mm, Lineal 30 cm, Fußballplatz 100 m).
+   Der orangefarbene Doppelpfeil zeigt immer, WELCHE Länge gemeint ist.
+   Ohne `zahlen` steht nur der Name dabei (Schätzen ohne Spoiler),
+   mit `zahlen` auch das Maß – fürs Merk-Bild nach der Antwort. */
+export const LAENGEN_DINGE = {
+  tuer: { name: "Tür", mass: "2 m" },
+  finger: { name: "Finger", mass: "1 cm" },
+  stift: { name: "Bleistiftspitze", mass: "1 mm" },
+  lineal: { name: "Lineal", mass: "30 cm" },
+  platz: { name: "Fußballplatz", mass: "100 m" },
+};
+function MessPfeil({ x1, y1, x2, y2 }) {
+  const dx = Math.sign(x2 - x1) * 6, dy = Math.sign(y2 - y1) * 6;
+  const spitze = (x, y, ax, ay) => `${x},${y} ${x + ax - dy * 0.6},${y + ay - dx * 0.6} ${x + ax + dy * 0.6},${y + ay + dx * 0.6}`;
+  return (
+    <g fill={WARN} stroke={WARN}>
+      <line x1={x1} y1={y1} x2={x2} y2={y2} strokeWidth="2" />
+      <polygon points={spitze(x1, y1, dx, dy)} />
+      <polygon points={spitze(x2, y2, -dx, -dy)} />
+    </g>
+  );
+}
+function LaengenDing({ was }) {
+  return (
+    <svg width="100" height="92" viewBox="0 0 100 92" role="img" aria-label={LAENGEN_DINGE[was].name}>
+      {was === "tuer" && (<>
+        <rect x="30" y="8" width="36" height="76" fill={FLAECHE} stroke={LINIE} strokeWidth="2" />
+        <rect x="36" y="14" width="24" height="30" fill="none" stroke={LEISE} strokeWidth="1.5" />
+        <circle cx="61" cy="52" r="2.5" fill={LINIE} />
+        <circle cx="14" cy="60" r="5" fill="none" stroke={LINIE} strokeWidth="2" />
+        <line x1="14" y1="65" x2="14" y2="76" stroke={LINIE} strokeWidth="2" />
+        <line x1="7" y1="70" x2="21" y2="70" stroke={LINIE} strokeWidth="2" />
+        <line x1="14" y1="76" x2="9" y2="84" stroke={LINIE} strokeWidth="2" />
+        <line x1="14" y1="76" x2="19" y2="84" stroke={LINIE} strokeWidth="2" />
+        <MessPfeil x1={78} y1={8} x2={78} y2={84} />
+      </>)}
+      {was === "finger" && (<>
+        <rect x="30" y="52" width="40" height="32" rx="10" fill={FLAECHE} stroke={LINIE} strokeWidth="2" />
+        <rect x="38" y="16" width="13" height="42" rx="6.5" fill={FLAECHE} stroke={LINIE} strokeWidth="2" />
+        <MessPfeil x1={38} y1={9} x2={51} y2={9} />
+      </>)}
+      {was === "stift" && (<>
+        <rect x="6" y="38" width="52" height="16" fill="#f0c437" stroke={LINIE} strokeWidth="2" />
+        <polygon points="58,38 82,46 58,54" fill="#eac089" stroke={LINIE} strokeWidth="2" strokeLinejoin="round" />
+        <polygon points="76,44 82,46 76,48" fill={LINIE} />
+        <MessPfeil x1={72} y1={62} x2={86} y2={62} />
+      </>)}
+      {was === "lineal" && (<>
+        <rect x="4" y="34" width="92" height="24" fill={FLAECHE} stroke={LINIE} strokeWidth="2" />
+        {Array.from({ length: 11 }, (_, i) => (
+          <line key={i} x1={8 + i * 8.4} y1="34" x2={8 + i * 8.4} y2={i % 5 === 0 ? 46 : 41} stroke={LINIE} strokeWidth="1.5" />
+        ))}
+        <MessPfeil x1={4} y1={70} x2={96} y2={70} />
+      </>)}
+      {was === "platz" && (<>
+        <rect x="4" y="16" width="92" height="52" fill="color-mix(in srgb, #3f9d46 35%, var(--karte))" stroke={LINIE} strokeWidth="2" />
+        <line x1="50" y1="16" x2="50" y2="68" stroke={LINIE} strokeWidth="1.5" />
+        <circle cx="50" cy="42" r="9" fill="none" stroke={LINIE} strokeWidth="1.5" />
+        <rect x="4" y="30" width="10" height="24" fill="none" stroke={LINIE} strokeWidth="1.5" />
+        <rect x="86" y="30" width="10" height="24" fill="none" stroke={LINIE} strokeWidth="1.5" />
+        <MessPfeil x1={4} y1={80} x2={96} y2={80} />
+      </>)}
+    </svg>
+  );
+}
+function Laengen({ b }) {
+  return (
+    <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center" }}>
+      {b.dinge.map((was) => (
+        <div key={was} style={{ textAlign: "center" }}>
+          <LaengenDing was={was} />
+          <div style={{ fontSize: "var(--schrift-klein)", fontWeight: 800, color: b.zahlen ? "var(--text)" : LEISE }}>
+            {LAENGEN_DINGE[was].name}{b.zahlen ? ` · ${LAENGEN_DINGE[was].mass}` : ""}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 const ARTEN = {
   strahl: Strahl, folge: Folge, mauer: Mauer, form: Form, buchstaben: Buchstaben,
   kaestchen: Kaestchen, wuerfelturm: Wuerfelturm, netz: Netz, uhr: Uhr,
   kugeln: Kugeln, rad: Rad, balken: Balken, striche: Striche, schilder: Schilder,
   stromkreis: Stromkreis, kompassrose: Kompassrose, sonne: Sonne, dkarte: DKarte,
-  wuerfel: Wuerfel, spielwuerfel: Spielwuerfel,
+  wuerfel: Wuerfel, spielwuerfel: Spielwuerfel, laengen: Laengen,
 };
 export const BILD_ARTEN = Object.keys(ARTEN);
 

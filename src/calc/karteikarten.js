@@ -32,7 +32,7 @@ export const KARTEIKARTEN = [
   { id: "m6", fach: "mathe", vs: "16:18 Uhr + 45 Minuten = ?", rs: "17:03 Uhr", merk: "Erst bis 17:00 (42 Min), dann noch 3 Minuten." , bild:{art:"uhr",zeit:"17:03"}},
   { id: "m7", fach: "mathe", vs: "1 m = ? cm · 1 km = ? m · 1 € = ? ct", rs: "100 cm · 1000 m · 100 ct", merk: "Kilo heißt tausend – Meter und Euro teilen in 100." },
   { id: "m8", fach: "mathe", vs: "Würfel zeigt eine 7 – sicher, möglich oder unmöglich?", rs: "unmöglich", merk: "Auf dem Würfel stehen nur 1 bis 6." , bild:{art:"spielwuerfel",reihe:true}},
-  { id: "m9", fach: "mathe", vs: "Wie hoch ist eine Tür? Wie breit ein Finger?", rs: "≈ 2 m · ≈ 1 cm", merk: "Anker: Tür 2 m · Finger 1 cm · Bleistiftspitze 1 mm · Fußballplatz 100 m." },
+  { id: "m9", fach: "mathe", vs: "Wie hoch ist eine Tür? Wie breit ein Finger?", rs: "≈ 2 m · ≈ 1 cm", merk: "Anker: Tür 2 m · Finger 1 cm · Bleistiftspitze 1 mm · Fußballplatz 100 m." , bild:{art:"laengen",dinge:["tuer","finger"],zahlen:true}},
   { id: "m10", fach: "mathe", vs: "Sack A: 1 von 2 weiß · Sack B: 2 von 4 weiß – wo gewinnst du eher?", rs: "In beiden gleich", merk: "Beides ist die Hälfte – Anteile vergleichen, nicht Anzahlen!" , bild:{art:"kugeln",saecke:[{w:1,b:1},{w:2,b:2}]}},
   { id: "m11", fach: "mathe", vs: "Welche Zahl liegt genau in der Mitte von 340 und 480?", rs: "410", merk: "Abstand 140 → die Hälfte (70) zu 340 dazu." },
   { id: "m12", fach: "mathe", vs: "6 · 38 = ?", rs: "228", merk: "6·40 − 6·2 = 240 − 12." },

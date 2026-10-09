@@ -32,7 +32,7 @@ function Zelle({ karte, seite }) {
         <div className="kk-mitte">
           <div className="kk-antwort">{karte.rs}</div>
           {karte.bild && <div className="kk-bild"><AufgabenBild b={karte.bild} /></div>}
-          <div className="kk-merk">🧠 {karte.merk}</div>
+          <div className="kk-merk">🧠 <b>Merkhilfe:</b> {karte.merk}</div>
         </div>
       )}
       <div className="kk-fuss">Lernprofi · Kompass 4</div>

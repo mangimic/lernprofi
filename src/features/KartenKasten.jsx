@@ -117,7 +117,7 @@ export default function KartenKasten() {
               <p data-test="kasten-antwort" style={{ fontSize: "var(--schrift-gross)", fontWeight: 800, color: T.ok, margin: "8px 0" }}>{karte.rs}</p>
               {karte.bild && <AufgabenBild b={karte.bild} />}
               <p style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "8px 12px", fontSize: "var(--schrift-klein)", margin: "0 0 12px" }}>
-                🧠 {karte.merk}
+                🧠 <b>Merkhilfe:</b> {karte.merk}
               </p>
               {wiederholung ? (
                 <button data-test="karte-weiter" onClick={() => weiter(runde)}

@@ -36,6 +36,24 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.55: Längen-Anker & Merkhilfe ----------
+console.log("== v0.55: Längen-Anker ==");
+test("v0.55: Längen-Anker mit Messpfeil, fünf Alltagsdinge, Zahlen nur im Merk-Bild", (() => {
+  const b = quelle("src/features/AufgabenBild.jsx");
+  const m = quelle("src/calc/aufgaben/mathe.js");
+  return b.includes("laengen: Laengen") && b.includes("LAENGEN_DINGE")
+    && ["tuer", "finger", "stift", "lineal", "platz"].every((d) => b.includes(`"${d}"`) || b.includes(`${d}:`))
+    && (m.match(/art:"laengen"/g) || []).length >= 10
+    && (m.match(/art:"laengen",dinge:\[[^\]]+\],zahlen:true/g) || []).length >= 5;
+})());
+test("v0.55: Karteikarte m9 mit Anker-Bild, 🧠 heißt überall Merkhilfe", (() => {
+  const k = quelle("src/calc/karteikarten.js");
+  return k.includes("bild:{art:\"laengen\",dinge:[\"tuer\",\"finger\"],zahlen:true}")
+    && quelle("src/features/Karteikarten.jsx").includes("Merkhilfe:")
+    && quelle("src/features/KartenKasten.jsx").includes("Merkhilfe:")
+    && releaseNoteVorhanden("rn-070");
+})());
+
 // ---------- v0.54: Würfel-Bilder ----------
 console.log("== v0.54: Würfel-Bilder ==");
 test("v0.54: Kantenmodell + Spielwürfel als Bild-Arten mit Zählhilfen", (() => {

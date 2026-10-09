@@ -170,7 +170,7 @@ describe("aufgabenRunde", () => {
   });
 
   it("🖼️ Aufgaben-Bilder: jede bild-Angabe hat eine bekannte Art und gültige Felder", () => {
-    const ARTEN = ["strahl", "folge", "mauer", "form", "buchstaben", "kaestchen", "wuerfelturm", "netz", "uhr", "kugeln", "rad", "balken", "striche", "schilder", "stromkreis", "kompassrose", "sonne", "dkarte", "wuerfel", "spielwuerfel"];
+    const ARTEN = ["strahl", "folge", "mauer", "form", "buchstaben", "kaestchen", "wuerfelturm", "netz", "uhr", "kugeln", "rad", "balken", "striche", "schilder", "stromkreis", "kompassrose", "sonne", "dkarte", "wuerfel", "spielwuerfel", "laengen"];
     const alle = [MATHE_DATEN, SACH_DATEN].flatMap((daten) =>
       Object.values(daten).flatMap((pool) => [...pool.easy, ...pool.hard]));
     const mitBild = alle.flatMap((a) => [a.bild, a.merkbild].filter(Boolean).map((b) => ({ ...b, f: a.f })));
@@ -200,6 +200,10 @@ describe("aufgabenRunde", () => {
       if (b.art === "sonne") expect(["osten", "sueden", "westen"], a.f).toContain(b.wo);
       if (b.art === "wuerfel" && b.zeigt) expect(["flaechen", "kanten", "ecken", "alles"], a.f).toContain(b.zeigt);
       if (b.art === "spielwuerfel") expect(b.reihe === true || (b.augen >= 1 && b.augen <= 6), a.f).toBe(true);
+      if (b.art === "laengen") {
+        expect(b.dinge.length, a.f).toBeGreaterThanOrEqual(1);
+        for (const d of b.dinge) expect(["tuer", "finger", "stift", "lineal", "platz"], a.f).toContain(d);
+      }
     }
   });
 
