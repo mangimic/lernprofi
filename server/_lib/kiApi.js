@@ -8,7 +8,7 @@
      Deckel erreicht, antwortet der Server 402 – die App kann das
      nicht umgehen. Obergrenze: env.KI_DECKEL_MAX_CENT (Standard 1000).
    - Kurzformat erzwungen: Die KI liefert JSON (Blasen + Mach-Aufgabe);
-     der Server stutzt auf höchstens 2 Blasen à 12 Wörter zurecht und
+     der Server stutzt auf höchstens 3 Blasen à 12 Wörter zurecht und
      der Wort-Wächter filtert Diagnose- und Druck-Wörter.
    - Datensparsamkeit: Es kommt nur die konkrete Aufgabe an – nie der
      Name, nie das Lernprofil.
@@ -17,7 +17,7 @@
      GET  /api/ki/status             → { verfuegbar, deckelCent, verbrauchtCent, monat, posten }
      POST /api/ki/deckel  { deckelCent }
      POST /api/ki/erklaeren { fach, bereich, frage, optionen, loesung, tipp, kontext? }
-          → { blasen: [≤2], mach, kostenCent, verbrauchtCent, deckelCent }
+          → { blasen: [≤3], mach, kostenCent, verbrauchtCent, deckelCent }
      POST /api/ki/schrift  { bild, satz, typ?, modell? }     → { sterne, uebe, mach, … }
      POST /api/ki/aufsatz  { bild, textart, typ?, modell? }  → { sterne, tipp, mach, … }
      POST /api/ki/bericht  { daten, modell? }                → { gut, beobachtung, tipps, … }
@@ -50,7 +50,7 @@ export const PREISE_USD_MTOK = {
   "claude-sonnet-5-5": { ein: 2.00, aus: 10.00 },
   "claude-opus-5-5": { ein: 4.00, aus: 20.00 },
 };
-export const MAX_BLASEN = 2;
+export const MAX_BLASEN = 3;
 export const MAX_WOERTER = 12;
 
 // Diagnose-/Druck-Wörter: immer verboten als Teilwort; Alltagswörter wie
@@ -109,17 +109,29 @@ export function antwortZurechtstutzen(rohText) {
   return { blasen, mach, ersetzt: false };
 }
 
+/* 🧠 Aufbau der Leo-Erklärung (belegte Methodik, Details: docs/LEO-PAEDAGOGIK.md):
+   1 Gedanke je Blase (Montessori: Isolierung der Schwierigkeit) · konkretes Bild vor
+   Fachwort (konkret→abstrakt/CRA) · Erst-dann-Schritt (Chunking, kleine Schritte) ·
+   Selbst-Check-Frage statt Lösung (Montessori: Fehlerkontrolle – das Kind prüft selbst) ·
+   Mach-Aufgabe mit Körper/Stimme (multisensorisch, Bewegung). */
 const LEO_SYSTEM = `Du bist Coach Leo 🦁 in einer Lern-App für ein Kind in Klasse 4 (Grundschule, Deutschland).
 Das Kind hat eine Aufgabe zweimal nicht geschafft. Erkläre sie NEU und ANDERS als der mitgelieferte Tipp.
+SO BAUST DU DEINE ERKLÄRUNG – genau 3 Blasen, das Kind tippt sie einzeln auf:
+1. ANKER: EIN konkretes Bild aus der Kinderwelt (Fußball, Angeln, Tennis, Schlagzeug, Pausenhof, Familie),
+   das GENAU die eine Schwierigkeit zeigt. Erst das Bild – noch kein Fachwort.
+2. SCHRITT: die Denkregel als „Erst …, dann …“-Satz. Nur EIN neuer Gedanke, höchstens EIN Fachwort,
+   und er knüpft an das Bild aus Blase 1 an.
+3. SELBST-CHECK: eine kurze Frage, mit der das Kind SELBST prüfen kann, ob seine Antwort passt
+   („Woran merkst du …?“). Keine Lösung!
 REGELN (alle verbindlich):
-- Antworte NUR mit JSON: {"blasen":["…","…"],"mach":"…"} – nichts davor, nichts danach.
-- Höchstens 2 Blasen, jede höchstens 12 Wörter. Einfache Wörter, du-Form.
-- Nutze ein Bild aus der Kinderwelt: Fußball, Angeln, Tennis, Pausenhof oder Familie. Gern 1-2 Emojis.
-- "mach" ist eine kleine Mach-Aufgabe mit Körper oder Stimme (laut sagen, mit dem Finger zeigen, in die Luft schreiben) – höchstens 14 Wörter.
+- Antworte NUR mit JSON: {"blasen":["…","…","…"],"mach":"…"} – nichts davor, nichts danach.
+- GENAU 3 Blasen, jede höchstens 12 Wörter. Kurze Hauptsätze, du-Form, einfache Wörter, gern 1-2 Emojis.
+- Sag, was das Kind TUN soll – nicht, was es lassen soll (vermeide „nicht …“-Sätze).
+- "mach" ist eine Mach-Aufgabe mit Körper oder Stimme (laut sagen, mit dem Finger zeigen, in die Luft schreiben) – höchstens 14 Wörter.
 - Verrate NIEMALS die Lösung und nenne sie nicht wörtlich.
-- Immer freundlich und bestärkend. Niemals Diagnose-Wörter, niemals Druck, keine Noten.
+- Freundlich und zutrauend, ohne Lob-Flut. Niemals Diagnose-Wörter, niemals Druck, keine Noten.
 BEISPIEL (für eine Dativ-Aufgabe):
-{"blasen":["⚽ Beim Training gibst du den Ball – aber WEM?","Die Frage „wem?“ ist dein Spürhund für diesen Fall."],"mach":"Frag LAUT: Wem gibt er den Ball? Zeig auf die Antwort!"}`;
+{"blasen":["⚽ Beim Training gibst du den Ball ab – aber WEM?","Erst „wem?“ fragen, dann die Antwort suchen – der 3. Fall.","Prüf dich: Passt deine Antwort auf die Frage „wem?“?"],"mach":"Frag LAUT: Wem gebe ich den Ball? Zeig auf die Antwort!"}`;
 
 const LEO_SCHRIFT = `Du bist Coach Leo 🦁. Ein Kind (Klasse 4, Deutschland) hat einen Satz MIT DER HAND
 geschrieben und fotografiert. Bewerte NUR die HANDSCHRIFT – niemals Inhalt oder Rechtschreibung.

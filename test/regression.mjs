@@ -36,6 +36,20 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.48: Leo-Pädagogik & Lese-Darstellung ----------
+console.log("== v0.48: Leo-Pädagogik ==");
+test("v0.48: 3-Blasen-Aufbau (Anker/Schritt/Selbst-Check), Lese-Sätze einzeln, Methodik-Doku", (() => {
+  const k = quelle("server/_lib/kiApi.js");
+  const u = quelle("src/features/Ueben.jsx");
+  const d = quelle("docs/LEO-PAEDAGOGIK.md");
+  return k.includes("MAX_BLASEN = 3")
+    && k.includes("ANKER") && k.includes("SELBST-CHECK") && k.includes("Erst …, dann …")
+    && k.includes("Verrate NIEMALS die Lösung")
+    && u.includes('data-test="lese-satz"')
+    && d.includes("Isolierung der Schwierigkeit") && d.includes("Fehlerkontrolle")
+    && releaseNoteVorhanden("rn-061");
+})());
+
 // ---------- v0.47: Kompass-Countdown ----------
 console.log("== v0.47: Kompass-Countdown ==");
 test("v0.47: kompassPlan-Logik, eigener Bereich mit Route, Start-Karte, Auto-Termine", (() => {
@@ -637,7 +651,8 @@ test("v0.21: Schlüssel nur im Worker, Deckel hart im Server (402), Kosten echt 
 })());
 test("v0.21: Kurzformat erzwungen (max 2 Blasen à 12 Wörter) + Wort-Wächter + Lösung geheim", (() => {
   const k = quelle("server/_lib/kiApi.js");
-  return k.includes("MAX_BLASEN = 2") && k.includes("MAX_WOERTER = 12")
+  // v0.48: Leo bekam eine 3. Blase (Selbst-Check) – alte Grenze bleibt als Alternative gültig
+  return (k.includes("MAX_BLASEN = 2") || k.includes("MAX_BLASEN = 3")) && k.includes("MAX_WOERTER = 12")
     && k.includes("wortProblem") && k.includes("NICHT verraten")
     && k.includes("Mach-Aufgabe");
 })());

@@ -227,6 +227,7 @@ test("🧭 Kompass-Training: Lese-Detektiv mit Textabschnitt, Steigern und Verbf
   // 🔍 Lese-Detektiv: Klasse 4 startet auf Stufe 2 – erster Abschnitt ist der Honig-Text
   await deutschBereich(page, "lesen");
   await expect(page.getByTestId("frage-kontext")).toContainText("Honig");
+  expect(await page.getByTestId("lese-satz").count()).toBeGreaterThanOrEqual(4); // ein Satz je Zeile, große Schrift
   await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
   await expect(page.getByTestId("feedback")).toContainText("Richtig");
   await page.getByTestId("abbrechen").click();
@@ -804,7 +805,11 @@ test("KI-Erklärer: Eltern geben frei, Leo erklärt in getakteten Blasen mit Mac
   } }));
   await page.route("**/api/ki/deckel", (route) => route.fulfill({ json: { deckelCent: 300 } }));
   await page.route("**/api/ki/erklaeren", (route) => route.fulfill({ json: {
-    blasen: ["⚽ Fußball: Du gibst WEM? den Ball.", "Immer bei „wem?“ → der 3. Fall."],
+    blasen: [
+      "⚽ Fußball: Du gibst WEM? den Ball.",
+      "Erst „wem?“ fragen, dann die Antwort suchen.",
+      "Prüf dich: Passt deine Antwort auf „wem?“?",
+    ],
     mach: "Frag LAUT: Wem gibt er den Ball?",
     kostenCent: 0.03, verbrauchtCent: 87.03, deckelCent: 500,
   } }));
@@ -830,6 +835,9 @@ test("KI-Erklärer: Eltern geben frei, Leo erklärt in getakteten Blasen mit Mac
   await expect(page.getByTestId("ki-blase").first()).toContainText("WEM");
   await page.getByTestId("ki-weiter").click();
   await expect(page.getByTestId("ki-blase")).toHaveCount(2);
+  await page.getByTestId("ki-weiter").click(); // 3. Blase: der Selbst-Check
+  await expect(page.getByTestId("ki-blase")).toHaveCount(3);
+  await expect(page.getByTestId("ki-blase").nth(2)).toContainText("Prüf dich");
   await expect(page.getByTestId("ki-mach")).toContainText("LAUT");
 
   // Richtige Antwort: kein Erklär-Knopf

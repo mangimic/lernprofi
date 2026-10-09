@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-061",
+    "version": "0.48.0",
+    "datum": "2026-10-09",
+    "titel": "Leo erklärt klarer & Lesetexte leichter",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🦁 Leos Erklärungen folgen jetzt einem festen pädagogischen Aufbau in 3 antippbaren Blasen: erst ein Bild aus deiner Welt (Anker), dann die Denkregel als Erst-dann-Schritt, zum Schluss eine Selbst-Check-Frage, mit der du deine Antwort SELBST prüfen kannst – dazu wie immer eine Mach-Aufgabe mit Körper oder Stimme. Eine Schwierigkeit zur Zeit, nie die Lösung verraten."
+      },
+      {
+        "type": "neu",
+        "text": "🔍 Die Lesetexte im Lese-Detektiv sind jetzt deutlich leichter zu lesen: große Schrift, viel Zeilenabstand und ein Satz pro Zeile – so findest du beim Zurückspringen sofort wieder die richtige Stelle."
+      }
+    ]
+  },
+  {
     "id": "rn-060",
     "version": "0.47.0",
     "datum": "2026-10-09",

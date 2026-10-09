@@ -314,7 +314,7 @@ export default function Ueben() {
   };
 
   // 🦁 „Erklär es mir anders“ (KI, Eltern-Freigabe nötig): holt höchstens
-  // 2 kurze Blasen + eine Mach-Aufgabe – selbst getaktet, Lösung bleibt geheim.
+  // 3 kurze Blasen (Anker → Schritt → Selbst-Check) + Mach-Aufgabe – selbst getaktet, Lösung bleibt geheim.
   const erklaerungHolen = async () => {
     const idx = runde.index;
     const a = runde.aufgaben[idx];
@@ -416,9 +416,19 @@ export default function Ueben() {
 
           {runde.typ === "mc" ? (
             <>
-              {a.kontext && (
+              {a.kontext && (runde.key === "lesen" ? (
+                // 🔍 Lese-Detektiv: große Schrift, viel Zeilenabstand, ein Satz je Zeile –
+                // so verliert das Auge beim Zurückspringen nicht die Spur.
+                <div data-test="frage-kontext" style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "14px 16px", display: "grid", gap: 10 }}>
+                  {(a.kontext.match(/[^.!?]+[.!?]*/g) || [a.kontext]).map((satz, i) => (
+                    <p key={i} data-test="lese-satz" style={{ margin: 0, fontSize: "var(--schrift-gross)", lineHeight: 1.65, maxWidth: "26em" }}>
+                      {satz.trim()}
+                    </p>
+                  ))}
+                </div>
+              ) : (
                 <p data-test="frage-kontext" style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px" }}>{a.kontext}</p>
-              )}
+              ))}
               <p data-test="frage-text" style={{ fontSize: "var(--schrift-gross)", fontWeight: 700, margin: "10px 0" }}>{a.f}</p>
               {a.bloecke && <ZahlenBloecke b={a.bloecke} />}
               {a.bild && <AufgabenBild b={a.bild} />}
