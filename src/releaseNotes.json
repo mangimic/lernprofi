@@ -1,5 +1,25 @@
 [
   {
+    "id": "rn-069",
+    "version": "0.54.0",
+    "datum": "2026-10-09",
+    "titel": "Echte Würfel-Bilder",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🎲 Würfel-Aufgaben zeigen jetzt einen echten Würfel: Bei den Geometrie-Fragen erscheint ein durchsichtiges Kantenmodell, und nach der Antwort hilft ein Merk-Bild beim Zählen – mit eingefärbten Flächen, Kanten oder Ecken samt Zählhilfe (z. B. „9 durchgezogene + 3 gestrichelte = 12 Kanten“)."
+      },
+      {
+        "type": "neu",
+        "text": "Bei den Zufalls-Aufgaben (sicher/möglich/unmöglich) liegen alle sechs Würfelseiten mit Augen nebeneinander – man sieht sofort: Mehr als die 6 gibt es nicht."
+      },
+      {
+        "type": "neu",
+        "text": "Auch auf den Karteikarten: Die Würfel-Karten zeigen die Augen-Reihe bzw. das Kantenmodell mit der Merkreihe 6-12-8."
+      }
+    ]
+  },
+  {
     "id": "rn-068",
     "version": "0.53.1",
     "datum": "2026-10-09",

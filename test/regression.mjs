@@ -36,6 +36,26 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.54: Würfel-Bilder ----------
+console.log("== v0.54: Würfel-Bilder ==");
+test("v0.54: Kantenmodell + Spielwürfel als Bild-Arten mit Zählhilfen", (() => {
+  const b = quelle("src/features/AufgabenBild.jsx");
+  return b.includes("wuerfel: Wuerfel") && b.includes("spielwuerfel: Spielwuerfel")
+    && b.includes("9 durchgezogene + 3 gestrichelte = 12 Kanten")
+    && b.includes("6 Flächen · 12 Kanten · 8 Ecken")
+    && b.includes("strokeDasharray={hinten ? \"5 4\" : undefined}");
+})());
+test("v0.54: Würfel-Aufgaben und Karteikarten nutzen die neuen Bilder", (() => {
+  const m = quelle("src/calc/aufgaben/mathe.js");
+  const k = quelle("src/calc/karteikarten.js");
+  return m.includes("merkbild:{art:\"wuerfel\",zeigt:\"flaechen\"}")
+    && m.includes("merkbild:{art:\"wuerfel\",zeigt:\"kanten\"}")
+    && (m.match(/art:"spielwuerfel",reihe:true/g) || []).length >= 3
+    && k.includes("bild:{art:\"spielwuerfel\",reihe:true}")
+    && k.includes("bild:{art:\"wuerfel\",zeigt:\"alles\"}")
+    && releaseNoteVorhanden("rn-069");
+})());
+
 // ---------- v0.53.1: Kartentexte mittig ----------
 test("v0.53.1: Karten-Inhalt zentriert im kk-mitte-Container", (() => {
   const f = quelle("src/features/Karteikarten.jsx");
