@@ -36,6 +36,31 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.39: Schuljahres-Kalender ----------
+console.log("== v0.39: Schuljahres-Kalender ==");
+test("v0.39: APP_VERSION mindestens 0.39.0", versionMindestens("0.39.0"));
+test("v0.39: BW-Ferien 2026/27 + Feiertage als Daten, Ferientage ganztags planbar", (() => {
+  const k = quelle("src/calc/kalender.js");
+  return k.includes('"2026-10-26"') && k.includes('"2027-07-29"') && k.includes("Christi Himmelfahrt")
+    && k.includes("schulfreiAm") && k.includes("monatsGitter")
+    && quelle("src/calc/wochenplan.js").includes("tagesStunden(tag, datum)")
+    && quelle("src/calc/wochenplan.js").includes("schulfreiAm")
+    && releaseNoteVorhanden("rn-051");
+})());
+test("v0.39: Mehr-Wochen-Dokument (plaene je Montag) mit Alt-Format-Anhebung", (() => {
+  return quelle("src/calc/wochenplan.js").includes("planSchreiben")
+    && quelle("src/calc/wochenplan.js").includes("plan.plaene[montag]")
+    && quelle("src/calc/migrateData.js").includes("wochePruefen")
+    && quelle("src/features/Start.jsx").includes("planSchreiben");
+})());
+test("v0.39: Wochen-Blättern (◀ Heute ▶) und Monatsblatt mit Ferien-Legende", (() => {
+  const f = quelle("src/features/Wochenplan.jsx");
+  return f.includes('data-test="woche-zurueck"') && f.includes('data-test="ansicht-monat"')
+    && f.includes('data-test="kalender-monat"') && f.includes("mt-${d}")
+    && f.includes('data-test="monat-titel"') && f.includes('data-test="kalender-ferien"')
+    && f.includes("MonatsBlatt");
+})());
+
 // ---------- v0.38: Morgen-Auffrischung am Testtag ----------
 console.log("== v0.38: Auffrischung ==");
 test("v0.38: Auffrisch-Zeile im Plan-Tageskopf und in der Heute-Ansicht", (() => {

@@ -1120,6 +1120,23 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await expect(page.getByTestId("slot-6-600")).toContainText("bis 12:30");
   await expect(page.getByTestId("slot-6-630")).toContainText("↳"); // Folgefenster belegt
   await expect(page.getByTestId("slot-6-720")).toContainText("↳");
+
+  // 🗓️ Monatsblatt: Schuljahres-Überblick mit BW-Ferien; Tipp auf einen Ferientag
+  // öffnet dessen Woche – dort ist der Tag ganztags planbar (ab 9 Uhr)
+  await page.getByTestId("ansicht-monat").click();
+  await expect(page.getByTestId("kalender-monat")).toBeVisible();
+  await expect(page.getByTestId("monat-titel")).toContainText("2026");
+  await expect(page.getByTestId("kalender-ferien")).toContainText("Sommerferien");
+  // zum Oktober 2026 navigieren (robust, egal in welchem Monat der Test läuft)
+  for (let i = 0; i < 14 && !(await page.getByTestId("mt-2026-10-27").count()); i++) {
+    await page.getByTestId("monat-zurueck").click();
+  }
+  await page.getByTestId("mt-2026-10-27").click(); // Dienstag in den Herbstferien
+  await expect(page.getByTestId("plan-kw")).toContainText("Herbstferien");
+  await expect(page.getByTestId("tag-1")).toContainText("Herbstferien");
+  await expect(page.getByTestId("slot-1-540")).toBeVisible(); // Ferien: ab 9 Uhr planbar
+  await page.getByTestId("woche-diese").click(); // zurück zur aktuellen Woche
+  await expect(page.getByTestId("slot-1-540")).toHaveCount(0); // Schultag: erst ab 13 Uhr
 });
 
 test("Auto-Sicherung: Änderungen wandern near-realtime im Hintergrund zum Server", async ({ page }) => {

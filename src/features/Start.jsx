@@ -4,8 +4,9 @@ import { missionsOpts } from "../calc/tagesform.js";
 import { zeitUebrigMin } from "../calc/elternWerkzeuge.js";
 import { EINSTUFUNG_FELDER } from "../calc/einstufung.js";
 import { STARK_SAETZE } from "../calc/aufgaben/stark.js";
+import { schulfreiAm } from "../calc/kalender.js";
 import {
-  wochenMontag, tagDatum, planFuerWoche, bausteinInfo, blockFertig, blockUnfertig,
+  wochenMontag, tagDatum, planFuerWoche, planSchreiben, bausteinInfo, blockFertig, blockUnfertig,
   tagGeschafft, heuteBelohnt, belohnungEintragen, WOCHENTAGE, slotLabel, schulFaecher, istAusgefallen, blockDauerVon, uhr, auffrischungen,
 } from "../calc/wochenplan.js";
 
@@ -46,7 +47,7 @@ export default function Start() {
       neuPlan = belohnungEintragen(neuPlan, heute);
       if (data.einstellungen.muenzenAktiv) lernstand.muenzen = muenzenNachRunde(lernstand.muenzen);
     }
-    lernstand.wochenplan = neuPlan;
+    lernstand.wochenplan = planSchreiben(data.lernstand.wochenplan, neuPlan);
     logChange({ ...data, lernstand }, "wochenplan", "neu", `Plan-Baustein „${block.typ}“ abgehakt`);
   };
   const planZiel = { mathe: "ueben", deutsch: "ueben", lernen: "ueben", schrift: "schrift", konz: "konz" };
@@ -101,6 +102,11 @@ export default function Start() {
       {(heutePlan.length > 0 || heuteFeste.length > 0) && (
         <div data-test="heute-plan" style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
           <b>🗓️ Heute auf deinem Plan</b>
+          {schulfreiAm(heute) && (
+            <p data-test="heute-ferien" style={{ margin: "6px 0 0", fontWeight: 700 }}>
+              {schulfreiAm(heute).emoji} {schulfreiAm(heute).name} – der ganze Tag gehört dir!
+            </p>
+          )}
           {auffrischungen(data.einstellungen.termine, montag, heuteIdx).map((a) => (
             <p key={`auf-${a.id}`} data-test="heute-auffrischung" style={{
               margin: "6px 0 0", fontWeight: 700, borderRadius: T.radiusKlein, padding: "6px 10px",
@@ -144,7 +150,7 @@ export default function Start() {
                   </span>
                   {b.fertig ? (
                     <button data-test="heute-unhaken" title="Doch nicht fertig? Haken entfernen"
-                      onClick={() => logChange({ ...data, lernstand: { ...data.lernstand, wochenplan: blockUnfertig(plan, b.id) } }, "wochenplan", "geaendert", "Haken entfernt")}
+                      onClick={() => logChange({ ...data, lernstand: { ...data.lernstand, wochenplan: planSchreiben(data.lernstand.wochenplan, blockUnfertig(plan, b.id)) } }, "wochenplan", "geaendert", "Haken entfernt")}
                       style={{ background: "transparent", color: T.ok, fontWeight: 800, height: "auto", minHeight: 0, padding: "0 6px" }}>
                       ✓ <span style={{ fontSize: "12px", fontWeight: 400, color: T.textLeise }}>↩︎</span>
                     </button>

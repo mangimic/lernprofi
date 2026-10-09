@@ -1,5 +1,25 @@
 [
   {
+    "id": "rn-051",
+    "version": "0.39.0",
+    "datum": "2026-10-09",
+    "titel": "Schuljahres-Kalender mit BW-Ferien",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🗓️ Der Plan ist jetzt ein echter Schuljahres-Kalender: Mit ◀ ▶ blättert ihr durch jede Woche des Schuljahres (jede Woche hat ihren eigenen Plan, „Heute“ springt zurück), und die neue Monatsansicht zeigt den Überblick wie ein Online-Kalender – mit Terminen, geplanten Bausteinen und Kalenderwochen. Ein Tipp auf einen Tag öffnet dessen Woche."
+      },
+      {
+        "type": "neu",
+        "text": "🍂🎄🐣 Die Schulferien Baden-Württemberg 2026/27 sind eingebaut (Herbst 26.–31.10., Weihnachten 23.12.–9.1., Ostern 25.3.–3.4., Pfingsten 18.–29.5., Sommer 29.7.–11.9.) plus die gesetzlichen Feiertage. Ferien- und Feiertage sind im Plan ganztags planbar (ab 9 Uhr), die Schulzeile zeigt stattdessen die Ferien an, und die Hausaufgaben-Regel ruht dort. Bewegliche Ferientage trägt die Familie selbst ein."
+      },
+      {
+        "type": "verbessert",
+        "text": "Termine sind jetzt fürs ganze Schuljahr möglich (bis 60), die Wochen-Kopie kopiert von jeder Woche in ihre Folgewoche, und die Heute-Ansicht begrüßt Ferientage („Herbstferien – der ganze Tag gehört dir!“)."
+      }
+    ]
+  },
+  {
     "id": "rn-050",
     "version": "0.38.0",
     "datum": "2026-10-08",

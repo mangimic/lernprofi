@@ -465,7 +465,7 @@ export default function Eltern() {
           <button data-test="termin-plus" disabled={!/^\d{4}-\d{2}-\d{2}$/.test(terminNeu.tag)}
             onClick={() => {
               const id = data.einstellungen.termine.reduce((m, t) => Math.max(m, t.id), 0) + 1;
-              einstellung({ termine: [...data.einstellungen.termine, { id, ...terminNeu, fach: terminNeu.fach.trim() }].slice(0, 20) }, "Termin eingetragen");
+              einstellung({ termine: [...data.einstellungen.termine, { id, ...terminNeu, fach: terminNeu.fach.trim() }].slice(0, 60) }, "Termin eingetragen");
               setTerminNeu({ tag: "", art: "ka", fach: "" });
             }}
             style={{ flex: "0 0 auto", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>

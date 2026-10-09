@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { DndContext, useDraggable, useDroppable, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { useApp } from "../appContext.jsx";
 import {
@@ -7,8 +7,9 @@ import {
   termineDerWoche, planPruefung, wochenBilanz, festerTermin, SCHULE, auffrischungen,
   kalenderWoche, routineAusPlan, routineAnwenden, schulZeilen, blockNotiz,
   istAusgefallen, ausfallSetzen, ausfallAufheben, blockVerschieben, wocheKopieren,
-  blockDauer, blockDauerVon, slotBelegt as slotBelegtCalc,
+  blockDauer, blockDauerVon, slotBelegt as slotBelegtCalc, planSchreiben,
 } from "../calc/wochenplan.js";
+import { schulfreiAm, ferienAm, monatsGitter, monatsName, monatSchritt, FERIEN_BW, SCHULJAHR } from "../calc/kalender.js";
 
 /* 🗓️ MEIN WOCHENPLAN (Etappe 9): Felix setzt sein Pensum selbst.
    Bedienung doppelt (ADHS-gerecht, iPad-tauglich):
@@ -113,11 +114,12 @@ function StundenSlot({ tagIdx, slot, block, blockStart, fest, wahlAktiv, aufTipp
   );
 }
 
-function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, ausfaelle, pruefung, wahlAktiv, schuleAuf, auffrischen, aufTipp, aufWeg, aufEdit, aufFest, aufTermin }) {
+function TagSpalte({ idx, datum, heuteIdx, termine, bloecke, feste, ausfaelle, pruefung, wahlAktiv, schuleAuf, auffrischen, aufTipp, aufWeg, aufEdit, aufFest, aufTermin }) {
   const { T } = useApp();
   const p = pruefung.tage[idx];
   const ampel = p.status === "voll" ? "🔴" : p.status === "einseitig" || p.status === "reihenfolge" ? "🟡" : p.lern + p.frei > 0 ? "🟢" : "";
-  const schule = SCHULE.tage.includes(idx);
+  const frei = schulfreiAm(datum);
+  const schule = SCHULE.tage.includes(idx) && !frei;
   return (
     <div data-test={`tag-${idx}`} style={{
       flex: "1 1 160px", minWidth: 160, background: T.karte,
@@ -125,10 +127,10 @@ function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, ausfaelle, pruefung
       outline: idx === heuteIdx ? `2px solid ${T.primaer}` : "none",
     }}>
       <div style={{ fontWeight: 800 }}>
-        {WOCHENTAGE[idx]}{idx === heuteIdx ? " · heute" : ""} <span data-test={`ampel-${idx}`}>{ampel}</span>
+        {WOCHENTAGE[idx]} {datum.slice(8)}.{datum.slice(5, 7)}.{idx === heuteIdx ? " · heute" : ""} <span data-test={`ampel-${idx}`}>{ampel}</span>
       </div>
       <div style={{ color: T.textLeise, fontSize: "11.5px", marginBottom: 4, minHeight: 15 }}>
-        {schule ? `🏫 Schule ${SCHULE.jeTag?.[idx] || SCHULE.text}` : "🌞 schulfrei"}
+        {frei ? `${frei.emoji} ${frei.name}` : schule ? `🏫 Schule ${SCHULE.jeTag?.[idx] || SCHULE.text}` : "🌞 schulfrei"}
       </div>
       {schule && schuleAuf && (
         <div data-test={`schule-${idx}`} style={{
@@ -161,7 +163,7 @@ function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, ausfaelle, pruefung
           </div>
         );
       })}
-      {tagesStunden(idx).map((s) => {
+      {tagesStunden(idx, datum).map((s) => {
         const f = festerTermin(feste, idx, s);
         const weg = f && (ausfaelle || []).some((a) => a.tag === idx && a.beginn === f.beginn);
         const block = bloecke.find((b) => s >= b.slot && s < b.slot + blockDauerVon(b));
@@ -184,6 +186,71 @@ function TagSpalte({ idx, heuteIdx, termine, bloecke, feste, ausfaelle, pruefung
   );
 }
 
+/* 🗓️ Monatsblatt: Schuljahres-Überblick wie im Online-Kalender –
+   Ferien farbig, Feiertage markiert, Termine als Emoji, Bausteine als
+   Zähler. Ein Tipp auf einen Tag springt in dessen Wochenplan. */
+function MonatsBlatt({ monat, setMonat, termine, wochenplanDoc, heute, oeffneWoche }) {
+  const { T } = useApp();
+  const gitter = monatsGitter(monat.jahr, monat.monat);
+  const imMonat = (d) => d.slice(5, 7) === String(monat.monat).padStart(2, "0");
+  return (
+    <div data-test="kalender-monat">
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+        <button data-test="monat-zurueck" aria-label="Monat zurück"
+          onClick={() => setMonat(monatSchritt(monat.jahr, monat.monat, -1))}
+          style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: T.weich, color: T.text }}>◀</button>
+        <b data-test="monat-titel" style={{ flex: 1, textAlign: "center", fontSize: "var(--schrift-gross)" }}>
+          {monatsName(monat.jahr, monat.monat)}
+        </b>
+        <button data-test="monat-vor" aria-label="Monat vor"
+          onClick={() => setMonat(monatSchritt(monat.jahr, monat.monat, 1))}
+          style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: T.weich, color: T.text }}>▶</button>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "34px repeat(7, 1fr)", gap: 4 }}>
+        <span />
+        {WOCHENTAGE.map((w) => (
+          <b key={w} style={{ textAlign: "center", fontSize: "var(--schrift-klein)", color: T.textLeise }}>{w}</b>
+        ))}
+        {gitter.map((woche) => (
+          <Fragment key={woche.montag}>
+            <button onClick={() => oeffneWoche(woche.montag)} title="Diese Woche öffnen"
+              style={{ height: "auto", minHeight: 0, padding: 0, background: "transparent", color: T.textLeise, fontSize: "11.5px", fontWeight: 700 }}>
+              KW{kalenderWoche(woche.montag)}
+            </button>
+            {woche.tage.map((d) => {
+              const frei = schulfreiAm(d);
+              const tagTermine = termine.filter((t) => t.tag === d);
+              const bloecke = planFuerWoche(wochenplanDoc, woche.montag).bloecke
+                .filter((b) => tagDatum(woche.montag, b.tag) === d).length;
+              return (
+                <button key={d} data-test={`mt-${d}`} onClick={() => oeffneWoche(woche.montag)}
+                  style={{
+                    height: "auto", minHeight: 52, padding: "3px 4px", borderRadius: 8, textAlign: "left",
+                    background: frei?.art === "ferien" ? "color-mix(in srgb, var(--akzent) 32%, var(--karte))"
+                      : frei ? "color-mix(in srgb, var(--akzent) 16%, var(--karte))" : T.weich,
+                    color: T.text, opacity: imMonat(d) ? 1 : 0.4,
+                    outline: d === heute ? `2px solid ${T.primaer}` : "none",
+                  }}>
+                  <span style={{ fontWeight: 800, fontSize: "var(--schrift-klein)" }}>{parseInt(d.slice(8), 10)}</span>
+                  <span style={{ display: "block", fontSize: "11px", lineHeight: 1.3 }}>
+                    {frei ? `${frei.emoji}` : ""}
+                    {tagTermine.map((t) => TERMIN_ARTEN[t.art]?.emoji || "📅").join("")}
+                    {bloecke > 0 ? ` •${bloecke}` : ""}
+                  </span>
+                </button>
+              );
+            })}
+          </Fragment>
+        ))}
+      </div>
+      <p data-test="kalender-ferien" style={{ margin: "10px 0 0", color: T.textLeise, fontSize: "12.5px" }}>
+        Schuljahr {SCHULJAHR.name} (BW): {FERIEN_BW.map((f) => `${f.emoji} ${f.name} ${f.von.slice(8)}.${f.von.slice(5, 7)}.–${f.bis.slice(8)}.${f.bis.slice(5, 7)}.`).join(" · ")}
+        {" "}· 🎉 Ferien- und Feiertage sind ganztags planbar; bewegliche Ferientage trägt die Familie selbst ein.
+      </p>
+    </div>
+  );
+}
+
 export default function Wochenplan() {
   const { data, logChange, T, heute, navTo } = useApp();
   const [wahl, setWahl] = useState(null); // angetippter Baustein (Tap-to-Place)
@@ -192,7 +259,10 @@ export default function Wochenplan() {
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 8 } }),
   );
 
-  const [woche, setWoche] = useState("diese"); // Sonntags wird die NÄCHSTE Woche besprochen
+  // 🗓️ Frei durchs Schuljahr blättern: jede Woche hat ihren eigenen Plan.
+  const [montagAnzeige, setMontagAnzeige] = useState(() => wochenMontag(heute));
+  const [ansicht, setAnsicht] = useState("woche"); // "woche" | "monat"
+  const [monat, setMonat] = useState(() => ({ jahr: parseInt(heute.slice(0, 4), 10), monat: parseInt(heute.slice(5, 7), 10) }));
   const [schuleAuf, setSchuleAuf] = useState(false); // 🏫 Vormittags-Stunden ein-/ausklappen
   const [editor, setEditor] = useState(null); // ✏️ Baustein-Notiz: { id, notiz }
   const [festDialog, setFestDialog] = useState(null); // ❌ Ausfall-Frage für einen festen Termin
@@ -201,26 +271,17 @@ export default function Wochenplan() {
   const [fenster, setFenster] = useState(null); // 🪟 Direkt-Wahl fürs Fenster: { tag, slot, suche }
   const [terminDialog, setTerminDialog] = useState(null); // eingetragenen Termin ansehen/entfernen
   const montagAktiv = wochenMontag(heute);
-  const aktiv = planFuerWoche(data.lernstand.wochenplan, montagAktiv);
-  const naechsteW = woche === "naechste";
-  const montag = naechsteW ? tagDatum(montagAktiv, 7) : montagAktiv;
-  // Angezeigter Plan: aktive Woche ODER die Vorplanung der Folgewoche.
-  const plan = naechsteW
-    ? (aktiv.naechste?.montag === montag
-      ? { montag, bloecke: aktiv.naechste.bloecke, belohnt: [], naechste: null, ausfaelle: aktiv.naechste.ausfaelle || [] }
-      : leererPlan(montag))
-    : aktiv;
-  const heuteIdx = naechsteW ? -1 : WOCHENTAGE.findIndex((_, i) => tagDatum(montag, i) === heute);
+  const montag = montagAnzeige;
+  const plan = planFuerWoche(data.lernstand.wochenplan, montag);
+  const heuteIdx = montag === montagAktiv ? WOCHENTAGE.findIndex((_, i) => tagDatum(montag, i) === heute) : -1;
   const feste = data.einstellungen.festeTermine;
   const routine = data.einstellungen.planRoutine;
   const termineJe = termineDerWoche(data.einstellungen.termine, montag);
   const pruefung = planPruefung(plan, data.einstellungen.termine, data.einstellungen.zeitLimit, feste);
 
-  // Speichern: die aktive Woche direkt, die Folgewoche als „naechste“-Vorplanung.
+  // Speichern: die angezeigte Woche landet im Mehr-Wochen-Dokument.
   const speichern = (neuerPlan, text) => {
-    const wochenplan = naechsteW
-      ? { ...aktiv, naechste: { montag, bloecke: neuerPlan.bloecke, ausfaelle: neuerPlan.ausfaelle || [] } }
-      : { ...neuerPlan, naechste: aktiv.naechste || null };
+    const wochenplan = planSchreiben(data.lernstand.wochenplan, neuerPlan);
     logChange({ ...data, lernstand: { ...data.lernstand, wochenplan } }, "wochenplan", "geaendert", text);
   };
   const hinzu = (tagIdx, slot, typ) => {
@@ -272,17 +333,29 @@ export default function Wochenplan() {
         <h2 style={{ margin: "0 0 4px" }}>
           🗓️ Mein Wochenplan{" "}
           <span data-test="plan-kw" style={{ fontSize: "var(--schrift-klein)", color: T.textLeise, fontWeight: 400 }}>
-            KW {kalenderWoche(montag)} · {tagDatum(montag, 0).slice(8)}.{tagDatum(montag, 0).slice(5, 7)}. – {tagDatum(montag, 6).slice(8)}.{tagDatum(montag, 6).slice(5, 7)}.
+            KW {kalenderWoche(montag)} · {tagDatum(montag, 0).slice(8)}.{tagDatum(montag, 0).slice(5, 7)}. – {tagDatum(montag, 6).slice(8)}.{tagDatum(montag, 6).slice(5, 7)}.{tagDatum(montag, 0).slice(0, 4) !== heute.slice(0, 4) ? `${tagDatum(montag, 0).slice(0, 4)}` : ""}
+            {ferienAm(tagDatum(montag, 2)) ? ` · ${ferienAm(tagDatum(montag, 2)).emoji} ${ferienAm(tagDatum(montag, 2)).name}` : ""}
           </span>
         </h2>
         <div style={{ display: "flex", gap: 6, margin: "6px 0 10px", flexWrap: "wrap" }}>
-          <button data-test="woche-diese" onClick={() => { setWoche("diese"); setWahl(null); }}
-            style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: !naechsteW ? T.primaer : T.weich, color: !naechsteW ? T.primaerText : T.text }}>
-            Diese Woche
+          <button data-test="woche-zurueck" aria-label="Woche zurück"
+            onClick={() => { setMontagAnzeige(tagDatum(montag, -7)); setWahl(null); }}
+            style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: T.weich, color: T.text }}>
+            ◀
           </button>
-          <button data-test="woche-naechste" onClick={() => { setWoche("naechste"); setWahl(null); }}
-            style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: naechsteW ? T.primaer : T.weich, color: naechsteW ? T.primaerText : T.text }}>
-            Nächste Woche planen
+          <button data-test="woche-diese" onClick={() => { setMontagAnzeige(montagAktiv); setWahl(null); }}
+            style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: montag === montagAktiv ? T.primaer : T.weich, color: montag === montagAktiv ? T.primaerText : T.text }}>
+            Heute
+          </button>
+          <button data-test="woche-naechste" aria-label="Woche vor"
+            onClick={() => { setMontagAnzeige(tagDatum(montag, 7)); setWahl(null); }}
+            style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: T.weich, color: T.text }}>
+            ▶
+          </button>
+          <button data-test="ansicht-monat"
+            onClick={() => { setAnsicht(ansicht === "monat" ? "woche" : "monat"); setWahl(null); }}
+            style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: ansicht === "monat" ? T.primaer : T.weich, color: ansicht === "monat" ? T.primaerText : T.text }}>
+            🗓️ {ansicht === "monat" ? "Zur Woche" : "Monat"}
           </button>
           <button data-test="routine-uebernehmen" onClick={routineHolen} disabled={!routine.length}
             style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: T.weich, color: T.text, opacity: routine.length ? 1 : 0.5 }}>
@@ -292,19 +365,14 @@ export default function Wochenplan() {
             style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: T.weich, color: T.text }}>
             💾 Als Routine speichern
           </button>
-          {!naechsteW && plan.bloecke.length > 0 && (
+          {plan.bloecke.length > 0 && (
             <button data-test="plan-kopieren"
               onClick={() => {
-                const zielMontag = tagDatum(montagAktiv, 7);
-                const ziel = aktiv.naechste?.montag === zielMontag
-                  ? { montag: zielMontag, bloecke: aktiv.naechste.bloecke, belohnt: [], naechste: null, ausfaelle: aktiv.naechste.ausfaelle || [] }
-                  : leererPlan(zielMontag);
+                const zielMontag = tagDatum(montag, 7);
+                const ziel = planFuerWoche(data.lernstand.wochenplan, zielMontag);
                 const neu = wocheKopieren(ziel, plan);
-                logChange(
-                  { ...data, lernstand: { ...data.lernstand, wochenplan: { ...aktiv, naechste: { montag: zielMontag, bloecke: neu.bloecke, ausfaelle: ziel.ausfaelle || [] } } } },
-                  "wochenplan", "geaendert", "Woche als Vorlage in die nächste Woche kopiert",
-                );
-                setWoche("naechste");
+                speichern(neu, "Woche als Vorlage in die Folgewoche kopiert");
+                setMontagAnzeige(zielMontag);
               }}
               style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: T.weich, color: T.text }}>
               ➡️ Für nächste Woche übernehmen
@@ -319,6 +387,11 @@ export default function Wochenplan() {
             🏫 Schulstunden
           </button>
         </div>
+        {ansicht === "monat" ? (
+          <MonatsBlatt monat={monat} setMonat={setMonat} termine={data.einstellungen.termine}
+            wochenplanDoc={data.lernstand.wochenplan} heute={heute}
+            oeffneWoche={(m) => { setMontagAnzeige(m); setAnsicht("woche"); }} />
+        ) : (<>
         <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           DU bestimmst dein Pensum – wochentags ab <b>13 Uhr</b> (🎲 erst Spielzeit nach dem Essen),
           am Wochenende <b>ab 9 Uhr</b>. Tippe ein freies Fenster direkt an (Auswahl mit Suche + eigener Text) – oder erst einen Baustein und dann ein Fenster (je 30 Minuten),
@@ -349,7 +422,7 @@ export default function Wochenplan() {
           )}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "stretch", background: T.grund, borderRadius: T.radiusKlein, padding: 8 }}>
             {WOCHENTAGE.map((_, i) => (
-              <TagSpalte key={i} idx={i} heuteIdx={heuteIdx} wahlAktiv={!!wahl} feste={feste} schuleAuf={schuleAuf}
+              <TagSpalte key={i} idx={i} datum={tagDatum(montag, i)} heuteIdx={heuteIdx} wahlAktiv={!!wahl} feste={feste} schuleAuf={schuleAuf}
                 aufEdit={(b) => setEditor({ id: b.id, notiz: b.notiz || "" })}
                 ausfaelle={plan.ausfaelle}
                 aufFest={(f) => setFestDialog(f)}
@@ -412,6 +485,7 @@ export default function Wochenplan() {
             </p>
           );
         })()}
+        </>)}
       </div>
       {fenster && (() => {
         const suche = fenster.suche.trim().toLowerCase();
@@ -497,7 +571,7 @@ export default function Wochenplan() {
             <button data-test="kt-ok" disabled={kindTermin.tag === null}
               onClick={() => {
                 const id = data.einstellungen.termine.reduce((m, t) => Math.max(m, t.id), 0) + 1;
-                const neu = [...data.einstellungen.termine, { id, tag: tagDatum(plan.montag, kindTermin.tag), art: kindTermin.art, fach: kindTermin.fach.trim() }].slice(0, 20);
+                const neu = [...data.einstellungen.termine, { id, tag: tagDatum(plan.montag, kindTermin.tag), art: kindTermin.art, fach: kindTermin.fach.trim() }].slice(0, 60);
                 logChange({ ...data, einstellungen: { ...data.einstellungen, termine: neu } }, "wochenplan", "neu", "Termin selbst eingetragen");
                 setKindTermin(null);
               }}

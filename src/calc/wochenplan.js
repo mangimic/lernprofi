@@ -1,3 +1,5 @@
+import { schulfreiAm } from "./kalender.js";
+
 /* ============================================================
    🗓️ MEIN WOCHENPLAN – reine Logik (Etappe 9).
    Felix setzt sich sein Pensum SELBST: Bausteine (Lernen, Schlagzeug,
@@ -75,9 +77,11 @@ export const SLOT_MIN = 30;
 export const WERKTAG_START = 13 * 60; // 13 Uhr: erst Spielzeit (nach dem Mittagessen)
 export const WOCHENEND_START = 9 * 60;
 export const TAG_ENDE = 19 * 60;
-/** Die planbaren Slot-Startminuten eines Wochentags (0=Mo … 6=So). */
-export function tagesStunden(tag) {
-  const start = tag === 5 || tag === 6 ? WOCHENEND_START : WERKTAG_START;
+/** Die planbaren Slot-Startminuten eines Wochentags (0=Mo … 6=So).
+    Mit Datum: Ferien- und Feiertage sind ganztags planbar (ab 9 Uhr). */
+export function tagesStunden(tag, datum) {
+  const frei = tag === 5 || tag === 6 || (datum && schulfreiAm(datum));
+  const start = frei ? WOCHENEND_START : WERKTAG_START;
   const liste = [];
   for (let m = start; m < TAG_ENDE; m += SLOT_MIN) liste.push(m);
   return liste;
@@ -163,8 +167,9 @@ export function slotBelegt(plan, tag, slot, ausserId = null) {
 /** Passt eine Dauer ab `von` in den Tag (Raster + keine anderen Bausteine)? */
 export function spanFrei(plan, tag, von, dauer, ausserId = null) {
   if (!Number.isInteger(dauer) || dauer < SLOT_MIN || dauer % SLOT_MIN !== 0) return false;
+  const stunden = tagesStunden(tag, plan.montag ? tagDatum(plan.montag, tag) : undefined);
   for (let m = von; m < von + dauer; m += SLOT_MIN) {
-    if (!tagesStunden(tag).includes(m)) return false;
+    if (!stunden.includes(m)) return false;
     if (slotBelegt(plan, tag, m, ausserId)) return false;
   }
   return true;
@@ -209,6 +214,18 @@ export function ausfallAufheben(plan, tag, beginn, dauer = 0) {
     volle Stunden 9-23 werden zu Minuten; Blöcke ohne gültigen Slot
     bekommen den ersten freien Slot ihres Tages. */
 export function planFuerWoche(plan, montag) {
+  // 🗓️ Neues Mehr-Wochen-Format (v0.39): { plaene: { [montag]: {bloecke, belohnt, ausfaelle} } }
+  if (plan && plan.plaene) {
+    const w = plan.plaene[montag];
+    if (!w) return leererPlan(montag);
+    return planFuerWoche({
+      montag,
+      bloecke: Array.isArray(w.bloecke) ? w.bloecke : [],
+      belohnt: Array.isArray(w.belohnt) ? w.belohnt : [],
+      ausfaelle: Array.isArray(w.ausfaelle) ? w.ausfaelle : [],
+      naechste: null,
+    }, montag);
+  }
   if (plan && plan.montag !== montag && plan.naechste?.montag === montag && Array.isArray(plan.naechste.bloecke)) {
     // Wochenwechsel: die sonntags besprochene Vorplanung wird zur aktiven Woche.
     return planFuerWoche({
@@ -217,20 +234,38 @@ export function planFuerWoche(plan, montag) {
     }, montag);
   }
   if (!(plan && plan.montag === montag && Array.isArray(plan.bloecke))) return leererPlan(montag);
-  const gueltig = (b) => Number.isInteger(b.slot) && tagesStunden(b.tag).includes(b.slot);
+  const gueltig = (b) => Number.isInteger(b.slot) && tagesStunden(b.tag, tagDatum(montag, b.tag)).includes(b.slot);
   if (plan.bloecke.every(gueltig)) return plan;
   const bloecke = [];
   for (const b of plan.bloecke) {
     let s = Number.isInteger(b.slot) ? b.slot : null;
     if (s !== null && s < 9) s = (s + 14) * 60;       // Index-Slot (v0.27)
     else if (s !== null && s < 24) s = s * 60;        // Stunden-Slot (Zwischenstand)
-    const slots = tagesStunden(b.tag);
+    const slots = tagesStunden(b.tag, tagDatum(montag, b.tag));
     if (s === null || !slots.includes(s) || bloecke.some((x) => x.tag === b.tag && x.slot === s)) {
       s = slots.find((m) => !bloecke.some((x) => x.tag === b.tag && x.slot === m)) ?? slots[0];
     }
     bloecke.push({ ...b, slot: s });
   }
   return { ...plan, bloecke };
+}
+
+/** Eine (bearbeitete) Woche ins Mehr-Wochen-Dokument zurücklegen.
+    Alt-Formate werden dabei vollständig ins neue Format gehoben;
+    höchstens 60 Wochen bleiben gespeichert (älteste fliegen raus). */
+export function planSchreiben(wp, plan) {
+  const plaene = {};
+  if (wp?.plaene) Object.assign(plaene, wp.plaene);
+  else if (wp?.montag) {
+    plaene[wp.montag] = { bloecke: wp.bloecke || [], belohnt: wp.belohnt || [], ausfaelle: wp.ausfaelle || [] };
+    if (wp.naechste?.montag) {
+      plaene[wp.naechste.montag] = { bloecke: wp.naechste.bloecke || [], belohnt: [], ausfaelle: wp.naechste.ausfaelle || [] };
+    }
+  }
+  plaene[plan.montag] = { bloecke: plan.bloecke, belohnt: plan.belohnt || [], ausfaelle: plan.ausfaelle || [] };
+  const schluessel = Object.keys(plaene).sort();
+  for (const k of schluessel.slice(0, Math.max(0, schluessel.length - 60))) delete plaene[k];
+  return { plaene };
 }
 
 export function naechsteId(bloecke) {
@@ -382,7 +417,9 @@ export function planPruefung(plan, termine, zeitLimit, feste = []) {
       + (feste || []).filter((f) => f.tag === i && f.aktiv && !istAusgefallen(plan, i, f.beginn)).length;
     // 🥁📚 Familienregel: VOR dem Üben kommen Hausaufgaben und Schlagzeug.
     const uebenSlots = am.filter((b) => ["mathe", "deutsch", "lernen", "schrift", "konz"].includes(b.typ)).map((b) => b.slot);
-    const ersterUeben = uebenSlots.length ? Math.min(...uebenSlots) : null;
+    // In Ferien und an Feiertagen gibt es keine Hausaufgaben – Regel ruht dort.
+    const schulfrei = plan.montag ? schulfreiAm(tagDatum(plan.montag, i)) : null;
+    const ersterUeben = !schulfrei && uebenSlots.length ? Math.min(...uebenSlots) : null;
     let reihenfolge = "";
     if (ersterUeben !== null) {
       const hausVorher = am.some((b) => b.typ === "hausaufgaben" && b.slot < ersterUeben);

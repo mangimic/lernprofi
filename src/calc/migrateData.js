@@ -101,22 +101,31 @@ export function migrateData(alt, heute) {
   if (!istObjekt(d.lernstand.schrift)) d.lernstand.schrift = null;
   const aufsatz = istObjekt(d.lernstand.aufsatz) ? d.lernstand.aufsatz : {};
   d.lernstand.aufsatz = { tag: typeof aufsatz.tag === "string" ? aufsatz.tag : "" };
+  // 🗓️ Wochenplan: Mehr-Wochen-Format { plaene: { [montag]: {…} } };
+  // Alt-Formate (eine Woche + „naechste") werden verlustfrei angehoben.
   const wp = d.lernstand.wochenplan;
-  d.lernstand.wochenplan = istObjekt(wp) && typeof wp.montag === "string" && Array.isArray(wp.bloecke)
-    ? {
-      montag: wp.montag,
-      bloecke: wp.bloecke.filter((b) => istObjekt(b)).slice(0, 60),
-      belohnt: (Array.isArray(wp.belohnt) ? wp.belohnt : []).filter((t) => typeof t === "string").slice(-7),
-      ausfaelle: (Array.isArray(wp.ausfaelle) ? wp.ausfaelle : []).filter((a) => istObjekt(a)).slice(0, 20),
-      naechste: istObjekt(wp.naechste) && typeof wp.naechste.montag === "string" && Array.isArray(wp.naechste.bloecke)
-        ? {
-          montag: wp.naechste.montag,
-          bloecke: wp.naechste.bloecke.filter((b) => istObjekt(b)).slice(0, 60),
-          ausfaelle: (Array.isArray(wp.naechste.ausfaelle) ? wp.naechste.ausfaelle : []).filter((a) => istObjekt(a)).slice(0, 20),
-        }
-        : null,
+  const wochePruefen = (w) => ({
+    bloecke: (Array.isArray(w.bloecke) ? w.bloecke : []).filter((b) => istObjekt(b)).slice(0, 60),
+    belohnt: (Array.isArray(w.belohnt) ? w.belohnt : []).filter((t) => typeof t === "string").slice(-7),
+    ausfaelle: (Array.isArray(w.ausfaelle) ? w.ausfaelle : []).filter((a) => istObjekt(a)).slice(0, 20),
+  });
+  if (istObjekt(wp) && istObjekt(wp.plaene)) {
+    const plaene = {};
+    for (const [k, w] of Object.entries(wp.plaene)) {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(k) && istObjekt(w)) plaene[k] = wochePruefen(w);
     }
-    : null;
+    const schluessel = Object.keys(plaene).sort();
+    for (const k of schluessel.slice(0, Math.max(0, schluessel.length - 60))) delete plaene[k];
+    d.lernstand.wochenplan = { plaene };
+  } else if (istObjekt(wp) && typeof wp.montag === "string" && Array.isArray(wp.bloecke)) {
+    const plaene = { [wp.montag]: wochePruefen(wp) };
+    if (istObjekt(wp.naechste) && typeof wp.naechste.montag === "string" && Array.isArray(wp.naechste.bloecke)) {
+      plaene[wp.naechste.montag] = wochePruefen(wp.naechste);
+    }
+    d.lernstand.wochenplan = { plaene };
+  } else {
+    d.lernstand.wochenplan = null;
+  }
   const mut = istObjekt(d.lernstand.mutSatz) ? d.lernstand.mutSatz : {};
   d.lernstand.mutSatz = {
     tag: typeof mut.tag === "string" ? mut.tag : "",
@@ -174,7 +183,7 @@ export function migrateData(alt, heute) {
   d.einstellungen.termine = (Array.isArray(d.einstellungen.termine) ? d.einstellungen.termine : [])
     .filter((t) => istObjekt(t) && /^\d{4}-\d{2}-\d{2}$/.test(t.tag) && ["ka", "kompass", "wdw"].includes(t.art))
     .map((t, i) => ({ id: Number.isInteger(t.id) ? t.id : i + 1, tag: t.tag, art: t.art, fach: typeof t.fach === "string" ? t.fach.slice(0, 40) : "" }))
-    .slice(0, 20);
+    .slice(0, 60); // ein ganzes Schuljahr voller Termine
   const ki = istObjekt(d.einstellungen.ki) ? d.einstellungen.ki : {};
   d.einstellungen.ki = {
     erklaeren: ki.erklaeren === true, schrift: ki.schrift === true, aufsatz: ki.aufsatz === true,
