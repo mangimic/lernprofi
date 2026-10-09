@@ -36,6 +36,18 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.41: Serien für Bausteine ----------
+console.log("== v0.41: Baustein-Serien ==");
+test("v0.41: blockSerie/blockSerieEntfernen mit Marker, HA-Ferien-Skip, Editor-Knöpfe", (() => {
+  const w = quelle("src/calc/wochenplan.js");
+  const f = quelle("src/features/Wochenplan.jsx");
+  return w.includes("blockSerie") && w.includes("blockSerieEntfernen")
+    && w.includes('typ === "hausaufgaben" && schulfreiAm(datum)')
+    && w.includes("#${block.id}")
+    && f.includes("block-serie-") && f.includes('data-test="block-serie-entfernen"')
+    && releaseNoteVorhanden("rn-054");
+})());
+
 // ---------- v0.40: Serientermine ----------
 console.log("== v0.40: Serientermine ==");
 test("v0.40: terminSerie überspringt Ferien, Serie gemeinsam löschbar, Migration erhält serie", (() => {

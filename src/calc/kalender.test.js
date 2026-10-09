@@ -3,7 +3,10 @@ import {
   FERIEN_BW, FEIERTAGE_BW, SCHULJAHR, ferienAm, feiertagAm, schulfreiAm,
   monatsGitter, monatsName, monatSchritt,
 } from "./kalender.js";
-import { tagesStunden, planFuerWoche, planSchreiben, blockHinzu, leererPlan, planPruefung, FESTE_TERMINE_STANDARD, terminSerie } from "./wochenplan.js";
+import {
+  tagesStunden, planFuerWoche, planSchreiben, blockHinzu, blockNotiz, leererPlan,
+  planPruefung, FESTE_TERMINE_STANDARD, terminSerie, blockSerie, blockSerieEntfernen,
+} from "./wochenplan.js";
 
 describe("kalender – Schuljahr 2026/27 (BW)", () => {
   it("Ferien und Feiertage: Ränder stimmen, Lücken sind Schule", () => {
@@ -54,6 +57,25 @@ describe("kalender – Schuljahr 2026/27 (BW)", () => {
     const jahr = terminSerie([], "2026-10-16", "wdw", "", "2027-09-12");
     expect(jahr.length).toBeLessThanOrEqual(60);
     expect(jahr.some((t) => t.tag >= "2027-07-29" && t.tag <= "2027-09-11")).toBe(false); // Sommerferien frei
+  });
+
+  it("Baustein-Serie: Folgewochen mit Notiz/Marker, belegte Wochen und HA-Ferien übersprungen", () => {
+    let plan = blockNotiz(blockHinzu(leererPlan("2026-10-05"), 5, "schlagzeug", 600), 1, "Wirbel");
+    let doc = planSchreiben(null, blockHinzu(planFuerWoche(planSchreiben(null, plan), "2026-10-19"), 5, "sport", 600)); // 19.10. belegt
+    doc = planSchreiben(doc, plan);
+    doc = blockSerie(doc, plan, 1, "2026-11-02");
+    expect(planFuerWoche(doc, "2026-10-12").bloecke[0]).toMatchObject({ typ: "schlagzeug", notiz: "Wirbel", serie: "2026-10-05#1" });
+    expect(planFuerWoche(doc, "2026-10-19").bloecke.map((b) => b.typ)).toEqual(["sport"]); // belegt → übersprungen
+    expect(planFuerWoche(doc, "2026-10-26").bloecke.length).toBe(1); // Ferien: Schlagzeug läuft weiter
+    // ab 19.10. entfernen: frühere Wochen bleiben
+    const ohne = blockSerieEntfernen(doc, "2026-10-19", "2026-10-05#1");
+    expect(planFuerWoche(ohne, "2026-10-26").bloecke.length).toBe(0);
+    expect(planFuerWoche(ohne, "2026-10-12").bloecke.length).toBe(1);
+    // Hausaufgaben-Serie lässt Ferientage aus
+    const ha = blockHinzu(leererPlan("2026-10-05"), 0, "hausaufgaben", 840);
+    const dha = blockSerie(planSchreiben(null, ha), ha, 1, "2026-11-02");
+    expect(planFuerWoche(dha, "2026-10-26").bloecke.length).toBe(0); // Mo 26.10. = Herbstferien
+    expect(planFuerWoche(dha, "2026-11-02").bloecke.length).toBe(1);
   });
 
   it("Mehr-Wochen-Dokument: jede Woche eigener Plan, Alt-Format wird gehoben", () => {

@@ -8,6 +8,7 @@ import {
   kalenderWoche, routineAusPlan, routineAnwenden, schulZeilen, blockNotiz,
   istAusgefallen, ausfallSetzen, ausfallAufheben, blockVerschieben, wocheKopieren,
   blockDauer, blockDauerVon, slotBelegt as slotBelegtCalc, planSchreiben, terminSerie,
+  blockSerie, blockSerieEntfernen,
 } from "../calc/wochenplan.js";
 import { schulfreiAm, ferienAm, monatsGitter, monatsName, monatSchritt, FERIEN_BW, SCHULJAHR } from "../calc/kalender.js";
 
@@ -739,6 +740,38 @@ export default function Wochenplan() {
                   </div>
                 );
               })()}
+              <div style={{ marginTop: 10 }}>
+                <p style={{ margin: "0 0 4px", fontSize: "var(--schrift-klein)", color: T.textLeise }}>
+                  🔁 Auch in den nächsten Wochen (gleiche Stelle)?
+                </p>
+                <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                  {[["4", "4 Wochen"], ["12", "12 Wochen"], ["schuljahr", "ganzes Schuljahr"]].map(([k, label]) => (
+                    <button key={k} data-test={`block-serie-${k}`}
+                      onClick={() => {
+                        // erst die (evtl. geänderte) Notiz sichern, dann die Serie legen
+                        const basis = blockNotiz(plan, block.id, editor.notiz);
+                        const bis = k === "schuljahr" ? SCHULJAHR.bis : tagDatum(plan.montag, (parseInt(k, 10) - 1) * 7);
+                        const doc = blockSerie(planSchreiben(data.lernstand.wochenplan, basis), basis, block.id, bis);
+                        logChange({ ...data, lernstand: { ...data.lernstand, wochenplan: doc } }, "wochenplan", "neu", `Baustein-Serie (${label}) angelegt`);
+                        zu();
+                      }}
+                      style={{ flex: "1 1 30%", height: "auto", minHeight: 0, padding: "7px 6px", fontWeight: 700, fontSize: "12.5px", background: T.weich, color: T.text }}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                {block.serie && (
+                  <button data-test="block-serie-entfernen"
+                    onClick={() => {
+                      const doc = blockSerieEntfernen(data.lernstand.wochenplan, plan.montag, block.serie);
+                      logChange({ ...data, lernstand: { ...data.lernstand, wochenplan: doc } }, "wochenplan", "geaendert", "Baustein-Serie ab dieser Woche entfernt");
+                      zu();
+                    }}
+                    style={{ width: "100%", marginTop: 6, background: T.weich, color: T.text, fontWeight: 700 }}>
+                    🔁🗑️ Serie ab dieser Woche entfernen
+                  </button>
+                )}
+              </div>
               <button data-test="block-verschieben"
                 onClick={() => { setVerschieben(block.id); zu(); }}
                 style={{ width: "100%", marginTop: 6, background: T.weich, color: T.text, fontWeight: 700 }}>

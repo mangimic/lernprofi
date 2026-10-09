@@ -1165,6 +1165,20 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await expect(page.getByTestId("monat-titel")).toHaveText(titelJetzt);
   await page.getByTestId("ansicht-monat").click(); // zurück zur Wochenansicht
   await expect(page.getByTestId("plan-palette")).toBeVisible();
+
+  // 🔁 Baustein-Serie: Schlagzeug So 14:00 in die nächsten 4 Wochen – und ab Folgewoche wieder raus
+  await page.getByTestId("slot-6-840").click();
+  await page.getByTestId("fenster-suche").fill("Schlagzeug");
+  await page.getByTestId("fenster-wahl-schlagzeug").click();
+  await page.getByTestId("slot-6-840").click(); // Editor öffnen
+  await page.getByTestId("block-serie-4").click();
+  await page.getByTestId("woche-naechste").click();
+  await expect(page.getByTestId("slot-6-840")).toContainText("Schlagzeug"); // Serie liegt in der Folgewoche
+  await page.getByTestId("slot-6-840").click();
+  await page.getByTestId("block-serie-entfernen").click();
+  await expect(page.getByTestId("slot-6-840")).not.toContainText("Schlagzeug");
+  await page.getByTestId("woche-diese").click();
+  await expect(page.getByTestId("slot-6-840")).toContainText("Schlagzeug"); // Ursprungs-Woche bleibt
 });
 
 test("Auto-Sicherung: Änderungen wandern near-realtime im Hintergrund zum Server", async ({ page }) => {

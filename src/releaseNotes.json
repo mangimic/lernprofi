@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-054",
+    "version": "0.41.0",
+    "datum": "2026-10-09",
+    "titel": "Serien für alle Einträge",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🔁 Serien gibt es jetzt auch für Bausteine: Baustein antippen → „Auch in den nächsten Wochen“ (4 / 12 / ganzes Schuljahr) – der Baustein liegt dann jede Woche an derselben Stelle, mit Notiz und Dauer. Wochen, in denen das Fenster schon belegt ist, werden übersprungen; Hausaufgaben-Serien lassen Ferien- und Feiertage automatisch aus."
+      },
+      {
+        "type": "neu",
+        "text": "Serien-Bausteine lassen sich „ab dieser Woche“ wieder entfernen – frühere Wochen bleiben unangetastet. Einzelne Vorkommen löscht man wie gewohnt mit ✖."
+      }
+    ]
+  },
+  {
     "id": "rn-053",
     "version": "0.40.0",
     "datum": "2026-10-09",

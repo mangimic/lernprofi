@@ -400,6 +400,45 @@ export function terminSerie(bestehend, ersterTag, art, fach, bisDatum) {
   return [...bestehend, ...neue].slice(0, 60);
 }
 
+/* 🔁 Baustein-Serie: einen geplanten Baustein in die Folgewochen legen
+   (gleicher Tag, gleiches Fenster, mit Notiz und Dauer). Wochen, in
+   denen das Fenster belegt ist, werden übersprungen; Hausaufgaben
+   lassen schulfreie Tage (Ferien/Feiertage) aus. Alle Teile tragen
+   denselben serie-Marker – so ist die Serie ab einer Woche löschbar. */
+export function blockSerie(wp, plan, blockId, bisDatum) {
+  const block = plan.bloecke.find((b) => b.id === blockId);
+  if (!block) return wp;
+  const marker = `${plan.montag}#${block.id}`;
+  let doc = planSchreiben(wp, {
+    ...plan,
+    bloecke: plan.bloecke.map((b) => (b.id === blockId ? { ...b, serie: marker } : b)),
+  });
+  for (let montag = tagDatum(plan.montag, 7); montag <= bisDatum; montag = tagDatum(montag, 7)) {
+    const datum = tagDatum(montag, block.tag);
+    if (block.typ === "hausaufgaben" && schulfreiAm(datum)) continue;
+    const ziel = planFuerWoche(doc, montag);
+    let neu = blockHinzu(ziel, block.tag, block.typ, block.slot, blockDauerVon(block));
+    if (neu === ziel) continue; // Fenster dort belegt → Woche überspringen
+    const id = neu.bloecke[neu.bloecke.length - 1].id;
+    if (block.notiz) neu = blockNotiz(neu, id, block.notiz);
+    neu = { ...neu, bloecke: neu.bloecke.map((b) => (b.id === id ? { ...b, serie: marker } : b)) };
+    doc = planSchreiben(doc, neu);
+  }
+  return doc;
+}
+
+/** Baustein-Serie ab einer Woche (einschließlich) wieder entfernen. */
+export function blockSerieEntfernen(wp, abMontag, marker) {
+  let doc = wp?.plaene ? wp : planSchreiben(wp, leererPlan(abMontag));
+  for (const montag of Object.keys(doc.plaene)) {
+    if (montag < abMontag) continue;
+    const woche = planFuerWoche(doc, montag);
+    if (!woche.bloecke.some((b) => b.serie === marker)) continue;
+    doc = planSchreiben(doc, { ...woche, bloecke: woche.bloecke.filter((b) => b.serie !== marker) });
+  }
+  return doc;
+}
+
 /* 🌅 Auffrischung: Steht an einem Tag ein Test (Klassenarbeit, Kompass,
    Wörter der Woche), gehört morgens VOR der Schule ein kurzer
    Auffrisch-Moment in den Plan – 5 Minuten anschauen reicht, geübt
