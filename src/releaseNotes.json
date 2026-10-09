@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-064",
+    "version": "0.50.1",
+    "datum": "2026-10-09",
+    "titel": "Aufgabe oder Lösung – auf einen Blick",
+    "entries": [
+      {
+        "type": "fix",
+        "text": "Jede Karteikarte trägt jetzt oben rechts ein Abzeichen: ❓ Aufgabe (Vorderseite) bzw. ✅ Lösung (Rückseite) – so ist auch nach dem Ausschneiden sofort klar, welche Seite welche ist."
+      }
+    ]
+  },
+  {
     "id": "rn-063",
     "version": "0.50.0",
     "datum": "2026-10-09",

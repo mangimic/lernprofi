@@ -36,6 +36,13 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.50.1: Aufgabe/Lösung-Abzeichen ----------
+test("v0.50.1: jede Karte trägt das Aufgabe- bzw. Lösungs-Abzeichen", (() => {
+  const f = quelle("src/features/Karteikarten.jsx");
+  return f.includes("❓ Aufgabe") && f.includes("✅ Lösung") && f.includes("kk-art")
+    && releaseNoteVorhanden("rn-064");
+})());
+
 // ---------- v0.50: Karteikarten zum Ausdrucken ----------
 console.log("== v0.50: Karteikarten ==");
 test("v0.50: 32 Karten, Duplex-Spiegelung, Druck-Route, Eltern-Einstieg", (() => {

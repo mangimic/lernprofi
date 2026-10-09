@@ -15,7 +15,12 @@ function Zelle({ karte, seite }) {
   const deko = FACH_DEKO[karte.fach];
   return (
     <div className={`kk-zelle ${karte.fach}`} data-test={seite === "vs" ? "karte-vs" : "karte-rs"}>
-      <div className="kk-kopf">{deko.emoji} {deko.name}{karte.typ === "schreiben" ? " · ✍️ Schreib-Karte" : ""}</div>
+      <div className="kk-kopf">
+        {deko.emoji} {deko.name}{karte.typ === "schreiben" ? " · ✍️ Schreib-Karte" : ""}
+        <span className={seite === "vs" ? "kk-art aufgabe" : "kk-art loesung"}>
+          {seite === "vs" ? "❓ Aufgabe" : "✅ Lösung"}
+        </span>
+      </div>
       {seite === "vs" ? (
         <>
           <div className="kk-frage">{karte.vs}</div>
@@ -48,7 +53,11 @@ export default function Karteikarten() {
           flex-direction: column; text-align: center; position: relative; }
         .kk-zelle.deutsch { border-top: 10px solid #2f6fde; }
         .kk-zelle.mathe { border-top: 10px solid #2e9e52; }
-        .kk-kopf { font-size: 12px; font-weight: 700; color: #5d7390; margin-bottom: auto; }
+        .kk-kopf { font-size: 12px; font-weight: 700; color: #5d7390; margin-bottom: auto;
+          display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+        .kk-art { border-radius: 20px; padding: 2px 10px; font-weight: 800; }
+        .kk-art.aufgabe { background: #dbe7f6; color: #1c3a63; }
+        .kk-art.loesung { background: #d9f0e1; color: #1f7a3f; }
         .kk-frage { font-size: 21px; font-weight: 800; margin: auto 0 4px; }
         .kk-hinweis { font-size: 13px; color: #5d7390; margin-bottom: auto; }
         .kk-antwort { font-size: 21px; font-weight: 800; color: #1f7a3f; margin: auto 0 8px; }
