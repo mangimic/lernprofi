@@ -338,22 +338,37 @@ export default function Wochenplan() {
           </span>
         </h2>
         <div style={{ display: "flex", gap: 6, margin: "6px 0 10px", flexWrap: "wrap" }}>
-          <button data-test="woche-zurueck" aria-label="Woche zurück"
-            onClick={() => { setMontagAnzeige(tagDatum(montag, -7)); setWahl(null); }}
-            style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: T.weich, color: T.text }}>
-            ◀
-          </button>
-          <button data-test="woche-diese" onClick={() => { setMontagAnzeige(montagAktiv); setWahl(null); }}
+          {ansicht === "woche" && (
+            <button data-test="woche-zurueck" aria-label="Woche zurück"
+              onClick={() => { setMontagAnzeige(tagDatum(montag, -7)); setWahl(null); }}
+              style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: T.weich, color: T.text }}>
+              ◀
+            </button>
+          )}
+          <button data-test="woche-diese"
+            onClick={() => {
+              // „Heute" springt IMMER zurück: Woche UND Monatsblatt auf jetzt.
+              setMontagAnzeige(montagAktiv);
+              setMonat({ jahr: parseInt(heute.slice(0, 4), 10), monat: parseInt(heute.slice(5, 7), 10) });
+              setWahl(null);
+            }}
             style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: montag === montagAktiv ? T.primaer : T.weich, color: montag === montagAktiv ? T.primaerText : T.text }}>
             Heute
           </button>
-          <button data-test="woche-naechste" aria-label="Woche vor"
-            onClick={() => { setMontagAnzeige(tagDatum(montag, 7)); setWahl(null); }}
-            style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: T.weich, color: T.text }}>
-            ▶
-          </button>
+          {ansicht === "woche" && (
+            <button data-test="woche-naechste" aria-label="Woche vor"
+              onClick={() => { setMontagAnzeige(tagDatum(montag, 7)); setWahl(null); }}
+              style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: T.weich, color: T.text }}>
+              ▶
+            </button>
+          )}
           <button data-test="ansicht-monat"
-            onClick={() => { setAnsicht(ansicht === "monat" ? "woche" : "monat"); setWahl(null); }}
+            onClick={() => {
+              // Beim Öffnen zeigt das Monatsblatt den Monat der angezeigten Woche.
+              if (ansicht !== "monat") setMonat({ jahr: parseInt(montag.slice(0, 4), 10), monat: parseInt(montag.slice(5, 7), 10) });
+              setAnsicht(ansicht === "monat" ? "woche" : "monat");
+              setWahl(null);
+            }}
             style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: ansicht === "monat" ? T.primaer : T.weich, color: ansicht === "monat" ? T.primaerText : T.text }}>
             🗓️ {ansicht === "monat" ? "Zur Woche" : "Monat"}
           </button>

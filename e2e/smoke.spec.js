@@ -1137,6 +1137,18 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await expect(page.getByTestId("slot-1-540")).toBeVisible(); // Ferien: ab 9 Uhr planbar
   await page.getByTestId("woche-diese").click(); // zurück zur aktuellen Woche
   await expect(page.getByTestId("slot-1-540")).toHaveCount(0); // Schultag: erst ab 13 Uhr
+
+  // „Heute" wirkt auch im Monatsblatt: nach Blättern springt Titel + Woche zurück
+  await page.getByTestId("ansicht-monat").click();
+  await expect(page.getByTestId("woche-naechste")).toHaveCount(0); // Wochen-Pfeile nur in der Wochenansicht
+  const titelJetzt = await page.getByTestId("monat-titel").innerText();
+  await page.getByTestId("monat-vor").click();
+  await page.getByTestId("monat-vor").click();
+  await expect(page.getByTestId("monat-titel")).not.toHaveText(titelJetzt);
+  await page.getByTestId("woche-diese").click();
+  await expect(page.getByTestId("monat-titel")).toHaveText(titelJetzt);
+  await page.getByTestId("ansicht-monat").click(); // zurück zur Wochenansicht
+  await expect(page.getByTestId("plan-palette")).toBeVisible();
 });
 
 test("Auto-Sicherung: Änderungen wandern near-realtime im Hintergrund zum Server", async ({ page }) => {

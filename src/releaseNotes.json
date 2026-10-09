@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-052",
+    "version": "0.39.1",
+    "datum": "2026-10-09",
+    "titel": "„Heute“ springt jetzt überall zurück",
+    "entries": [
+      {
+        "type": "fix",
+        "text": "🗓️ Der „Heute“-Knopf wirkte in der Monatsansicht nicht (der Monat blieb stehen). Jetzt springt er überall wirklich zu heute – Wochenplan UND Monatsblatt. Das Monatsblatt öffnet außerdem immer im Monat der gerade angezeigten Woche, und die Wochen-Pfeile ◀ ▶ erscheinen nur noch in der Wochenansicht."
+      }
+    ]
+  },
+  {
     "id": "rn-051",
     "version": "0.39.0",
     "datum": "2026-10-09",

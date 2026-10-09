@@ -36,6 +36,16 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.39.1: Heute-Sprung überall ----------
+console.log("== v0.39.1: Heute-Fix ==");
+test("v0.39.1: Heute setzt Woche UND Monat; Wochen-Pfeile nur in der Wochenansicht", (() => {
+  const f = quelle("src/features/Wochenplan.jsx");
+  return f.includes("setMonat({ jahr: parseInt(heute.slice(0, 4)")
+    && f.includes('{ansicht === "woche" && (')
+    && f.includes("Monat der angezeigten Woche")
+    && releaseNoteVorhanden("rn-052");
+})());
+
 // ---------- v0.39: Schuljahres-Kalender ----------
 console.log("== v0.39: Schuljahres-Kalender ==");
 test("v0.39: APP_VERSION mindestens 0.39.0", versionMindestens("0.39.0"));
