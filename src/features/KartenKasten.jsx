@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useApp } from "../appContext.jsx";
 import { aktiveKarten } from "../calc/karteikarten.js";
-import { faelligeKarten, karteWerten, kastenZaehler, RUNDEN_GROESSE } from "../calc/karteikasten.js";
+import { faelligeKarten, karteWerten, kastenZaehler, eingabeFelder, eingabePruefen, RUNDEN_GROESSE } from "../calc/karteikasten.js";
 import AufgabenBild from "./AufgabenBild.jsx";
 
 /* 🗃️ DER DIGITALE KARTEIKASTEN (Leitner, 3 Fächer):
@@ -26,10 +26,15 @@ export default function KartenKasten() {
   const zaehler = kastenZaehler(alleKarten, stand);
   // Runde: { stapel: [{karte, wiederholung}], index, offen, gewusst, gesamt }
   const [runde, setRunde] = useState(null);
+  // ⌨️ Tipp-Eingabe je Karte (wird bei jedem Kartenwechsel geleert)
+  const [eingaben, setEingaben] = useState({});
+  const [geprueft, setGeprueft] = useState(null);
 
   const starten = () => {
     const karten = faelligeKarten(alleKarten, stand, heute);
     if (!karten.length) return;
+    setEingaben({});
+    setGeprueft(null);
     setRunde({ stapel: karten.map((karte) => ({ karte, wiederholung: false })), index: 0, offen: false, gewusst: 0, gesamt: karten.length });
   };
 
@@ -38,6 +43,8 @@ export default function KartenKasten() {
   };
 
   const weiter = (r) => {
+    setEingaben({});
+    setGeprueft(null);
     if (r.index + 1 < r.stapel.length) { setRunde({ ...r, index: r.index + 1, offen: false }); return; }
     // 🎉 Runden-Ende: Münze + Protokoll in EINEM Eintrag
     const kasten = data.lernstand.karteikasten;
@@ -94,6 +101,7 @@ export default function KartenKasten() {
   if (runde) {
     const { karte, wiederholung } = runde.stapel[runde.index];
     const deko = FACH_DEKO[karte.fach];
+    const felder = eingabeFelder(karte);
     return (
       <div data-test="kasten-seite">
         <div data-test="kasten-karte" style={{ ...karteCss, border: `2px solid ${runde.offen ? T.ok : T.primaer}` }}>
@@ -102,7 +110,54 @@ export default function KartenKasten() {
           </span>
           <p data-test="kasten-frage" style={{ fontSize: "var(--schrift-gross)", fontWeight: 800, margin: "6px 0 4px", whiteSpace: "pre-line" }}>{karte.vs}</p>
           {karte.hinweis && <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>{karte.hinweis}</p>}
-          {!runde.offen ? (
+          {felder ? (
+            /* ⌨️ Zahlen-Karte: Ergebnis eintippen, objektiv prüfen – Felix
+               sieht sofort je Feld ✓ oder die Korrektur, die Wertung folgt
+               automatisch aus dem Ergebnis. */
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (!runde.offen) { setGeprueft(eingabePruefen(felder, eingaben)); setRunde({ ...runde, offen: true }); }
+            }}>
+              {!runde.offen && (
+                <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>⌨️ Tipp das Ergebnis ein – dann prüfen!</p>
+              )}
+              {felder.map((f, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, margin: "6px 0" }}>
+                  {f.label && <span style={{ fontWeight: 800, fontSize: "var(--schrift-gross)" }}>{f.label}</span>}
+                  <input data-test={`kasten-eingabe-${i}`} inputMode="numeric" autoComplete="off" placeholder="?"
+                    value={eingaben[i] || ""} disabled={runde.offen}
+                    onChange={(e) => setEingaben({ ...eingaben, [i]: e.target.value })}
+                    style={{ width: 92, textAlign: "center", fontSize: "var(--schrift-gross)", fontWeight: 800,
+                      borderRadius: 10, padding: "8px 6px", background: T.grund, color: T.text,
+                      border: `2px solid ${!runde.offen ? T.primaer : geprueft.richtig[i] ? T.ok : "var(--warn)"}` }} />
+                  {runde.offen && (geprueft.richtig[i]
+                    ? <span style={{ color: T.ok, fontWeight: 800, fontSize: "var(--schrift-gross)" }}>✓</span>
+                    : <span data-test={`kasten-korrektur-${i}`} style={{ color: T.ok, fontWeight: 800, fontSize: "var(--schrift-gross)" }}>→ {f.loesung}</span>)}
+                </div>
+              ))}
+              {!runde.offen ? (
+                <button type="submit" data-test="kasten-pruefen"
+                  style={{ width: "100%", marginTop: 6, background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+                  ✔️ Prüfen
+                </button>
+              ) : (
+                <>
+                  {karte.bild && <AufgabenBild b={karte.bild} />}
+                  <p style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "8px 12px", fontSize: "var(--schrift-klein)", margin: "8px 0 10px" }}>
+                    🧠 <b>Merkhilfe:</b> {karte.merk}
+                  </p>
+                  <p data-test="kasten-eingabe-ergebnis" style={{ fontWeight: 800, margin: "0 0 10px", color: geprueft.alle ? T.ok : "var(--warn)" }}>
+                    {geprueft.alle ? "🎉 Alles richtig!" : "Schau dir die Korrektur in Ruhe an!"}
+                  </p>
+                  <button type="button" data-test="kasten-eingabe-weiter"
+                    onClick={() => (wiederholung ? weiter(runde) : werten(geprueft.alle))}
+                    style={{ width: "100%", background: geprueft.alle ? T.ok : T.primaer, color: "#fff", fontWeight: 700 }}>
+                    {wiederholung ? "✔️ Weiter" : geprueft.alle ? "🙂 Weiter – ein Fach vor!" : "🤔 Weiter – die Karte kommt nochmal"}
+                  </button>
+                </>
+              )}
+            </form>
+          ) : !runde.offen ? (
             <>
               <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
                 {karte.typ === "schreiben" ? "✍️ Schreib das Wort auf ein Blatt – dann umdrehen!" : "Sag die Antwort LAUT – dann umdrehen!"}

@@ -1386,6 +1386,44 @@ test("🗃️ Digitaler Karteikasten: Runde ziehen, werten, Nochmal kommt wieder
   await expect(page.getByTestId("kasten-fach-1")).toContainText("60");
 });
 
+test("🗃️ Karteikasten: Zahlen-Karten fragen das Ergebnis per Eingabe ab, Wertung folgt automatisch", async ({ page }) => {
+  await tresorAnlegen(page);
+  // Nur Mathe aktiv lassen, damit die Runde deterministisch mit m1 beginnt
+  await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("karten-oeffnen").click();
+  await page.getByTestId("karten-verwalten").click();
+  for (let i = 1; i <= 32; i++) await page.getByTestId(`karten-an-d${i}`).click();
+  await expect(page.getByTestId("karten-zaehler")).toContainText("32 aktiv · 32 ausgeblendet");
+  await page.getByTestId("nav-start").click();
+  await page.getByTestId("zum-kasten").click();
+  await expect(page.getByTestId("kasten-fach-1")).toContainText("32");
+  await page.getByTestId("kasten-start").click();
+  // m1 „7 · 8 = ?": falsche Eingabe → Korrektur je Feld, Karte kommt nochmal
+  await page.getByTestId("kasten-eingabe-0").fill("55");
+  await page.getByTestId("kasten-pruefen").click();
+  await expect(page.getByTestId("kasten-korrektur-0")).toContainText("56");
+  await page.getByTestId("kasten-eingabe-weiter").click();
+  // m2 und m3 haben Text-Lösungen → klassisch umdrehen und selbst einschätzen
+  await page.getByTestId("karte-umdrehen").click();
+  await page.getByTestId("karte-gewusst").click();
+  await page.getByTestId("karte-umdrehen").click();
+  await page.getByTestId("karte-gewusst").click();
+  // m4 „5 · 18 = ?": richtige Eingabe → automatisch ein Fach vor
+  await page.getByTestId("kasten-eingabe-0").fill("90");
+  await page.getByTestId("kasten-pruefen").click();
+  await expect(page.getByTestId("kasten-eingabe-ergebnis")).toContainText("Alles richtig");
+  await page.getByTestId("kasten-eingabe-weiter").click();
+  // m5 klassisch
+  await page.getByTestId("karte-umdrehen").click();
+  await page.getByTestId("karte-gewusst").click();
+  // ⏮️ Wiederholung von m1: diesmal richtig tippen – ohne zweite Wertung
+  await expect(page.getByTestId("kasten-karte")).toContainText("nochmal");
+  await page.getByTestId("kasten-eingabe-0").fill("56");
+  await page.getByTestId("kasten-pruefen").click();
+  await page.getByTestId("kasten-eingabe-weiter").click();
+  await expect(page.getByTestId("kasten-ergebnis")).toContainText("4 von 5");
+});
+
 test("🗃️ Karteikarten: 4 je A4-Blatt, Rückseiten gespiegelt, Fach-Filter und Druck-Knopf", async ({ page }) => {
   await tresorAnlegen(page);
   await page.getByTestId("nav-eltern").click();

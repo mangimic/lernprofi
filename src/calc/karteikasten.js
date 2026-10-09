@@ -38,3 +38,26 @@ export function kastenZaehler(karten, stand) {
   for (const k of karten) z[kartenFach(stand, k.id)]++;
   return z;
 }
+
+/** 🧮 Tipp-Eingabe: Wo die Lösung eine reine Zahl ist, tippt das Kind
+    das Ergebnis selbst ein (objektive Wertung statt Selbst-Einschätzung).
+    Eine Lösungszeile „8 · 6 = 48" wird zum Feld „8 · 6 =" mit Lösung 48;
+    eine reine Zahl („56") zu einem einzelnen Feld. Alles andere (Wörter,
+    Einheiten, Erklär-Gleichungen in einer Zeile) bleibt beim Umdrehen. */
+export function eingabeFelder(karte) {
+  const zeilen = karte.rs.split("\n");
+  if (zeilen.length >= 2 && zeilen.every((z) => /^.+ = \d+$/.test(z))) {
+    return zeilen.map((z) => {
+      const teile = z.split(" = ");
+      return { label: `${teile[0]} =`, loesung: teile[1] };
+    });
+  }
+  if (/^\d+$/.test(karte.rs)) return [{ label: null, loesung: karte.rs }];
+  return null;
+}
+
+/** Vergleich je Feld als Zahl (Leerzeichen und führende Nullen egal). */
+export function eingabePruefen(felder, antworten) {
+  const richtig = felder.map((f, i) => parseInt(String(antworten[i] || "").trim(), 10) === parseInt(f.loesung, 10));
+  return { richtig, alle: richtig.every(Boolean) };
+}

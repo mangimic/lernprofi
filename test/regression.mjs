@@ -36,6 +36,18 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.59: Ergebnis-Eingabe im Kasten ----------
+console.log("== v0.59: Ergebnis-Eingabe ==");
+test("v0.59: Zahlen-Karten fragen das Ergebnis per Eingabefeld ab (objektive Wertung)", (() => {
+  const c = quelle("src/calc/karteikasten.js");
+  const kk = quelle("src/features/KartenKasten.jsx");
+  return c.includes("export function eingabeFelder") && c.includes("export function eingabePruefen")
+    && kk.includes("kasten-pruefen") && kk.includes("kasten-eingabe-weiter") && kk.includes("kasten-korrektur-")
+    && kk.includes("werten(geprueft.alle)")
+    && quelle("e2e/smoke.spec.js").includes("kasten-eingabe-0")
+    && releaseNoteVorhanden("rn-075");
+})());
+
 // ---------- v0.58: Merkhilfen validiert ----------
 console.log("== v0.58: Merkhilfen der Mal-Karten ==");
 test("v0.58: jede Einmaleins-Merkhilfe trägt ALLE drei Aufgaben ihrer Karte", (() => {

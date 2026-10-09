@@ -48,7 +48,7 @@ describe("karteikarten", () => {
   });
 });
 
-import { faelligeKarten, karteWerten, kastenZaehler, istFaellig, RUNDEN_GROESSE } from "./karteikasten.js";
+import { faelligeKarten, karteWerten, kastenZaehler, istFaellig, eingabeFelder, eingabePruefen, RUNDEN_GROESSE } from "./karteikasten.js";
 
 describe("karteikasten (digital, Leitner)", () => {
   const HEUTE = "2026-10-09";
@@ -81,6 +81,22 @@ describe("karteikasten (digital, Leitner)", () => {
     stand = karteWerten(stand, "a", false, HEUTE);
     expect(stand.a.fach).toBe(1);
     expect(kastenZaehler(MINI, stand)).toEqual({ 1: 6, 2: 0, 3: 0 });
+  });
+
+  it("Tipp-Eingabe: Zahl-Lösungen und Gleichungs-Zeilen werden zu Feldern, Rest bleibt beim Umdrehen", () => {
+    expect(eingabeFelder({ rs: "56" })).toEqual([{ label: null, loesung: "56" }]);
+    expect(eingabeFelder({ rs: "8 · 6 = 48\n8 · 7 = 56\n8 · 8 = 64" })).toEqual([
+      { label: "8 · 6 =", loesung: "48" },
+      { label: "8 · 7 =", loesung: "56" },
+      { label: "8 · 8 =", loesung: "64" },
+    ]);
+    expect(eingabeFelder({ rs: "unmöglich" })).toBe(null);
+    expect(eingabeFelder({ rs: "478 − 100 + 3 = 381" })).toBe(null); // Erklär-Gleichung, keine Abfrage
+    expect(eingabeFelder({ rs: "1 m = 100 cm\n1 km = 1000 m\n1 € = 100 ct" })).toBe(null); // Einheiten tippt niemand
+    // Genau die 16 Zahlen-Karten des Standard-Satzes sind tippbar (8 einzeln + 8 Einmaleins)
+    expect(KARTEIKARTEN.filter((k) => eingabeFelder(k)).length).toBe(16);
+    expect(eingabePruefen(eingabeFelder({ rs: "56" }), { 0: " 56 " })).toEqual({ richtig: [true], alle: true });
+    expect(eingabePruefen([{ loesung: "48" }, { loesung: "56" }], { 0: "48" })).toEqual({ richtig: [true, false], alle: false });
   });
 });
 
