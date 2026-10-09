@@ -1405,6 +1405,23 @@ test("🗃️ Karteikarten: 4 je A4-Blatt, Rückseiten gespiegelt, Fach-Filter u
   await expect(page.getByTestId("karten-blatt")).toHaveCount(12);
   await expect(page.getByTestId("karte-vs").first()).toContainText("7 · 8");
   await expect(page.getByTestId("karten-drucken")).toContainText("12 Seiten · 24 Karten");
+
+  // ⚙️ Eltern-Kontrolle: Karte ausblenden, eigene Karte anlegen – wirkt auf Druck UND Kasten
+  await page.getByTestId("karten-wahl-alle").click();
+  await page.getByTestId("karten-verwalten").click();
+  await expect(page.getByTestId("karten-zaehler")).toContainText("56 aktiv");
+  await page.getByTestId("karten-an-d1").click();
+  await expect(page.getByTestId("karten-zaehler")).toContainText("55 aktiv · 1 ausgeblendet");
+  await expect(page.getByTestId("karte-vs")).toHaveCount(55);
+  await page.getByTestId("eigene-vs").fill("Lernwort der Woche: Fahrradhelm");
+  await page.getByTestId("eigene-rs").fill("Fahrradhelm");
+  await page.getByTestId("eigene-plus").click();
+  await expect(page.getByTestId("karten-zaehler")).toContainText("56 aktiv");
+  await expect(page.getByTestId("karte-vs").last()).toContainText("Fahrradhelm");
+  // … und der digitale Kasten zieht denselben Satz
+  await page.getByTestId("nav-start").click();
+  await page.getByTestId("zum-kasten").click();
+  await expect(page.getByTestId("kasten-fach-1")).toContainText("56");
 });
 
 test("Auto-Sicherung: Änderungen wandern near-realtime im Hintergrund zum Server", async ({ page }) => {

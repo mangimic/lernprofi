@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-066",
+    "version": "0.52.0",
+    "datum": "2026-10-09",
+    "titel": "Karteikarten unter Eltern-Kontrolle",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "⚙️ Neue Karten-Verwaltung (auf der Karten-Seite, nur im Eltern-Modus): jede einzelne Karte lässt sich ausblenden und wieder aktivieren, eigene Karten (z. B. die aktuellen Lernwörter der Woche) sind in Sekunden angelegt – beides wirkt sofort auf die Druckblätter UND den digitalen Kasten."
+      },
+      {
+        "type": "neu",
+        "text": "📊 Volle Übersicht: Die Verwaltung zeigt zu jeder Karte, in welchem Leitner-Fach sie gerade liegt; die Eltern-Karte fasst zusammen (aktiv/ausgeblendet/eigene, Kasten-Stand, gespielte Runden)."
+      }
+    ]
+  },
+  {
     "id": "rn-065",
     "version": "0.51.0",
     "datum": "2026-10-09",

@@ -36,6 +36,20 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.52: Karten-Verwaltung ----------
+console.log("== v0.52: Karten-Verwaltung ==");
+test("v0.52: aktiveKarten (aus/eigene), Verwaltung mit Fach-Stand, Kasten nutzt den Satz", (() => {
+  const k = quelle("src/calc/karteikarten.js");
+  const f = quelle("src/features/Karteikarten.jsx");
+  const kk = quelle("src/features/KartenKasten.jsx");
+  return k.includes("export function aktiveKarten") && k.includes("kartenAus") && k.includes("eigeneKarten")
+    && f.includes('data-test="karten-verwalten"') && f.includes("eigene-plus") && f.includes("kartenFach(stand, k.id)")
+    && kk.includes("aktiveKarten(data.einstellungen)")
+    && quelle("src/calc/migrateData.js").includes("eigeneKarten")
+    && quelle("src/features/Eltern.jsx").includes('data-test="karten-stand"')
+    && releaseNoteVorhanden("rn-066");
+})());
+
 // ---------- v0.51: Fundus & digitaler Karteikasten ----------
 console.log("== v0.51: Fundus & Kasten ==");
 test("v0.51: Fundus-Aufgaben, Leitner-Logik, Kasten-Route, Karten-IDs, Migration", (() => {

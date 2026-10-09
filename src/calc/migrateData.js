@@ -56,6 +56,8 @@ export function leeresDokument(heute) {
       festeTermine: FESTE_TERMINE_STANDARD, // 🔒 wöchentlich feste Termine (Minuten-Slots)
       planRoutine: [],     // 🔁 Wochen-Routine: { tag, slot, typ } (ohne Freunde-Zeit)
       bausteine: { aus: [], namen: {}, eigene: [] }, // 🧩 Plan-Kategorien: ausgeblendet/umbenannt/eigene
+      kartenAus: [],       // 🗃️ ausgeblendete Karteikarten (IDs)
+      eigeneKarten: [],    // 🗃️ eigene Eltern-Karten: { id, fach, vs, rs, merk }
     },
     protokoll: [],     // Änderungsprotokoll: { zeit, bereich, art, text }
   };
@@ -214,6 +216,17 @@ export function migrateData(alt, heute) {
     bericht: ki.bericht === true, saetze: ki.saetze === true,
     modell: ["haiku", "sonnet", "opus"].includes(ki.modell) ? ki.modell : "sonnet",
   };
+
+  d.einstellungen.kartenAus = (Array.isArray(d.einstellungen.kartenAus) ? d.einstellungen.kartenAus : [])
+    .filter((x) => typeof x === "string").map((x) => x.slice(0, 8)).slice(0, 200);
+  d.einstellungen.eigeneKarten = (Array.isArray(d.einstellungen.eigeneKarten) ? d.einstellungen.eigeneKarten : [])
+    .filter((k) => istObjekt(k) && ["deutsch", "mathe"].includes(k.fach)
+      && typeof k.vs === "string" && k.vs.trim() && typeof k.rs === "string" && k.rs.trim())
+    .map((k, i) => ({
+      id: Number.isInteger(k.id) ? k.id : i + 1, fach: k.fach,
+      vs: k.vs.trim().slice(0, 80), rs: k.rs.trim().slice(0, 45),
+      merk: typeof k.merk === "string" ? k.merk.trim().slice(0, 120) : "",
+    })).slice(0, 40);
 
   const kk = istObjekt(d.lernstand.karteikasten) ? d.lernstand.karteikasten : {};
   const kkStand = {};

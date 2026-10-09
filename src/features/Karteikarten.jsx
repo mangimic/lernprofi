@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useApp } from "../appContext.jsx";
-import { KARTEIKARTEN, kartenSeiten } from "../calc/karteikarten.js";
+import { KARTEIKARTEN, kartenSeiten, aktiveKarten } from "../calc/karteikarten.js";
+import { kartenFach } from "../calc/karteikasten.js";
 
 /* 🗃️ KARTEIKARTEN DRUCKEN: 4 Karten je A4-Blatt (je ~A6). Je Vorderseiten-
    Blatt folgt das passende Rückseiten-Blatt mit je Zeile getauschten
@@ -37,11 +38,30 @@ function Zelle({ karte, seite }) {
   );
 }
 
+const FACH_CHIP = { 1: "📥 Fach 1", 2: "📦 Fach 2", 3: "🏆 Fach 3" };
+
 export default function Karteikarten() {
-  const { T, navTo } = useApp();
+  const { data, logChange, T, navTo, tresor } = useApp();
   const [wahl, setWahl] = useState("alle");
-  const karten = KARTEIKARTEN.filter((k) => wahl === "alle" || k.fach === wahl);
+  const [verwalten, setVerwalten] = useState(false);
+  const [neu, setNeu] = useState({ fach: "deutsch", vs: "", rs: "", merk: "" });
+  const aktiv = aktiveKarten(data.einstellungen);
+  const karten = aktiv.filter((k) => wahl === "alle" || k.fach === wahl);
   const seiten = kartenSeiten(karten);
+  const aus = data.einstellungen.kartenAus;
+  const eigene = data.einstellungen.eigeneKarten;
+  const stand = data.lernstand.karteikasten.stand;
+  // Alle verwaltbaren Karten: Standard + eigene (fuer die Liste, auch ausgeblendete)
+  const verwaltbar = [
+    ...KARTEIKARTEN,
+    ...eigene.map((k) => ({ id: `e${k.id}`, fach: k.fach, vs: k.vs, rs: k.rs, eigen: true, roheId: k.id })),
+  ];
+  const einstellung = (aenderung, text) =>
+    logChange({ ...data, einstellungen: { ...data.einstellungen, ...aenderung } }, "einstellungen", "geaendert", text);
+  const anAus = (id) => {
+    const neuAus = aus.includes(id) ? aus.filter((x) => x !== id) : [...aus, id].slice(0, 200);
+    einstellung({ kartenAus: neuAus }, aus.includes(id) ? "Karteikarte wieder aktiviert" : "Karteikarte ausgeblendet");
+  };
 
   return (
     <div data-test="karten-seite">
@@ -96,7 +116,66 @@ export default function Karteikarten() {
             style={{ flex: "2 1 200px", fontWeight: 700, background: T.ok, color: "#fff" }}>
             🖨️ Jetzt drucken ({seiten.length * 2} Seiten · {karten.length} Karten)
           </button>
+          {tresor.elternModus && (
+            <button data-test="karten-verwalten" onClick={() => setVerwalten(!verwalten)}
+              style={{ flex: "1 1 160px", fontWeight: 700, background: verwalten ? T.primaer : T.weich, color: verwalten ? T.primaerText : T.text }}>
+              ⚙️ Karten verwalten
+            </button>
+          )}
         </div>
+        {verwalten && tresor.elternModus && (
+          <div data-test="karten-verwaltung" style={{ marginTop: 12 }}>
+            <p data-test="karten-zaehler" style={{ margin: "0 0 8px", fontWeight: 700, fontSize: "var(--schrift-klein)" }}>
+              {aktiv.length} aktiv · {aus.length} ausgeblendet · {eigene.length} eigene ·
+              Kasten-Stand je Karte: 📥 täglich / 📦 alle 3 Tage / 🏆 sitzt
+            </p>
+            <div style={{ maxHeight: 340, overflowY: "auto", border: `1px solid ${T.rand}`, borderRadius: T.radiusKlein, padding: "6px 10px" }}>
+              {verwaltbar.map((k) => (
+                <div key={k.id} data-test="karten-zeile" style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0", opacity: aus.includes(k.id) ? 0.45 : 1 }}>
+                  <input type="checkbox" data-test={`karten-an-${k.id}`} checked={!aus.includes(k.id)}
+                    onChange={() => anAus(k.id)} style={{ width: 18, height: 18 }} />
+                  <span>{FACH_DEKO[k.fach].emoji}</span>
+                  <span style={{ flex: 1, fontSize: "var(--schrift-klein)" }}>
+                    <b>{k.vs}</b> <span style={{ color: T.textLeise }}>→ {k.rs}</span>
+                  </span>
+                  <span style={{ fontSize: "12px", color: T.textLeise, whiteSpace: "nowrap" }}>{FACH_CHIP[kartenFach(stand, k.id)]}</span>
+                  {k.eigen && (
+                    <button data-test={`eigene-karte-weg-${k.roheId}`} aria-label="Eigene Karte entfernen"
+                      onClick={() => einstellung({ eigeneKarten: eigene.filter((x) => x.id !== k.roheId) }, "Eigene Karteikarte entfernt")}
+                      style={{ background: "transparent", color: T.textLeise, padding: 0, minHeight: 0, height: "auto" }}>
+                      ✖
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
+              <select data-test="eigene-fach" value={neu.fach} onChange={(e) => setNeu({ ...neu, fach: e.target.value })}
+                style={{ minHeight: "var(--touch)", borderRadius: T.radiusKlein, border: `1px solid ${T.rand}`, background: T.grund, color: T.text, padding: "0 8px" }}>
+                <option value="deutsch">📖 Deutsch</option>
+                <option value="mathe">🔢 Mathe</option>
+              </select>
+              <input data-test="eigene-vs" type="text" maxLength={80} placeholder="Vorderseite (Frage / Lernwort)"
+                value={neu.vs} onChange={(e) => setNeu({ ...neu, vs: e.target.value })}
+                style={{ flex: "2 1 200px", minHeight: "var(--touch)", borderRadius: T.radiusKlein, border: `1px solid ${T.rand}`, background: T.grund, color: T.text, padding: "0 10px" }} />
+              <input data-test="eigene-rs" type="text" maxLength={45} placeholder="Rückseite (Lösung)"
+                value={neu.rs} onChange={(e) => setNeu({ ...neu, rs: e.target.value })}
+                style={{ flex: "1 1 140px", minHeight: "var(--touch)", borderRadius: T.radiusKlein, border: `1px solid ${T.rand}`, background: T.grund, color: T.text, padding: "0 10px" }} />
+              <input data-test="eigene-merk" type="text" maxLength={120} placeholder="Merkhilfe (optional)"
+                value={neu.merk} onChange={(e) => setNeu({ ...neu, merk: e.target.value })}
+                style={{ flex: "2 1 200px", minHeight: "var(--touch)", borderRadius: T.radiusKlein, border: `1px solid ${T.rand}`, background: T.grund, color: T.text, padding: "0 10px" }} />
+              <button data-test="eigene-plus" disabled={!neu.vs.trim() || !neu.rs.trim()}
+                onClick={() => {
+                  const id = eigene.reduce((m, k) => Math.max(m, k.id), 0) + 1;
+                  einstellung({ eigeneKarten: [...eigene, { id, fach: neu.fach, vs: neu.vs.trim(), rs: neu.rs.trim(), merk: neu.merk.trim() }].slice(0, 40) }, "Eigene Karteikarte angelegt");
+                  setNeu({ fach: neu.fach, vs: "", rs: "", merk: "" });
+                }}
+                style={{ flex: "0 0 auto", background: T.primaer, color: T.primaerText, fontWeight: 700, opacity: neu.vs.trim() && neu.rs.trim() ? 1 : 0.5 }}>
+                + Karte
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {seiten.map((s, i) => (

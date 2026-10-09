@@ -8,6 +8,8 @@ import { syncStatus, hochladen, herunterladen, konfliktUeberschreiben } from "..
 import { kiStatus, kiDeckelSetzen, kiErklaeren, kiBericht, kiSaetze } from "../ki.js";
 import { berichtDaten } from "../calc/bericht.js";
 import { BAUSTEINE } from "../calc/wochenplan.js";
+import { aktiveKarten } from "../calc/karteikarten.js";
+import { kastenZaehler } from "../calc/karteikasten.js";
 
 /* Elternbereich (eigener Tab, nur nach Entsperren mit dem Eltern-Passwort):
    Profil · Tagesziel · Stufen-Steuerung · neutrale Lern-Übersicht ·
@@ -585,13 +587,20 @@ export default function Eltern() {
 
       <Karte test="eltern-karten">
         <b>🗃️ Karteikarten (Kompass-Vorbereitung)</b>
-        <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          32 Abruf-Karten für Deutsch und Mathe – 4 pro A4-Blatt, beidseitig drucken, schneiden,
-          im 3-Fächer-Kasten üben (3–5 Karten pro Runde, erst laut antworten, dann umdrehen).
-        </p>
+        {(() => {
+          const aktiv = aktiveKarten(data.einstellungen);
+          const z = kastenZaehler(aktiv, data.lernstand.karteikasten.stand);
+          return (
+            <p data-test="karten-stand" style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+              <b>{aktiv.length} Karten aktiv</b> ({data.einstellungen.eigeneKarten.length} eigene, {data.einstellungen.kartenAus.length} ausgeblendet) ·
+              Kasten-Stand: 📥 {z[1]} · 📦 {z[2]} · 🏆 {z[3]} · {data.lernstand.karteikasten.runden} Runden gespielt.
+              Unter „⚙️ Karten verwalten“ könnt ihr Karten ausblenden und eigene anlegen (z. B. die Lernwörter der Woche).
+            </p>
+          );
+        })()}
         <button data-test="karten-oeffnen" onClick={() => navTo("karten")}
           style={{ background: T.weich, color: T.text, fontWeight: 700 }}>
-          🖨️ Karten ansehen &amp; drucken
+          🖨️ Karten ansehen, verwalten &amp; drucken
         </button>
       </Karte>
 

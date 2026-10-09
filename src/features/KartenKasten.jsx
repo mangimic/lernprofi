@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useApp } from "../appContext.jsx";
-import { KARTEIKARTEN } from "../calc/karteikarten.js";
+import { aktiveKarten } from "../calc/karteikarten.js";
 import { faelligeKarten, karteWerten, kastenZaehler, RUNDEN_GROESSE } from "../calc/karteikasten.js";
 
 /* 🗃️ DER DIGITALE KARTEIKASTEN (Leitner, 3 Fächer):
@@ -21,12 +21,13 @@ const KASTEN_INFO = [
 export default function KartenKasten() {
   const { data, update, logChange, T, heute, navTo } = useApp();
   const stand = data.lernstand.karteikasten.stand;
-  const zaehler = kastenZaehler(KARTEIKARTEN, stand);
+  const alleKarten = aktiveKarten(data.einstellungen);
+  const zaehler = kastenZaehler(alleKarten, stand);
   // Runde: { stapel: [{karte, wiederholung}], index, offen, gewusst, gesamt }
   const [runde, setRunde] = useState(null);
 
   const starten = () => {
-    const karten = faelligeKarten(KARTEIKARTEN, stand, heute);
+    const karten = faelligeKarten(alleKarten, stand, heute);
     if (!karten.length) return;
     setRunde({ stapel: karten.map((karte) => ({ karte, wiederholung: false })), index: 0, offen: false, gewusst: 0, gesamt: karten.length });
   };
@@ -71,9 +72,9 @@ export default function KartenKasten() {
           <h2 style={{ marginTop: 0 }}>🎉 Runde geschafft!</h2>
           <p><b>{runde.gewusst} von {runde.gesamt}</b> gewusst · 🪙 +1 Münze (jetzt {data.lernstand.muenzen})</p>
           <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-            🏆 Im „sitzt!“-Fach liegen jetzt <b>{kastenZaehler(KARTEIKARTEN, data.lernstand.karteikasten.stand)[3]}</b> Karten.
+            🏆 Im „sitzt!“-Fach liegen jetzt <b>{kastenZaehler(alleKarten, data.lernstand.karteikasten.stand)[3]}</b> Karten.
           </p>
-          {faelligeKarten(KARTEIKARTEN, data.lernstand.karteikasten.stand, heute).length > 0 && (
+          {faelligeKarten(alleKarten, data.lernstand.karteikasten.stand, heute).length > 0 && (
             <button data-test="kasten-nochmal" onClick={starten}
               style={{ width: "100%", marginBottom: 8, background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
               🃏 Noch eine Runde
@@ -147,7 +148,7 @@ export default function KartenKasten() {
   }
 
   // ── Kasten-Übersicht ──
-  const faellig = faelligeKarten(KARTEIKARTEN, stand, heute);
+  const faellig = faelligeKarten(alleKarten, stand, heute);
   return (
     <div data-test="kasten-seite">
       <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>

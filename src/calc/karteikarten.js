@@ -72,6 +72,16 @@ export const KARTEIKARTEN_FUNDUS = [
 ];
 KARTEIKARTEN.push(...KARTEIKARTEN_FUNDUS);
 
+/** Der wirksame Kartensatz: Standard + eigene Eltern-Karten, minus
+    ausgeblendete. Gilt für Druck UND digitalen Kasten gleichermassen. */
+export function aktiveKarten(einstellungen) {
+  const aus = new Set(einstellungen?.kartenAus || []);
+  const eigene = (einstellungen?.eigeneKarten || []).map((k) => ({
+    id: `e${k.id}`, fach: k.fach, vs: k.vs, rs: k.rs, merk: k.merk, eigen: true,
+  }));
+  return [...KARTEIKARTEN, ...eigene].filter((k) => !aus.has(k.id));
+}
+
 /** Blätter à 4 Karten. `hinten` ist je Zeile links/rechts getauscht, damit
     beidseitiger Druck (lange Kante) Vorder- und Rückseite deckungsgleich macht. */
 export function kartenSeiten(karten) {

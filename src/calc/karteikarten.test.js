@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { KARTEIKARTEN, kartenSeiten } from "./karteikarten.js";
+import { KARTEIKARTEN, kartenSeiten, aktiveKarten } from "./karteikarten.js";
 
 describe("karteikarten", () => {
   it("Kartensatz: 32 Deutsch + 24 Mathe, eindeutige IDs, druckfertige Längen, saubere Sprache", () => {
@@ -66,5 +66,23 @@ describe("karteikasten (digital, Leitner)", () => {
     stand = karteWerten(stand, "a", false, HEUTE);
     expect(stand.a.fach).toBe(1);
     expect(kastenZaehler(MINI, stand)).toEqual({ 1: 6, 2: 0, 3: 0 });
+  });
+});
+
+describe("aktiveKarten (Eltern-Kontrolle)", () => {
+  it("filtert ausgeblendete, hängt eigene mit e-Prefix an", () => {
+    const einst = {
+      kartenAus: ["d1", "m1", "e2"],
+      eigeneKarten: [
+        { id: 1, fach: "deutsch", vs: "Lernwort: Fahrradhelm", rs: "Fahrradhelm", merk: "fahr + Rad + Helm" },
+        { id: 2, fach: "mathe", vs: "8 · 8 = ?", rs: "64", merk: "" },
+      ],
+    };
+    const karten = aktiveKarten(einst);
+    expect(karten.length).toBe(KARTEIKARTEN.length - 1); // 2 Standard raus, 2 eigene rein, 1 eigene raus
+    expect(karten.some((k) => k.id === "d1" || k.id === "m1" || k.id === "e2")).toBe(false);
+    const eigene = karten.find((k) => k.id === "e1");
+    expect(eigene).toMatchObject({ fach: "deutsch", rs: "Fahrradhelm", eigen: true });
+    expect(aktiveKarten({}).length).toBe(KARTEIKARTEN.length); // ohne Einstellungen: alles aktiv
   });
 });
