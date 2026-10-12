@@ -1301,6 +1301,21 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await expect(page.getByTestId("tag-3")).toContainText("Klassenarbeit Deutsch");
   await expect(page.getByTestId("tag-4").getByTestId("termin-chip")).toHaveCount(0);
 
+  // 📅 Kalender-Wahl: Termin in einer ANDEREN Woche (nächster Monat, 15.) eintragen
+  await page.getByTestId("kind-termin").click();
+  await page.getByTestId("kat-termin").click();
+  await page.getByTestId("kt-kalender").click();
+  await page.getByTestId("kt-monat-vor").click();
+  await page.locator('[data-test^="kt-datum-"][data-test$="-15"]').click();
+  await expect(page.getByTestId("kt-datum-gewaehlt")).toContainText("15.");
+  await page.getByTestId("kt-fach").fill("Sachkunde Probe");
+  await page.getByTestId("kt-ok").click();
+  // … sichtbar in der Monatsansicht des Folgemonats und in der Eltern-Liste
+  await page.getByTestId("ansicht-monat").click();
+  await page.getByTestId("monat-vor").click();
+  await expect(page.locator('[data-test^="mt-"][data-test$="-15"]')).toContainText("📝");
+  await page.getByTestId("ansicht-monat").click();
+
   // 🔄 Baustein ändern: aus dem Sonntags-Schlagzeug wird Angeln – Fenster und Zeit bleiben
   await page.getByTestId("slot-6-840").click();
   await page.getByTestId("block-wechsel").click();

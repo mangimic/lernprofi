@@ -279,7 +279,8 @@ export default function Wochenplan() {
   const [editor, setEditor] = useState(null); // ✏️ Baustein-Notiz: { id, notiz }
   const [festDialog, setFestDialog] = useState(null); // ❌ Ausfall-Frage für einen festen Termin
   const [verschieben, setVerschieben] = useState(null); // 📍 Baustein-Id, die ein neues Fenster sucht
-  const [kindTermin, setKindTermin] = useState(null); // 📝 Eingabe: { art, fach, tag, serie }
+  const [kindTermin, setKindTermin] = useState(null); // 📝 Eingabe: { art, fach, tag, datum, serie }
+  const [ktMonat, setKtMonat] = useState(null); // 📅 Kalender im Termin-Dialog: null = zugeklappt, sonst { jahr, monat }
   const [fenster, setFenster] = useState(null); // 🪟 Direkt-Wahl fürs Fenster: { tag, slot, suche }
   const [terminDialog, setTerminDialog] = useState(null); // eingetragenen Termin ansehen/entfernen
   const [palette, setPalette] = useState(false); // 📝 Kategorien erst nach „Termin eintragen" zeigen
@@ -470,7 +471,7 @@ export default function Wochenplan() {
                   )}
                 </div>
                 <button data-test="kat-termin"
-                  onClick={() => { setPalette(false); setKatSuche(""); setKindTermin({ art: "ka", fach: "", tag: null, serie: "nein" }); }}
+                  onClick={() => { setPalette(false); setKatSuche(""); setKtMonat(null); setKindTermin({ art: "ka", fach: "", tag: null, datum: null, serie: "nein" }); }}
                   style={{ width: "100%", marginTop: 8, height: "auto", minHeight: "var(--touch)", background: T.weich, color: T.text, fontWeight: 700 }}>
                   📝 Klassenarbeit, Kompass-Test oder Wörter der Woche eintragen
                 </button>
@@ -664,13 +665,65 @@ export default function Wochenplan() {
             <p style={{ margin: "0 0 4px", fontSize: "var(--schrift-klein)", color: T.textLeise }}>An welchem Tag? (Woche vom {plan.montag.split("-").reverse().join(".")})</p>
             <div style={{ display: "flex", gap: 4, marginBottom: 8 }}>
               {WOCHENTAGE.map((w, i) => (
-                <button key={i} data-test={`kt-tag-${i}`} onClick={() => setKindTermin({ ...kindTermin, tag: i })}
+                <button key={i} data-test={`kt-tag-${i}`} onClick={() => setKindTermin({ ...kindTermin, tag: i, datum: null })}
                   style={{ flex: 1, height: "auto", minHeight: 0, padding: "8px 2px", fontWeight: 700,
                     background: kindTermin.tag === i ? T.primaer : T.weich, color: kindTermin.tag === i ? T.primaerText : T.text }}>
                   {w}<span style={{ display: "block", fontSize: "11px", fontWeight: 400 }}>{tagDatum(plan.montag, i).slice(8)}.</span>
                 </button>
               ))}
             </div>
+            {/* 📅 Jeder Tag im Schuljahr: zuklappbarer Monatskalender –
+                die Wochen-Knöpfe oben bleiben die Schnellwahl. */}
+            {!ktMonat ? (
+              <button data-test="kt-kalender"
+                onClick={() => {
+                  const basis = kindTermin.datum || heute;
+                  setKtMonat({ jahr: parseInt(basis.slice(0, 4), 10), monat: parseInt(basis.slice(5, 7), 10) });
+                }}
+                style={{ width: "100%", height: "auto", minHeight: 0, padding: "8px 6px", marginBottom: 8,
+                  background: T.weich, color: T.text, fontWeight: 700, fontSize: "var(--schrift-klein)" }}>
+                📅 Anderen Tag im Kalender wählen{kindTermin.datum ? ` (gewählt: ${kindTermin.datum.split("-").reverse().join(".")})` : " (auch andere Wochen)"}
+              </button>
+            ) : (
+              <div style={{ background: T.grund, borderRadius: T.radiusKlein, padding: 8, marginBottom: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                  <button data-test="kt-monat-zurueck" aria-label="Monat zurück"
+                    onClick={() => setKtMonat(monatSchritt(ktMonat.jahr, ktMonat.monat, -1))}
+                    style={{ height: "auto", minHeight: 0, padding: "5px 10px", fontWeight: 700, background: T.weich, color: T.text }}>◀</button>
+                  <b style={{ flex: 1, textAlign: "center", fontSize: "var(--schrift-klein)" }}>{monatsName(ktMonat.jahr, ktMonat.monat)}</b>
+                  <button data-test="kt-monat-vor" aria-label="Monat vor"
+                    onClick={() => setKtMonat(monatSchritt(ktMonat.jahr, ktMonat.monat, 1))}
+                    style={{ height: "auto", minHeight: 0, padding: "5px 10px", fontWeight: 700, background: T.weich, color: T.text }}>▶</button>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 3 }}>
+                  {WOCHENTAGE.map((w) => (
+                    <b key={w} style={{ textAlign: "center", fontSize: "11px", color: T.textLeise }}>{w}</b>
+                  ))}
+                  {monatsGitter(ktMonat.jahr, ktMonat.monat).flatMap((wo) => wo.tage).map((d) => {
+                    const frei = schulfreiAm(d);
+                    const gewaehlt = kindTermin.datum === d;
+                    return (
+                      <button key={d} data-test={`kt-datum-${d}`}
+                        onClick={() => setKindTermin({ ...kindTermin, datum: d, tag: null })}
+                        style={{
+                          height: "auto", minHeight: 34, padding: "4px 2px", borderRadius: 6, fontWeight: 700,
+                          background: gewaehlt ? T.primaer : frei ? "color-mix(in srgb, var(--akzent) 22%, var(--karte))" : T.karte,
+                          color: gewaehlt ? T.primaerText : T.text,
+                          opacity: d.slice(5, 7) === String(ktMonat.monat).padStart(2, "0") ? 1 : 0.35,
+                          outline: d === heute && !gewaehlt ? `2px solid ${T.primaer}` : "none",
+                        }}>
+                        {parseInt(d.slice(8), 10)}
+                      </button>
+                    );
+                  })}
+                </div>
+                {kindTermin.datum && (
+                  <p data-test="kt-datum-gewaehlt" style={{ margin: "6px 0 0", fontWeight: 700, fontSize: "var(--schrift-klein)" }}>
+                    ✓ Gewählt: {kindTermin.datum.split("-").reverse().join(".")}
+                  </p>
+                )}
+              </div>
+            )}
             {kindTermin.editId == null ? (
               <>
                 <p style={{ margin: "0 0 4px", fontSize: "var(--schrift-klein)", color: T.textLeise }}>🔁 Wiederholen?</p>
@@ -692,9 +745,9 @@ export default function Wochenplan() {
             <input data-test="kt-fach" type="text" maxLength={40} placeholder="Fach oder Thema (z. B. Mathe)"
               value={kindTermin.fach} onChange={(e) => setKindTermin({ ...kindTermin, fach: e.target.value })}
               style={{ width: "100%", boxSizing: "border-box", minHeight: "var(--touch)", borderRadius: T.radiusKlein, border: `1px solid ${T.rand}`, padding: "0 12px", background: T.grund, color: T.text }} />
-            <button data-test="kt-ok" disabled={kindTermin.tag === null}
+            <button data-test="kt-ok" disabled={kindTermin.tag === null && !kindTermin.datum}
               onClick={() => {
-                const ersterTag = tagDatum(plan.montag, kindTermin.tag);
+                const ersterTag = kindTermin.datum || tagDatum(plan.montag, kindTermin.tag);
                 let neu;
                 if (kindTermin.editId != null) {
                   neu = data.einstellungen.termine.map((t) =>
@@ -711,7 +764,7 @@ export default function Wochenplan() {
                   kindTermin.editId != null ? "Termin bearbeitet" : "Termin selbst eingetragen");
                 setKindTermin(null);
               }}
-              style={{ width: "100%", marginTop: 10, background: T.primaer, color: T.primaerText, fontWeight: 700, opacity: kindTermin.tag === null ? 0.5 : 1 }}>
+              style={{ width: "100%", marginTop: 10, background: T.primaer, color: T.primaerText, fontWeight: 700, opacity: kindTermin.tag === null && !kindTermin.datum ? 0.5 : 1 }}>
               {kindTermin.editId != null ? "✓ Speichern" : "✓ Eintragen"}
             </button>
             <button onClick={() => setKindTermin(null)}
@@ -737,7 +790,12 @@ export default function Wochenplan() {
             <button data-test="termin-bearbeiten"
               onClick={() => {
                 const idx = WOCHENTAGE.findIndex((_, i) => tagDatum(plan.montag, i) === terminDialog.tag);
-                setKindTermin({ art: terminDialog.art, fach: terminDialog.fach || "", tag: idx >= 0 ? idx : null, serie: "nein", editId: terminDialog.id });
+                setKtMonat(null);
+                setKindTermin({
+                  art: terminDialog.art, fach: terminDialog.fach || "", serie: "nein", editId: terminDialog.id,
+                  tag: idx >= 0 ? idx : null,
+                  datum: idx >= 0 ? null : terminDialog.tag, // außerhalb der Woche: Datum behalten
+                });
                 setTerminDialog(null);
               }}
               style={{ width: "100%", marginBottom: 6, background: T.primaer, color: T.primaerText, fontWeight: 700 }}>

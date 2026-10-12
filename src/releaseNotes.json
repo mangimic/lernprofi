@@ -1,5 +1,25 @@
 [
   {
+    "id": "rn-080",
+    "version": "0.64.0",
+    "datum": "2026-10-12",
+    "titel": "Termine im Kalender setzen",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "📅 Beim Eintragen eines Termins (Klassenarbeit, Kompass-Test, Wörter der Woche) gibt es jetzt einen aufklappbaren Monatskalender: Monat vor/zurück blättern, Tag antippen – damit lassen sich Termine in JEDER Woche setzen, nicht mehr nur in der aktuellen."
+      },
+      {
+        "type": "neu",
+        "text": "Die Wochentag-Knöpfe bleiben als Schnellwahl für die aktuelle Woche. Ferientage sind im Kalender farbig hinterlegt, der gewählte Tag wird klar angezeigt (✓ Gewählt: 15.11.2026)."
+      },
+      {
+        "type": "fix",
+        "text": "Beim Bearbeiten eines Termins außerhalb der aktuellen Woche bleibt sein Datum jetzt erhalten – vorher musste man den Tag neu in der aktuellen Woche wählen."
+      }
+    ]
+  },
+  {
     "id": "rn-079",
     "version": "0.63.0",
     "datum": "2026-10-12",

@@ -36,6 +36,18 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.64: Termin-Kalender ----------
+console.log("== v0.64: Termin-Kalender ==");
+test("v0.64: Termine über den Monatskalender in jeder Woche setzen", (() => {
+  const w = quelle("src/features/Wochenplan.jsx");
+  return w.includes("kt-kalender") && w.includes("kt-datum-") && w.includes("kt-monat-vor")
+    && w.includes("kindTermin.datum || tagDatum(plan.montag, kindTermin.tag)")
+    && w.includes("kindTermin.tag === null && !kindTermin.datum")
+    && w.includes("datum: idx >= 0 ? null : terminDialog.tag")
+    && quelle("e2e/smoke.spec.js").includes("kt-datum-")
+    && releaseNoteVorhanden("rn-080");
+})());
+
 // ---------- v0.63: Kompass-Countdown oben ----------
 console.log("== v0.63: Countdown oben ==");
 test("v0.63: Kompass-Karte ganz oben mit heutigen Themen und ▶️ in die Übung", (() => {
