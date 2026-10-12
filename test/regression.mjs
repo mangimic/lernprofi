@@ -36,6 +36,20 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.65: Suche ----------
+console.log("== v0.65: Suche ==");
+test("v0.65: flacher Such-Index (bewusst ohne Knowledge Graph), Overlay mit Deep-Links", (() => {
+  const s = quelle("src/calc/suche.js");
+  const ui = quelle("src/features/Suche.jsx");
+  return s.includes("export function sucheIndex") && s.includes("export function suchen")
+    && s.includes("OHNE Knowledge Graph") && s.includes('replace(/ß/g, "ss")')
+    && quelle("src/calc/uebenGruppen.js").includes("export const DEUTSCH_LISTE")
+    && ui.includes("suche-eingabe") && ui.includes("suche-treffer") && ui.includes("uebenZielSetzen(t.ziel.feld)")
+    && quelle("src/App.jsx").includes("suche-knopf")
+    && quelle("e2e/smoke.spec.js").includes("suche-eingabe")
+    && releaseNoteVorhanden("rn-081");
+})());
+
 // ---------- v0.64: Termin-Kalender ----------
 console.log("== v0.64: Termin-Kalender ==");
 test("v0.64: Termine über den Monatskalender in jeder Woche setzen", (() => {
@@ -363,7 +377,8 @@ test("v0.44: 6 Kompass-Bereiche vorhanden, in der Übungs-Liste verdrahtet, mit 
   const w = quelle("src/calc/wozu.js");
   return ["lesen", "strategie", "wortfam", "zusnomen", "steigern", "verbform"].every((key) => k.includes(`key: "${key}"`) && w.includes(`${key}:`))
     && k.includes("LESEN_DATEN") && k.includes("kontext: L_")
-    && u.includes("KOMPASS_DEUTSCH_DATEN") && u.includes("KOMPASS_DEUTSCH_BEREICHE")
+    && u.includes("KOMPASS_DEUTSCH_DATEN")
+    && (u.includes("KOMPASS_DEUTSCH_BEREICHE") || quelle("src/calc/uebenGruppen.js").includes("...KOMPASS_DEUTSCH_BEREICHE"))
     && u.includes('data-test="frage-kontext"')
     && releaseNoteVorhanden("rn-057");
 })());
@@ -1102,7 +1117,7 @@ test("v0.15: Regel geprüft (anders als Ausgangssatz + Prädikat an 2. Stelle)",
 })());
 test("v0.15: Übungstyp umstellen im Üben-Bereich (Bausteine, Neu bauen, Keine da)", (() => {
   const u = quelle("src/features/Ueben.jsx");
-  return u.includes('typ: "umstellen"') && u.includes('data-test="um-chip"')
+  return (u.includes('typ: "umstellen"') || quelle("src/calc/uebenGruppen.js").includes('typ: "umstellen"')) && u.includes('data-test="um-chip"')
     && u.includes('data-test="um-reset"') && u.includes('data-test="zo-keine"')
     && u.includes("ANDERE Reihenfolge") && u.includes("KEINE Ortsbestimmung");
 })());
@@ -1331,7 +1346,7 @@ test("v0.6: Konverter-Modul mit allen 5 Pools", (() => {
   return ["zeitPool", "wortartenPool", "faellePool", "redePool", "gwsPool"].every((f) => d.includes(`export function ${f}`));
 })());
 test("v0.6: Üben listet 11 Deutsch-Bereiche (inkl. rede/zeit/wa/faelle/gws)", (() => {
-  const u = quelle("src/features/Ueben.jsx");
+  const u = quelle("src/features/Ueben.jsx") + quelle("src/calc/uebenGruppen.js");
   return ["\"subj\"", "\"praed\"", "\"rede\"", "\"zeit\"", "\"wa\"", "\"faelle\"", "\"gk\"", "\"gws\""].every((k) => u.includes(k));
 })());
 test("v0.6: Konverter bleiben rein (kein DOM, keine Uhr, kein Zufall)", (() => {
@@ -1376,7 +1391,7 @@ test("v0.4: Stark-Pool mit Mut-Sätzen", (() => {
 test("v0.4: Üben kennt alle 4 Fächer (Deutsch · Mathe · Sachkunde · Stark)", (() => {
   const u = quelle("src/features/Ueben.jsx");
   return ["\"deutsch\"", "\"mathe\"", "\"sachkunde\"", "\"stark\""].every((f) => u.includes(f))
-    && u.includes("DEUTSCH_BEREICHE") && u.includes("STARK_BEREICHE");
+    && (u.includes("DEUTSCH_BEREICHE") || quelle("src/calc/uebenGruppen.js").includes("...DEUTSCH_BEREICHE")) && u.includes("STARK_BEREICHE");
 })());
 test("v0.4: kein Beschämungs-Vokabular in den Deutsch/Stark-Pools", (() => {
   const t = quelle("src/calc/aufgaben/deutsch.js") + quelle("src/calc/aufgaben/stark.js");

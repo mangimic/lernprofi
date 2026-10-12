@@ -2,11 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useApp } from "../appContext.jsx";
 import { MATHE_DATEN, MATHE_BEREICHE } from "../calc/aufgaben/mathe.js";
 import { SACH_DATEN, SACH_BEREICHE } from "../calc/aufgaben/sachkunde.js";
-import { GESCH_DATEN, ddPool, doppelPool, DEUTSCH_BEREICHE } from "../calc/aufgaben/deutsch.js";
+import { GESCH_DATEN, ddPool, doppelPool } from "../calc/aufgaben/deutsch.js";
 import { subjektPool, praedikatPool, gkPool } from "../calc/aufgaben/saetze.js";
 import { umstellenPool, umSatzText, umstellenPruefen } from "../calc/aufgaben/satzglieder.js";
-import { KOMPASS_DEUTSCH_DATEN, KOMPASS_DEUTSCH_BEREICHE } from "../calc/aufgaben/kompassDeutsch.js";
-import { DEUTSCH_GRUPPEN, leoWahl } from "../calc/uebenGruppen.js";
+import { KOMPASS_DEUTSCH_DATEN } from "../calc/aufgaben/kompassDeutsch.js";
+import { DEUTSCH_GRUPPEN, DEUTSCH_LISTE, leoWahl } from "../calc/uebenGruppen.js";
 import { KOMPASS_ORIGINAL } from "../calc/kompassPlan.js";
 import { dokHolen, dokAnzeigen } from "../doks.js";
 import AufgabenBild from "./AufgabenBild.jsx";
@@ -39,20 +39,7 @@ function deutschDaten(thema) {
     ...KOMPASS_DEUTSCH_DATEN, // 🧭 Kompass-Training (themenfrei)
   };
 }
-const DEUTSCH_LISTE = [
-  { key: "subj", emoji: "🔎", name: "Subjekte", typ: "tippen" },
-  { key: "praed", emoji: "🧲", name: "Prädikate", typ: "tippen" },
-  { key: "satzglied", emoji: "🔀", name: "Satzglieder umstellen", typ: "umstellen" },
-  { key: "rede", emoji: "💬", name: "Wörtliche Rede", typ: "tippen" },
-  { key: "zeit", emoji: "⏳", name: "Zeitformen" },
-  { key: "wa", emoji: "🏷️", name: "Wortarten" },
-  { key: "faelle", emoji: "🎯", name: "Die 4 Fälle" },
-  { key: "gk", emoji: "🔠", name: "Groß & Klein", typ: "tippen" },
-  { key: "gws", emoji: "📖", name: "Grundwortschatz" },
-  ...DEUTSCH_BEREICHE,
-  ...KOMPASS_DEUTSCH_BEREICHE, // 🧭 die Aufgabenformate aus dem Kompass-4-Test
-  { key: "vorgang", emoji: "📝", name: "Vorgangsbeschreibung", typ: "modul" },
-];
+// (Die Deutsch-Bereichsliste lebt in calc/uebenGruppen.js – auch die Suche nutzt sie.)
 
 /* 🟫 Zahlenblöcke (Dienes-Material wie in der Schule): Tausenderwürfel,
    Hunderterplatte, Zehnerstange, Einerwürfel – als Grafik statt nur

@@ -1526,6 +1526,31 @@ test("📂 Dokumenten-Ablage: Eltern laden verschlüsselt hoch, Öffnen entschl�
   expect(Object.keys(ablage).length).toBe(0);
 });
 
+test("🔍 Suche: findet Übungen, Karten und Seiten – ein Tipp springt hin", async ({ page }) => {
+  await tresorAnlegen(page);
+  // Übung finden und direkt starten (Deep-Link ins Lernfeld)
+  await page.getByTestId("suche-knopf").click();
+  await page.getByTestId("suche-eingabe").fill("lese detektiv");
+  await expect(page.getByTestId("suche-treffer").first()).toContainText("Lese-Detektiv");
+  await page.getByTestId("suche-treffer").first().click();
+  await expect(page.getByTestId("frage-karte")).toBeVisible();
+  await page.getByTestId("abbrechen").click();
+  // Normalisierung: „wurfel" (ohne Umlaut) findet die Würfel-Karteikarten
+  await page.getByTestId("suche-knopf").click();
+  await page.getByTestId("suche-eingabe").fill("wurfel");
+  await expect(page.getByTestId("suche-treffer").first()).toContainText("Würfel");
+  // Seite öffnen per Enter (erster Treffer)
+  await page.getByTestId("suche-eingabe").fill("spielhalle");
+  await page.getByTestId("suche-eingabe").press("Enter");
+  await expect(page.getByTestId("spielhalle")).toBeVisible();
+  // Nichts gefunden → freundlicher Hinweis
+  await page.getByTestId("suche-knopf").click();
+  await page.getByTestId("suche-eingabe").fill("xyzgibtsnicht");
+  await expect(page.getByTestId("suche-leer")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByTestId("suche-dialog")).toHaveCount(0);
+});
+
 test("🗃️ Karteikarten: 4 je A4-Blatt, Rückseiten gespiegelt, Fach-Filter und Druck-Knopf", async ({ page }) => {
   await tresorAnlegen(page);
   await page.getByTestId("nav-eltern").click();

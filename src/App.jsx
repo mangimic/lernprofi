@@ -12,6 +12,7 @@ import KompassPlan from "./features/KompassPlan.jsx";
 import Karteikarten from "./features/Karteikarten.jsx";
 import KartenKasten from "./features/KartenKasten.jsx";
 import Doks from "./features/Doks.jsx";
+import Suche from "./features/Suche.jsx";
 import Schrift from "./features/Schrift.jsx";
 import Aufsatz from "./features/Aufsatz.jsx";
 import Wochenplan from "./features/Wochenplan.jsx";
@@ -19,7 +20,7 @@ import Eltern from "./features/Eltern.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.64.0";
+export const APP_VERSION = "0.65.0";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -84,6 +85,7 @@ export default function App() {
   // 📱 Beim Runterscrollen verschwindet die untere Leiste (mehr Platz),
   // beim Hochscrollen oder oben ist sie sofort wieder da.
   const [navWeg, setNavWeg] = useState(false);
+  const [sucheOffen, setSucheOffen] = useState(false); // 🔍 Such-Overlay
   useEffect(() => {
     // capture:true fängt auch Scrollen in inneren Containern; scrollingElement
     // deckt Browser ab, bei denen window.scrollY nicht mitläuft.
@@ -175,12 +177,18 @@ export default function App() {
         padding: isMobile ? "10px 12px 80px" : "16px 20px 90px",
       }}
     >
-      <header style={{ textAlign: "center", marginBottom: T.abstand }}>
+      <header style={{ textAlign: "center", marginBottom: T.abstand, position: "relative" }}>
         <h1 style={{ fontSize: "var(--schrift-gross)", margin: "6px 0 0" }}>✏️ Lernprofi</h1>
         <div data-test="version" style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           Version {APP_VERSION}
         </div>
+        <button data-test="suche-knopf" onClick={() => setSucheOffen(true)} aria-label="Suchen"
+          style={{ position: "absolute", right: 0, top: 2, height: "auto", minHeight: "var(--touch)",
+            padding: "6px 14px", background: T.weich, color: T.text, fontWeight: 700, fontSize: 18 }}>
+          🔍
+        </button>
       </header>
+      {sucheOffen && <Suche zu={() => setSucheOffen(false)} />}
 
       <main>
         {route === "neu" ? <WasIstNeu /> : route === "ueben" ? <Ueben /> :

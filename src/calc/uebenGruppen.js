@@ -2,6 +2,24 @@
    das Kind erst 5 große Gruppen (plus „Leo wählt für dich") – weniger
    Auswahl auf einmal, klarer erster Schritt. Eine Gruppe mit nur einem
    Feld startet direkt, ohne Zwischenschritt. */
+import { DEUTSCH_BEREICHE } from "./aufgaben/deutsch.js";
+import { KOMPASS_DEUTSCH_BEREICHE } from "./aufgaben/kompassDeutsch.js";
+
+/** Alle Deutsch-Lernbereiche in Anzeige-Reihenfolge (auch für die Suche). */
+export const DEUTSCH_LISTE = [
+  { key: "subj", emoji: "🔎", name: "Subjekte", typ: "tippen" },
+  { key: "praed", emoji: "🧲", name: "Prädikate", typ: "tippen" },
+  { key: "satzglied", emoji: "🔀", name: "Satzglieder umstellen", typ: "umstellen" },
+  { key: "rede", emoji: "💬", name: "Wörtliche Rede", typ: "tippen" },
+  { key: "zeit", emoji: "⏳", name: "Zeitformen" },
+  { key: "wa", emoji: "🏷️", name: "Wortarten" },
+  { key: "faelle", emoji: "🎯", name: "Die 4 Fälle" },
+  { key: "gk", emoji: "🔠", name: "Groß & Klein", typ: "tippen" },
+  { key: "gws", emoji: "📖", name: "Grundwortschatz" },
+  ...DEUTSCH_BEREICHE,
+  ...KOMPASS_DEUTSCH_BEREICHE, // 🧭 die Aufgabenformate aus dem Kompass-4-Test
+  { key: "vorgang", emoji: "📝", name: "Vorgangsbeschreibung", typ: "modul" },
+];
 
 export const DEUTSCH_GRUPPEN = [
   { key: "lesen", emoji: "🔍", name: "Lesen & Verstehen", felder: ["lesen"] },
