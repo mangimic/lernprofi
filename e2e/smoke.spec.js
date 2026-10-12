@@ -1376,6 +1376,16 @@ test("🧭 Kompass-Countdown: Termine automatisch im Plan, Wochen-Fahrplan, Chip
   await expect(page.getByTestId("original-hinweis")).toContainText("Kompass-Heft Deutsch, Aufgaben 1–7");
   await page.getByTestId("abbrechen").click();
   await expect(page.getByTestId("plan-seite")).toBeVisible();
+  // 🧭 Ganz oben auf der Startseite: Countdown je Fach + heutige Kompass-Themen mit ▶️
+  // (die Tagesliste hängt vom Wochentag ab – nur prüfen, wenn heute ein Übungstag ist)
+  await page.getByTestId("nav-start").click();
+  await expect(page.getByTestId("kompass-karte")).toContainText("Tage");
+  if (await page.locator('[data-test^="kc-ueben-"]').count()) {
+    await page.locator('[data-test^="kc-ueben-"]').first().click();
+    await expect(page.getByTestId("frage-karte")).toBeVisible();
+    await page.getByTestId("abbrechen").click();
+    await expect(page.getByTestId("start-seite")).toBeVisible();
+  }
   // Ein Fokus-Chip startet die Übung direkt – und Abbrechen führt ZURÜCK zum Kompass
   await page.getByTestId("nav-start").click();
   await page.getByTestId("kompass-karte").click();

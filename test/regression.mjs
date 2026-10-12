@@ -36,6 +36,18 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.63: Kompass-Countdown oben ----------
+console.log("== v0.63: Countdown oben ==");
+test("v0.63: Kompass-Karte ganz oben mit heutigen Themen und ▶️ in die Übung", (() => {
+  const s = quelle("src/features/Start.jsx");
+  return s.indexOf('data-test="kompass-karte"') < s.indexOf("Hallo! 👋")
+    && s.includes("kc-ueben-") && s.includes('data-test="kc-heute"')
+    && s.includes("feldVonNotiz(b.notiz)")
+    && s.includes("Heute steht kein Kompass-Thema im Plan")
+    && quelle("e2e/smoke.spec.js").includes("kc-ueben-")
+    && releaseNoteVorhanden("rn-079");
+})());
+
 // ---------- v0.62: Eltern-Navigation ----------
 console.log("== v0.62: Eltern-Navigation ==");
 test("v0.62: Elternbereich in sechs Gruppen mit klebender Tab-Leiste", (() => {

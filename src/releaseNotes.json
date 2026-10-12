@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-079",
+    "version": "0.63.0",
+    "datum": "2026-10-12",
+    "titel": "Countdown ganz oben",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🧭 Der Kompass-Countdown steht jetzt an OBERSTER Stelle der Startseite – mit den Tagen bis zu beiden Tests (📖 Deutsch · 🔢 Mathe) auf einen Blick."
+      },
+      {
+        "type": "neu",
+        "text": "Die Karte zeigt direkt die heutigen Kompass-Themen aus dem Wochenplan: jedes mit ▶️-Knopf in die passende Übung, Erledigtes mit ✅ durchgestrichen. Steht heute nichts im Plan, sagt die Karte das – ein Tipp öffnet wie bisher den Wochen-Fahrplan."
+      }
+    ]
+  },
+  {
     "id": "rn-078",
     "version": "0.62.0",
     "datum": "2026-10-12",

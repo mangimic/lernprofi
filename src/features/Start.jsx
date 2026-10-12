@@ -5,7 +5,7 @@ import { zeitUebrigMin } from "../calc/elternWerkzeuge.js";
 import { EINSTUFUNG_FELDER } from "../calc/einstufung.js";
 import { STARK_SAETZE } from "../calc/aufgaben/stark.js";
 import { schulfreiAm } from "../calc/kalender.js";
-import { kompassTermine, tageBis } from "../calc/kompassPlan.js";
+import { kompassTermine, tageBis, feldVonNotiz } from "../calc/kompassPlan.js";
 import {
   wochenMontag, tagDatum, planFuerWoche, planSchreiben, bausteinInfo, bausteinAnzeige, blockFertig, blockUnfertig,
   tagGeschafft, heuteBelohnt, belohnungEintragen, WOCHENTAGE, slotLabel, schulFaecher, istAusgefallen, blockDauerVon, uhr, auffrischungen,
@@ -70,6 +70,55 @@ export default function Start() {
 
   return (
     <div data-test="start-seite">
+      {(() => {
+        // 🧭 Kompass-Countdown GANZ OBEN (≤ 10 Wochen vor dem Test):
+        // Countdown je Fach + die heutigen Kompass-Themen aus dem
+        // Wochenplan, jedes mit ▶️ direkt in die Übung.
+        const ziele = kompassTermine(data.einstellungen.termine, heute);
+        if (!ziele.length || tageBis(heute, ziele[0].tag) > 70) return null;
+        const heuteKompass = heutePlan
+          .map((b) => ({ b, feld: b.typ !== "eigen" ? feldVonNotiz(b.notiz) : null }))
+          .filter((x) => x.feld);
+        return (
+          <div data-test="kompass-karte" onClick={() => navTo("kompass")} role="button" tabIndex={0}
+            onKeyDown={(e) => e.key === "Enter" && navTo("kompass")}
+            style={{
+              background: T.karte, color: T.text, borderRadius: T.radius, padding: T.abstand,
+              marginBottom: T.abstand, border: `2px solid ${T.primaer}`, cursor: "pointer",
+            }}>
+            <b>🧭 Kompass-Countdown</b>
+            <span style={{ float: "right", fontWeight: 800, color: T.primaer }}>
+              {ziele.map((z) => `${z.fach === "Deutsch" ? "📖" : "🔢"} ${tageBis(heute, z.tag)} Tage`).join(" · ")}
+            </span>
+            {heuteKompass.length > 0 ? (
+              <div style={{ marginTop: 8, display: "grid", gap: 6 }}>
+                <span style={{ fontSize: "var(--schrift-klein)", fontWeight: 800, color: T.textLeise }}>Heute dran:</span>
+                {heuteKompass.map(({ b, feld }) => (
+                  <div key={b.id} data-test="kc-heute" style={{
+                    display: "flex", alignItems: "center", gap: 8, background: T.grund,
+                    borderRadius: T.radiusKlein, padding: "6px 10px",
+                  }}>
+                    <span style={{ flex: 1, fontWeight: 700, textDecoration: b.fertig ? "line-through" : "none" }}>
+                      {b.fertig ? "✅ " : ""}{b.notiz}
+                    </span>
+                    {!b.fertig && (
+                      <button data-test={`kc-ueben-${feld}`}
+                        onClick={(ev) => { ev.stopPropagation(); uebenZielSetzen(feld); navTo("ueben"); }}
+                        style={{ background: T.primaer, color: T.primaerText, fontWeight: 700, height: "auto", minHeight: 0, padding: "8px 14px" }}>
+                        ▶️ üben
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <span style={{ display: "block", marginTop: 6, color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+                Heute steht kein Kompass-Thema im Plan – tipp hier für deinen Fahrplan.
+              </span>
+            )}
+          </div>
+        );
+      })()}
       <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
         <h2 style={{ margin: "0 0 6px" }}>Hallo! 👋</h2>
         <p data-test="tages-stand" style={{ margin: "0 0 10px", color: T.textLeise }}>
@@ -190,24 +239,6 @@ export default function Start() {
           )}
         </div>
       )}
-      {(() => {
-        // 🧭 Kompass-Countdown-Karte: erscheint, sobald ein Test in Sicht ist (≤ 10 Wochen)
-        const ziele = kompassTermine(data.einstellungen.termine, heute);
-        if (!ziele.length || tageBis(heute, ziele[0].tag) > 70) return null;
-        return (
-          <button data-test="kompass-karte" onClick={() => navTo("kompass")} style={{
-            width: "100%", textAlign: "left", display: "block", height: "auto",
-            background: T.karte, color: T.text, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand,
-            border: `1px solid ${T.rand}`,
-          }}>
-            <b>🧭 Kompass-Countdown</b>
-            <span style={{ float: "right", color: T.primaer, fontWeight: 800 }}>noch {tageBis(heute, ziele[0].tag)} Tage</span>
-            <span style={{ display: "block", marginTop: 4, color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-              Dein Lernplan bis zu den Tests – Woche für Woche, ein Tipp startet die Übung.
-            </span>
-          </button>
-        );
-      })()}
       {!einstufung ? (
         <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
           <b>🧪 Einstufungstest</b>
