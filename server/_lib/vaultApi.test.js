@@ -9,6 +9,7 @@ function mockEnv({ mitKv = true, dev = false } = {}) {
     TRESOR: mitKv ? {
       async get(k, art) { const v = m.get(k); return art === "json" && v ? JSON.parse(v) : v ?? null; },
       async put(k, v) { m.set(k, v); },
+      async delete(k) { m.delete(k); },
     } : undefined,
   };
 }
@@ -66,5 +67,21 @@ describe("vaultApi", () => {
     expect((await vaultApi(anfrage("PUT", "/api/vault", { baseRev: 0, blobs: { boese: 1 } }), env)).status).toBe(400);
     expect((await vaultApi(anfrage("PUT", "/api/vault", { blobs: BLOBS }), env)).status).toBe(400);
     expect((await vaultApi(anfrage("GET", "/api/quatsch"), env)).status).toBe(404);
+  });
+
+  it("📂 Doks: PUT legt Chiffrat ab, GET liefert es, DELETE räumt auf – nur saubere IDs", async () => {
+    const env = mockEnv();
+    const paket = { iv: "aWY=", chiffrat: "Y2hpZmZyYXQ=" };
+    expect((await vaultApi(anfrage("PUT", "/api/doks/dabc123", paket), env)).status).toBe(200);
+    const get = await vaultApi(anfrage("GET", "/api/doks/dabc123"), env);
+    expect(get.status).toBe(200);
+    expect(await get.json()).toEqual(paket);
+    expect((await vaultApi(anfrage("DELETE", "/api/doks/dabc123"), env)).status).toBe(200);
+    expect((await vaultApi(anfrage("GET", "/api/doks/dabc123"), env)).status).toBe(404);
+    // Validierung: böse IDs und kaputte Pakete kommen nicht durch
+    expect((await vaultApi(anfrage("PUT", "/api/doks/..%2Ftresor", paket), env)).status).toBe(400);
+    expect((await vaultApi(anfrage("PUT", "/api/doks/AB", paket), env)).status).toBe(400);
+    expect((await vaultApi(anfrage("PUT", "/api/doks/dabc123", { iv: 1 }), env)).status).toBe(400);
+    expect((await vaultApi(anfrage("GET", "/api/doks/dabc123", null, false), env)).status).toBe(401);
   });
 });

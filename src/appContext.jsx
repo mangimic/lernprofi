@@ -9,6 +9,7 @@ import {
   tresorVorhanden, tresorAnlegen, entsperrenMitPasswort, entsperrenMitPin,
   pinAendern, datenSpeichern, datenLaden, MAX_PIN_VERSUCHE,
 } from "./vault.js";
+import { bytesVerschluesseln, bytesEntschluesseln } from "./crypto.js";
 
 /* ☁️ Auto-Sicherung: Jede Änderung wird kurz gesammelt (2,5 s Ruhe)
    und dann im Hintergrund verschlüsselt zum Server geschoben – ohne
@@ -296,6 +297,10 @@ export function AppProvider({ children }) {
       setRoute("start");
     },
     pinAendern: (elternPasswort, neuePin) => pinAendern(elternPasswort, neuePin, idbStorage),
+    // 📂 Datei-Verschlüsselung mit dem Tresor-Schlüssel (für die
+    // Dokumenten-Ablage) – der Schlüssel verlässt den Kontext nie.
+    dateiVerschluesseln: (bytes) => bytesVerschluesseln(master.current, bytes),
+    dateiEntschluesseln: (paket) => bytesEntschluesseln(master.current, paket),
     exportJson: () =>
       JSON.stringify({ app: "lernprofi", exportiert: new Date().toISOString(), daten: data }, null, 2),
     importJson: (text) => {

@@ -8,6 +8,7 @@ import { umstellenPool, umSatzText, umstellenPruefen } from "../calc/aufgaben/sa
 import { KOMPASS_DEUTSCH_DATEN, KOMPASS_DEUTSCH_BEREICHE } from "../calc/aufgaben/kompassDeutsch.js";
 import { DEUTSCH_GRUPPEN, leoWahl } from "../calc/uebenGruppen.js";
 import { KOMPASS_ORIGINAL } from "../calc/kompassPlan.js";
+import { dokHolen, dokAnzeigen } from "../doks.js";
 import AufgabenBild from "./AufgabenBild.jsx";
 import { zeitPool, wortartenPool, faellePool, redePool, gwsPool } from "../calc/aufgaben/deutschKonverter.js";
 import { STARK_DATEN, STARK_BEREICHE } from "../calc/aufgaben/stark.js";
@@ -156,7 +157,7 @@ function faecherBauen(thema) {
 }
 
 export default function Ueben() {
-  const { data, logChange, T, heute, fokus, uebenZiel, uebenZielSetzen, navZurueck } = useApp();
+  const { data, logChange, T, heute, fokus, uebenZiel, uebenZielSetzen, navZurueck, tresor } = useApp();
   const [fachId, setFachId] = useState("deutsch");
   const [gruppe, setGruppe] = useState(null); // 🗂️ geöffnete Deutsch-Gruppe (weniger Auswahl auf einmal)
   const [runde, setRunde] = useState(null);
@@ -420,11 +421,27 @@ export default function Ueben() {
               🧭 <b>Wozu?</b> {wozuSatz(runde.key)}
             </p>
           )}
-          {runde.index === 0 && KOMPASS_ORIGINAL[runde.key] && (
-            <p data-test="original-hinweis" style={{ margin: "2px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-              📄 <b>Am Original:</b> Kompass-Heft {KOMPASS_ORIGINAL[runde.key].heft}, Aufgabe{KOMPASS_ORIGINAL[runde.key].aufgaben.match(/^\d+$/) ? "" : "n"} {KOMPASS_ORIGINAL[runde.key].aufgaben} ({KOMPASS_ORIGINAL[runde.key].thema}) – liegt im Papier-Ordner.
-            </p>
-          )}
+          {runde.index === 0 && KOMPASS_ORIGINAL[runde.key] && (() => {
+            const o = KOMPASS_ORIGINAL[runde.key];
+            // 📂 Liegt das passende Heft in der Dokumenten-Ablage? Dann öffnet
+            // ein Tipp das Original direkt (entschlüsselt im Browser).
+            const heftDok = data.doks.find((d) => d.kategorie === `kompass-${o.heft === "Deutsch" ? "deutsch" : "mathe"}`);
+            return (
+              <p data-test="original-hinweis" style={{ margin: "2px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+                📄 <b>Am Original:</b> Kompass-Heft {o.heft}, Aufgabe{o.aufgaben.match(/^\d+$/) ? "" : "n"} {o.aufgaben} ({o.thema})
+                {heftDok ? (
+                  <>
+                    {" – "}
+                    <button data-test="original-dok"
+                      onClick={() => dokHolen(heftDok.id).then((p) => tresor.dateiEntschluesseln(p)).then((b) => dokAnzeigen(b, heftDok.name)).catch(() => {})}
+                      style={{ background: "transparent", color: T.primaer, padding: 0, minHeight: 0, height: "auto", fontWeight: 800, textDecoration: "underline" }}>
+                      📂 Heft öffnen
+                    </button>
+                  </>
+                ) : " – liegt im Papier-Ordner."}
+              </p>
+            );
+          })()}
           {runde.key === "zeit" && <ZeitStrahl />}
 
           {runde.typ === "mc" ? (

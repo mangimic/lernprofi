@@ -604,6 +604,20 @@ export default function Eltern() {
         </button>
       </Karte>
 
+      <Karte test="eltern-doks">
+        <b>📂 Unterlagen (Dokumenten-Ablage)</b>
+        <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          {data.doks.length === 0
+            ? "Noch leer. Legt hier PDFs und Bilder ab (z. B. die Kompass-Hefte) – verschlüsselt im Tresor, nur für euch lesbar."
+            : `${data.doks.length} Dokument${data.doks.length === 1 ? "" : "e"} abgelegt – verschlüsselt im Tresor. Das Kind sieht sie über die Startseite.`}
+          {" "}Kompass-Hefte in der 🧭-Kategorie werden aus den Übungen heraus verlinkt.
+        </p>
+        <button data-test="doks-oeffnen" onClick={() => navTo("doks")}
+          style={{ background: T.weich, color: T.text, fontWeight: 700 }}>
+          📂 Ablage öffnen
+        </button>
+      </Karte>
+
       <Karte test="eltern-bericht">
         <b>📊 Leos Wochenbericht</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>

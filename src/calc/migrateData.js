@@ -59,6 +59,7 @@ export function leeresDokument(heute) {
       kartenAus: [],       // 🗃️ ausgeblendete Karteikarten (IDs)
       eigeneKarten: [],    // 🗃️ eigene Eltern-Karten: { id, fach, vs, rs, merk }
     },
+    doks: [],          // 📂 Dokumenten-Ablage: { id, name, kategorie, groesse, datum }
     protokoll: [],     // Änderungsprotokoll: { zeit, bereich, art, text }
   };
 }
@@ -238,6 +239,18 @@ export function migrateData(alt, heute) {
     }
   }
   d.lernstand.karteikasten = { stand: kkStand, runden: Number.isInteger(kk.runden) && kk.runden >= 0 ? kk.runden : 0 };
+
+  // 📂 Dokumenten-Ablage: nur saubere Einträge, höchstens 60.
+  d.doks = (Array.isArray(d.doks) ? d.doks : [])
+    .filter((x) => istObjekt(x) && /^[a-z0-9][a-z0-9-]{3,40}$/.test(x.id || "")
+      && typeof x.name === "string" && x.name.trim().length >= 1)
+    .map((x) => ({
+      id: x.id,
+      name: x.name.trim().slice(0, 80),
+      kategorie: ["kompass-deutsch", "kompass-mathe", "schule", "sonstiges"].includes(x.kategorie) ? x.kategorie : "sonstiges",
+      groesse: Number.isInteger(x.groesse) && x.groesse >= 0 ? x.groesse : 0,
+      datum: typeof x.datum === "string" ? x.datum : "",
+    })).slice(0, 60);
 
   if (!Array.isArray(d.protokoll)) d.protokoll = [];
 

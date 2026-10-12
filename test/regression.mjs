@@ -36,6 +36,22 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.61: Dokumenten-Ablage ----------
+console.log("== v0.61: Dokumenten-Ablage ==");
+test("v0.61: verschlüsselte Doks-API (Server) + Ablage-Seite für Kind und Eltern", (() => {
+  const api = quelle("server/_lib/vaultApi.js");
+  const doks = quelle("src/doks.js");
+  const seite = quelle("src/features/Doks.jsx");
+  return api.includes("/api\\/doks\\/") && api.includes("DOK_ID") && api.includes("env.TRESOR.delete")
+    && quelle("src/crypto.js").includes("export async function bytesVerschluesseln")
+    && doks.includes("DOK_KATEGORIEN") && doks.includes("kompass-deutsch")
+    && seite.includes("dok-hochladen") && seite.includes("dok-oeffnen-") && seite.includes("tresor.elternModus")
+    && quelle("src/features/Ueben.jsx").includes("original-dok")
+    && quelle("src/calc/migrateData.js").includes("d.doks")
+    && quelle("src/features/Start.jsx").includes("zum-doks")
+    && releaseNoteVorhanden("rn-077");
+})());
+
 // ---------- v0.60: Kalender → Übung → Original-Heft ----------
 console.log("== v0.60: Original-Verweise ==");
 test("v0.60: Kompass-Block im Kalender springt in die Übung, Übung verweist aufs Original-Heft", (() => {

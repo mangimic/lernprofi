@@ -85,6 +85,23 @@ describe("migrateData", () => {
     expect(migrateData({}, HEUTE).einstellungen.bausteine).toEqual({ aus: [], namen: {}, eigene: [] });
   });
 
+  it("📂 doks: nur saubere Einträge, Kategorie-Whitelist, höchstens 60", () => {
+    const d = migrateData({ doks: [
+      { id: "dabc123", name: "  Kompass Deutsch 2025.pdf  ", kategorie: "kompass-deutsch", groesse: 1234, datum: "2026-10-12" },
+      { id: "dxyz999", name: "Zeugnis.pdf", kategorie: "quatsch", groesse: -5 },
+      { id: "BÖSE/../x", name: "haxx.pdf", kategorie: "schule" },
+      { id: "dok4ohne", name: "", kategorie: "schule" },
+      "quatsch",
+    ] }, HEUTE);
+    expect(d.doks).toEqual([
+      { id: "dabc123", name: "Kompass Deutsch 2025.pdf", kategorie: "kompass-deutsch", groesse: 1234, datum: "2026-10-12" },
+      { id: "dxyz999", name: "Zeugnis.pdf", kategorie: "sonstiges", groesse: 0, datum: "" },
+    ]);
+    expect(migrateData({}, HEUTE).doks).toEqual([]);
+    const viele = migrateData({ doks: Array.from({ length: 70 }, (_, i) => ({ id: `dok${i}xx`, name: `n${i}` })) }, HEUTE);
+    expect(viele.doks.length).toBe(60);
+  });
+
   it("leeresDokument ist bereits migriert", () => {
     const leer = leeresDokument(HEUTE);
     expect(migrateData(leer, HEUTE)).toEqual(leer);

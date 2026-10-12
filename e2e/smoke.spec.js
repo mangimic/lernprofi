@@ -1433,6 +1433,52 @@ test("🗃️ Karteikasten: Zahlen-Karten fragen das Ergebnis per Eingabe ab, We
   await expect(page.getByTestId("kasten-ergebnis")).toContainText("4 von 5");
 });
 
+test("📂 Dokumenten-Ablage: Eltern laden verschlüsselt hoch, Öffnen entschlüsselt, Übung verlinkt das Heft", async ({ page }) => {
+  // Server-Attrappe: KV-Ablage im Test – es darf NUR Chiffrat ankommen.
+  const ablage = {};
+  await page.route("**/api/doks/**", (r) => {
+    const id = r.request().url().split("/").pop();
+    if (r.request().method() === "PUT") { ablage[id] = r.request().postData(); return r.fulfill({ json: { ok: true } }); }
+    if (r.request().method() === "DELETE") { delete ablage[id]; return r.fulfill({ json: { ok: true } }); }
+    return ablage[id]
+      ? r.fulfill({ body: ablage[id], contentType: "application/json" })
+      : r.fulfill({ status: 404, json: { fehler: "fehlt" } });
+  });
+  await tresorAnlegen(page);
+  await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("doks-oeffnen").click();
+  await expect(page.getByTestId("doks-leer")).toBeVisible();
+  await page.getByTestId("dok-datei").setInputFiles({
+    name: "kompass-heft-deutsch.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4 Testinhalt"),
+  });
+  await page.getByTestId("dok-kategorie").selectOption("kompass-deutsch");
+  await page.getByTestId("dok-hochladen").click();
+  await expect(page.getByTestId("doks-status")).toContainText("liegt verschlüsselt");
+  await expect(page.getByTestId("dok-zeile")).toHaveCount(1);
+  await expect(page.getByTestId("dok-zeile")).toContainText("kompass-heft-deutsch.pdf");
+  expect(Object.keys(ablage).length).toBe(1);
+  expect(Object.values(ablage)[0]).not.toContain("PDF"); // Zero-Knowledge: nie Klartext zum Server
+  // 📖 Öffnen holt das Chiffrat, entschlüsselt im Browser und öffnet einen Tab
+  const tab = page.waitForEvent("popup");
+  await page.locator('[data-test^="dok-oeffnen-"]').click();
+  await (await tab).close();
+  // Startseite zeigt die Kachel fürs Kind; die Lese-Übung verlinkt das Heft direkt
+  await page.getByTestId("nav-start").click();
+  await expect(page.getByTestId("zum-doks")).toContainText("1");
+  if (await page.getByTestId("kompass-karte").count()) {
+    await page.getByTestId("kompass-karte").click();
+    await page.locator('[data-test="kp-fokus-lesen"]').first().click();
+    await expect(page.getByTestId("original-dok")).toBeVisible();
+    await page.getByTestId("abbrechen").click();
+  }
+  // 🗑️ Löschen räumt Liste UND Server-Ablage auf
+  await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("doks-oeffnen").click();
+  await page.locator('[data-test^="dok-weg-"]').click();
+  await expect(page.getByTestId("doks-leer")).toBeVisible();
+  expect(Object.keys(ablage).length).toBe(0);
+});
+
 test("🗃️ Karteikarten: 4 je A4-Blatt, Rückseiten gespiegelt, Fach-Filter und Druck-Knopf", async ({ page }) => {
   await tresorAnlegen(page);
   await page.getByTestId("nav-eltern").click();

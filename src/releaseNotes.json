@@ -1,5 +1,25 @@
 [
   {
+    "id": "rn-077",
+    "version": "0.61.0",
+    "datum": "2026-10-12",
+    "titel": "Dokumenten-Ablage",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "📂 Neue Dokumenten-Ablage für die Familie: Eltern laden PDFs und Bilder hoch (bis 12 MB, in Kategorien wie Kompass Deutsch/Mathe, Schule) – alles wird im Browser mit dem Tresor-Schlüssel verschlüsselt, der Server sieht nie Klartext."
+      },
+      {
+        "type": "neu",
+        "text": "Das Kind erreicht die Unterlagen über die Startseite (die Kachel erscheint, sobald etwas abgelegt ist) und öffnet jedes Dokument mit einem Tipp. Verwalten (hochladen, löschen) können nur die Eltern."
+      },
+      {
+        "type": "neu",
+        "text": "🧭 Liegt ein Kompass-Heft in seiner Kategorie, wird aus „Am Original … liegt im Papier-Ordner“ ein direkter „📂 Heft öffnen“-Knopf in den Übungen."
+      }
+    ]
+  },
+  {
     "id": "rn-076",
     "version": "0.60.0",
     "datum": "2026-10-12",

@@ -103,6 +103,12 @@ export default function Start() {
           style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
           🗓️ Mein Wochenplan (DU bestimmst dein Pensum)
         </button>
+        {data.doks.length > 0 && (
+          <button data-test="zum-doks" onClick={() => navTo("doks")}
+            style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
+            📂 Unsere Unterlagen ({data.doks.length})
+          </button>
+        )}
       </div>
       {(heutePlan.length > 0 || heuteFeste.length > 0) && (
         <div data-test="heute-plan" style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>

@@ -11,6 +11,7 @@ import Einstufung from "./features/Einstufung.jsx";
 import KompassPlan from "./features/KompassPlan.jsx";
 import Karteikarten from "./features/Karteikarten.jsx";
 import KartenKasten from "./features/KartenKasten.jsx";
+import Doks from "./features/Doks.jsx";
 import Schrift from "./features/Schrift.jsx";
 import Aufsatz from "./features/Aufsatz.jsx";
 import Wochenplan from "./features/Wochenplan.jsx";
@@ -18,7 +19,7 @@ import Eltern from "./features/Eltern.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.60.0";
+export const APP_VERSION = "0.61.0";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -191,6 +192,7 @@ export default function App() {
          route === "kompass" ? <KompassPlan /> :
          route === "karten" ? <Karteikarten /> :
          route === "kasten" ? <KartenKasten /> :
+         route === "doks" ? <Doks /> :
          route === "einstufung" ? <Einstufung /> :
          route === "eltern" && tresor.elternModus ? <Eltern /> : <Start />}
       </main>

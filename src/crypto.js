@@ -72,3 +72,20 @@ export async function entschluesseln(schluessel, paket) {
   );
   return TD.decode(klar);
 }
+
+/** Verschlüsselt rohe Bytes (Dateien) → { iv, chiffrat } (Base64). */
+export async function bytesVerschluesseln(schluessel, bytes) {
+  const iv = zufallsBytes(12);
+  const chiffrat = await globalThis.crypto.subtle.encrypt(
+    { name: "AES-GCM", iv }, schluessel, bytes,
+  );
+  return { iv: toB64(iv), chiffrat: toB64(new Uint8Array(chiffrat)) };
+}
+
+/** Entschlüsselt { iv, chiffrat } → Uint8Array (Dateien). */
+export async function bytesEntschluesseln(schluessel, paket) {
+  const klar = await globalThis.crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: fromB64(paket.iv) }, schluessel, fromB64(paket.chiffrat),
+  );
+  return new Uint8Array(klar);
+}
