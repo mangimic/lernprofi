@@ -7,6 +7,7 @@ import { subjektPool, praedikatPool, gkPool } from "../calc/aufgaben/saetze.js";
 import { umstellenPool, umSatzText, umstellenPruefen } from "../calc/aufgaben/satzglieder.js";
 import { KOMPASS_DEUTSCH_DATEN, KOMPASS_DEUTSCH_BEREICHE } from "../calc/aufgaben/kompassDeutsch.js";
 import { DEUTSCH_GRUPPEN, leoWahl } from "../calc/uebenGruppen.js";
+import { KOMPASS_ORIGINAL } from "../calc/kompassPlan.js";
 import AufgabenBild from "./AufgabenBild.jsx";
 import { zeitPool, wortartenPool, faellePool, redePool, gwsPool } from "../calc/aufgaben/deutschKonverter.js";
 import { STARK_DATEN, STARK_BEREICHE } from "../calc/aufgaben/stark.js";
@@ -417,6 +418,11 @@ export default function Ueben() {
           {runde.index === 0 && wozuSatz(runde.key) && (
             <p data-test="wozu-anker" style={{ margin: "2px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
               🧭 <b>Wozu?</b> {wozuSatz(runde.key)}
+            </p>
+          )}
+          {runde.index === 0 && KOMPASS_ORIGINAL[runde.key] && (
+            <p data-test="original-hinweis" style={{ margin: "2px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+              📄 <b>Am Original:</b> Kompass-Heft {KOMPASS_ORIGINAL[runde.key].heft}, Aufgabe{KOMPASS_ORIGINAL[runde.key].aufgaben.match(/^\d+$/) ? "" : "n"} {KOMPASS_ORIGINAL[runde.key].aufgaben} ({KOMPASS_ORIGINAL[runde.key].thema}) – liegt im Papier-Ordner.
             </p>
           )}
           {runde.key === "zeit" && <ZeitStrahl />}

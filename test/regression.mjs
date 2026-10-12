@@ -36,6 +36,19 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.60: Kalender → Übung → Original-Heft ----------
+console.log("== v0.60: Original-Verweise ==");
+test("v0.60: Kompass-Block im Kalender springt in die Übung, Übung verweist aufs Original-Heft", (() => {
+  const kp = quelle("src/calc/kompassPlan.js");
+  const w = quelle("src/features/Wochenplan.jsx");
+  const u = quelle("src/features/Ueben.jsx");
+  return kp.includes("export function feldVonNotiz") && kp.includes("export const KOMPASS_ORIGINAL")
+    && w.includes("block-ueben") && w.includes("feldVonNotiz(block.notiz)")
+    && u.includes("original-hinweis") && u.includes("KOMPASS_ORIGINAL[runde.key]")
+    && quelle("e2e/smoke.spec.js").includes("block-ueben")
+    && releaseNoteVorhanden("rn-076");
+})());
+
 // ---------- v0.59: Ergebnis-Eingabe im Kasten ----------
 console.log("== v0.59: Ergebnis-Eingabe ==");
 test("v0.59: Zahlen-Karten fragen das Ergebnis per Eingabefeld ab (objektive Wertung)", (() => {

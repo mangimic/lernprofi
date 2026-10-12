@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { tageBis, kompassTermine, kompassWochen, KOMPASS_STANDARD, kompassUebernehmen } from "./kompassPlan.js";
+import { tageBis, kompassTermine, kompassWochen, KOMPASS_STANDARD, kompassUebernehmen, KOMPASS_FELD_NAMEN, KOMPASS_ORIGINAL, feldVonNotiz } from "./kompassPlan.js";
 import { planFuerWoche, blockHinzu, blockFertig, FESTE_TERMINE_STANDARD, leererPlan, planSchreiben } from "./wochenplan.js";
 
 // Fixes Test-Datum: 6 Wochen vor den Kompass-Terminen (fiktive Daten, kein Kind-Bezug).
@@ -94,5 +94,26 @@ describe("kompassUebernehmen", () => {
     const thema = neu.bloecke.find((b) => b.typ === "deutsch");
     expect(thema.slot).toBe(870); // erster ersetzbarer Freizeit-Block danach
     expect(thema.notiz).toBe("Lese-Detektiv");
+  });
+});
+
+describe("Original-Arbeitsblatt-Verweise", () => {
+  it("feldVonNotiz: Baustein-Notiz führt zurück zum Übungs-Feld", () => {
+    expect(feldVonNotiz("Lese-Detektiv")).toBe("lesen");
+    expect(feldVonNotiz("Formen & Flächen")).toBe("mgeo");
+    expect(feldVonNotiz("Fliegenfischen")).toBe(null);
+    expect(feldVonNotiz(undefined)).toBe(null);
+    for (const [feld, name] of Object.entries(KOMPASS_FELD_NAMEN)) {
+      expect(feldVonNotiz(name)).toBe(feld); // Rundreise für jedes Feld
+    }
+  });
+  it("KOMPASS_ORIGINAL: jedes Fokus-Feld zeigt auf Heft und Aufgaben", () => {
+    for (const feld of Object.keys(KOMPASS_FELD_NAMEN)) {
+      const o = KOMPASS_ORIGINAL[feld];
+      expect(o, feld).toBeTruthy();
+      expect(["Deutsch", "Mathe"], feld).toContain(o.heft);
+      expect(o.aufgaben, feld).toMatch(/^\d/);
+      expect(o.thema.length, feld).toBeGreaterThan(5);
+    }
   });
 });

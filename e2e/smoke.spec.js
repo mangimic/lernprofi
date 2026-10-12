@@ -1291,6 +1291,9 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await page.getByTestId("fenster-wahl-angeln").click();
   await expect(page.getByTestId("slot-6-840")).toContainText("Angeln");
   await expect(page.getByTestId("slot-6-840")).not.toContainText("Schlagzeug");
+  // Die lokale Sicherung (IndexedDB) schreibt asynchron – ohne diese Pause
+  // verliert der direkt folgende Reload unter Volllast den Baustein-Wechsel.
+  await page.waitForTimeout(800);
 
   // 🧩 Plan-Kategorien: Eltern benennen um, blenden aus und ergänzen eine eigene
   // (nach dem PIN-Neustart ist die App im Kind-Modus – erst als Eltern entsperren)
@@ -1348,6 +1351,12 @@ test("🧭 Kompass-Countdown: Termine automatisch im Plan, Wochen-Fahrplan, Chip
   await expect(page.getByTestId("tag-0")).toContainText("Hausaufgaben");
   await expect(page.getByTestId("tag-0")).toContainText("Schlagzeug");
   await expect(page.getByTestId("tag-0")).toContainText("Lese-Detektiv");
+  // ▶️ Direkt vom Kalender-Block in die Übung – mit Verweis aufs Original-Heft,
+  // und Abbrechen führt ZURÜCK in den Plan (Herkunfts-Navigation)
+  await page.locator('[data-test="tag-0"] [data-test="block-ueben"]').first().click();
+  await expect(page.getByTestId("original-hinweis")).toContainText("Kompass-Heft Deutsch, Aufgaben 1–7");
+  await page.getByTestId("abbrechen").click();
+  await expect(page.getByTestId("plan-seite")).toBeVisible();
   // Ein Fokus-Chip startet die Übung direkt – und Abbrechen führt ZURÜCK zum Kompass
   await page.getByTestId("nav-start").click();
   await page.getByTestId("kompass-karte").click();

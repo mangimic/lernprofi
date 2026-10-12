@@ -89,6 +89,35 @@ export const KOMPASS_FELD_NAMEN = {
   mgroessen: "Größen & Sachaufgaben", mdaten: "Daten & Zufall",
 };
 
+/** 🔎 Umkehrung: Baustein-Notiz („Lese-Detektiv") → Übungs-Feld („lesen").
+    Damit springt ein Kompass-Lernblock im Kalender direkt in seine Übung. */
+export function feldVonNotiz(notiz) {
+  if (!notiz) return null;
+  for (const [feld, name] of Object.entries(KOMPASS_FELD_NAMEN)) {
+    if (name === notiz) return feld;
+  }
+  return null;
+}
+
+/** 📄 Wo dieselbe Sache im ORIGINAL-Arbeitsheft steht (Kompass 4,
+    Papier liegt zu Hause): je Übungs-Feld das Heft und die
+    Aufgabennummern – zum gezielten Nachüben am echten Blatt. */
+export const KOMPASS_ORIGINAL = {
+  lesen: { heft: "Deutsch", aufgaben: "1–7", thema: "Lesetext mit Fragen" },
+  strategie: { heft: "Deutsch", aufgaben: "8–10", thema: "Schreibweise erklären" },
+  gws: { heft: "Deutsch", aufgaben: "9 & 13", thema: "Großschreibung, Satz trennen" },
+  zusnomen: { heft: "Deutsch", aufgaben: "14 & 21", thema: "Zusammengesetzte Nomen" },
+  wortfam: { heft: "Deutsch", aufgaben: "17", thema: "Wortstamm einkreisen" },
+  steigern: { heft: "Deutsch", aufgaben: "18 & 19", thema: "Adjektive steigern" },
+  verbform: { heft: "Deutsch", aufgaben: "15, 16 & 22", thema: "Verben in Formen setzen" },
+  zeit: { heft: "Deutsch", aufgaben: "20 & 22", thema: "Zeitformen verbinden" },
+  mrechnen: { heft: "Mathe", aufgaben: "1, 4, 6, 7 & 10", thema: "Rechnen, Zahlenmauer, Tricks" },
+  mzahlen: { heft: "Mathe", aufgaben: "3, 5, 8 & 9", thema: "Stellenwert, Folgen, Mitte" },
+  mgeo: { heft: "Mathe", aufgaben: "12, 13, 15 & 16", thema: "Flächen, Würfelgebäude, Netz" },
+  mgroessen: { heft: "Mathe", aufgaben: "2, 17–20", thema: "Größen & Sachaufgaben" },
+  mdaten: { heft: "Mathe", aufgaben: "21 & 22", thema: "Kugeln & Wahrscheinlichkeit" },
+};
+
 // ─── 📅 Fahrplan → Wochenplan übernehmen ───
 // Regeln (Familien-Vereinbarung):
 // 1. Erst müssen 📚 Hausaufgaben und 🥁 Schlagzeug am Tag stehen (Block oder

@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-076",
+    "version": "0.60.0",
+    "datum": "2026-10-12",
+    "titel": "Vom Kalender zur Aufgabe",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "▶️ Kompass-Lernblöcke im Wochenplan haben jetzt einen Spring-Knopf: Ein Tipp startet direkt die passende Übung (z. B. „Lese-Detektiv“ → Lese-Training). Abbrechen führt zurück in den Plan."
+      },
+      {
+        "type": "neu",
+        "text": "📄 Jede Kompass-Übung verweist am Start auf die passende Stelle im ORIGINAL-Arbeitsheft – Heft (Deutsch/Mathe), Aufgabennummern und Thema, z. B. „Kompass-Heft Deutsch, Aufgaben 1–7 (Lesetext mit Fragen)“. So lässt sich nach der App-Runde gezielt am echten Blatt weiterüben."
+      }
+    ]
+  },
+  {
     "id": "rn-075",
     "version": "0.59.0",
     "datum": "2026-10-09",

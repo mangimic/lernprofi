@@ -11,6 +11,7 @@ import {
   blockSerie, blockSerieEntfernen, blockTyp, bausteinListe, bausteinAnzeige,
 } from "../calc/wochenplan.js";
 import { schulfreiAm, ferienAm, monatsGitter, monatsName, monatSchritt, FERIEN_BW, SCHULJAHR } from "../calc/kalender.js";
+import { feldVonNotiz } from "../calc/kompassPlan.js";
 
 /* 🗓️ MEIN WOCHENPLAN (Etappe 9): Felix setzt sein Pensum selbst.
    Bedienung doppelt (ADHS-gerecht, iPad-tauglich):
@@ -42,7 +43,9 @@ function PaletteBaustein({ b, gewaehlt, aufTipp }) {
 /* Eine Stunde (14-19 Uhr) an einem Tag: leer = Ablagefläche (tippen
    oder hineinziehen), belegt = Baustein-Kärtchen mit ✖. */
 function StundenSlot({ tagIdx, slot, block, blockStart, fest, wahlAktiv, aufTipp, aufWeg, aufEdit, aufFest }) {
-  const { T, data } = useApp();
+  const { T, data, uebenZielSetzen, navTo } = useApp();
+  // 🧭 Kompass-Lernblock? Dann führt ein Knopf direkt in die passende Übung.
+  const kompassFeld = block && !block.fertig && block.typ !== "eigen" ? feldVonNotiz(block.notiz) : null;
   const { setNodeRef, isOver } = useDroppable({ id: `slot-${tagIdx}-${slot}`, disabled: !!fest });
   // Platzierte Bausteine sind selbst ziehbar (umplanen ohne Löschen).
   const zieh = useDraggable({ id: `block-${block?.id ?? `leer-${tagIdx}-${slot}`}`, disabled: !block || !blockStart });
@@ -102,6 +105,14 @@ function StundenSlot({ tagIdx, slot, block, blockStart, fest, wahlAktiv, aufTipp
             {block.typ !== "eigen" && block.notiz && <span style={{ fontWeight: 400, opacity: 0.85 }}> · {block.notiz}</span>}
             {blockDauerVon(block) > 30 && <span style={{ fontWeight: 400, opacity: 0.85 }}> · bis {uhr(block.slot + blockDauerVon(block))}</span>}
           </span>
+          {kompassFeld && (
+            <button data-test="block-ueben"
+              onClick={(ev) => { ev.stopPropagation(); uebenZielSetzen(kompassFeld); navTo("ueben"); }}
+              aria-label={`Jetzt üben: ${block.notiz}`}
+              style={{ background: "transparent", color: "inherit", padding: 0, minHeight: 0, height: "auto", fontSize: 15 }}>
+              ▶️
+            </button>
+          )}
           <button data-test="block-weg" onClick={(ev) => { ev.stopPropagation(); aufWeg(block.id); }}
             aria-label="Baustein entfernen"
             style={{ background: "transparent", color: "inherit", padding: 0, minHeight: 0, height: "auto", fontSize: 14 }}>
