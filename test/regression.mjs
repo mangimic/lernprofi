@@ -36,6 +36,22 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.66: Mathekönner ----------
+console.log("== v0.66: Mathekönner ==");
+test("v0.66: drei Mathekönner-Pools in Mathe verdrahtet, Wochenend-Planer mit Einplan-Karte", (() => {
+  const mk = quelle("src/calc/aufgaben/mathekoenner.js");
+  const kp = quelle("src/calc/koennerPlan.js");
+  return ["mk1x1", "mkgesch", "mkzr"].every((k) => mk.includes(`${k}:`))
+    && mk.includes("Rechengeschichten") && mk.includes("Zahlen bis 10 000")
+    && quelle("src/calc/aufgaben/mathe.js").includes("Object.assign(MATHE_DATEN, MK_DATEN)")
+    && kp.includes("export function koennerEinplanen") && kp.includes("KOENNER_FELD_NAMEN")
+    && quelle("src/calc/kompassPlan.js").includes("KOENNER_FELD_NAMEN")
+    && quelle("src/features/Start.jsx").includes("koenner-einplanen")
+    && quelle("src/calc/wozu.js").includes("mk1x1:")
+    && quelle("e2e/smoke.spec.js").includes("koenner-einplanen")
+    && releaseNoteVorhanden("rn-082");
+})());
+
 // ---------- v0.65: Suche ----------
 console.log("== v0.65: Suche ==");
 test("v0.65: flacher Such-Index (bewusst ohne Knowledge Graph), Overlay mit Deep-Links", (() => {

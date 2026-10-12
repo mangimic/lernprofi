@@ -1551,6 +1551,29 @@ test("🔍 Suche: findet Übungen, Karten und Seiten – ein Tipp springt hin", 
   await expect(page.getByTestId("suche-dialog")).toHaveCount(0);
 });
 
+test("🏅 Mathekönner: drei Übungsbereiche, ein Tipp plant das Wochenende", async ({ page }) => {
+  await tresorAnlegen(page);
+  // Ein Tipp auf der Startseite plant Sa (1×1 + Rechengeschichten) und So (Zahlenraum)
+  await page.getByTestId("koenner-einplanen").click();
+  await expect(page.getByTestId("koenner-karte")).toHaveCount(0); // erledigt → Karte verschwindet
+  await page.getByTestId("nav-plan").click();
+  if (new Date().getDay() === 0) await page.getByTestId("woche-naechste").click(); // Sonntag: Wochenende schon vorbei
+  await expect(page.getByTestId("tag-5")).toContainText("1×1-Training");
+  await expect(page.getByTestId("tag-5")).toContainText("Rechengeschichten");
+  await expect(page.getByTestId("tag-6")).toContainText("Zahlen bis 10 000");
+  // ▶️ am Block springt direkt in die Übung – mit Wozu-Anker
+  await page.locator('[data-test="tag-6"] [data-test="block-ueben"]').first().click();
+  await expect(page.getByTestId("frage-karte")).toBeVisible();
+  await expect(page.getByTestId("wozu-anker")).toContainText("10 000");
+  await page.getByTestId("abbrechen").click();
+  await expect(page.getByTestId("plan-seite")).toBeVisible();
+  // Die Bereiche stehen auch in der Übungs-Welt von Mathe
+  await page.getByTestId("nav-ueben").click();
+  await page.getByTestId("ueben-fach-mathe").click();
+  await page.getByTestId("bereich-mkgesch").click();
+  await expect(page.getByTestId("frage-text")).toBeVisible();
+});
+
 test("🗃️ Karteikarten: 4 je A4-Blatt, Rückseiten gespiegelt, Fach-Filter und Druck-Knopf", async ({ page }) => {
   await tresorAnlegen(page);
   await page.getByTestId("nav-eltern").click();

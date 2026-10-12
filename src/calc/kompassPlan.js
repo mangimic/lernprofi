@@ -9,6 +9,7 @@ import {
   tagesStunden, festerTermin, istAusgefallen, slotBelegt,
 } from "./wochenplan.js";
 import { schulfreiAm, ferienAm } from "./kalender.js";
+import { KOENNER_FELD_NAMEN } from "./koennerPlan.js";
 
 /** Haupttermine Kompass 4 im Schuljahr 2026/27 (amtlich). */
 export const KOMPASS_STANDARD = [
@@ -90,11 +91,14 @@ export const KOMPASS_FELD_NAMEN = {
 };
 
 /** 🔎 Umkehrung: Baustein-Notiz („Lese-Detektiv") → Übungs-Feld („lesen").
-    Damit springt ein Kompass-Lernblock im Kalender direkt in seine Übung. */
+    Damit springt ein Lernblock im Kalender direkt in seine Übung –
+    das gilt für Kompass- UND Mathekönner-Blöcke. */
 export function feldVonNotiz(notiz) {
   if (!notiz) return null;
-  for (const [feld, name] of Object.entries(KOMPASS_FELD_NAMEN)) {
-    if (name === notiz) return feld;
+  for (const karte of [KOMPASS_FELD_NAMEN, KOENNER_FELD_NAMEN]) {
+    for (const [feld, name] of Object.entries(karte)) {
+      if (name === notiz) return feld;
+    }
   }
   return null;
 }

@@ -1,5 +1,7 @@
 /* Aufgaben-Pools Mathe (aus der Alt-App v1.86 übernommen, Kompass-4-Basis).
    Reine Daten: je Bereich { easy, hard }, Aufgabe = { f, r, x:[2], tipp, kontext? } */
+import { MK_DATEN, MK_BEREICHE } from "./mathekoenner.js";
+
 export const MATHE_DATEN={
   mrechnen:{
     easy:[
@@ -162,4 +164,6 @@ export const MATHE_BEREICHE = [
   { key: "mgeo", emoji: "📐", name: "Formen & Flächen" },
   { key: "mgroessen", emoji: "⏰", name: "Größen & Sachaufgaben" },
   { key: "mdaten", emoji: "🎲", name: "Daten & Zufall" },
+  ...MK_BEREICHE, // 🏅 Mathekönner-Schwerpunkte (1×1, Rechengeschichten, ZR 10 000)
 ];
+Object.assign(MATHE_DATEN, MK_DATEN);

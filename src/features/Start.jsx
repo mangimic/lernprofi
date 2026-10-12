@@ -1,4 +1,5 @@
 import { useApp } from "../appContext.jsx";
+import { koennerEinplanen } from "../calc/koennerPlan.js";
 import { heutigerTag, lernspur, muenzenNachRunde, aufgabenZaehlen } from "../calc/lerntage.js";
 import { missionsOpts } from "../calc/tagesform.js";
 import { zeitUebrigMin } from "../calc/elternWerkzeuge.js";
@@ -35,6 +36,16 @@ export default function Start() {
   const heuteFeste = [...(data.einstellungen.festeTermine || [])
     .filter((f) => f.tag === heuteIdx && !istAusgefallen(plan, heuteIdx, f.beginn))]
     .sort((a, b) => a.beginn - b.beginn);
+  // 🏅 Mathekönner: ein Tipp legt die drei Schwerpunkte aufs kommende
+  // Wochenende (Sa: 1×1 + Rechengeschichten · So: Zahlen bis 10 000).
+  const koennerPlanen = () => {
+    const erg = koennerEinplanen(data.lernstand.wochenplan, heute, data.einstellungen.festeTermine);
+    logChange({
+      ...data,
+      lernstand: { ...data.lernstand, wochenplan: erg.doc, koenner: { geplant: heute } },
+    }, "wochenplan", "neu", "Mathekönner-Wochenende eingeplant (1×1 · Rechengeschichten · Zahlen bis 10 000)");
+  };
+
   const planHaken = (id) => {
     const block = plan.bloecke.find((b) => b.id === id);
     if (!block || block.fertig) return;
@@ -119,6 +130,22 @@ export default function Start() {
           </div>
         );
       })()}
+      {!data.lernstand.koenner?.geplant && (
+        <div data-test="koenner-karte" style={{
+          background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand,
+          border: "2px solid var(--warn)",
+        }}>
+          <b>🏅 Mathekönner kommt!</b>
+          <p style={{ margin: "4px 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+            Deine drei Schwerpunkte stehen bereit: ✖️ das 1×1 · 📖 Rechengeschichten · 🔢 Zahlen bis 10 000.
+            Ein Tipp legt sie aufs Wochenende: Samstag 1×1 und Rechengeschichten, Sonntag Zahlen bis 10 000.
+          </p>
+          <button data-test="koenner-einplanen" onClick={koennerPlanen}
+            style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+            🗓️ Fürs Wochenende einplanen
+          </button>
+        </div>
+      )}
       <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
         <h2 style={{ margin: "0 0 6px" }}>Hallo! 👋</h2>
         <p data-test="tages-stand" style={{ margin: "0 0 10px", color: T.textLeise }}>
