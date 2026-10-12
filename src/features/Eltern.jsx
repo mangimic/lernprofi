@@ -31,6 +31,17 @@ const STUFEN_FELDER = [
   { key: "stark", name: "💪 Stark mit Leo" },
 ];
 
+
+/* 📑 Eltern-Navigation: sechs Aufgaben-Gruppen statt einer langen Liste. */
+const ELTERN_GRUPPEN = [
+  { key: "stand", name: "📈 Lernstand" },
+  { key: "regeln", name: "🎯 Üben & Regeln" },
+  { key: "plan", name: "🗓️ Plan & Termine" },
+  { key: "material", name: "🗃️ Material" },
+  { key: "leo", name: "🤖 Leo (KI)" },
+  { key: "konto", name: "🔐 Konto & Daten" },
+];
+
 function Karte({ children, test }) {
   const { T } = useApp();
   return (
@@ -136,6 +147,7 @@ export default function Eltern() {
   const [saetzeWoerter, setSaetzeWoerter] = useState("");
   const [vorschlaege, setVorschlaege] = useState(null); // 🔤 null | {laden} | {saetze, auswahl} | {grund}
   useEffect(() => { kiStatus().then(setKi); }, []);
+  const [tab, setTab] = useState("stand"); // 📑 aktive Gruppe der Eltern-Navigation
   const syncAktion = async (arbeit, erfolgsText) => {
     setSyncMeldung("⏳ Einen Moment …"); setFrage(null);
     const erg = await arbeit();
@@ -155,15 +167,113 @@ export default function Eltern() {
     <div data-test="eltern-karte">
       <h2>🔧 Elternbereich</h2>
 
-      <Karte test="eltern-profil">
-        <b>👤 Profil</b>
+      {/* 📑 Gruppen-Navigation: eine Aufgabe, eine Ansicht – statt einer
+          endlosen Liste. Die Leiste klebt oben und scrollt seitlich. */}
+      <div data-test="eltern-tabs" style={{
+        position: "sticky", top: 0, zIndex: 5, display: "flex", gap: 6, overflowX: "auto",
+        padding: "8px 2px", margin: "0 -2px 10px", background: "var(--grund)",
+      }}>
+        {ELTERN_GRUPPEN.map((g) => (
+          <button key={g.key} data-test={`eb-tab-${g.key}`} onClick={() => setTab(g.key)}
+            style={{
+              whiteSpace: "nowrap", fontWeight: 700, borderRadius: 20, padding: "8px 14px",
+              height: "auto", flexShrink: 0,
+              background: tab === g.key ? T.primaer : T.karte,
+              color: tab === g.key ? T.primaerText : T.text,
+            }}>
+            {g.name}
+          </button>
+        ))}
+      </div>
+
+      {tab === "stand" && (<>
+      <Karte test="eltern-uebersicht">
+        <b>📈 Lern-Übersicht</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          Der Name bleibt verschlüsselt auf dem Gerät.
+          Nur Zahlen, keine Bewertung. Heute: {tagHeute.missionen} Mission{tagHeute.missionen === 1 ? "" : "en"}
+          {tagHeute.zielErreicht ? " · 🎯 Ziel erreicht" : ""}{spur > 0 ? ` · 🛤️ Lernspur ${spur} Tag${spur === 1 ? "" : "e"}` : ""}
+          {" · 🪙 "}{data.lernstand.muenzen} Münzen
         </p>
-        <input data-test="profil-name" style={feld} placeholder="Vorname (freiwillig)" value={data.profil.name}
-          onChange={(e) => logChange({ ...data, profil: { ...data.profil, name: e.target.value } }, "profil", "geaendert", "Name angepasst")} />
+        {tage.length ? (
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--schrift-klein)" }}>
+            <thead><tr style={{ textAlign: "left", color: T.textLeise }}><th>Tag</th><th>Tagesform</th><th style={{ textAlign: "center" }}>Aufgaben</th><th style={{ textAlign: "center" }}>Missionen</th><th style={{ textAlign: "center" }}>Ziel</th></tr></thead>
+            <tbody>
+              {tage.map((t) => (
+                <tr key={t.tag}><td>{t.tag}</td><td>{TAGESFORM_MODI[t.form] || "–"}</td><td style={{ textAlign: "center" }}>{t.aufgaben}</td><td style={{ textAlign: "center" }}>{t.missionen}</td><td style={{ textAlign: "center" }}>{t.zielErreicht ? "🎯" : "–"}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        ) : <p style={{ color: T.textLeise }}>Noch keine Lerntage – die Übersicht füllt sich beim Üben.</p>}
       </Karte>
 
+      <Karte test="eltern-bericht">
+        <b>📊 Leos Wochenbericht</b>
+        <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          Leo fasst die letzten 7 Tage zusammen: Lichtblicke, eine Beobachtung, 2-3 Tipps.
+          Es gehen nur anonyme Zähler zum Server – nie der Name, nie Texte des Kindes.
+        </p>
+        {!data.einstellungen.ki.bericht ? (
+          <p data-test="bericht-hinweis" style={{ margin: 0, color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+            Oben bei den KI-Funktionen „📊 Wochenbericht“ freigeben, dann geht es hier los.
+          </p>
+        ) : (
+          <>
+            <button data-test="bericht-knopf" disabled={!!wBericht?.laden || !ki?.verfuegbar}
+              onClick={async () => {
+                setWBericht({ laden: true });
+                setWBericht(await kiBericht({ daten: berichtDaten(data, heute), modell: data.einstellungen.ki.modell }));
+              }}
+              style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
+              {wBericht?.laden ? "📊 Leo schaut auf die Woche …" : "📊 Wochenbericht erstellen"}
+            </button>
+            {wBericht && !wBericht.laden && (wBericht.ok ? (
+              <div data-test="bericht-ansicht" style={{ marginTop: 10, background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px" }}>
+                {wBericht.gut.map((g, i) => <p key={i} style={{ margin: "0 0 6px" }}>⭐ {g}</p>)}
+                <p style={{ margin: "0 0 6px" }}>👀 {wBericht.beobachtung}</p>
+                {wBericht.tipps.map((t2, i) => <p key={i} style={{ margin: "0 0 6px" }}>💡 {t2}</p>)}
+                <p style={{ margin: 0, color: T.textLeise, fontSize: "12.5px" }}>
+                  Kosten: {String(wBericht.kostenCent).replace(".", ",")} ct · Der Bericht wird nicht gespeichert.
+                </p>
+              </div>
+            ) : (
+              <p data-test="bericht-fehler" style={{ margin: "8px 0 0", color: "var(--warn)", fontSize: "var(--schrift-klein)" }}>
+                {wBericht.grund === "deckel" ? "⚠️ Der Monatsdeckel ist erreicht."
+                  : "⚠️ Das hat gerade nicht geklappt – bitte nochmal versuchen."}
+              </p>
+            ))}
+          </>
+        )}
+      </Karte>
+
+      <Karte test="eltern-gespraech">
+        <b>💬 Gesprächsimpulse</b>
+        <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          Das sind keine Tests, sondern <b>Tür-Öffner</b> – Gespräche, die prägen, lange bevor es
+          darauf ankommt. Sie passen gut zu dem, was Ihr Kind in „💪 Stark mit Leo“ übt.
+        </p>
+        <p data-test="gespraech-tages" style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px" }}>
+          🌟 <b>Frage des Tages</b> ({gespraechDesTages(heute).bereich}):<br />„{gespraechDesTages(heute).frage}“
+        </p>
+        <p style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px", fontSize: "var(--schrift-klein)" }}>
+          💡 <b>So klappt es am besten:</b> nebenbei fragen (Auto, Abendessen, Zähneputzen) statt im
+          Verhör-Modus · selbst zuerst etwas Eigenes erzählen · Antworten stehen lassen, nicht sofort
+          verbessern oder trösten · eine Frage pro Tag reicht völlig.
+        </p>
+        {GESPRAECH_BEREICHE.map((b) => (
+          <details key={b.titel} data-test="gespraech-bereich" style={{ marginTop: 6 }}>
+            <summary style={{ cursor: "pointer", fontWeight: 700 }}>{b.emoji} {b.titel}</summary>
+            <ol style={{ margin: "6px 0 6px 18px", padding: 0 }}>
+              {b.fragen.map((f, i) => <li key={i} style={{ marginBottom: 8 }}>{f}</li>)}
+            </ol>
+          </details>
+        ))}
+        <p style={{ marginTop: 8, color: T.textLeise, fontSize: "12.5px" }}>
+          Alles bleibt im verschlüsselten Tresor – die App speichert keine Antworten. Die Fragen sind
+          an eine Coaching-Fragensammlung angelehnt und für 8–10 Jahre übersetzt.
+        </p>
+      </Karte>
+      </>)}
+      {tab === "regeln" && (<>
       <Karte test="eltern-ziel">
         <b>🎯 Tagesziel</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
@@ -195,25 +305,6 @@ export default function Eltern() {
             </div>
           ))}
         </details>
-      </Karte>
-
-      <Karte test="eltern-uebersicht">
-        <b>📈 Lern-Übersicht</b>
-        <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          Nur Zahlen, keine Bewertung. Heute: {tagHeute.missionen} Mission{tagHeute.missionen === 1 ? "" : "en"}
-          {tagHeute.zielErreicht ? " · 🎯 Ziel erreicht" : ""}{spur > 0 ? ` · 🛤️ Lernspur ${spur} Tag${spur === 1 ? "" : "e"}` : ""}
-          {" · 🪙 "}{data.lernstand.muenzen} Münzen
-        </p>
-        {tage.length ? (
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--schrift-klein)" }}>
-            <thead><tr style={{ textAlign: "left", color: T.textLeise }}><th>Tag</th><th>Tagesform</th><th style={{ textAlign: "center" }}>Aufgaben</th><th style={{ textAlign: "center" }}>Missionen</th><th style={{ textAlign: "center" }}>Ziel</th></tr></thead>
-            <tbody>
-              {tage.map((t) => (
-                <tr key={t.tag}><td>{t.tag}</td><td>{TAGESFORM_MODI[t.form] || "–"}</td><td style={{ textAlign: "center" }}>{t.aufgaben}</td><td style={{ textAlign: "center" }}>{t.missionen}</td><td style={{ textAlign: "center" }}>{t.zielErreicht ? "🎯" : "–"}</td></tr>
-              ))}
-            </tbody>
-          </table>
-        ) : <p style={{ color: T.textLeise }}>Noch keine Lerntage – die Übersicht füllt sich beim Üben.</p>}
       </Karte>
 
       <Karte test="eltern-lernen">
@@ -301,134 +392,80 @@ export default function Eltern() {
         </button>
       </Karte>
 
-      <Karte test="eltern-gespraech">
-        <b>💬 Gesprächsimpulse</b>
+      <Karte test="eltern-saetze">
+        <b>🔤 Persönliche Übungssätze</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          Das sind keine Tests, sondern <b>Tür-Öffner</b> – Gespräche, die prägen, lange bevor es
-          darauf ankommt. Sie passen gut zu dem, was Ihr Kind in „💪 Stark mit Leo“ übt.
+          Leo baut Abschreib-Sätze aus den Interessen Ihres Kindes fürs 🖐️ Schreib-Training.
+          Sie sehen jeden Satz <b>vor</b> dem Einspielen und wählen aus – nichts landet ungeprüft beim Kind.
         </p>
-        <p data-test="gespraech-tages" style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px" }}>
-          🌟 <b>Frage des Tages</b> ({gespraechDesTages(heute).bereich}):<br />„{gespraechDesTages(heute).frage}“
-        </p>
-        <p style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px", fontSize: "var(--schrift-klein)" }}>
-          💡 <b>So klappt es am besten:</b> nebenbei fragen (Auto, Abendessen, Zähneputzen) statt im
-          Verhör-Modus · selbst zuerst etwas Eigenes erzählen · Antworten stehen lassen, nicht sofort
-          verbessern oder trösten · eine Frage pro Tag reicht völlig.
-        </p>
-        {GESPRAECH_BEREICHE.map((b) => (
-          <details key={b.titel} data-test="gespraech-bereich" style={{ marginTop: 6 }}>
-            <summary style={{ cursor: "pointer", fontWeight: 700 }}>{b.emoji} {b.titel}</summary>
-            <ol style={{ margin: "6px 0 6px 18px", padding: 0 }}>
-              {b.fragen.map((f, i) => <li key={i} style={{ marginBottom: 8 }}>{f}</li>)}
-            </ol>
-          </details>
-        ))}
-        <p style={{ marginTop: 8, color: T.textLeise, fontSize: "12.5px" }}>
-          Alles bleibt im verschlüsselten Tresor – die App speichert keine Antworten. Die Fragen sind
-          an eine Coaching-Fragensammlung angelehnt und für 8–10 Jahre übersetzt.
-        </p>
-      </Karte>
-
-      <Karte test="eltern-ki">
-        <b>🤖 KI-Funktionen</b>
-        <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          Jede Funktion einzeln freigeben (Standard: aus). Der Kostendeckel wird vom Server hart
-          durchgesetzt; der Schlüssel liegt nur dort. Antworten sind immer kurz: höchstens 2 Blasen,
-          eine Mach-Aufgabe – kein Lesestoff.
-        </p>
-        {[
-          { key: "erklaeren", name: "🦁 „Erklär es mir anders“ (nach Fehlversuchen)", da: true },
-          { key: "schrift", name: "🖐️ Schrift-Blick (Foto vom Blatt prüfen)", da: true },
-          { key: "aufsatz", name: "✍️ Aufsatz-Check (Foto vom Text)", da: true },
-          { key: "bericht", name: "📊 Wochenbericht", da: true },
-          { key: "saetze", name: "🔤 Persönliche Übungssätze", da: true },
-        ].map((f) => (
-          <div key={f.key} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, opacity: f.da ? 1 : 0.55 }}>
-            <span style={{ flex: 1, fontSize: "var(--schrift-klein)" }}>{f.name}{f.da ? "" : " · kommt als Nächstes"}</span>
-            <div style={{ flex: "0 0 128px" }}>
-              {f.da ? (
-                <Seg test={`ki-${f.key}`} werte={[{ v: 1, label: "An" }, { v: 0, label: "Aus" }]}
-                  aktiv={data.einstellungen.ki[f.key] ? 1 : 0}
-                  auf={(v) => einstellung({ ki: { ...data.einstellungen.ki, [f.key]: v === 1 } }, `KI „${f.key}“ ${v === 1 ? "freigegeben" : "ausgeschaltet"}`)} />
-              ) : (
-                <span style={{ fontSize: "var(--schrift-klein)", color: T.textLeise }}>bald</span>
-              )}
-            </div>
-          </div>
-        ))}
-        <p style={{ margin: "14px 0 4px", fontSize: "var(--schrift-klein)" }}><b>🧠 Leo-Modell</b></p>
-        <Seg test="ki-modell" werte={[
-          { v: "haiku", label: "Haiku · ~0,03 ct" },
-          { v: "sonnet", label: "Sonnet · ~0,5 ct" },
-          { v: "opus", label: "Opus · ~1 ct" },
-        ]}
-          aktiv={data.einstellungen.ki.modell}
-          auf={(v) => einstellung({ ki: { ...data.einstellungen.ki, modell: v } }, `Leo-Modell: ${v}`)} />
-        <p style={{ margin: "4px 0 0", color: T.textLeise, fontSize: "12.5px" }}>
-          Preis pro Erklärung. Haiku ist flott und günstig, Sonnet unser empfohlener
-          Mittelweg, Opus die beste Qualität – alle laufen unter demselben Monatsdeckel.
-        </p>
-        <div style={{ marginTop: 12 }}>
-          {ki === null ? (
-            <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>Prüfe KI-Server …</p>
-          ) : !ki.verfuegbar ? (
-            <p data-test="ki-meldung" style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-              {ki.grund === "kein-schluessel" ? "⚠️ Der Worker findet den API-Schlüssel nicht. Er muss als Secret (nicht Text!) unter dem Namen „lernprofiapi“ in den Worker-Settings → Variables and Secrets liegen – Anleitung: docs/DEPLOY-CLOUDFLARE.md."
-                : ki.grund === "kein-kv" ? "⚠️ Der KV-Namespace fehlt noch (gleicher Schritt wie beim Geräte-Abgleich) – docs/DEPLOY-CLOUDFLARE.md."
-                : ki.grund === "kein-zugang" ? "⚠️ Cloudflare Access hat die Anfrage nicht freigegeben – bitte neu anmelden."
-                : "Gerade keine Verbindung zum Server – die Schalter wirken, sobald er erreichbar ist."}
+        {data.einstellungen.eigeneSaetze.length > 0 && (
+          <div data-test="eigene-saetze" style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "8px 12px", marginBottom: 8 }}>
+            <p style={{ margin: "0 0 4px", fontSize: "var(--schrift-klein)" }}>
+              <b>Aktiv im Schreib-Training ({data.einstellungen.eigeneSaetze.length}):</b>
             </p>
-          ) : (
-            <>
-              <p style={{ margin: "0 0 4px", fontSize: "var(--schrift-klein)" }}><b>Monatsdeckel</b></p>
-              <Seg test="ki-deckel" werte={[300, 500, 1000].filter((v) => v <= (ki.maxDeckelCent || 1000)).map((v) => ({ v, label: `${v / 100} €` }))}
-                aktiv={ki.deckelCent}
-                auf={async (v) => { const e = await kiDeckelSetzen(v); if (e.ok) setKi({ ...ki, deckelCent: e.deckelCent }); }} />
-              <p data-test="ki-verbrauch" style={{ margin: "10px 0 4px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-                {ki.monat}: <b>{(ki.verbrauchtCent / 100).toFixed(2).replace(".", ",")} €</b> von {(ki.deckelCent / 100).toFixed(2).replace(".", ",")} € verbraucht
-                {ki.verbrauchtCent >= ki.deckelCent * 0.8 ? " · ⚠️ Deckel fast erreicht" : ""}
-              </p>
-              <div style={{ height: 10, background: T.weich, borderRadius: 5, overflow: "hidden" }}>
-                <div style={{ height: "100%", width: `${Math.min(100, (ki.verbrauchtCent / ki.deckelCent) * 100)}%`, background: ki.verbrauchtCent >= ki.deckelCent * 0.8 ? "var(--warn)" : "var(--ok)" }} />
+            {data.einstellungen.eigeneSaetze.map((s, i) => (
+              <p key={i} style={{ margin: "0 0 2px", fontSize: "var(--schrift-klein)" }}>✍️ {s}</p>
+            ))}
+            <button data-test="saetze-leeren"
+              onClick={() => einstellung({ eigeneSaetze: [] }, "Eigene Übungssätze entfernt")}
+              style={{ marginTop: 4, background: "transparent", color: T.textLeise, fontSize: "12.5px", height: "auto", minHeight: 0, padding: 0 }}>
+              ✖️ Entfernen (zurück zu den Welt-Sätzen)
+            </button>
+          </div>
+        )}
+        {!data.einstellungen.ki.saetze ? (
+          <p data-test="saetze-hinweis" style={{ margin: 0, color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+            Oben bei den KI-Funktionen „🔤 Persönliche Übungssätze“ freigeben, dann geht es hier los.
+          </p>
+        ) : (
+          <>
+            <input data-test="saetze-woerter" type="text" value={saetzeWoerter}
+              onChange={(e) => setSaetzeWoerter(e.target.value)} maxLength={200}
+              placeholder="Interessen, z. B.: Schlagzeug, Angeln, Pfadfinder"
+              style={{ width: "100%", boxSizing: "border-box", minHeight: "var(--touch)", borderRadius: T.radiusKlein, border: `1px solid ${T.rand}`, padding: "0 12px", background: T.grund, color: T.text }} />
+            <button data-test="saetze-holen" disabled={!!vorschlaege?.laden || saetzeWoerter.trim().length < 2 || !ki?.verfuegbar}
+              onClick={async () => {
+                setVorschlaege({ laden: true });
+                const e = await kiSaetze({ woerter: saetzeWoerter.trim(), modell: data.einstellungen.ki.modell });
+                setVorschlaege(e.ok ? { saetze: e.saetze, auswahl: e.saetze.map(() => true), kostenCent: e.kostenCent } : { grund: e.grund });
+              }}
+              style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
+              {vorschlaege?.laden ? "🔤 Leo denkt sich Sätze aus …" : "🔤 Vorschläge holen"}
+            </button>
+            {vorschlaege && !vorschlaege.laden && (vorschlaege.saetze ? (
+              <div data-test="saetze-vorschlaege" style={{ marginTop: 10 }}>
+                {vorschlaege.saetze.map((s, i) => (
+                  <label key={i} data-test="satz-vorschlag" style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, fontSize: "var(--schrift-klein)" }}>
+                    <input type="checkbox" checked={vorschlaege.auswahl[i]}
+                      onChange={() => setVorschlaege({ ...vorschlaege, auswahl: vorschlaege.auswahl.map((a, j) => (j === i ? !a : a)) })} />
+                    {s}
+                  </label>
+                ))}
+                <button data-test="saetze-einspielen" disabled={!vorschlaege.auswahl.some(Boolean)}
+                  onClick={() => {
+                    const gewaehlt = vorschlaege.saetze.filter((_, i) => vorschlaege.auswahl[i]).slice(0, 12);
+                    einstellung({ eigeneSaetze: gewaehlt }, `${gewaehlt.length} eigene Übungssätze freigegeben`);
+                    setVorschlaege(null);
+                    setSaetzeWoerter("");
+                  }}
+                  style={{ width: "100%", marginTop: 6, background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+                  ✓ Ausgewählte freigeben und einspielen
+                </button>
+                <p style={{ margin: "6px 0 0", color: T.textLeise, fontSize: "12.5px" }}>
+                  Kosten: {String(vorschlaege.kostenCent).replace(".", ",")} ct · Ersetzt die bisherigen eigenen Sätze.
+                </p>
               </div>
-              {ki.posten?.length > 0 && (
-                <p style={{ margin: "8px 0 0", color: T.textLeise, fontSize: "12.5px" }}>
-                  Zuletzt: {ki.posten.slice(0, 4).map((p2) => `${p2.zweck} (${String(p2.cent).replace(".", ",")} ct)`).join(" · ")}
-                </p>
-              )}
-              {ki.letzterFehler && (
-                <p data-test="ki-letzter-fehler" style={{ margin: "8px 0 0", color: "var(--warn)", fontSize: "12.5px", wordBreak: "break-word" }}>
-                  ⚠️ Letzter KI-Fehler ({new Date(ki.letzterFehler.zeit).toLocaleString("de-DE")} · {ki.letzterFehler.zweck}):{" "}
-                  <code>{ki.letzterFehler.detail}</code>
-                </p>
-              )}
-              <button data-test="ki-test" disabled={!!kiTest?.laden}
-                onClick={async () => {
-                  setKiTest({ laden: true });
-                  const e = await kiErklaeren({
-                    fach: "Test", bereich: "Verbindungstest", frage: "Wie viele Beine hat eine Spinne?",
-                    loesung: "8", tipp: "Zähle nach.", modell: data.einstellungen.ki.modell,
-                  });
-                  setKiTest(e);
-                  setKi(await kiStatus()); // Verbrauch + letzter Fehler frisch anzeigen
-                }}
-                style={{ width: "100%", marginTop: 10, background: T.weich, color: T.text, fontWeight: 700 }}>
-                {kiTest?.laden ? "🧪 Teste …" : "🧪 KI-Verbindung testen (kostet ~1 Erklärung)"}
-              </button>
-              {kiTest && !kiTest.laden && (
-                <p data-test="ki-test-ergebnis" style={{ margin: "8px 0 0", fontSize: "var(--schrift-klein)", color: kiTest.ok ? T.ok : "var(--warn)", wordBreak: "break-word" }}>
-                  {kiTest.ok
-                    ? `✅ Leo hat geantwortet (Modell ${data.einstellungen.ki.modell}, ${String(kiTest.kostenCent).replace(".", ",")} ct) – die Verbindung steht.`
-                    : kiTest.grund === "deckel" ? "⚠️ Der Monatsdeckel ist erreicht – Deckel erhöhen oder nächsten Monat abwarten."
-                    : kiTest.grund === "offline" ? "⚠️ Keine Verbindung zum Server (offline?)."
-                    : <>⚠️ Der Server meldet: <code>{kiTest.detail || kiTest.grund}</code> – bei „401/invalid x-api-key“ stimmt der Schlüssel nicht (nach einer Rotation neu als Secret „lernprofiapi“ setzen), bei „credit“ fehlt Guthaben im Anthropic-Konto.</>}
-                </p>
-              )}
-            </>
-          )}
-        </div>
+            ) : (
+              <p data-test="saetze-fehler" style={{ margin: "8px 0 0", color: "var(--warn)", fontSize: "var(--schrift-klein)" }}>
+                {vorschlaege.grund === "deckel" ? "⚠️ Der Monatsdeckel ist erreicht."
+                  : "⚠️ Das hat gerade nicht geklappt – bitte nochmal versuchen."}
+              </p>
+            ))}
+          </>
+        )}
       </Karte>
-
+      </>)}
+      {tab === "plan" && (<>
       <Karte test="eltern-termine">
         <b>🗓️ Termine für den Wochenplan</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
@@ -584,7 +621,8 @@ export default function Eltern() {
           </>
         )}
       </Karte>
-
+      </>)}
+      {tab === "material" && (<>
       <Karte test="eltern-karten">
         <b>🗃️ Karteikarten (Kompass-Vorbereitung)</b>
         {(() => {
@@ -617,117 +655,116 @@ export default function Eltern() {
           📂 Ablage öffnen
         </button>
       </Karte>
-
-      <Karte test="eltern-bericht">
-        <b>📊 Leos Wochenbericht</b>
+      </>)}
+      {tab === "leo" && (<>
+      <Karte test="eltern-ki">
+        <b>🤖 KI-Funktionen</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          Leo fasst die letzten 7 Tage zusammen: Lichtblicke, eine Beobachtung, 2-3 Tipps.
-          Es gehen nur anonyme Zähler zum Server – nie der Name, nie Texte des Kindes.
+          Jede Funktion einzeln freigeben (Standard: aus). Der Kostendeckel wird vom Server hart
+          durchgesetzt; der Schlüssel liegt nur dort. Antworten sind immer kurz: höchstens 2 Blasen,
+          eine Mach-Aufgabe – kein Lesestoff.
         </p>
-        {!data.einstellungen.ki.bericht ? (
-          <p data-test="bericht-hinweis" style={{ margin: 0, color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-            Oben bei den KI-Funktionen „📊 Wochenbericht“ freigeben, dann geht es hier los.
-          </p>
-        ) : (
-          <>
-            <button data-test="bericht-knopf" disabled={!!wBericht?.laden || !ki?.verfuegbar}
-              onClick={async () => {
-                setWBericht({ laden: true });
-                setWBericht(await kiBericht({ daten: berichtDaten(data, heute), modell: data.einstellungen.ki.modell }));
-              }}
-              style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
-              {wBericht?.laden ? "📊 Leo schaut auf die Woche …" : "📊 Wochenbericht erstellen"}
-            </button>
-            {wBericht && !wBericht.laden && (wBericht.ok ? (
-              <div data-test="bericht-ansicht" style={{ marginTop: 10, background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px" }}>
-                {wBericht.gut.map((g, i) => <p key={i} style={{ margin: "0 0 6px" }}>⭐ {g}</p>)}
-                <p style={{ margin: "0 0 6px" }}>👀 {wBericht.beobachtung}</p>
-                {wBericht.tipps.map((t2, i) => <p key={i} style={{ margin: "0 0 6px" }}>💡 {t2}</p>)}
-                <p style={{ margin: 0, color: T.textLeise, fontSize: "12.5px" }}>
-                  Kosten: {String(wBericht.kostenCent).replace(".", ",")} ct · Der Bericht wird nicht gespeichert.
-                </p>
-              </div>
-            ) : (
-              <p data-test="bericht-fehler" style={{ margin: "8px 0 0", color: "var(--warn)", fontSize: "var(--schrift-klein)" }}>
-                {wBericht.grund === "deckel" ? "⚠️ Der Monatsdeckel ist erreicht."
-                  : "⚠️ Das hat gerade nicht geklappt – bitte nochmal versuchen."}
-              </p>
-            ))}
-          </>
-        )}
-      </Karte>
-
-      <Karte test="eltern-saetze">
-        <b>🔤 Persönliche Übungssätze</b>
-        <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          Leo baut Abschreib-Sätze aus den Interessen Ihres Kindes fürs 🖐️ Schreib-Training.
-          Sie sehen jeden Satz <b>vor</b> dem Einspielen und wählen aus – nichts landet ungeprüft beim Kind.
-        </p>
-        {data.einstellungen.eigeneSaetze.length > 0 && (
-          <div data-test="eigene-saetze" style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "8px 12px", marginBottom: 8 }}>
-            <p style={{ margin: "0 0 4px", fontSize: "var(--schrift-klein)" }}>
-              <b>Aktiv im Schreib-Training ({data.einstellungen.eigeneSaetze.length}):</b>
-            </p>
-            {data.einstellungen.eigeneSaetze.map((s, i) => (
-              <p key={i} style={{ margin: "0 0 2px", fontSize: "var(--schrift-klein)" }}>✍️ {s}</p>
-            ))}
-            <button data-test="saetze-leeren"
-              onClick={() => einstellung({ eigeneSaetze: [] }, "Eigene Übungssätze entfernt")}
-              style={{ marginTop: 4, background: "transparent", color: T.textLeise, fontSize: "12.5px", height: "auto", minHeight: 0, padding: 0 }}>
-              ✖️ Entfernen (zurück zu den Welt-Sätzen)
-            </button>
+        {[
+          { key: "erklaeren", name: "🦁 „Erklär es mir anders“ (nach Fehlversuchen)", da: true },
+          { key: "schrift", name: "🖐️ Schrift-Blick (Foto vom Blatt prüfen)", da: true },
+          { key: "aufsatz", name: "✍️ Aufsatz-Check (Foto vom Text)", da: true },
+          { key: "bericht", name: "📊 Wochenbericht", da: true },
+          { key: "saetze", name: "🔤 Persönliche Übungssätze", da: true },
+        ].map((f) => (
+          <div key={f.key} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, opacity: f.da ? 1 : 0.55 }}>
+            <span style={{ flex: 1, fontSize: "var(--schrift-klein)" }}>{f.name}{f.da ? "" : " · kommt als Nächstes"}</span>
+            <div style={{ flex: "0 0 128px" }}>
+              {f.da ? (
+                <Seg test={`ki-${f.key}`} werte={[{ v: 1, label: "An" }, { v: 0, label: "Aus" }]}
+                  aktiv={data.einstellungen.ki[f.key] ? 1 : 0}
+                  auf={(v) => einstellung({ ki: { ...data.einstellungen.ki, [f.key]: v === 1 } }, `KI „${f.key}“ ${v === 1 ? "freigegeben" : "ausgeschaltet"}`)} />
+              ) : (
+                <span style={{ fontSize: "var(--schrift-klein)", color: T.textLeise }}>bald</span>
+              )}
+            </div>
           </div>
-        )}
-        {!data.einstellungen.ki.saetze ? (
-          <p data-test="saetze-hinweis" style={{ margin: 0, color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-            Oben bei den KI-Funktionen „🔤 Persönliche Übungssätze“ freigeben, dann geht es hier los.
-          </p>
-        ) : (
-          <>
-            <input data-test="saetze-woerter" type="text" value={saetzeWoerter}
-              onChange={(e) => setSaetzeWoerter(e.target.value)} maxLength={200}
-              placeholder="Interessen, z. B.: Schlagzeug, Angeln, Pfadfinder"
-              style={{ width: "100%", boxSizing: "border-box", minHeight: "var(--touch)", borderRadius: T.radiusKlein, border: `1px solid ${T.rand}`, padding: "0 12px", background: T.grund, color: T.text }} />
-            <button data-test="saetze-holen" disabled={!!vorschlaege?.laden || saetzeWoerter.trim().length < 2 || !ki?.verfuegbar}
-              onClick={async () => {
-                setVorschlaege({ laden: true });
-                const e = await kiSaetze({ woerter: saetzeWoerter.trim(), modell: data.einstellungen.ki.modell });
-                setVorschlaege(e.ok ? { saetze: e.saetze, auswahl: e.saetze.map(() => true), kostenCent: e.kostenCent } : { grund: e.grund });
-              }}
-              style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
-              {vorschlaege?.laden ? "🔤 Leo denkt sich Sätze aus …" : "🔤 Vorschläge holen"}
-            </button>
-            {vorschlaege && !vorschlaege.laden && (vorschlaege.saetze ? (
-              <div data-test="saetze-vorschlaege" style={{ marginTop: 10 }}>
-                {vorschlaege.saetze.map((s, i) => (
-                  <label key={i} data-test="satz-vorschlag" style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, fontSize: "var(--schrift-klein)" }}>
-                    <input type="checkbox" checked={vorschlaege.auswahl[i]}
-                      onChange={() => setVorschlaege({ ...vorschlaege, auswahl: vorschlaege.auswahl.map((a, j) => (j === i ? !a : a)) })} />
-                    {s}
-                  </label>
-                ))}
-                <button data-test="saetze-einspielen" disabled={!vorschlaege.auswahl.some(Boolean)}
-                  onClick={() => {
-                    const gewaehlt = vorschlaege.saetze.filter((_, i) => vorschlaege.auswahl[i]).slice(0, 12);
-                    einstellung({ eigeneSaetze: gewaehlt }, `${gewaehlt.length} eigene Übungssätze freigegeben`);
-                    setVorschlaege(null);
-                    setSaetzeWoerter("");
-                  }}
-                  style={{ width: "100%", marginTop: 6, background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
-                  ✓ Ausgewählte freigeben und einspielen
-                </button>
-                <p style={{ margin: "6px 0 0", color: T.textLeise, fontSize: "12.5px" }}>
-                  Kosten: {String(vorschlaege.kostenCent).replace(".", ",")} ct · Ersetzt die bisherigen eigenen Sätze.
-                </p>
-              </div>
-            ) : (
-              <p data-test="saetze-fehler" style={{ margin: "8px 0 0", color: "var(--warn)", fontSize: "var(--schrift-klein)" }}>
-                {vorschlaege.grund === "deckel" ? "⚠️ Der Monatsdeckel ist erreicht."
-                  : "⚠️ Das hat gerade nicht geklappt – bitte nochmal versuchen."}
+        ))}
+        <p style={{ margin: "14px 0 4px", fontSize: "var(--schrift-klein)" }}><b>🧠 Leo-Modell</b></p>
+        <Seg test="ki-modell" werte={[
+          { v: "haiku", label: "Haiku · ~0,03 ct" },
+          { v: "sonnet", label: "Sonnet · ~0,5 ct" },
+          { v: "opus", label: "Opus · ~1 ct" },
+        ]}
+          aktiv={data.einstellungen.ki.modell}
+          auf={(v) => einstellung({ ki: { ...data.einstellungen.ki, modell: v } }, `Leo-Modell: ${v}`)} />
+        <p style={{ margin: "4px 0 0", color: T.textLeise, fontSize: "12.5px" }}>
+          Preis pro Erklärung. Haiku ist flott und günstig, Sonnet unser empfohlener
+          Mittelweg, Opus die beste Qualität – alle laufen unter demselben Monatsdeckel.
+        </p>
+        <div style={{ marginTop: 12 }}>
+          {ki === null ? (
+            <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>Prüfe KI-Server …</p>
+          ) : !ki.verfuegbar ? (
+            <p data-test="ki-meldung" style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+              {ki.grund === "kein-schluessel" ? "⚠️ Der Worker findet den API-Schlüssel nicht. Er muss als Secret (nicht Text!) unter dem Namen „lernprofiapi“ in den Worker-Settings → Variables and Secrets liegen – Anleitung: docs/DEPLOY-CLOUDFLARE.md."
+                : ki.grund === "kein-kv" ? "⚠️ Der KV-Namespace fehlt noch (gleicher Schritt wie beim Geräte-Abgleich) – docs/DEPLOY-CLOUDFLARE.md."
+                : ki.grund === "kein-zugang" ? "⚠️ Cloudflare Access hat die Anfrage nicht freigegeben – bitte neu anmelden."
+                : "Gerade keine Verbindung zum Server – die Schalter wirken, sobald er erreichbar ist."}
+            </p>
+          ) : (
+            <>
+              <p style={{ margin: "0 0 4px", fontSize: "var(--schrift-klein)" }}><b>Monatsdeckel</b></p>
+              <Seg test="ki-deckel" werte={[300, 500, 1000].filter((v) => v <= (ki.maxDeckelCent || 1000)).map((v) => ({ v, label: `${v / 100} €` }))}
+                aktiv={ki.deckelCent}
+                auf={async (v) => { const e = await kiDeckelSetzen(v); if (e.ok) setKi({ ...ki, deckelCent: e.deckelCent }); }} />
+              <p data-test="ki-verbrauch" style={{ margin: "10px 0 4px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+                {ki.monat}: <b>{(ki.verbrauchtCent / 100).toFixed(2).replace(".", ",")} €</b> von {(ki.deckelCent / 100).toFixed(2).replace(".", ",")} € verbraucht
+                {ki.verbrauchtCent >= ki.deckelCent * 0.8 ? " · ⚠️ Deckel fast erreicht" : ""}
               </p>
-            ))}
-          </>
-        )}
+              <div style={{ height: 10, background: T.weich, borderRadius: 5, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${Math.min(100, (ki.verbrauchtCent / ki.deckelCent) * 100)}%`, background: ki.verbrauchtCent >= ki.deckelCent * 0.8 ? "var(--warn)" : "var(--ok)" }} />
+              </div>
+              {ki.posten?.length > 0 && (
+                <p style={{ margin: "8px 0 0", color: T.textLeise, fontSize: "12.5px" }}>
+                  Zuletzt: {ki.posten.slice(0, 4).map((p2) => `${p2.zweck} (${String(p2.cent).replace(".", ",")} ct)`).join(" · ")}
+                </p>
+              )}
+              {ki.letzterFehler && (
+                <p data-test="ki-letzter-fehler" style={{ margin: "8px 0 0", color: "var(--warn)", fontSize: "12.5px", wordBreak: "break-word" }}>
+                  ⚠️ Letzter KI-Fehler ({new Date(ki.letzterFehler.zeit).toLocaleString("de-DE")} · {ki.letzterFehler.zweck}):{" "}
+                  <code>{ki.letzterFehler.detail}</code>
+                </p>
+              )}
+              <button data-test="ki-test" disabled={!!kiTest?.laden}
+                onClick={async () => {
+                  setKiTest({ laden: true });
+                  const e = await kiErklaeren({
+                    fach: "Test", bereich: "Verbindungstest", frage: "Wie viele Beine hat eine Spinne?",
+                    loesung: "8", tipp: "Zähle nach.", modell: data.einstellungen.ki.modell,
+                  });
+                  setKiTest(e);
+                  setKi(await kiStatus()); // Verbrauch + letzter Fehler frisch anzeigen
+                }}
+                style={{ width: "100%", marginTop: 10, background: T.weich, color: T.text, fontWeight: 700 }}>
+                {kiTest?.laden ? "🧪 Teste …" : "🧪 KI-Verbindung testen (kostet ~1 Erklärung)"}
+              </button>
+              {kiTest && !kiTest.laden && (
+                <p data-test="ki-test-ergebnis" style={{ margin: "8px 0 0", fontSize: "var(--schrift-klein)", color: kiTest.ok ? T.ok : "var(--warn)", wordBreak: "break-word" }}>
+                  {kiTest.ok
+                    ? `✅ Leo hat geantwortet (Modell ${data.einstellungen.ki.modell}, ${String(kiTest.kostenCent).replace(".", ",")} ct) – die Verbindung steht.`
+                    : kiTest.grund === "deckel" ? "⚠️ Der Monatsdeckel ist erreicht – Deckel erhöhen oder nächsten Monat abwarten."
+                    : kiTest.grund === "offline" ? "⚠️ Keine Verbindung zum Server (offline?)."
+                    : <>⚠️ Der Server meldet: <code>{kiTest.detail || kiTest.grund}</code> – bei „401/invalid x-api-key“ stimmt der Schlüssel nicht (nach einer Rotation neu als Secret „lernprofiapi“ setzen), bei „credit“ fehlt Guthaben im Anthropic-Konto.</>}
+                </p>
+              )}
+            </>
+          )}
+        </div>
+      </Karte>
+      </>)}
+      {tab === "konto" && (<>
+      <Karte test="eltern-profil">
+        <b>👤 Profil</b>
+        <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          Der Name bleibt verschlüsselt auf dem Gerät.
+        </p>
+        <input data-test="profil-name" style={feld} placeholder="Vorname (freiwillig)" value={data.profil.name}
+          onChange={(e) => logChange({ ...data, profil: { ...data.profil, name: e.target.value } }, "profil", "geaendert", "Name angepasst")} />
       </Karte>
 
       <Karte test="eltern-sync">
@@ -825,6 +862,7 @@ export default function Eltern() {
           🔒 Tresor sperren
         </button>
       </Karte>
+      </>)}
     </div>
   );
 }

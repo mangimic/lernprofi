@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-078",
+    "version": "0.62.0",
+    "datum": "2026-10-12",
+    "titel": "Aufgeräumter Elternbereich",
+    "entries": [
+      {
+        "type": "verbessert",
+        "text": "🔧 Der Elternbereich hat jetzt eine Navigation statt einer langen Liste: sechs Gruppen (📈 Lernstand · 🎯 Üben & Regeln · 🗓️ Plan & Termine · 🗃️ Material · 🤖 Leo (KI) · 🔐 Konto & Daten) über eine oben festklebende Tab-Leiste – kein endloses Scrollen mehr."
+      },
+      {
+        "type": "verbessert",
+        "text": "Beim Öffnen startet die Ansicht mit dem Lernstand (Übersicht, Wochenbericht, Gesprächs-Tipps); jede Einstellung ist höchstens zwei Tipps entfernt."
+      }
+    ]
+  },
+  {
     "id": "rn-077",
     "version": "0.61.0",
     "datum": "2026-10-12",

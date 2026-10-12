@@ -36,6 +36,16 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.62: Eltern-Navigation ----------
+console.log("== v0.62: Eltern-Navigation ==");
+test("v0.62: Elternbereich in sechs Gruppen mit klebender Tab-Leiste", (() => {
+  const e = quelle("src/features/Eltern.jsx");
+  return e.includes("ELTERN_GRUPPEN") && e.includes("eb-tab-") && e.includes('position: "sticky"')
+    && ["stand", "regeln", "plan", "material", "leo", "konto"].every((g) => e.includes(`tab === "${g}" && `))
+    && quelle("e2e/smoke.spec.js").includes("eb-tab-material")
+    && releaseNoteVorhanden("rn-078");
+})());
+
 // ---------- v0.61: Dokumenten-Ablage ----------
 console.log("== v0.61: Dokumenten-Ablage ==");
 test("v0.61: verschlüsselte Doks-API (Server) + Ablage-Seite für Kind und Eltern", (() => {

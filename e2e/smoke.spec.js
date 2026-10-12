@@ -83,9 +83,11 @@ test("Eltern-Zugang mit Passwort: Eltern-Tab, Import aus der Alt-App, Sperren", 
   // Eltern-Tab öffnen, Tagesziel umstellen
   await page.getByTestId("nav-eltern").click();
   await expect(page.getByTestId("eltern-karte")).toBeVisible();
+  await page.getByTestId("eb-tab-regeln").click();
   await page.getByTestId("ziel-3").click();
 
   // Geräte-Abgleich: ohne Worker-API zeigt die Karte einen klaren Status (kein Crash)
+  await page.getByTestId("eb-tab-konto").click();
   await expect(page.getByTestId("eltern-sync")).toBeVisible();
   await expect(page.getByTestId("eltern-sync")).not.toContainText("Prüfe Verbindung", { timeout: 10000 });
 
@@ -101,6 +103,7 @@ test("Eltern-Zugang mit Passwort: Eltern-Tab, Import aus der Alt-App, Sperren", 
 
   // Sperren → Gate; Kind-Entsperrung sieht KEINEN Eltern-Tab, Daten sind da
   await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-konto").click();
   await page.getByTestId("sperren-knopf").click();
   await expect(page.getByTestId("gate-entsperren")).toBeVisible();
   await page.getByTestId("pin-eingabe").fill(PIN);
@@ -614,8 +617,10 @@ test("Eltern-Werkzeuge: Spiel ausblenden, Münzen aus, Zeitlimit sperrt freundli
   await page.getByTestId("nav-eltern").click();
 
   // ♟️ Schach ausblenden, 🪙 Münz-Freischaltung aus, 💬 Gespräche sichtbar
+  await page.getByTestId("eb-tab-regeln").click();
   await page.getByTestId("spiel-an-schach-0").click();
   await page.getByTestId("muenzen-aktiv-0").click();
+  await page.getByTestId("eb-tab-stand").click();
   await expect(page.getByTestId("gespraech-tages")).toContainText("Frage des Tages");
   await expect(page.getByTestId("gespraech-bereich")).toHaveCount(4);
 
@@ -629,6 +634,7 @@ test("Eltern-Werkzeuge: Spiel ausblenden, Münzen aus, Zeitlimit sperrt freundli
 
   // 🎁 3 Münzen schenken, ⏰ Tageslimit auf 10 Minuten
   await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-regeln").click();
   await page.getByTestId("muenz-geschenk").click();
   await expect(page.getByTestId("muenz-geschenk")).toContainText("jetzt 3");
   await page.getByTestId("zeit-limit-10").click();
@@ -655,6 +661,7 @@ test("Eltern-Werkzeuge: Spiel ausblenden, Münzen aus, Zeitlimit sperrt freundli
   await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
   await expect(page.getByTestId("zeit-sperre")).toHaveCount(0);
   await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-regeln").click();
   await page.getByTestId("zeit-frei").click();
   await expect(page.getByTestId("zeit-verbraucht")).toContainText("0 Min von 10 Min");
 });
@@ -662,6 +669,7 @@ test("Eltern-Werkzeuge: Spiel ausblenden, Münzen aus, Zeitlimit sperrt freundli
 test("Tagesform & Fokus: roter Tag macht Missionen kürzer, Bewegungspause kommt", async ({ page }) => {
   await tresorAnlegen(page); // Eltern-Modus: keine Tagesform-Frage
   await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-regeln").click();
   await expect(page.getByTestId("eltern-lernen")).toBeVisible();
   await page.getByTestId("pausen-intervall-5").click();
   await page.getByTestId("zeit-limit-0").click(); // Time-Boxing aus, damit nur die Pause triggert
@@ -824,6 +832,7 @@ test("KI-Erklärer: Eltern geben frei, Leo erklärt in getakteten Blasen mit Mac
 
   await tresorAnlegen(page);
   await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-leo").click();
   await expect(page.getByTestId("eltern-ki")).toBeVisible();
   await expect(page.getByTestId("ki-verbrauch")).toContainText("0,87 € von 5,00 €");
   await page.getByTestId("ki-erklaeren-1").click(); // 🦁 freigeben
@@ -875,6 +884,7 @@ test("Schreib-Training: Satz des Tages, Foto → Leos Schrift-Blick, Schrift-Rei
 
   // Eltern geben den Schrift-Blick frei
   await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-leo").click();
   await page.getByTestId("ki-schrift-1").click();
   await page.getByTestId("nav-start").click();
   await page.getByTestId("zum-schrift").click();
@@ -927,6 +937,7 @@ test("Aufsatz-Check: Textart wählen, Foto → 2 Sterne + markierte Stelle + Mac
 
   // Eltern geben frei
   await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-leo").click();
   await page.getByTestId("ki-aufsatz-1").click();
   await page.getByTestId("nav-start").click();
   await page.getByTestId("zum-aufsatz").click();
@@ -969,18 +980,22 @@ test("Wochenbericht + persönliche Übungssätze: Eltern geben frei, prüfen und
 
   await tresorAnlegen(page);
   await page.getByTestId("nav-eltern").click();
-  // Ohne Freigabe nur Hinweise
+  // Ohne Freigabe nur Hinweise (Bericht unter 📈 Lernstand, Sätze unter 🎯 Regeln)
   await expect(page.getByTestId("bericht-hinweis")).toBeVisible();
+  await page.getByTestId("eb-tab-regeln").click();
   await expect(page.getByTestId("saetze-hinweis")).toBeVisible();
+  await page.getByTestId("eb-tab-leo").click();
   await page.getByTestId("ki-bericht-1").click();
   await page.getByTestId("ki-saetze-1").click();
 
   // 📊 Wochenbericht erstellen
+  await page.getByTestId("eb-tab-stand").click();
   await page.getByTestId("bericht-knopf").click();
   await expect(page.getByTestId("bericht-ansicht")).toContainText("Tagesziel geschafft");
   await expect(page.getByTestId("bericht-ansicht")).toContainText("Bewegungspause");
 
   // 🔤 Sätze holen, einen abwählen, einspielen
+  await page.getByTestId("eb-tab-regeln").click();
   await page.getByTestId("saetze-woerter").fill("Schlagzeug, Pfadfinder, Angeln");
   await page.getByTestId("saetze-holen").click();
   await expect(page.getByTestId("satz-vorschlag")).toHaveCount(3);
@@ -996,6 +1011,7 @@ test("Wochenbericht + persönliche Übungssätze: Eltern geben frei, prüfen und
 
   // Entfernen bringt die Welt-Sätze zurück
   await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-regeln").click();
   await page.getByTestId("saetze-leeren").click();
   await expect(page.getByTestId("eigene-saetze")).toHaveCount(0);
 });
@@ -1008,6 +1024,7 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   const freitag = new Date();
   freitag.setDate(freitag.getDate() - ((freitag.getDay() + 6) % 7) + 4);
   await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-plan").click();
   await page.getByTestId("termin-tag").fill(isoLokal(freitag));
   await page.selectOption('[data-test="termin-art"]', "ka");
   await page.getByTestId("termin-fach").fill("Mathe");
@@ -1303,6 +1320,7 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await page.getByTestId("pw-ok").click();
   await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
   await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-plan").click();
   await page.getByTestId("kat-bearbeiten").click();
   await page.getByTestId("kat-name-angeln").fill("Fliegenfischen");
   await page.getByTestId("kat-an-pfadfinder").click(); // ausblenden
@@ -1338,6 +1356,7 @@ test("🧭 Kompass-Countdown: Termine automatisch im Plan, Wochen-Fahrplan, Chip
   await expect(page.getByTestId("kp-woche").last()).toContainText("Testwoche");
   // … wirklich im Plan: der Elternbereich zeigt beide Kompass-Einträge
   await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-plan").click();
   await expect(page.getByTestId("termin-zeile")).toHaveCount(2);
   await expect(page.getByTestId("termin-zeile").first()).toContainText("Kompass-Test");
   // 📅 Fahrplan übernehmen: Pflicht zuerst (HA + Schlagzeug), Thema dahinter – doppelt sicher
@@ -1399,6 +1418,7 @@ test("🗃️ Karteikasten: Zahlen-Karten fragen das Ergebnis per Eingabe ab, We
   await tresorAnlegen(page);
   // Nur Mathe aktiv lassen, damit die Runde deterministisch mit m1 beginnt
   await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-material").click();
   await page.getByTestId("karten-oeffnen").click();
   await page.getByTestId("karten-verwalten").click();
   for (let i = 1; i <= 32; i++) await page.getByTestId(`karten-an-d${i}`).click();
@@ -1446,6 +1466,7 @@ test("📂 Dokumenten-Ablage: Eltern laden verschlüsselt hoch, Öffnen entschl�
   });
   await tresorAnlegen(page);
   await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-material").click();
   await page.getByTestId("doks-oeffnen").click();
   await expect(page.getByTestId("doks-leer")).toBeVisible();
   await page.getByTestId("dok-datei").setInputFiles({
@@ -1473,6 +1494,7 @@ test("📂 Dokumenten-Ablage: Eltern laden verschlüsselt hoch, Öffnen entschl�
   }
   // 🗑️ Löschen räumt Liste UND Server-Ablage auf
   await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-material").click();
   await page.getByTestId("doks-oeffnen").click();
   await page.locator('[data-test^="dok-weg-"]').click();
   await expect(page.getByTestId("doks-leer")).toBeVisible();
@@ -1482,6 +1504,7 @@ test("📂 Dokumenten-Ablage: Eltern laden verschlüsselt hoch, Öffnen entschl�
 test("🗃️ Karteikarten: 4 je A4-Blatt, Rückseiten gespiegelt, Fach-Filter und Druck-Knopf", async ({ page }) => {
   await tresorAnlegen(page);
   await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-material").click();
   await page.getByTestId("karten-oeffnen").click();
   await expect(page.getByTestId("karten-seite")).toBeVisible();
   await expect(page.getByTestId("karten-blatt")).toHaveCount(32); // 64 Karten → 16× Vorder- + 16× Rückseiten
@@ -1537,6 +1560,7 @@ test("Auto-Sicherung: Änderungen wandern near-realtime im Hintergrund zum Serve
   await tresorAnlegen(page);
   await page.getByTestId("thema-schalter").click(); // irgendeine Änderung …
   await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-konto").click();
   // … landet ohne Knopfdruck verschlüsselt auf dem Server
   await expect(page.getByTestId("autosync-status")).toContainText("Automatisch gesichert", { timeout: 10000 });
   expect(puts).toBeGreaterThanOrEqual(1);
@@ -1546,6 +1570,7 @@ test("Auto-Sicherung: Änderungen wandern near-realtime im Hintergrund zum Serve
   await page.getByTestId("nav-start").click();
   await page.getByTestId("thema-schalter").click();
   await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-konto").click();
   await expect(page.getByTestId("autosync-status")).toContainText("Automatisch gesichert", { timeout: 10000 });
   expect(puts).toBeGreaterThan(putsVorher);
 });
@@ -1564,6 +1589,7 @@ test("Untere Leiste macht beim Scrollen Platz und kommt nach dem Stopp zurück",
 test("KI-Karte ohne Server: ehrliche Meldung statt Absturz, Schalter bleiben bedienbar", async ({ page }) => {
   await tresorAnlegen(page);
   await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-leo").click();
   await expect(page.getByTestId("eltern-ki")).toBeVisible();
   await expect(page.getByTestId("ki-meldung")).toBeVisible({ timeout: 10000 });
   await page.getByTestId("ki-erklaeren-1").click(); // Freigabe wirkt trotzdem (lokale Einstellung)
