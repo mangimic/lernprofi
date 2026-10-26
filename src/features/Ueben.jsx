@@ -620,7 +620,12 @@ export default function Ueben() {
             }
             return (
               <div className="mut-dialog" data-test="ki-erklaerung">
-                <div className="mut-kopf">🦁 <b>Coach Leo</b> erklärt es anders</div>
+                <div className="mut-kopf">🦁 <b>Coach Leo</b> erklärt es anders
+                  {/* Δ1: sichtbarer Fortschritt – das Kind sieht, wie viel noch kommt */}
+                  <span data-test="ki-zaehler" style={{ float: "right", fontWeight: 700 }}>
+                    💬 {k.offen} von {k.blasen.length}
+                  </span>
+                </div>
                 {k.blasen.slice(0, k.offen).map((b, i) => (
                   <div key={i} className="bubble coach" data-test="ki-blase">{b}</div>
                 ))}

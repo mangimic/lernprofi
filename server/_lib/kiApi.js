@@ -127,9 +127,11 @@ REGELN (alle verbindlich):
 - Antworte NUR mit JSON: {"blasen":["…","…","…"],"mach":"…"} – nichts davor, nichts danach.
 - GENAU 3 Blasen, jede höchstens 12 Wörter. Kurze Hauptsätze, du-Form, einfache Wörter, gern 1-2 Emojis.
 - Sag, was das Kind TUN soll – nicht, was es lassen soll (vermeide „nicht …“-Sätze).
-- "mach" ist eine Mach-Aufgabe mit Körper oder Stimme (laut sagen, mit dem Finger zeigen, in die Luft schreiben) – höchstens 14 Wörter.
+- "mach" ist eine Mach-Aufgabe mit Körper oder Stimme (laut sagen, mit dem Finger zeigen, in die Luft schreiben) – höchstens 14 Wörter und in unter 2 Minuten machbar.
+- Zählst du etwas auf, dann höchstens 3 Punkte – nie verschachtelte Listen.
+- Keine Begrüßung, keine Einleitung, kein „Zusammengefasst“ – starte direkt mit dem Anker.
 - Verrate NIEMALS die Lösung und nenne sie nicht wörtlich.
-- Freundlich und zutrauend, ohne Lob-Flut. Niemals Diagnose-Wörter, niemals Druck, keine Noten.
+- Freundlich und zutrauend, ohne Lob-Flut: Lob nur konkret für etwas, das das Kind wirklich getan hat. Niemals Diagnose-Wörter, niemals Druck, keine Noten.
 BEISPIEL (für eine Dativ-Aufgabe):
 {"blasen":["⚽ Beim Training gibst du den Ball ab – aber WEM?","Erst „wem?“ fragen, dann die Antwort suchen – der 3. Fall.","Prüf dich: Passt deine Antwort auf die Frage „wem?“?"],"mach":"Frag LAUT: Wem gebe ich den Ball? Zeig auf die Antwort!"}`;
 
@@ -202,7 +204,9 @@ const LEO_BERICHT = `Du schreibst für ELTERN eines Kindes (Klasse 4, Deutschlan
 aus anonymen Lerndaten einer Lern-App (Missionen = kleine Übungs-Einheiten; Stufen 1-3 je Lernfeld;
 Tagesform: gruen=fit, gelb=normal, rot=schwerer Tag; "geschrieben" = Handschrift-Blätter).
 REGELN (alle verbindlich):
-- Antworte NUR mit JSON: {"gut":["…","…"],"beobachtung":"…","tipps":["…","…"]}.
+- Antworte NUR mit JSON: {"zuerst":"…","gut":["…","…"],"beobachtung":"…","tipps":["…","…"]}.
+- "zuerst": DIE eine konkrete Empfehlung für die nächste Woche – ein Satz, beginnt mit einem Verb
+  („Übt 2-mal …", „Plant …"), höchstens 15 Wörter. Eltern lesen zuerst, WAS zu tun ist.
 - "gut": 2-3 konkrete Lichtblicke aus DIESEN Daten, je höchstens 20 Wörter.
 - "beobachtung": 1-2 Sätze, was auffällt (Muster, nicht Einzeltage), höchstens 40 Wörter.
 - "tipps": 2-3 umsetzbare Ideen für die nächste Woche, je höchstens 20 Wörter –
@@ -218,13 +222,14 @@ export function berichtZurechtstutzen(rohText) {
     const w = String(satz || "").trim().split(/\s+/).filter(Boolean);
     return w.length <= max + 3 ? w.join(" ") : w.slice(0, max).join(" ") + " …";
   };
+  const zuerst = kuerzen(geparst?.zuerst || "", 15); // Δ5: Aktion zuerst (leer bei Alt-Antworten ok)
   const gut = (Array.isArray(geparst?.gut) ? geparst.gut : []).map((x) => kuerzen(x, 20)).filter(Boolean).slice(0, 3);
   const beobachtung = kuerzen(geparst?.beobachtung || "", 40);
   const tipps = (Array.isArray(geparst?.tipps) ? geparst.tipps : []).map((x) => kuerzen(x, 20)).filter(Boolean).slice(0, 3);
-  if (!gut.length || wortProblem([...gut, beobachtung, ...tipps].join(" "))) {
-    return { gut: [], beobachtung: "", tipps: [], ersetzt: true };
+  if (!gut.length || wortProblem([zuerst, ...gut, beobachtung, ...tipps].join(" "))) {
+    return { zuerst: "", gut: [], beobachtung: "", tipps: [], ersetzt: true };
   }
-  return { gut, beobachtung, tipps, ersetzt: false };
+  return { zuerst, gut, beobachtung, tipps, ersetzt: false };
 }
 
 /* 🔤 Persönliche Übungssätze: Leo baut Abschreib-Sätze aus den

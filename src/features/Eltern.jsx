@@ -228,6 +228,9 @@ export default function Eltern() {
             </button>
             {wBericht && !wBericht.laden && (wBericht.ok ? (
               <div data-test="bericht-ansicht" style={{ marginTop: 10, background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px" }}>
+                {wBericht.zuerst && (
+                  <p data-test="bericht-zuerst" style={{ margin: "0 0 8px", fontWeight: 800 }}>🎯 {wBericht.zuerst}</p>
+                )}
                 {wBericht.gut.map((g, i) => <p key={i} style={{ margin: "0 0 6px" }}>⭐ {g}</p>)}
                 <p style={{ margin: "0 0 6px" }}>👀 {wBericht.beobachtung}</p>
                 {wBericht.tipps.map((t2, i) => <p key={i} style={{ margin: "0 0 6px" }}>💡 {t2}</p>)}

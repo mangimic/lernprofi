@@ -292,6 +292,12 @@ describe("kiApi – Routen", () => {
     // Stutzer: Diagnose-Wort → ersetzt, Route würde 502 liefern
     expect(berichtZurechtstutzen('{"gut":["Trotz ADHS lief es gut."],"beobachtung":"x","tipps":["y"]}').ersetzt).toBe(true);
     expect(berichtZurechtstutzen("kein json").ersetzt).toBe(true);
+    // Δ5 „zuerst": wird übernommen und gekürzt; fehlt es (Alt-Antwort), bleibt es leer
+    const mitZuerst = berichtZurechtstutzen('{"zuerst":"Übt 2-mal Rechengeschichten am Wochenende.","gut":["x"],"beobachtung":"y","tipps":["z"]}');
+    expect(mitZuerst.zuerst).toContain("Rechengeschichten");
+    expect(mitZuerst.ersetzt).toBe(false);
+    expect(berichtZurechtstutzen('{"gut":["x"],"beobachtung":"y","tipps":["z"]}').zuerst).toBe("");
+    expect(berichtZurechtstutzen(`{"zuerst":"${"Wort ".repeat(30).trim()}","gut":["x"],"beobachtung":"y","tipps":["z"]}`).zuerst.endsWith("…")).toBe(true);
   });
 
   it("saetze: filtert zu lange/problematische Sätze, bucht „saetze“, braucht woerter", async () => {

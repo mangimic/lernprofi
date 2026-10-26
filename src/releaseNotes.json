@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-083",
+    "version": "0.67.0",
+    "datum": "2026-10-26",
+    "titel": "Leo erklärt noch klarer",
+    "entries": [
+      {
+        "type": "verbessert",
+        "text": "💬 Leos Erklärungen zeigen jetzt einen Blasen-Zähler („💬 2 von 3“) – man sieht immer, wie viel noch kommt. Die Mach-Aufgabe ist garantiert in unter 2 Minuten machbar, Aufzählungen haben einen 3-Punkte-Deckel, und Floskeln (Begrüßung, „Zusammengefasst“, Lob-Autopilot) sind ausdrücklich verboten – Lob gibt es nur konkret fürs Getane."
+      },
+      {
+        "type": "verbessert",
+        "text": "🎯 Der Wochenbericht für Eltern beginnt jetzt mit der EINEN konkreten Empfehlung der Woche (z. B. „Übt 2-mal Rechengeschichten …“) – erst die Aktion, dann Lichtblicke, Beobachtung und Tipps."
+      }
+    ]
+  },
+  {
     "id": "rn-082",
     "version": "0.66.0",
     "datum": "2026-10-12",

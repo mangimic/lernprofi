@@ -36,6 +36,21 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.67: Leo-Regeln v2 ----------
+console.log("== v0.67: Leo-Regeln v2 ==");
+test("v0.67: Blasen-Zähler, 2-Minuten-Deckel, 3-Punkte-Deckel, Floskel-Verbot, Bericht Aktion-zuerst", (() => {
+  const ki = quelle("server/_lib/kiApi.js");
+  return quelle("src/features/Ueben.jsx").includes("ki-zaehler")
+    && ki.includes("in unter 2 Minuten machbar")
+    && ki.includes("höchstens 3 Punkte – nie verschachtelte Listen")
+    && ki.includes("Keine Begrüßung, keine Einleitung")
+    && ki.includes("Lob nur konkret")
+    && ki.includes('"zuerst"') && ki.includes("beginnt mit einem Verb")
+    && quelle("src/features/Eltern.jsx").includes("bericht-zuerst")
+    && quelle("e2e/smoke.spec.js").includes("ki-zaehler")
+    && releaseNoteVorhanden("rn-083");
+})());
+
 // ---------- v0.66: Mathekönner ----------
 console.log("== v0.66: Mathekönner ==");
 test("v0.66: drei Mathekönner-Pools in Mathe verdrahtet, Wochenend-Planer mit Einplan-Karte", (() => {
