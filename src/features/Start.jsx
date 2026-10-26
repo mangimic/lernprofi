@@ -1,5 +1,6 @@
 import { useApp } from "../appContext.jsx";
 import { koennerEinplanen } from "../calc/koennerPlan.js";
+import { hoerEinplanen } from "../calc/kompassPlan.js";
 import { heutigerTag, lernspur, muenzenNachRunde, aufgabenZaehlen } from "../calc/lerntage.js";
 import { missionsOpts } from "../calc/tagesform.js";
 import { zeitUebrigMin } from "../calc/elternWerkzeuge.js";
@@ -44,6 +45,16 @@ export default function Start() {
       ...data,
       lernstand: { ...data.lernstand, wochenplan: erg.doc, koenner: { geplant: heute } },
     }, "wochenplan", "neu", "Mathekönner-Wochenende eingeplant (1×1 · Rechengeschichten · Zahlen bis 10 000)");
+  };
+
+  // 🔊 Hör-Detektiv: 2-Wochen-Förderplan (Mo + Do) für die
+  // Rechtschreib-Fehlermuster – ein Tipp, dann steht er im Kalender.
+  const hoerPlanen = () => {
+    const erg = hoerEinplanen(data.lernstand.wochenplan, heute, data.einstellungen.festeTermine);
+    logChange({
+      ...data,
+      lernstand: { ...data.lernstand, wochenplan: erg.doc, hoerplan: { geplant: heute } },
+    }, "wochenplan", "neu", "Hör-Detektiv-Plan eingeplant (2 Wochen, Mo + Do)");
   };
 
   const planHaken = (id) => {
@@ -143,6 +154,22 @@ export default function Start() {
           <button data-test="koenner-einplanen" onClick={koennerPlanen}
             style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
             🗓️ Fürs Wochenende einplanen
+          </button>
+        </div>
+      )}
+      {!data.lernstand.hoerplan?.geplant && (
+        <div data-test="hoer-karte" style={{
+          background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand,
+          border: `2px solid ${T.primaer}`,
+        }}>
+          <b>🔊 Neu: Hör-Detektiv!</b>
+          <p style={{ margin: "4px 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+            Dein Training für knifflige Wörter: d oder t? f oder v? Wo versteckt sich das r?
+            tz oder z? Ein Tipp legt dir 2 Wochen lang Montag + Donnerstag eine Runde in den Plan.
+          </p>
+          <button data-test="hoer-einplanen" onClick={hoerPlanen}
+            style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+            🗓️ 2-Wochen-Plan anlegen
           </button>
         </div>
       )}

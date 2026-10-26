@@ -4,6 +4,7 @@
    Feld startet direkt, ohne Zwischenschritt. */
 import { DEUTSCH_BEREICHE } from "./aufgaben/deutsch.js";
 import { KOMPASS_DEUTSCH_BEREICHE } from "./aufgaben/kompassDeutsch.js";
+import { HOEREN_BEREICH } from "./aufgaben/hoeren.js";
 
 /** Alle Deutsch-Lernbereiche in Anzeige-Reihenfolge (auch für die Suche). */
 export const DEUTSCH_LISTE = [
@@ -18,12 +19,13 @@ export const DEUTSCH_LISTE = [
   { key: "gws", emoji: "📖", name: "Grundwortschatz" },
   ...DEUTSCH_BEREICHE,
   ...KOMPASS_DEUTSCH_BEREICHE, // 🧭 die Aufgabenformate aus dem Kompass-4-Test
+  HOEREN_BEREICH, // 🔊 gezieltes Rechtschreib-Training nach Felix' Fehlermustern
   { key: "vorgang", emoji: "📝", name: "Vorgangsbeschreibung", typ: "modul" },
 ];
 
 export const DEUTSCH_GRUPPEN = [
   { key: "lesen", emoji: "🔍", name: "Lesen & Verstehen", felder: ["lesen"] },
-  { key: "schreiben", emoji: "✍️", name: "Richtig schreiben", felder: ["gk", "gws", "dd", "doppel", "strategie", "wortfam"] },
+  { key: "schreiben", emoji: "✍️", name: "Richtig schreiben", felder: ["gk", "gws", "dd", "doppel", "strategie", "wortfam", "hoeren"] },
   { key: "woerter", emoji: "🏷️", name: "Wörter & Wortarten", felder: ["wa", "zeit", "verbform", "steigern", "zusnomen", "faelle"] },
   { key: "saetze", emoji: "🧲", name: "Sätze & Satzglieder", felder: ["subj", "praed", "satzglied", "rede"] },
   { key: "texte", emoji: "📚", name: "Texte schreiben", felder: ["gesch", "vorgang"] },

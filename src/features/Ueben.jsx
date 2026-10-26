@@ -6,6 +6,7 @@ import { GESCH_DATEN, ddPool, doppelPool } from "../calc/aufgaben/deutsch.js";
 import { subjektPool, praedikatPool, gkPool } from "../calc/aufgaben/saetze.js";
 import { umstellenPool, umSatzText, umstellenPruefen } from "../calc/aufgaben/satzglieder.js";
 import { KOMPASS_DEUTSCH_DATEN } from "../calc/aufgaben/kompassDeutsch.js";
+import { HOEREN_DATEN } from "../calc/aufgaben/hoeren.js";
 import { DEUTSCH_GRUPPEN, DEUTSCH_LISTE, leoWahl } from "../calc/uebenGruppen.js";
 import { KOMPASS_ORIGINAL } from "../calc/kompassPlan.js";
 import { dokHolen, dokAnzeigen } from "../doks.js";
@@ -37,6 +38,7 @@ function deutschDaten(thema) {
     zeit: zeitPool(thema), wa: wortartenPool(thema), faelle: faellePool(thema), gws: gwsPool(),
     gesch: GESCH_DATEN, dd: ddPool(), doppel: doppelPool(), satzglied: umstellenPool(),
     ...KOMPASS_DEUTSCH_DATEN, // 🧭 Kompass-Training (themenfrei)
+    ...HOEREN_DATEN, // 🔊 Hör-Detektiv (Rechtschreib-Fehlermuster)
   };
 }
 // (Die Deutsch-Bereichsliste lebt in calc/uebenGruppen.js – auch die Suche nutzt sie.)

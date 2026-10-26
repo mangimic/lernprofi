@@ -24,7 +24,7 @@ async function tresorAnlegen(page) {
 // Der Helfer öffnet die passende Gruppe; eine Ein-Feld-Gruppe (Lesen) startet direkt.
 const GRUPPE_VON = {
   lesen: "lesen",
-  gk: "schreiben", gws: "schreiben", dd: "schreiben", doppel: "schreiben", strategie: "schreiben", wortfam: "schreiben",
+  gk: "schreiben", gws: "schreiben", dd: "schreiben", doppel: "schreiben", strategie: "schreiben", wortfam: "schreiben", hoeren: "schreiben",
   wa: "woerter", zeit: "woerter", verbform: "woerter", steigern: "woerter", zusnomen: "woerter", faelle: "woerter",
   subj: "saetze", praed: "saetze", satzglied: "saetze", rede: "saetze",
   gesch: "texte", vorgang: "texte",
@@ -1580,6 +1580,29 @@ test("🔍 Suche: findet Übungen, Karten und Seiten – ein Tipp springt hin", 
   await expect(page.getByTestId("suche-leer")).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByTestId("suche-dialog")).toHaveCount(0);
+});
+
+test("🔊 Hör-Detektiv: Förderbereich übt die Fehlermuster, ein Tipp plant 2 Wochen Mo+Do", async ({ page }) => {
+  await tresorAnlegen(page);
+  // Ein Tipp auf der Startseite legt den 2-Wochen-Plan an – Karte verschwindet
+  await page.getByTestId("hoer-einplanen").click();
+  await expect(page.getByTestId("hoer-karte")).toHaveCount(0);
+  await page.getByTestId("nav-plan").click();
+  // Mindestens ein Hör-Detektiv-Block liegt in dieser oder der nächsten Woche
+  if (!(await page.getByTestId("plan-seite").textContent()).includes("Hör-Detektiv")) {
+    await page.getByTestId("woche-naechste").click();
+  }
+  await expect(page.getByTestId("plan-seite")).toContainText("Hör-Detektiv");
+  // ▶️ am Block startet die Übung mit dem Ton-Detektiv-Anker
+  await page.locator('[data-test="block-ueben"]').first().click();
+  await expect(page.getByTestId("frage-text")).toBeVisible();
+  await expect(page.getByTestId("wozu-anker")).toContainText("Ton-Detektiv");
+  await page.getByTestId("abbrechen").click();
+  await expect(page.getByTestId("plan-seite")).toBeVisible();
+  // Der Bereich hängt in der Übungs-Welt unter „Richtig schreiben"
+  await page.getByTestId("nav-ueben").click();
+  await deutschBereich(page, "hoeren");
+  await expect(page.getByTestId("frage-text")).toContainText("richtig geschrieben");
 });
 
 test("🏅 Mathekönner: drei Übungsbereiche, ein Tipp plant das Wochenende", async ({ page }) => {

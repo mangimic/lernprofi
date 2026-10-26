@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { tageBis, kompassTermine, kompassWochen, KOMPASS_STANDARD, kompassUebernehmen, KOMPASS_FELD_NAMEN, KOMPASS_ORIGINAL, feldVonNotiz } from "./kompassPlan.js";
+import { tageBis, kompassTermine, kompassWochen, KOMPASS_STANDARD, kompassUebernehmen, KOMPASS_FELD_NAMEN, KOMPASS_ORIGINAL, feldVonNotiz, hoerEinplanen } from "./kompassPlan.js";
 import { planFuerWoche, blockHinzu, blockFertig, FESTE_TERMINE_STANDARD, leererPlan, planSchreiben } from "./wochenplan.js";
 
 // Fixes Test-Datum: 6 Wochen vor den Kompass-Terminen (fiktive Daten, kein Kind-Bezug).
@@ -115,5 +115,30 @@ describe("Original-Arbeitsblatt-Verweise", () => {
       expect(o.aufgaben, feld).toMatch(/^\d/);
       expect(o.thema.length, feld).toBeGreaterThan(5);
     }
+  });
+});
+
+describe("Hör-Detektiv-Plan", () => {
+  it("plant 2 Wochen Mo+Do nach der Familienregel, idempotent, Notiz führt zur Übung", () => {
+    const erg = hoerEinplanen(null, "2026-10-12", FESTE_TERMINE_STANDARD); // Montag
+    expect(erg.eingeplant).toBe(4); // Mo+Do in zwei Wochen
+    const w1 = planFuerWoche(erg.doc, "2026-10-12");
+    const hoer = w1.bloecke.filter((b) => b.notiz === "Hör-Detektiv");
+    expect(hoer.map((b) => b.tag).sort()).toEqual([0, 3]);
+    expect(hoer.every((b) => b.typ === "deutsch")).toBe(true);
+    // Familienregel: an Schultagen stehen Hausaufgaben am selben Tag davor
+    for (const b of hoer) {
+      const ha = w1.bloecke.find((x) => x.tag === b.tag && x.typ === "hausaufgaben");
+      expect(ha).toBeTruthy();
+      expect(ha.slot).toBeLessThan(b.slot);
+    }
+    expect(feldVonNotiz("Hör-Detektiv")).toBe("hoeren");
+    // Zweiter Lauf plant nichts doppelt
+    const nochmal = hoerEinplanen(erg.doc, "2026-10-12", FESTE_TERMINE_STANDARD);
+    expect(nochmal.eingeplant).toBe(0);
+    expect(nochmal.schonDa).toBe(4);
+    // Später Start (Freitag): der vergangene Mo+Do der Woche ruht, Rest wird geplant
+    const spaet = hoerEinplanen(null, "2026-10-16", FESTE_TERMINE_STANDARD);
+    expect(spaet.eingeplant).toBe(2); // nur die Folgewoche
   });
 });

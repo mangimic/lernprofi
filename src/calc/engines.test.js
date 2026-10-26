@@ -4,6 +4,7 @@ import { STUFEN_NAMEN, leererFortschritt, stufenMax, stufenStart, aktiveStufe, r
 import { PAKET_GROESSE, paketWaehlen, antwortOptionen, antwortRichtig, poolGesund, stufenListe } from "./aufgabenRunde.js";
 import { muenzenNachRunde, aufgabenZaehlen, heutigerTag, lernspur, MISSIONS_LAENGE } from "./lerntage.js";
 import { MATHE_DATEN, MATHE_BEREICHE } from "./aufgaben/mathe.js";
+import { HOEREN_DATEN } from "./aufgaben/hoeren.js";
 import { SACH_DATEN, SACH_BEREICHE } from "./aufgaben/sachkunde.js";
 import { GESCH_DATEN, ddPool, doppelPool, DEUTSCH_BEREICHE } from "./aufgaben/deutsch.js";
 import { STARK_DATEN, STARK_SAETZE } from "./aufgaben/stark.js";
@@ -152,11 +153,11 @@ describe("aufgabenRunde", () => {
     }
   });
 
-  it("🗂️ Übungs-Gruppen decken alle 19 Deutsch-Felder genau einmal ab; Leo wählt fair", () => {
+  it("🗂️ Übungs-Gruppen decken alle 20 Deutsch-Felder genau einmal ab; Leo wählt fair", () => {
     const alleFelder = DEUTSCH_GRUPPEN.flatMap((g) => g.felder);
     expect(alleFelder.length).toBe(new Set(alleFelder).size); // kein Feld doppelt
     expect([...alleFelder].sort()).toEqual([
-      "dd", "doppel", "faelle", "gesch", "gk", "gws", "lesen", "praed", "rede", "satzglied",
+      "dd", "doppel", "faelle", "gesch", "gk", "gws", "hoeren", "lesen", "praed", "rede", "satzglied",
       "steigern", "strategie", "subj", "verbform", "vorgang", "wa", "wortfam", "zeit", "zusnomen",
     ]);
     expect(gruppeVonFeld("lesen").felder).toEqual(["lesen"]); // Ein-Feld-Gruppe startet direkt
@@ -209,6 +210,18 @@ describe("aufgabenRunde", () => {
         expect(b.plus, a.f).toBeGreaterThanOrEqual(5);
       }
     }
+  });
+
+  it("🔊 Hör-Detektiv: Pool gesund, 12+12, trainiert die vier Fehlermuster", () => {
+    expect(poolGesund(HOEREN_DATEN.hoeren)).toBe(true);
+    expect(HOEREN_DATEN.hoeren.easy.length).toBe(12);
+    expect(HOEREN_DATEN.hoeren.hard.length).toBe(12);
+    const alle = [...HOEREN_DATEN.hoeren.easy, ...HOEREN_DATEN.hoeren.hard];
+    // Die Original-Fehlerwörter vom Blatt sind als richtige Antworten drin
+    for (const wort of ["vorne", "dran", "Artikel", "setzen"]) {
+      expect(alle.some((a) => a.r === wort), wort).toBe(true);
+    }
+    expect(gruppeVonFeld("hoeren").key).toBe("schreiben");
   });
 
   it("Stark-mit-Leo-Pool und Mut-Sätze sind vollständig", () => {

@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-084",
+    "version": "0.68.0",
+    "datum": "2026-10-26",
+    "titel": "Hör-Detektiv",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🔊 Neuer Deutsch-Bereich „Hör-Detektiv“ (unter „Richtig schreiben“): 24 Aufgaben trainieren genau vier knifflige Hör-Muster – d oder t am Wortanfang (dran), f oder v (vorne, V-Familie), das versteckte r in Silben (Ar-ti-kel) und tz/ck nach kurzem Vokal (setzen, backen). Jeder Tipp zeigt die passende Strategie: verlängern, Silben schwingen, Vokallänge prüfen."
+      },
+      {
+        "type": "neu",
+        "text": "🗓️ Auf der Startseite legt ein Tipp den 2-Wochen-Förderplan an: Montag + Donnerstag je eine Hör-Detektiv-Runde – nach der Familienregel (erst Hausaufgaben und Schlagzeug), mit ▶️ direkt in die Übung."
+      }
+    ]
+  },
+  {
     "id": "rn-083",
     "version": "0.67.0",
     "datum": "2026-10-26",

@@ -93,14 +93,51 @@ export const KOMPASS_FELD_NAMEN = {
 /** 🔎 Umkehrung: Baustein-Notiz („Lese-Detektiv") → Übungs-Feld („lesen").
     Damit springt ein Lernblock im Kalender direkt in seine Übung –
     das gilt für Kompass- UND Mathekönner-Blöcke. */
+/** 🔊 Förder-Felder (gezieltes Training nach echten Fehlermustern). */
+export const FOERDER_FELD_NAMEN = { hoeren: "Hör-Detektiv" };
+
 export function feldVonNotiz(notiz) {
   if (!notiz) return null;
-  for (const karte of [KOMPASS_FELD_NAMEN, KOENNER_FELD_NAMEN]) {
+  for (const karte of [KOMPASS_FELD_NAMEN, KOENNER_FELD_NAMEN, FOERDER_FELD_NAMEN]) {
     for (const [feld, name] of Object.entries(karte)) {
       if (name === notiz) return feld;
     }
   }
   return null;
+}
+
+/** 🔊 Hör-Detektiv-Lernplan: 2 Wochen lang Montag + Donnerstag je eine
+    Einheit – nach der Familienregel (erst Hausaufgaben an Schultagen
+    und Schlagzeug, dann das Üben). Idempotent je Woche.
+    Ergebnis: { doc, eingeplant, schonDa, keinPlatz }. */
+export function hoerEinplanen(doc, heute, feste) {
+  const NOTIZ = FOERDER_FELD_NAMEN.hoeren;
+  let eingeplant = 0, schonDa = 0, keinPlatz = 0;
+  for (const wo of [0, 1]) {
+    const montag = tagDatum(wochenMontag(heute), wo * 7);
+    let plan = planFuerWoche(doc, montag);
+    for (const tag of [0, 3]) { // Montag + Donnerstag
+      const datum = tagDatum(montag, tag);
+      if (datum < heute) continue; // vergangene Tage ruhen
+      if (plan.bloecke.some((b) => b.tag === tag && b.typ === "deutsch" && b.notiz === NOTIZ)) { schonDa++; continue; }
+      let p = plan, abMin = 0;
+      if (!schulfreiAm(datum)) {
+        const ha = pflichtSichern(p, feste, tag, datum, "hausaufgaben");
+        if (ha.ende === null) { keinPlatz++; continue; }
+        p = ha.plan; abMin = Math.max(abMin, ha.ende);
+      }
+      const sz = pflichtSichern(p, feste, tag, datum, "schlagzeug");
+      if (sz.ende === null) { keinPlatz++; continue; }
+      p = sz.plan; abMin = Math.max(abMin, sz.ende);
+      const slot = ersterFreierSlot(p, feste, tag, datum, abMin);
+      if (slot === null) { keinPlatz++; continue; }
+      plan = blockNotiz(blockHinzu(p, tag, "deutsch", slot), p.bloecke.length
+        ? Math.max(...p.bloecke.map((b) => b.id)) + 1 : 1, NOTIZ);
+      eingeplant++;
+    }
+    doc = planSchreiben(doc, plan);
+  }
+  return { doc, eingeplant, schonDa, keinPlatz };
 }
 
 /** 📄 Wo dieselbe Sache im ORIGINAL-Arbeitsheft steht (Kompass 4,

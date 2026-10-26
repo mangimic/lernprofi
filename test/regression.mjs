@@ -36,6 +36,20 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.68: Hör-Detektiv ----------
+console.log("== v0.68: Hör-Detektiv ==");
+test("v0.68: Förderbereich nach Fehlermustern + 2-Wochen-Plan mit Familienregel", (() => {
+  const h = quelle("src/calc/aufgaben/hoeren.js");
+  const kp = quelle("src/calc/kompassPlan.js");
+  return h.includes("HOEREN_DATEN") && ["vorne", "dran", "Artikel", "setzen"].every((w) => h.includes(`r:"${w}"`))
+    && quelle("src/calc/uebenGruppen.js").includes("HOEREN_BEREICH")
+    && kp.includes("export function hoerEinplanen") && kp.includes("FOERDER_FELD_NAMEN")
+    && quelle("src/features/Start.jsx").includes("hoer-einplanen")
+    && quelle("src/calc/wozu.js").includes("hoeren:")
+    && quelle("e2e/smoke.spec.js").includes("hoer-einplanen")
+    && releaseNoteVorhanden("rn-084");
+})());
+
 // ---------- v0.67: Leo-Regeln v2 ----------
 console.log("== v0.67: Leo-Regeln v2 ==");
 test("v0.67: Blasen-Zähler, 2-Minuten-Deckel, 3-Punkte-Deckel, Floskel-Verbot, Bericht Aktion-zuerst", (() => {
