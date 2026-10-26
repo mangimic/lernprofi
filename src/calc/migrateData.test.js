@@ -38,6 +38,22 @@ describe("migrateData", () => {
     expect(d.einstellungen.thema).toBe("hell");
   });
 
+  it("interessen: Whitelist aus den Übungs-Welten, eindeutig, höchstens 3", () => {
+    const leer = migrateData(null, HEUTE);
+    expect(leer.profil.interessen).toEqual([]);
+    expect(leer.profil.interessenGefragt).toBe("");
+    const d = migrateData({ profil: {
+      interessen: ["dinos", "quatsch", "dinos", "weltraum", "gaming", "fussball"],
+      interessenGefragt: HEUTE,
+    } }, HEUTE);
+    expect(d.profil.interessen).toEqual(["dinos", "weltraum", "gaming"]); // ohne Fremdes/Doppeltes, max 3
+    expect(d.profil.interessenGefragt).toBe(HEUTE);
+    expect(migrateData({ profil: { interessen: "alle", interessenGefragt: 7 } }, HEUTE).profil.interessen).toEqual([]);
+    // neue Welten sind gültige Übungs-Welten
+    expect(migrateData({ einstellungen: { uebungsThema: "dinos" } }, HEUTE).einstellungen.uebungsThema).toBe("dinos");
+    expect(migrateData({ einstellungen: { uebungsThema: "neon" } }, HEUTE).einstellungen.uebungsThema).toBe("alltag");
+  });
+
   it("ist verlustfrei: unbekannte Schlüssel bleiben erhalten", () => {
     const d = migrateData({ zukunftsFeld: { a: 1 }, profil: { spitzname: "Blitz" } }, HEUTE);
     expect(d.zukunftsFeld).toEqual({ a: 1 });

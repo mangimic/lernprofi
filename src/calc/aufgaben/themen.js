@@ -1,11 +1,15 @@
-/* 🎨 Übungs-Welten: Felix wählt, aus welcher Welt die Übungs-Sätze
-   kommen (Muster „Interesse schlägt Pflicht“). Die Satz-Pools der
-   Alt-App sind durchgängig nach diesen vier Welten aufgebaut. */
+/* 🎨 Übungs-Welten: das Kind wählt, aus welcher Welt die Übungs-Sätze
+   kommen (Muster „Interesse schlägt Pflicht“). Die Satz-Pools sind
+   durchgängig nach diesen Welten aufgebaut – jede neue Welt braucht
+   Datensätze in ALLEN Themen-Maps (saetze.js, deutsch2.js, schrift.js). */
 export const THEMEN_WELTEN = [
   { key: "alltag", emoji: "🌳", name: "Alltag" },
   { key: "angeln", emoji: "🎣", name: "Angeln" },
   { key: "tennis", emoji: "🎾", name: "Tennis" },
   { key: "fussball", emoji: "⚽", name: "Fußball" },
+  { key: "dinos", emoji: "🦖", name: "Dinos" },
+  { key: "weltraum", emoji: "🚀", name: "Weltraum" },
+  { key: "gaming", emoji: "🎮", name: "Blockwelt" },
 ];
 export const THEMEN_KEYS = THEMEN_WELTEN.map((t) => t.key);
 

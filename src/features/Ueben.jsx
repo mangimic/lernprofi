@@ -677,7 +677,10 @@ export default function Ueben() {
             <b>🎨 Deine Übungs-Welt</b> <span style={{ color: T.textLeise }}>– für die Satz-Übungen (Subjekte bis Die 4 Fälle)</span>
           </p>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {THEMEN_WELTEN.map((w) => (
+            {/* Lieblings-Welten (aus dem Interessen-Picker) stehen vorn */}
+            {[...THEMEN_WELTEN].sort((a, b) =>
+              ((data.profil.interessen || []).includes(b.key) ? 1 : 0) - ((data.profil.interessen || []).includes(a.key) ? 1 : 0),
+            ).map((w) => (
               <button key={w.key} data-test={`thema-${w.key}`}
                 onClick={() => logChange({ ...data, einstellungen: { ...data.einstellungen, uebungsThema: w.key } },
                   "einstellungen", "geaendert", `Übungs-Welt: ${w.name}`)}

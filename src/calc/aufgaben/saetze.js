@@ -46,6 +46,33 @@ export const SUBJ_THEMEN = {
     {woerter:["Der","Schiedsrichter","pfeift","ein","Foul."], subj:[0,1], subjektText:"Der Schiedsrichter", art:"wer", frage:"Wer oder was pfeift ein Foul?"},
     {woerter:["Am","Spielfeldrand","steht","der","Trainer."], subj:[3,4], subjektText:"der Trainer", art:"wer", frage:"Wer oder was steht am Spielfeldrand?"},
     {woerter:["Die","Fans","jubeln","laut."], subj:[0,1], subjektText:"Die Fans", art:"wer", frage:"Wer oder was jubelt laut?"}
+  ]},
+  dinos:{ name:"Dinos", emoji:"🦖", saetze:[
+    {woerter:["Der","große","Dino","stampft","durch","den","Wald."], subj:[0,1,2], subjektText:"Der große Dino", art:"was", frage:"Wer oder was stampft durch den Wald?"},
+    {woerter:["Die","Forscherin","findet","einen","Knochen."], subj:[0,1], subjektText:"Die Forscherin", art:"wer", frage:"Wer oder was findet einen Knochen?"},
+    {woerter:["Der","T-Rex","brüllt","sehr","laut."], subj:[0,1], subjektText:"Der T-Rex", art:"was", frage:"Wer oder was brüllt sehr laut?"},
+    {woerter:["Ein","kleiner","Dino","schlüpft","aus","dem","Ei."], subj:[0,1,2], subjektText:"Ein kleiner Dino", art:"was", frage:"Wer oder was schlüpft aus dem Ei?"},
+    {woerter:["Der","Langhals","frisst","grüne","Blätter."], subj:[0,1], subjektText:"Der Langhals", art:"was", frage:"Wer oder was frisst grüne Blätter?"},
+    {woerter:["Im","Museum","stehen","die","Knochen."], subj:[3,4], subjektText:"die Knochen", art:"was", frage:"Wer oder was steht im Museum?"},
+    {woerter:["Der","Flugsaurier","segelt","über","das","Tal."], subj:[0,1], subjektText:"Der Flugsaurier", art:"was", frage:"Wer oder was segelt über das Tal?"}
+  ]},
+  weltraum:{ name:"Weltraum", emoji:"🚀", saetze:[
+    {woerter:["Die","Rakete","startet","mit","lautem","Donner."], subj:[0,1], subjektText:"Die Rakete", art:"was", frage:"Wer oder was startet mit lautem Donner?"},
+    {woerter:["Der","Astronaut","schwebt","durch","das","Raumschiff."], subj:[0,1], subjektText:"Der Astronaut", art:"wer", frage:"Wer oder was schwebt durch das Raumschiff?"},
+    {woerter:["Der","Mond","leuchtet","in","der","Nacht."], subj:[0,1], subjektText:"Der Mond", art:"was", frage:"Wer oder was leuchtet in der Nacht?"},
+    {woerter:["Ein","heller","Komet","fliegt","vorbei."], subj:[0,1,2], subjektText:"Ein heller Komet", art:"was", frage:"Wer oder was fliegt vorbei?"},
+    {woerter:["Die","Astronautin","landet","auf","dem","Mond."], subj:[0,1], subjektText:"Die Astronautin", art:"wer", frage:"Wer oder was landet auf dem Mond?"},
+    {woerter:["Am","Himmel","funkeln","die","Sterne."], subj:[3,4], subjektText:"die Sterne", art:"was", frage:"Wer oder was funkelt am Himmel?"},
+    {woerter:["Das","Fernrohr","zeigt","einen","Planeten."], subj:[0,1], subjektText:"Das Fernrohr", art:"was", frage:"Wer oder was zeigt einen Planeten?"}
+  ]},
+  gaming:{ name:"Blockwelt", emoji:"🎮", saetze:[
+    {woerter:["Der","Spieler","baut","ein","hohes","Haus."], subj:[0,1], subjektText:"Der Spieler", art:"wer", frage:"Wer oder was baut ein hohes Haus?"},
+    {woerter:["Die","Spielerin","gräbt","nach","Gold."], subj:[0,1], subjektText:"Die Spielerin", art:"wer", frage:"Wer oder was gräbt nach Gold?"},
+    {woerter:["Die","Fackel","leuchtet","in","der","Höhle."], subj:[0,1], subjektText:"Die Fackel", art:"was", frage:"Wer oder was leuchtet in der Höhle?"},
+    {woerter:["Ein","blauer","Diamant","glitzert","im","Stein."], subj:[0,1,2], subjektText:"Ein blauer Diamant", art:"was", frage:"Wer oder was glitzert im Stein?"},
+    {woerter:["Der","Turm","ragt","in","den","Himmel."], subj:[0,1], subjektText:"Der Turm", art:"was", frage:"Wer oder was ragt in den Himmel?"},
+    {woerter:["In","der","Werkstatt","baut","der","Junge","eine","Tür."], subj:[4,5], subjektText:"der Junge", art:"wer", frage:"Wer oder was baut eine Tür?"},
+    {woerter:["Die","Brücke","führt","über","das","Wasser."], subj:[0,1], subjektText:"Die Brücke", art:"was", frage:"Wer oder was führt über das Wasser?"}
   ]}
 };
 
@@ -77,6 +104,27 @@ export const SUBJ_K4 = {
     {woerter:["Nach","dem","Foul","zeigt","der","Schiedsrichter","die","Karte."], subj:[4,5], subjektText:"der Schiedsrichter", art:"wer", frage:"Wer oder was zeigt die Karte?"},
     {woerter:["Am","Spielfeldrand","feuert","der","Trainer","die","Spieler","an."], subj:[3,4], subjektText:"der Trainer", art:"wer", frage:"Wer oder was feuert die Spieler an?"},
     {woerter:["Am","Ende","hat","die","Mannschaft","das","Spiel","gewonnen."], subj:[3,4], subjektText:"die Mannschaft", art:"wer", frage:"Wer oder was hat das Spiel gewonnen?"}
+  ],
+  dinos:[
+    {woerter:["Am","frühen","Morgen","brüllt","der","riesige","T-Rex","im","Tal."], subj:[4,5,6], subjektText:"der riesige T-Rex", art:"was", frage:"Wer oder was brüllt im Tal?"},
+    {woerter:["Der","Langhals","und","der","Flugsaurier","trinken","am","Fluss."], subj:[0,1,2,3,4], subjektText:"Der Langhals und der Flugsaurier", art:"was", frage:"Wer oder was trinkt am Fluss?"},
+    {woerter:["Nach","dem","Regen","sucht","die","Forscherin","neue","Spuren."], subj:[4,5], subjektText:"die Forscherin", art:"wer", frage:"Wer oder was sucht neue Spuren?"},
+    {woerter:["Im","Nest","liegen","drei","gefleckte","Eier."], subj:[3,4,5], subjektText:"drei gefleckte Eier", art:"was", frage:"Wer oder was liegt im Nest?"},
+    {woerter:["Am","Ende","hat","die","Forscherin","den","Knochen","ausgegraben."], subj:[3,4], subjektText:"die Forscherin", art:"wer", frage:"Wer oder was hat den Knochen ausgegraben?"}
+  ],
+  weltraum:[
+    {woerter:["Am","späten","Abend","startet","die","große","Rakete","zum","Mond."], subj:[4,5,6], subjektText:"die große Rakete", art:"was", frage:"Wer oder was startet zum Mond?"},
+    {woerter:["Der","Astronaut","und","die","Astronautin","schweben","zur","Station."], subj:[0,1,2,3,4], subjektText:"Der Astronaut und die Astronautin", art:"wer", frage:"Wer oder was schwebt zur Station?"},
+    {woerter:["Nach","der","Landung","funkt","die","Astronautin","zur","Erde."], subj:[4,5], subjektText:"die Astronautin", art:"wer", frage:"Wer oder was funkt zur Erde?"},
+    {woerter:["Plötzlich","saust","ein","heller","Komet","vorbei."], subj:[2,3,4], subjektText:"ein heller Komet", art:"was", frage:"Wer oder was saust vorbei?"},
+    {woerter:["Am","Ende","hat","die","Rakete","den","Mond","erreicht."], subj:[3,4], subjektText:"die Rakete", art:"was", frage:"Wer oder was hat den Mond erreicht?"}
+  ],
+  gaming:[
+    {woerter:["Vor","dem","Bau","sammelt","der","Spieler","viele","Blöcke."], subj:[4,5], subjektText:"der Spieler", art:"wer", frage:"Wer oder was sammelt viele Blöcke?"},
+    {woerter:["Der","Spieler","und","seine","Freundin","bauen","eine","Burg."], subj:[0,1,2,3,4], subjektText:"Der Spieler und seine Freundin", art:"wer", frage:"Wer oder was baut eine Burg?"},
+    {woerter:["In","der","Höhle","glitzert","ein","blauer","Diamant."], subj:[4,5,6], subjektText:"ein blauer Diamant", art:"was", frage:"Wer oder was glitzert in der Höhle?"},
+    {woerter:["Nach","dem","Graben","baut","das","Kind","eine","Treppe."], subj:[4,5], subjektText:"das Kind", art:"wer", frage:"Wer oder was baut eine Treppe?"},
+    {woerter:["Am","Ende","hat","der","Junge","den","Turm","gebaut."], subj:[3,4], subjektText:"der Junge", art:"wer", frage:"Wer oder was hat den Turm gebaut?"}
   ]
 };
 
@@ -124,6 +172,33 @@ export const PRAED_THEMEN = {
     {woerter:["Der","Schiedsrichter","pfeift","ein","Foul."], praed:[2], praedText:"pfeift"},
     {woerter:["Am","Spielfeldrand","steht","der","Trainer."], praed:[2], praedText:"steht"},
     {woerter:["Die","Fans","jubeln","laut."], praed:[2], praedText:"jubeln"}
+  ]},
+  dinos:{ name:"Dinos", emoji:"🦖", saetze:[
+    {woerter:["Der","große","Dino","stampft","durch","den","Wald."], praed:[3], praedText:"stampft"},
+    {woerter:["Die","Forscherin","findet","einen","Knochen."], praed:[2], praedText:"findet"},
+    {woerter:["Der","T-Rex","brüllt","sehr","laut."], praed:[2], praedText:"brüllt"},
+    {woerter:["Ein","kleiner","Dino","schlüpft","aus","dem","Ei."], praed:[3], praedText:"schlüpft"},
+    {woerter:["Der","Langhals","frisst","grüne","Blätter."], praed:[2], praedText:"frisst"},
+    {woerter:["Im","Museum","stehen","die","Knochen."], praed:[2], praedText:"stehen"},
+    {woerter:["Der","Flugsaurier","segelt","über","das","Tal."], praed:[2], praedText:"segelt"}
+  ]},
+  weltraum:{ name:"Weltraum", emoji:"🚀", saetze:[
+    {woerter:["Die","Rakete","startet","mit","lautem","Donner."], praed:[2], praedText:"startet"},
+    {woerter:["Der","Astronaut","schwebt","durch","das","Raumschiff."], praed:[2], praedText:"schwebt"},
+    {woerter:["Der","Mond","leuchtet","in","der","Nacht."], praed:[2], praedText:"leuchtet"},
+    {woerter:["Ein","heller","Komet","fliegt","vorbei."], praed:[3,4], praedText:"fliegt … vorbei"},
+    {woerter:["Die","Astronautin","landet","auf","dem","Mond."], praed:[2], praedText:"landet"},
+    {woerter:["Am","Himmel","funkeln","die","Sterne."], praed:[2], praedText:"funkeln"},
+    {woerter:["Das","Fernrohr","zeigt","einen","Planeten."], praed:[2], praedText:"zeigt"}
+  ]},
+  gaming:{ name:"Blockwelt", emoji:"🎮", saetze:[
+    {woerter:["Der","Spieler","baut","ein","hohes","Haus."], praed:[2], praedText:"baut"},
+    {woerter:["Die","Spielerin","gräbt","nach","Gold."], praed:[2], praedText:"gräbt"},
+    {woerter:["Die","Fackel","leuchtet","in","der","Höhle."], praed:[2], praedText:"leuchtet"},
+    {woerter:["Ein","blauer","Diamant","glitzert","im","Stein."], praed:[3], praedText:"glitzert"},
+    {woerter:["Der","Turm","ragt","in","den","Himmel."], praed:[2], praedText:"ragt"},
+    {woerter:["In","der","Werkstatt","baut","der","Junge","eine","Tür."], praed:[3], praedText:"baut"},
+    {woerter:["Die","Brücke","führt","über","das","Wasser."], praed:[2], praedText:"führt"}
   ]}
 };
 
@@ -155,6 +230,27 @@ export const PRAED_K4 = {
     {woerter:["Nach","dem","Foul","zeigt","der","Schiedsrichter","die","Karte."], praed:[3], praedText:"zeigt"},
     {woerter:["Am","Spielfeldrand","feuert","der","Trainer","die","Spieler","an."], praed:[2,7], praedText:"feuert … an"},
     {woerter:["Am","Ende","hat","die","Mannschaft","das","Spiel","gewonnen."], praed:[2,7], praedText:"hat … gewonnen"}
+  ],
+  dinos:[
+    {woerter:["Am","frühen","Morgen","brüllt","der","riesige","T-Rex","im","Tal."], praed:[3], praedText:"brüllt"},
+    {woerter:["Der","Langhals","und","der","Flugsaurier","trinken","am","Fluss."], praed:[5], praedText:"trinken"},
+    {woerter:["Nach","dem","Regen","sucht","die","Forscherin","neue","Spuren."], praed:[3], praedText:"sucht"},
+    {woerter:["Im","Nest","liegen","drei","gefleckte","Eier."], praed:[2], praedText:"liegen"},
+    {woerter:["Am","Ende","hat","die","Forscherin","den","Knochen","ausgegraben."], praed:[2,7], praedText:"hat … ausgegraben"}
+  ],
+  weltraum:[
+    {woerter:["Am","späten","Abend","startet","die","große","Rakete","zum","Mond."], praed:[3], praedText:"startet"},
+    {woerter:["Der","Astronaut","und","die","Astronautin","schweben","zur","Station."], praed:[5], praedText:"schweben"},
+    {woerter:["Nach","der","Landung","funkt","die","Astronautin","zur","Erde."], praed:[3], praedText:"funkt"},
+    {woerter:["Plötzlich","saust","ein","heller","Komet","vorbei."], praed:[1,5], praedText:"saust … vorbei"},
+    {woerter:["Am","Ende","hat","die","Rakete","den","Mond","erreicht."], praed:[2,7], praedText:"hat … erreicht"}
+  ],
+  gaming:[
+    {woerter:["Vor","dem","Bau","sammelt","der","Spieler","viele","Blöcke."], praed:[3], praedText:"sammelt"},
+    {woerter:["Der","Spieler","und","seine","Freundin","bauen","eine","Burg."], praed:[5], praedText:"bauen"},
+    {woerter:["In","der","Höhle","glitzert","ein","blauer","Diamant."], praed:[3], praedText:"glitzert"},
+    {woerter:["Nach","dem","Graben","baut","das","Kind","eine","Treppe."], praed:[3], praedText:"baut"},
+    {woerter:["Am","Ende","hat","der","Junge","den","Turm","gebaut."], praed:[2,7], praedText:"hat … gebaut"}
   ]
 };
 
@@ -190,6 +286,30 @@ export const GK_THEMEN = {
     {woerter:["der","junge","spielt","im","verein."], gross:[0,1,4]},
     {woerter:["der","ball","rollt","ins","tor."], gross:[0,1,4]},
     {woerter:["die","fans","jubeln","laut."], gross:[0,1]}
+  ]},
+  dinos:{ name:"Dinos", emoji:"🦖", saetze:[
+    {woerter:["der","große","dino","stampft","durch","den","wald."], gross:[0,2,6]},
+    {woerter:["die","forscherin","findet","einen","knochen."], gross:[0,1,4]},
+    {woerter:["der","langhals","frisst","grüne","blätter."], gross:[0,1,4]},
+    {woerter:["im","museum","stehen","die","knochen."], gross:[0,1,4]},
+    {woerter:["ein","kleiner","dino","schlüpft","aus","dem","ei."], gross:[0,2,6]},
+    {woerter:["der","flugsaurier","segelt","über","das","tal."], gross:[0,1,5]}
+  ]},
+  weltraum:{ name:"Weltraum", emoji:"🚀", saetze:[
+    {woerter:["die","rakete","startet","zum","mond."], gross:[0,1,4]},
+    {woerter:["der","astronaut","schwebt","durch","das","raumschiff."], gross:[0,1,5]},
+    {woerter:["am","himmel","funkeln","die","sterne."], gross:[0,1,4]},
+    {woerter:["ein","heller","komet","fliegt","vorbei."], gross:[0,2]},
+    {woerter:["das","fernrohr","zeigt","einen","planeten."], gross:[0,1,4]},
+    {woerter:["die","astronautin","landet","auf","dem","mond."], gross:[0,1,5]}
+  ]},
+  gaming:{ name:"Blockwelt", emoji:"🎮", saetze:[
+    {woerter:["der","spieler","baut","ein","hohes","haus."], gross:[0,1,5]},
+    {woerter:["die","fackel","leuchtet","in","der","höhle."], gross:[0,1,5]},
+    {woerter:["ein","blauer","diamant","glitzert","im","stein."], gross:[0,2,5]},
+    {woerter:["die","spielerin","gräbt","nach","gold."], gross:[0,1,4]},
+    {woerter:["der","turm","ragt","in","den","himmel."], gross:[0,1,5]},
+    {woerter:["die","brücke","führt","über","das","wasser."], gross:[0,1,5]}
   ]}
 };
 

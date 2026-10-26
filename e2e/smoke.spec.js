@@ -1756,3 +1756,24 @@ test("Übungs-Welt, Wozu-Anker, Zeitstrahl und Lehrer-Moment", async ({ page }) 
   await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
   await expect(page.getByTestId("lehrer-moment")).toHaveCount(0);
 });
+
+test("Interessen-Picker: Lieblings-Welten wählen steuert die Übungs-Welt", async ({ page }) => {
+  await tresorAnlegen(page);
+
+  // 🎨 Die Welten-Frage begrüßt das Kind einmalig auf der Startseite
+  await expect(page.getByTestId("interessen-karte")).toBeVisible();
+  await expect(page.getByTestId("interessen-ok")).toBeDisabled(); // ohne Auswahl kein Speichern
+  await page.getByTestId("interesse-dinos").click();
+  await page.getByTestId("interesse-weltraum").click();
+  await expect(page.getByTestId("interessen-ok")).toContainText("(2)");
+  await page.getByTestId("interessen-ok").click();
+  await expect(page.getByTestId("interessen-karte")).toHaveCount(0); // einmalig
+
+  // Die erste gewählte Welt ist sofort die Übungs-Welt – und die
+  // Lieblings-Welten stehen in der Welt-Wahl vorn
+  await page.getByTestId("nav-ueben").click();
+  await expect(page.locator('[data-test^="thema-"]').first()).toHaveAttribute("data-test", "thema-dinos");
+  await deutschBereich(page, "subj");
+  await expect(page.getByTestId("frage-karte")).toContainText(/Dino|T-Rex|Langhals|Forscherin|Flugsaurier|Knochen|Nest/);
+  await page.getByTestId("abbrechen").click();
+});

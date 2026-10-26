@@ -1,5 +1,25 @@
 [
   {
+    "id": "rn-085",
+    "version": "0.69.0",
+    "datum": "2026-10-26",
+    "titel": "Drei neue Welten + Lieblings-Welten",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🦖🚀🎮 Drei neue Übungs-Welten: Dinos, Weltraum und Blockwelt! Alle Satz-Übungen (Subjekte, Prädikate, Groß/Klein, Zeitformen, Wortarten, Fälle, wörtliche Rede) und das Schreib-Training gibt es jetzt auch mit Dino-Forschern, Raketen und Bau-Abenteuern."
+      },
+      {
+        "type": "neu",
+        "text": "🎨 Neue Welten-Frage auf der Startseite: Das Kind wählt einmalig bis zu 3 Lieblings-Welten – die erste wird sofort die Übungs-Welt, und in der Welt-Wahl beim Üben stehen die Favoriten vorn. Jederzeit änderbar, überspringen geht auch."
+      },
+      {
+        "type": "technik",
+        "text": "🧩 Unter der Haube: Die Lieblings-Welten sind der erste Baustein fürs Kennenlernen neuer Kinder – Interessen steuern künftig auch Spiele und Aufgaben-Vorschläge."
+      }
+    ]
+  },
+  {
     "id": "rn-084",
     "version": "0.68.0",
     "datum": "2026-10-26",

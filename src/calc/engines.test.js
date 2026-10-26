@@ -653,7 +653,7 @@ describe("übungs-welten & wozu-anker", () => {
     const S = await import("./aufgaben/saetze.js");
     const K = await import("./aufgaben/deutschKonverter.js");
     const { THEMEN_KEYS, nurThema } = await import("./aufgaben/themen.js");
-    expect(THEMEN_KEYS).toEqual(["alltag", "angeln", "tennis", "fussball"]);
+    expect(THEMEN_KEYS).toEqual(["alltag", "angeln", "tennis", "fussball", "dinos", "weltraum", "gaming"]);
     expect(nurThema({ a: 1, b: 2 }, "quatsch")).toEqual({ a: 1, b: 2 });
     for (const thema of THEMEN_KEYS) {
       for (const pool of [S.subjektPool(thema), S.praedikatPool(thema), S.gkPool(thema), K.redePool(thema)]) {
@@ -664,6 +664,39 @@ describe("übungs-welten & wozu-anker", () => {
       expect(K.faellePool(thema).easy.length).toBeGreaterThan(0);
       expect(K.wortartenPool(thema).easy.length).toBeGreaterThan(0);
       expect(S.subjektPool(thema).easy.length).toBeLessThan(S.subjektPool().easy.length);
+    }
+  });
+
+  it("jede Welt hat Datensätze in ALLEN Themen-Maps, Texte passen zu den Ziel-Indizes", async () => {
+    const S = await import("./aufgaben/saetze.js");
+    const D2 = await import("./aufgaben/deutsch2.js");
+    const { SCHREIB_SAETZE } = await import("./schrift.js");
+    const { THEMEN_KEYS } = await import("./aufgaben/themen.js");
+    const putz = (w) => w.replace(/[.,!?]/g, "");
+    for (const k of THEMEN_KEYS) {
+      for (const map of [S.SUBJ_THEMEN, S.PRAED_THEMEN, S.GK_THEMEN, D2.ZEIT_THEMEN, D2.WA_THEMEN, D2.FAELLE_THEMEN, D2.REDE_THEMEN]) {
+        expect(map[k], k).toBeTruthy();
+        expect(map[k].saetze.length, k).toBeGreaterThanOrEqual(5);
+      }
+      for (const map of [S.SUBJ_K4, S.PRAED_K4, D2.WA_K4, D2.REDE_K4]) {
+        expect(map[k], k).toBeTruthy();
+        expect(map[k].length, k).toBeGreaterThanOrEqual(4);
+      }
+      // Subjekt-/Prädikat-Text = genau die markierten Wörter (ohne Satzzeichen)
+      for (const a of [...S.SUBJ_THEMEN[k].saetze, ...S.SUBJ_K4[k]]) {
+        expect(a.subj.map((i) => putz(a.woerter[i])).join(" ")).toBe(a.subjektText);
+      }
+      for (const a of [...S.PRAED_THEMEN[k].saetze, ...S.PRAED_K4[k]]) {
+        expect(a.praed.map((i) => putz(a.woerter[i])).join(" … ")).toBe(a.praedText);
+      }
+      // Groß/Klein: der Satzanfang ist immer dabei
+      for (const a of S.GK_THEMEN[k].saetze) expect(a.gross[0]).toBe(0);
+      // Zeitformen: jede Welt übt leicht (Präsens/Präteritum) UND schwer (Perfekt/Futur)
+      expect(new Set(D2.ZEIT_THEMEN[k].saetze.map((a) => a.form)))
+        .toEqual(new Set(["praesens", "praeteritum", "perfekt", "futur"]));
+      // Schreib-Training: jede Welt hat Abschreib-Sätze (höchstens 8 Wörter)
+      expect(SCHREIB_SAETZE[k].length, k).toBeGreaterThanOrEqual(6);
+      expect(SCHREIB_SAETZE[k].every((s) => s.split(" ").length <= 8)).toBe(true);
     }
   });
 

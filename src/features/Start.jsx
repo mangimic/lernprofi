@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { useApp } from "../appContext.jsx";
+import { THEMEN_WELTEN } from "../calc/aufgaben/themen.js";
 import { koennerEinplanen } from "../calc/koennerPlan.js";
 import { hoerEinplanen } from "../calc/kompassPlan.js";
 import { heutigerTag, lernspur, muenzenNachRunde, aufgabenZaehlen } from "../calc/lerntage.js";
@@ -37,6 +39,22 @@ export default function Start() {
   const heuteFeste = [...(data.einstellungen.festeTermine || [])
     .filter((f) => f.tag === heuteIdx && !istAusgefallen(plan, heuteIdx, f.beginn))]
     .sort((a, b) => a.beginn - b.beginn);
+  // 🎨 Interessen-Picker (einmalig): das Kind wählt bis zu 3 Lieblings-
+  // Welten – die erste wird sofort die Übungs-Welt der Satz-Übungen.
+  // Später jederzeit änderbar (Welten-Wahl im Üben-Bereich).
+  const [interessenWahl, setInteressenWahl] = useState([]);
+  const interesseToggle = (key) => {
+    setInteressenWahl((w) => (w.includes(key) ? w.filter((k) => k !== key) : w.length >= 3 ? w : [...w, key]));
+  };
+  const interessenSpeichern = (wahl) => {
+    const namen = THEMEN_WELTEN.filter((w) => wahl.includes(w.key)).map((w) => w.name);
+    logChange({
+      ...data,
+      profil: { ...data.profil, interessen: wahl, interessenGefragt: heute },
+      einstellungen: { ...data.einstellungen, uebungsThema: wahl[0] || data.einstellungen.uebungsThema },
+    }, "profil", "geaendert", wahl.length ? `Lieblings-Welten gewählt: ${namen.join(", ")}` : "Welten-Frage übersprungen");
+  };
+
   // 🏅 Mathekönner: ein Tipp legt die drei Schwerpunkte aufs kommende
   // Wochenende (Sa: 1×1 + Rechengeschichten · So: Zahlen bis 10 000).
   const koennerPlanen = () => {
@@ -141,6 +159,39 @@ export default function Start() {
           </div>
         );
       })()}
+      {!data.profil.interessenGefragt && !(data.profil.interessen || []).length && (
+        <div data-test="interessen-karte" style={{
+          background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand,
+          border: `2px solid ${T.primaer}`,
+        }}>
+          <b>🎨 Was magst du am liebsten?</b>
+          <p style={{ margin: "4px 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+            Wähle bis zu 3 Welten – deine Übungs-Sätze kommen dann aus deinen Lieblings-Welten.
+            Du kannst das später jederzeit beim Üben ändern.
+          </p>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
+            {THEMEN_WELTEN.map((w) => (
+              <button key={w.key} data-test={`interesse-${w.key}`} onClick={() => interesseToggle(w.key)}
+                style={{
+                  flex: "1 1 auto", fontWeight: 700, padding: "0 12px", whiteSpace: "nowrap",
+                  background: interessenWahl.includes(w.key) ? T.primaer : T.weich,
+                  color: interessenWahl.includes(w.key) ? T.primaerText : T.text,
+                }}>
+                {w.emoji} {w.name}
+              </button>
+            ))}
+          </div>
+          <button data-test="interessen-ok" disabled={!interessenWahl.length}
+            onClick={() => interessenSpeichern(interessenWahl)}
+            style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700, opacity: interessenWahl.length ? 1 : 0.5 }}>
+            ✅ Das sind meine Welten{interessenWahl.length ? ` (${interessenWahl.length})` : ""}
+          </button>
+          <button data-test="interessen-spaeter" onClick={() => interessenSpeichern([])}
+            style={{ width: "100%", marginTop: 6, background: "transparent", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+            Später auswählen
+          </button>
+        </div>
+      )}
       {!data.lernstand.koenner?.geplant && (
         <div data-test="koenner-karte" style={{
           background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand,

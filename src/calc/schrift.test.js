@@ -6,9 +6,10 @@ import {
 const VERBOTEN = /\b(dumm|faul|krank)\b|adhs|störung|diagnose|defizit|unmotiviert|versager|zappel/i;
 
 describe("schrift – Schreib-Satz des Tages", () => {
-  it("alle Sätze: höchstens 8 Wörter, Sprachregeln eingehalten, 4 Welten à 8 Sätze", () => {
+  it("alle Sätze: höchstens 8 Wörter, Sprachregeln eingehalten, alle Welten à 8 Sätze", async () => {
+    const { THEMEN_KEYS } = await import("./aufgaben/themen.js");
     const welten = Object.keys(SCHREIB_SAETZE);
-    expect(welten.sort()).toEqual(["alltag", "angeln", "fussball", "tennis"]);
+    expect(welten.sort()).toEqual([...THEMEN_KEYS].sort());
     for (const w of welten) {
       expect(SCHREIB_SAETZE[w].length).toBe(8);
       for (const satz of SCHREIB_SAETZE[w]) {

@@ -48,6 +48,36 @@ export const SCHREIB_SAETZE = {
     "Mein Trikot ist voller Matsch.",
     "Zum Schluss geben wir alles.",
   ],
+  dinos: [
+    "Der Dino stampft durch den Wald.",
+    "Die Forscherin findet einen Knochen.",
+    "Im Nest liegen drei Eier.",
+    "Der T-Rex brüllt sehr laut.",
+    "Der Langhals frisst grüne Blätter.",
+    "Der Flugsaurier segelt über das Tal.",
+    "Im Museum stehen alte Knochen.",
+    "Eine Spur führt zum Fluss.",
+  ],
+  weltraum: [
+    "Die Rakete startet zum Mond.",
+    "Am Himmel funkeln viele Sterne.",
+    "Der Astronaut schwebt ganz langsam.",
+    "Der Mond leuchtet in der Nacht.",
+    "Ein Komet saust am Fenster vorbei.",
+    "Die Astronautin funkt zur Erde.",
+    "Das Fernrohr zeigt einen Planeten.",
+    "Die Raumstation kreist um die Erde.",
+  ],
+  gaming: [
+    "Der Spieler baut ein hohes Haus.",
+    "Die Fackel leuchtet in der Höhle.",
+    "Ein Diamant glitzert im Stein.",
+    "Die Brücke führt über das Wasser.",
+    "In der Werkstatt entsteht eine Tür.",
+    "Der Turm ragt in den Himmel.",
+    "Wir sammeln Holz für das Haus.",
+    "Am Abend ist die Burg fertig.",
+  ],
 };
 
 /** Tages-Nummer (deterministisch aus dem ISO-Datum). */

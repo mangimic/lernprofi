@@ -36,6 +36,26 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.69: Drei neue Welten + Interessen-Picker ----------
+console.log("== v0.69: Drei neue Welten + Interessen-Picker ==");
+test("v0.69: Dinos/Weltraum/Blockwelt in allen Themen-Maps, Interessen im Profil, Picker auf Start", (() => {
+  const th = quelle("src/calc/aufgaben/themen.js");
+  const sz = quelle("src/calc/aufgaben/saetze.js");
+  const d2 = quelle("src/calc/aufgaben/deutsch2.js");
+  const mg = quelle("src/calc/migrateData.js");
+  const st = quelle("src/features/Start.jsx");
+  return ["dinos", "weltraum", "gaming"].every((k) =>
+    th.includes(`key: "${k}"`)
+    && (sz.match(new RegExp(`${k}:`, "g")) || []).length >= 5
+    && (d2.match(new RegExp(`${k}:`, "g")) || []).length >= 6)
+    && quelle("src/calc/schrift.js").includes("dinos: [")
+    && mg.includes("interessen") && mg.includes("THEMEN_KEYS.includes(d.einstellungen.uebungsThema)")
+    && st.includes("interessen-karte") && st.includes("interessen-ok") && st.includes("interessen-spaeter")
+    && quelle("src/features/Ueben.jsx").includes("data.profil.interessen")
+    && quelle("e2e/smoke.spec.js").includes("interesse-dinos")
+    && releaseNoteVorhanden("rn-085");
+})());
+
 // ---------- v0.68: Hör-Detektiv ----------
 console.log("== v0.68: Hör-Detektiv ==");
 test("v0.68: Förderbereich nach Fehlermustern + 2-Wochen-Plan mit Familienregel", (() => {

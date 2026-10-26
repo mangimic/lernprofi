@@ -8,6 +8,7 @@
    unangetastet erhalten.
    ============================================================ */
 import { STARK_SAETZE } from "./aufgaben/stark.js";
+import { THEMEN_KEYS } from "./aufgaben/themen.js";
 import { FESTE_TERMINE_STANDARD, mittagErzwingen } from "./wochenplan.js";
 
 export const SCHEMA_VERSION = 1;
@@ -17,7 +18,11 @@ export function leeresDokument(heute) {
   return {
     schemaVersion: SCHEMA_VERSION,
     erstellt: heute,
-    profil: { name: "", klasse: 4 },
+    profil: {
+      name: "", klasse: 4,
+      interessen: [],      // 🎨 Lieblings-Welten des Kindes (max 3, aus THEMEN_KEYS)
+      interessenGefragt: "", // Datum, an dem der Interessen-Picker beantwortet/weggeklickt wurde
+    },
     lernstand: {
       stufen: {},      // je Lernfeld: { freigeschaltet, runden, krone }
       muenzen: 0,
@@ -80,6 +85,9 @@ export function migrateData(alt, heute) {
   d.profil = { ...basis.profil, ...(istObjekt(quelle.profil) ? quelle.profil : {}) };
   if (typeof d.profil.name !== "string") d.profil.name = "";
   if (![3, 4].includes(d.profil.klasse)) d.profil.klasse = 4;
+  d.profil.interessen = [...new Set((Array.isArray(d.profil.interessen) ? d.profil.interessen : [])
+    .filter((k) => THEMEN_KEYS.includes(k)))].slice(0, 3);
+  if (typeof d.profil.interessenGefragt !== "string") d.profil.interessenGefragt = "";
 
   d.lernstand = { ...basis.lernstand, ...(istObjekt(quelle.lernstand) ? quelle.lernstand : {}) };
   if (!istObjekt(d.lernstand.stufen)) d.lernstand.stufen = {};
@@ -155,7 +163,7 @@ export function migrateData(alt, heute) {
   if (typeof d.einstellungen.tagesformAktiv !== "boolean") d.einstellungen.tagesformAktiv = true;
   if (typeof d.einstellungen.pausenAktiv !== "boolean") d.einstellungen.pausenAktiv = true;
   if (![5, 10, 15].includes(d.einstellungen.pausenIntervall)) d.einstellungen.pausenIntervall = 10;
-  if (!["alltag", "angeln", "tennis", "fussball"].includes(d.einstellungen.uebungsThema)) {
+  if (!THEMEN_KEYS.includes(d.einstellungen.uebungsThema)) {
     d.einstellungen.uebungsThema = "alltag";
   }
   d.einstellungen.eigeneSaetze = (Array.isArray(d.einstellungen.eigeneSaetze) ? d.einstellungen.eigeneSaetze : [])
