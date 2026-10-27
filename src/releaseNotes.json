@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-088",
+    "version": "0.72.0",
+    "datum": "2026-10-27",
+    "titel": "Wiederherstellungs-Code",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🧯 Passwort vergessen ist kein Daten-Verlust mehr: Im Elternbereich (Konto & Daten) erzeugt ihr einen Wiederherstellungs-Code – 25 Zeichen, zum Ausdrucken und sicher Ablegen. Er ist ein dritter Umschlag um den Tresor-Schlüssel: Am Sperrbildschirm öffnet „Passwort vergessen“ den Tresor mit dem Code, ihr vergebt ein neues Eltern-Passwort, die Lern-PIN bleibt unverändert."
+      },
+      {
+        "type": "neu",
+        "text": "🔑 Auch auf einem neuen Gerät: Bei der Anmeldung gibt es jetzt „Passwort vergessen? Mit Wiederherstellungs-Code“ – der Code meldet sich am Familien-Konto an, holt den verschlüsselten Tresor und setzt das neue Passwort gleich mit (lokal und am Konto). Ein neu erzeugter Code ersetzt immer den alten; der JSON-Backup-Export bleibt als zusätzliche Rettungsleine."
+      }
+    ]
+  },
+  {
     "id": "rn-087",
     "version": "0.71.0",
     "datum": "2026-10-27",

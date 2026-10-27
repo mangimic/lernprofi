@@ -8,6 +8,7 @@
    und speichert vom Beweis nur einen Hash – den Tresor kann er nie öffnen.
    ============================================================ */
 import { geheimnisBits, toB64, PBKDF2_ITERATIONEN } from "./crypto.js";
+import { rettungsCodeNormal } from "./vault.js";
 
 export const emailNormal = (email) => String(email || "").trim().toLowerCase();
 export const EMAIL_GUELTIG = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -56,4 +57,27 @@ export async function kontoAnmelden(email, passwort) {
 
 export async function kontoAbmelden() {
   return post("/api/konto/abmelden");
+}
+
+/* 🧯 Wiederherstellungs-Code am Konto: eigener Beweis mit „rettung:"-Präfix
+   (Domänen-Trennung vom Passwort-Beweis), derselbe Zero-Knowledge-Weg. */
+export async function rettungsBeweis(email, code, iterationen = PBKDF2_ITERATIONEN) {
+  return authBeweis(email, `rettung:${rettungsCodeNormal(code)}`, iterationen);
+}
+
+/** Hinterlegt den Code-Beweis am angemeldeten Konto (für den Code-Login). */
+export async function kontoRettungHinterlegen(email, code) {
+  return post("/api/konto/rettung", { rettungAuthBeweis: await rettungsBeweis(email, code) });
+}
+
+/** Anmelden mit dem Wiederherstellungs-Code statt Passwort. */
+export async function kontoAnmeldenMitCode(email, code) {
+  return post("/api/konto/login", { email: emailNormal(email), authBeweis: await rettungsBeweis(email, code) });
+}
+
+/** Setzt den Passwort-Beweis am Konto neu – legitimiert durch den Code
+    ODER das alte Passwort. */
+export async function kontoPasswortSetzen({ email, code, altesPasswort, neuesPasswort }) {
+  const beweis = code ? await rettungsBeweis(email, code) : await authBeweis(email, altesPasswort);
+  return post("/api/konto/passwort", { beweis, authBeweis: await authBeweis(email, neuesPasswort) });
 }

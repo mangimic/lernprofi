@@ -124,6 +124,35 @@ describe("kontoApi – Registrieren und Login", () => {
     expect((await login(BEWEIS)).status).toBe(429); // Drossel gilt auch für richtige
   });
 
+  it("🧯 Rettungs-Beweis: hinterlegen, Code-Login, Passwort-Beweis neu setzen", async () => {
+    const env = mockEnv();
+    const r = await kontoApi(anfrage("POST", "/api/konto/registrieren",
+      { einladung: await einladung(env), email: "a@b.de", authBeweis: BEWEIS }), env);
+    const cookie = cookieVon(r);
+    const RETT = "cmV0dHVuZ3MtYmV3ZWlzLWZpa3Rpdi0zMi1ieXRlcyE=";
+    // hinterlegen braucht eine Anmeldung
+    expect((await kontoApi(anfrage("POST", "/api/konto/rettung", { rettungAuthBeweis: RETT }), env)).status).toBe(401);
+    expect((await kontoApi(anfrage("POST", "/api/konto/rettung", { rettungAuthBeweis: RETT }, { cookie }), env)).status).toBe(200);
+    // der Server kennt auch davon NUR den Hash
+    expect([...env.TRESOR._map.values()].join("")).not.toContain(RETT);
+    // Login mit dem Rettungs-Beweis → Sitzung + Markierung rettung
+    const codeLogin = await kontoApi(anfrage("POST", "/api/konto/login", { email: "a@b.de", authBeweis: RETT }), env);
+    expect(codeLogin.status).toBe(200);
+    expect(await codeLogin.json()).toMatchObject({ rettung: true });
+    // Passwort-Beweis neu setzen, legitimiert durch den Rettungs-Beweis
+    const NEU = "bmV1ZXItcGFzc3dvcnQtYmV3ZWlzLTMyLWJ5dGVzIQ==";
+    const falsch = "ZmFsc2NoZXItYmV3ZWlzLWZhbHNjaGVyLWJld2VpcyE=";
+    expect((await kontoApi(anfrage("POST", "/api/konto/passwort",
+      { beweis: falsch, authBeweis: NEU }, { cookie: cookieVon(codeLogin) }), env)).status).toBe(401);
+    expect((await kontoApi(anfrage("POST", "/api/konto/passwort",
+      { beweis: RETT, authBeweis: NEU }, { cookie: cookieVon(codeLogin) }), env)).status).toBe(200);
+    // alter Passwort-Beweis tot, neuer lebt, Rettungs-Beweis lebt weiter
+    const login = (b) => kontoApi(anfrage("POST", "/api/konto/login", { email: "a@b.de", authBeweis: b }), env);
+    expect((await login(BEWEIS)).status).toBe(401);
+    expect((await login(NEU)).status).toBe(200);
+    expect((await login(RETT)).status).toBe(200);
+  });
+
   it("Stamm-Verknüpfung: nur über Access, ohne Code, genau einmal", async () => {
     const env = mockEnv();
     const body = { stamm: true, email: "familie@example.com", authBeweis: BEWEIS };

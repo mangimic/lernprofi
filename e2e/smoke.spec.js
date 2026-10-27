@@ -1815,6 +1815,54 @@ test("Familien-Konto: Einrichtung mit Einladungs-Code – das Passwort verlässt
   await expect(page.getByTestId("konto-abmelden")).toBeVisible();
 });
 
+test("Wiederherstellungs-Code: erzeugen, Passwort vergessen, neues Passwort – PIN bleibt", async ({ page }) => {
+  await tresorAnlegen(page);
+
+  // 🧯 Code im Elternbereich erzeugen – nur mit richtigem Eltern-Passwort
+  await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-konto").click();
+  await page.getByTestId("rett-pw").fill("falsches-passwort");
+  await page.getByTestId("rett-erzeugen").click();
+  await expect(page.getByTestId("rett-meldung")).toBeVisible();
+  await page.getByTestId("rett-pw").fill(PW);
+  await page.getByTestId("rett-erzeugen").click();
+  await expect(page.getByTestId("rett-code-anzeige")).toBeVisible();
+  const code = (await page.getByTestId("rett-code-anzeige").textContent()).trim();
+  expect(code).toMatch(/^([a-z2-9]{5}-){4}[a-z2-9]{5}$/);
+
+  // Sperren → „Passwort vergessen": Code (Großschreibung egal) + neues Passwort
+  await page.getByTestId("sperren-knopf").click();
+  await expect(page.getByTestId("gate-entsperren")).toBeVisible();
+  await page.getByTestId("eltern-zugang").click();
+  await page.getByTestId("pw-vergessen").click();
+  await page.getByTestId("rett-code").fill(code.toUpperCase());
+  await page.getByTestId("rett-pw1").fill("neues-eltern-passwort");
+  await page.getByTestId("rett-pw2").fill("neues-eltern-passwort");
+  await page.getByTestId("rett-ok").click();
+  await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
+  await expect(page.getByTestId("nav-eltern")).toBeVisible(); // Eltern-Modus
+
+  // Altes Passwort ist tot, das neue öffnet
+  await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-konto").click();
+  await page.getByTestId("sperren-knopf").click();
+  await page.getByTestId("eltern-zugang").click();
+  await page.getByTestId("pw-eingabe").fill(PW);
+  await page.getByTestId("pw-ok").click();
+  await expect(page.getByTestId("gate-fehler")).toBeVisible();
+  await page.getByTestId("pw-eingabe").fill("neues-eltern-passwort");
+  await page.getByTestId("pw-ok").click();
+  await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
+
+  // Die Lern-PIN blieb die ganze Zeit unberührt
+  await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-konto").click();
+  await page.getByTestId("sperren-knopf").click();
+  await page.getByTestId("pin-eingabe").fill(PIN);
+  await page.getByTestId("pin-ok").click();
+  await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
+});
+
 test("Neues Gerät: Anmelden holt den verschlüsselten Tresor und entsperrt mit dem Eltern-Passwort", async ({ browser }) => {
   // Gerät A: rein lokale Einrichtung, Auto-Sicherung schiebt die Chiffrate hoch
   let rev = 0;

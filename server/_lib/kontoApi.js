@@ -207,7 +207,8 @@ export async function kontoApi(request, env, jetzt = new Date()) {
     return json(201, { kontoId }, { "set-cookie": sitzungsCookie(token) });
   }
 
-  // 🔑 Login: Auth-Beweis vergleichen, Fehlversuche je E-Mail drosseln.
+  // 🔑 Login: Auth-Beweis vergleichen (Passwort-Beweis ODER hinterlegter
+  // Wiederherstellungs-Beweis), Fehlversuche je E-Mail drosseln.
   if (url.pathname === "/api/konto/login") {
     if (!EMAIL.test(emailNorm) || !beweisGueltig) return json(400, { fehler: "Erwartet { email, authBeweis }." });
     const limitKey = `limit:login:${emailNorm}`;
@@ -218,13 +219,46 @@ export async function kontoApi(request, env, jetzt = new Date()) {
     const kontoId = await kv.get(`email:${emailNorm}`);
     const satz = kontoId ? await kv.get(`konto:${kontoId}`, "json") : null;
     const hash = await sha256Hex(beweis); // immer rechnen – kein Timing-Orakel auf die E-Mail
-    if (!satz || satz.authHash !== hash) {
+    const rettung = !!satz?.rettungAuthHash && satz.rettungAuthHash === hash;
+    if (!satz || (satz.authHash !== hash && !rettung)) {
       await kv.put(limitKey, String(versuche + 1), { expirationTtl: LOGIN_FENSTER_SEK });
       return json(401, { fehler: "E-Mail oder Passwort stimmt nicht." });
     }
     await kv.delete(limitKey);
     const token = await sitzungAusstellen(env.SESSION_GEHEIM, kontoId, jetzt);
-    return json(200, { kontoId }, { "set-cookie": sitzungsCookie(token) });
+    return json(200, { kontoId, ...(rettung ? { rettung: true } : {}) }, { "set-cookie": sitzungsCookie(token) });
+  }
+
+  // 🧯 Wiederherstellungs-Beweis hinterlegen (ersetzt einen alten) –
+  // braucht ein angemeldetes Konto (Sitzung oder verknüpftes Stamm-Konto).
+  if (url.pathname === "/api/konto/rettung") {
+    const konto = await kontoVonAnfrage(request, env, jetzt);
+    const satz = konto ? await kv.get(`konto:${konto.kontoId}`, "json") : null;
+    if (!satz) return json(401, { fehler: "Bitte zuerst anmelden bzw. das Konto verknüpfen." });
+    const rb = typeof eingabe?.rettungAuthBeweis === "string" ? eingabe.rettungAuthBeweis : "";
+    if (rb.length < 20 || rb.length > 200) return json(400, { fehler: "Rettungs-Beweis fehlt oder hat die falsche Länge." });
+    satz.rettungAuthHash = await sha256Hex(rb);
+    await kv.put(`konto:${konto.kontoId}`, JSON.stringify(satz));
+    return json(200, { ok: true });
+  }
+
+  // 🔁 Passwort-Beweis neu setzen – legitimiert durch den ALTEN Beweis
+  // (Passwort oder Wiederherstellungs-Code) am angemeldeten Konto.
+  if (url.pathname === "/api/konto/passwort") {
+    const konto = await kontoVonAnfrage(request, env, jetzt);
+    const satz = konto ? await kv.get(`konto:${konto.kontoId}`, "json") : null;
+    if (!satz) return json(401, { fehler: "Bitte zuerst anmelden bzw. das Konto verknüpfen." });
+    const alt = typeof eingabe?.beweis === "string" ? eingabe.beweis : "";
+    if (alt.length < 20 || alt.length > 200 || !beweisGueltig) {
+      return json(400, { fehler: "Erwartet { beweis, authBeweis } (alter und neuer Beweis)." });
+    }
+    const altHash = await sha256Hex(alt);
+    if (altHash !== satz.authHash && altHash !== satz.rettungAuthHash) {
+      return json(401, { fehler: "Der alte Beweis stimmt nicht." });
+    }
+    satz.authHash = await sha256Hex(beweis);
+    await kv.put(`konto:${konto.kontoId}`, JSON.stringify(satz));
+    return json(200, { ok: true });
   }
 
   if (url.pathname === "/api/konto/abmelden") {

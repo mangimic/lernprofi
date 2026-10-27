@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useApp } from "../appContext.jsx";
-import { kontoRegistrieren, kontoAnmelden, emailNormal, EMAIL_GUELTIG } from "../konto.js";
+import { kontoRegistrieren, kontoAnmelden, kontoAnmeldenMitCode, kontoPasswortSetzen, kontoStatus, emailNormal, EMAIL_GUELTIG } from "../konto.js";
+import { passwortNeuSetzen } from "../vault.js";
 import { herunterladen } from "../sync.js";
 import { idbStorage } from "../idbShim.js";
 
@@ -48,8 +49,10 @@ export default function VaultGate() {
   const [pin, setPin] = useState("");
   const [passwort, setPasswort] = useState("");
   const [einr, setEinr] = useState({ pw1: "", pw2: "", pin1: "", pin2: "", code: "", email: "" });
-  const [weg, setWeg] = useState("einrichten"); // einrichten | anmelden
+  const [weg, setWeg] = useState("einrichten"); // einrichten | anmelden | rettung (neues Gerät)
   const [anm, setAnm] = useState({ email: "", passwort: "" });
+  const [pwVergessen, setPwVergessen] = useState(false); // 🧯 lokaler Rettungs-Weg
+  const [rett, setRett] = useState({ email: "", code: "", pw1: "", pw2: "" });
 
   const los = async (arbeit) => {
     setFehler(""); setLaeuft(true);
@@ -102,11 +105,79 @@ export default function VaultGate() {
     await tresor.entsperrenPasswort(anm.passwort);
   });
 
+  // 🧯 Neues Passwort prüfen (für beide Rettungs-Wege gleich)
+  const rettPwPruefen = () => {
+    if (rett.pw1 !== rett.pw2) throw new Error("Die beiden neuen Passwörter sind nicht gleich.");
+    if (String(rett.pw1).length < 8) throw new Error("Das neue Eltern-Passwort braucht mindestens 8 Zeichen.");
+  };
+
+  // 🧯 Lokaler Rettungs-Weg: Tresor liegt auf DIESEM Gerät, Passwort ist weg.
+  // Der Code öffnet den dritten Umschlag und setzt ein neues Passwort;
+  // wenn das Konto erreichbar ist, wird der Server-Beweis mit aktualisiert.
+  const lokalRetten = () => los(async () => {
+    rettPwPruefen();
+    await passwortNeuSetzen(rett.code, rett.pw1, idbStorage); // wirft bei falschem Code
+    try {
+      const s = await kontoStatus();
+      if (s.angemeldet && s.email) await kontoPasswortSetzen({ email: s.email, code: rett.code, neuesPasswort: rett.pw1 });
+    } catch { /* ohne Netz: lokal fertig, Server-Beweis folgt über den Elternbereich */ }
+    await tresor.entsperrenPasswort(rett.pw1);
+  });
+
+  // 🧯 Rettung auf NEUEM Gerät: Code-Login → Chiffrat holen → neues
+  // Passwort setzen (lokal + am Konto) → entsperren.
+  const neuGeraetRetten = () => los(async () => {
+    if (!EMAIL_GUELTIG.test(emailNormal(rett.email))) throw new Error("Bitte die Konto-E-Mail eingeben.");
+    rettPwPruefen();
+    let erg;
+    try { erg = await kontoAnmeldenMitCode(rett.email, rett.code); }
+    catch { throw new Error("Der Server ist gerade nicht erreichbar – bitte später noch einmal."); }
+    if (!erg.ok) throw new Error(erg.fehler || "Der Code passt nicht zu diesem Konto.");
+    const holen = await herunterladen(idbStorage);
+    if (!holen.ok) throw new Error("Der Tresor konnte nicht geholt werden – bitte später noch einmal.");
+    await passwortNeuSetzen(rett.code, rett.pw1, idbStorage);
+    try { await kontoPasswortSetzen({ email: rett.email, code: rett.code, neuesPasswort: rett.pw1 }); } catch { /* best effort */ }
+    await tresor.entsperrenPasswort(rett.pw1);
+  });
+
   const kopf = (
     <header style={{ textAlign: "center", margin: "18px 0" }}>
       <h1 style={{ fontSize: "var(--schrift-gross)", margin: 0 }}>✏️ Lernprofi</h1>
     </header>
   );
+
+  if (tresor.status === "neu" && weg === "rettung") {
+    return (
+      <div data-test="gate-rettung" style={{ maxWidth: 480, margin: "0 auto", padding: "0 16px" }}>
+        {kopf}
+        <Karte>
+          <h2 style={{ marginTop: 0 }}>🧯 Passwort vergessen</h2>
+          <p style={{ color: T.textLeise }}>
+            Mit eurem <b>Wiederherstellungs-Code</b> (der ausgedruckte Zettel)
+            meldet sich dieses Gerät an, holt den verschlüsselten Tresor und
+            ihr vergebt ein <b>neues</b> Eltern-Passwort.
+          </p>
+          <Feld test="rett-email" type="email" placeholder="E-Mail des Familien-Kontos" value={rett.email}
+            onChange={(e) => setRett({ ...rett, email: e.target.value })} />
+          <Feld test="rett-code" placeholder="Wiederherstellungs-Code (xxxxx-xxxxx-…)" autoComplete="off" value={rett.code}
+            onChange={(e) => setRett({ ...rett, code: e.target.value })} />
+          <Feld test="rett-pw1" type="password" placeholder="Neues Eltern-Passwort (mind. 8 Zeichen)" value={rett.pw1}
+            onChange={(e) => setRett({ ...rett, pw1: e.target.value })} />
+          <Feld test="rett-pw2" type="password" placeholder="Neues Eltern-Passwort wiederholen" value={rett.pw2}
+            onChange={(e) => setRett({ ...rett, pw2: e.target.value })} />
+          {fehler && <p data-test="gate-fehler" style={{ color: T.warn }}>{fehler}</p>}
+          <button data-test="rett-ok" disabled={laeuft} onClick={neuGeraetRetten}
+            style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+            {laeuft ? "Einen Moment …" : "🧯 Tresor retten und neues Passwort setzen"}
+          </button>
+          <button onClick={() => { setWeg("anmelden"); setFehler(""); }}
+            style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 8, fontSize: "var(--schrift-klein)" }}>
+            ← Zurück zur Anmeldung
+          </button>
+        </Karte>
+      </div>
+    );
+  }
 
   if (tresor.status === "neu" && weg === "anmelden") {
     return (
@@ -129,8 +200,12 @@ export default function VaultGate() {
             style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
             {laeuft ? "Einen Moment …" : "🔑 Anmelden und Tresor holen"}
           </button>
-          <button data-test="anm-zurueck" onClick={() => { setWeg("einrichten"); setFehler(""); }}
+          <button data-test="anm-pw-vergessen" onClick={() => { setWeg("rettung"); setFehler(""); }}
             style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 8, fontSize: "var(--schrift-klein)" }}>
+            🧯 Passwort vergessen? Mit Wiederherstellungs-Code
+          </button>
+          <button data-test="anm-zurueck" onClick={() => { setWeg("einrichten"); setFehler(""); }}
+            style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 4, fontSize: "var(--schrift-klein)" }}>
             ← Zurück zur Einrichtung
           </button>
         </Karte>
@@ -204,7 +279,7 @@ export default function VaultGate() {
             🔧 Eltern-Zugang (mit Passwort)
           </button>
         </Karte>
-      ) : (
+      ) : !pwVergessen ? (
         <Karte>
           <h2 style={{ marginTop: 0 }}>🔧 Eltern-Zugang</h2>
           <Feld test="pw-eingabe" type="password" placeholder="Eltern-Passwort" value={passwort} autoFocus
@@ -216,9 +291,37 @@ export default function VaultGate() {
             style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
             {laeuft ? "Einen Moment …" : "Entsperren"}
           </button>
-          <button onClick={() => { setElternWeg(false); setFehler(""); }}
+          <button data-test="pw-vergessen" onClick={() => { setPwVergessen(true); setFehler(""); }}
             style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 8, fontSize: "var(--schrift-klein)" }}>
+            🧯 Passwort vergessen? Mit Wiederherstellungs-Code
+          </button>
+          <button onClick={() => { setElternWeg(false); setFehler(""); }}
+            style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 4, fontSize: "var(--schrift-klein)" }}>
             ← Zurück zur Lern-PIN
+          </button>
+        </Karte>
+      ) : (
+        <Karte>
+          <h2 style={{ marginTop: 0 }}>🧯 Passwort vergessen</h2>
+          <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+            Euer <b>Wiederherstellungs-Code</b> (der ausgedruckte Zettel) öffnet den
+            Tresor auf diesem Gerät – und ihr vergebt ein <b>neues</b> Eltern-Passwort.
+            Die Lern-PIN bleibt, wie sie ist.
+          </p>
+          <Feld test="rett-code" placeholder="Wiederherstellungs-Code (xxxxx-xxxxx-…)" autoComplete="off" value={rett.code} autoFocus
+            onChange={(e) => setRett({ ...rett, code: e.target.value })} />
+          <Feld test="rett-pw1" type="password" placeholder="Neues Eltern-Passwort (mind. 8 Zeichen)" value={rett.pw1}
+            onChange={(e) => setRett({ ...rett, pw1: e.target.value })} />
+          <Feld test="rett-pw2" type="password" placeholder="Neues Eltern-Passwort wiederholen" value={rett.pw2}
+            onChange={(e) => setRett({ ...rett, pw2: e.target.value })} />
+          {fehler && <p data-test="gate-fehler" style={{ color: T.warn }}>{fehler}</p>}
+          <button data-test="rett-ok" disabled={laeuft} onClick={lokalRetten}
+            style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+            {laeuft ? "Einen Moment …" : "🧯 Neues Passwort setzen und entsperren"}
+          </button>
+          <button onClick={() => { setPwVergessen(false); setFehler(""); }}
+            style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 8, fontSize: "var(--schrift-klein)" }}>
+            ← Zurück zum Eltern-Zugang
           </button>
         </Karte>
       )}

@@ -5,8 +5,8 @@ import { ZEIT_STUFEN, SPIELE_SCHALTER, spielAktiv, zeitHeute, GESPRAECH_BEREICHE
 import { PAUSEN_INTERVALLE, TAGESFORM_MODI } from "../calc/tagesform.js";
 import { idbStorage } from "../idbShim.js";
 import { syncStatus, hochladen, herunterladen, konfliktUeberschreiben } from "../sync.js";
-import { kontoStatus, kontoRegistrieren, kontoAnmelden, kontoAbmelden, emailNormal, EMAIL_GUELTIG } from "../konto.js";
-import { entsperrenMitPasswort } from "../vault.js";
+import { kontoStatus, kontoRegistrieren, kontoAnmelden, kontoAbmelden, kontoRettungHinterlegen, emailNormal, EMAIL_GUELTIG } from "../konto.js";
+import { entsperrenMitPasswort, rettungAnlegen } from "../vault.js";
 import { kiStatus, kiDeckelSetzen, kiErklaeren, kiBericht, kiSaetze } from "../ki.js";
 import { berichtDaten } from "../calc/bericht.js";
 import { BAUSTEINE } from "../calc/wochenplan.js";
@@ -158,6 +158,42 @@ export default function Eltern() {
       setKontoMeldung("⚠️ Der Server ist gerade nicht erreichbar.");
     }
   };
+  // 🧯 Wiederherstellungs-Code: Eltern-Passwort öffnet den Umschlag,
+  // ein frischer Code wird dritter Umschlag (und ersetzt einen alten).
+  // Ist das Konto verknüpft, wird sein Anmelde-Beweis gleich hinterlegt.
+  const [rett, setRett] = useState({ pw: "", code: null, meldung: "" });
+  const rettErzeugen = async () => {
+    setRett((r) => ({ ...r, meldung: "" }));
+    try {
+      const code = await rettungAnlegen(rett.pw, idbStorage);
+      let meldung = "ℹ️ Lokal aktiv. Sobald das Familien-Konto verknüpft ist, erzeugt den Code bitte NEU – dann kann er sich auch am Konto anmelden.";
+      if (konto?.angemeldet && konto.email) {
+        try {
+          const erg = await kontoRettungHinterlegen(konto.email, code);
+          meldung = erg.ok
+            ? "✅ Auch am Familien-Konto hinterlegt – der Code kann sich dort anmelden (für neue Geräte)."
+            : `⚠️ Lokal aktiv, aber am Konto nicht hinterlegt: ${erg.fehler || "unbekannter Fehler"}`;
+        } catch { meldung = "⚠️ Lokal aktiv; das Konto war gerade nicht erreichbar – bitte später NEU erzeugen."; }
+      }
+      setRett({ pw: "", code, meldung });
+    } catch (e) {
+      setRett((r) => ({ ...r, meldung: `⚠️ ${e?.message || "Das hat nicht geklappt."}` }));
+    }
+  };
+  const rettDrucken = () => {
+    const w = window.open("", "_blank", "noopener,width=600,height=500");
+    if (!w) return;
+    w.document.write(`<!doctype html><title>Wiederherstellungs-Code</title>
+      <body style="font-family:system-ui;padding:40px">
+      <h2>🧯 Lernprofi – Wiederherstellungs-Code</h2>
+      <p>Öffnet den Tresor, falls das Eltern-Passwort verloren geht.<br>
+      Gut aufbewahren (z.&nbsp;B. zu den Zeugnissen) – wer den Zettel hat, kommt an die Lerndaten.</p>
+      <p style="font-size:26px;font-family:ui-monospace,monospace;letter-spacing:1px"><b>${rett.code}</b></p>
+      <p>Weg: Sperrbildschirm → Eltern-Zugang → „Passwort vergessen“.</p>
+      <script>window.print()</script></body>`);
+    w.document.close();
+  };
+
   // Stamm-Verknüpfung: das Passwort wird ERST lokal am Tresor geprüft,
   // damit Konto-Passwort und Tresor-Passwort garantiert dasselbe sind.
   const stammVerknuepfen = () => kontoAktion(async () => {
@@ -829,6 +865,39 @@ export default function Eltern() {
           </button>
         )}
         {kontoMeldung && <p data-test="konto-meldung" style={{ margin: "8px 0 0", color: "var(--warn)", fontSize: "var(--schrift-klein)" }}>{kontoMeldung}</p>}
+
+        <div style={{ marginTop: 14, borderTop: `1px solid ${T.rand}`, paddingTop: 10 }}>
+          <b>🧯 Wiederherstellungs-Code</b>
+          <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+            Euer Rettungsanker, falls das Eltern-Passwort verloren geht: Der Code öffnet den
+            Tresor und ihr setzt ein neues Passwort. Druckt ihn aus und legt ihn sicher ab –
+            ein neuer Code ersetzt den alten.
+          </p>
+          {!rett.code && (
+            <>
+              <input data-test="rett-pw" style={feld} type="password" placeholder="Eltern-Passwort (zur Bestätigung)"
+                value={rett.pw} onChange={(e) => setRett({ ...rett, pw: e.target.value })} />
+              <button data-test="rett-erzeugen" onClick={rettErzeugen}
+                style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
+                🧯 Wiederherstellungs-Code erzeugen
+              </button>
+            </>
+          )}
+          {rett.code && (
+            <>
+              <p data-test="rett-code-anzeige" style={{
+                margin: "8px 0", padding: "12px 10px", background: T.grund, borderRadius: T.radiusKlein,
+                fontFamily: "ui-monospace, monospace", fontWeight: 800, fontSize: "var(--schrift)",
+                textAlign: "center", letterSpacing: 1, userSelect: "all", overflowWrap: "anywhere",
+              }}>{rett.code}</p>
+              <button data-test="rett-drucken" onClick={rettDrucken}
+                style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+                🖨️ Jetzt ausdrucken (einzige Kopie!)
+              </button>
+            </>
+          )}
+          {rett.meldung && <p data-test="rett-meldung" style={{ margin: "8px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>{rett.meldung}</p>}
+        </div>
       </Karte>
 
       <Karte test="eltern-profil">

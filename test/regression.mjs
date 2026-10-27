@@ -36,6 +36,26 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.72: Wiederherstellungs-Code ----------
+console.log("== v0.72: Wiederherstellungs-Code ==");
+test("v0.72: dritter Umschlag im Tresor, Rettungs-Wege am Gate, Code-Login am Konto", (() => {
+  const va = quelle("src/vault.js");
+  const vg = quelle("src/features/VaultGate.jsx");
+  const ko = quelle("server/_lib/kontoApi.js");
+  return va.includes("export async function rettungAnlegen")
+    && va.includes("export async function entsperrenMitRettungscode")
+    && va.includes("export async function passwortNeuSetzen")
+    && va.includes("rettungWrap") && va.includes("RETTUNG_ZEICHEN")
+    && vg.includes("pw-vergessen") && vg.includes("gate-rettung") && vg.includes("rett-ok")
+    && quelle("src/features/Eltern.jsx").includes("rett-erzeugen")
+    && quelle("src/features/Eltern.jsx").includes("rett-code-anzeige")
+    && quelle("src/konto.js").includes("rettung:") // Domänen-Trennung des Code-Beweises
+    && ko.includes("/api/konto/rettung") && ko.includes("/api/konto/passwort")
+    && ko.includes("rettungAuthHash")
+    && quelle("e2e/smoke.spec.js").includes("pw-vergessen")
+    && releaseNoteVorhanden("rn-088");
+})());
+
 // ---------- v0.71: Client-Anmeldung (Familien-Konto) ----------
 console.log("== v0.71: Client-Anmeldung ==");
 test("v0.71: Anmelde-Beweis getrennt vom Wrap, Gate mit Konto-Wegen, Eltern-Konto-Karte, Stamm-Verknüpfung", (() => {

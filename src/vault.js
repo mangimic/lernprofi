@@ -115,6 +115,75 @@ export async function pinAendern(elternPasswort, neuePin, speicher) {
   await speicher.set(META_SCHLUESSEL, meta);
 }
 
+/* 🧯 Wiederherstellungs-Code (v0.72): dritter Umschlag um denselben
+   Master-Schlüssel. 25 Zufallszeichen ohne verwechselbare Buchstaben
+   (kein i/l/o/0/1), angezeigt als 5er-Gruppen. Er löst das letzte
+   Tresor-Risiko: Passwort vergessen ≠ Daten verloren. */
+export const RETTUNG_ZEICHEN = "abcdefghjkmnpqrstuvwxyz23456789";
+export const RETTUNG_LAENGE = 25;
+
+/** Normalisiert Eingaben: Kleinschreibung, nur gültige Zeichen (Striche/Leerzeichen egal). */
+export function rettungsCodeNormal(code) {
+  return String(code || "").toLowerCase().split("").filter((z) => RETTUNG_ZEICHEN.includes(z)).join("");
+}
+
+/** Formatiert einen normalisierten Code in 5er-Gruppen (abcde-fghjk-…). */
+export function rettungsCodeFormat(norm) {
+  return (norm.match(/.{1,5}/g) || []).join("-");
+}
+
+export function rettungsCodeErzeugen() {
+  const roh = zufallsBytes(RETTUNG_LAENGE);
+  return rettungsCodeFormat([...roh].map((x) => RETTUNG_ZEICHEN[x % RETTUNG_ZEICHEN.length]).join(""));
+}
+
+/** Legt den Wiederherstellungs-Code an (braucht das Eltern-Passwort).
+    Ein vorhandener Code wird ERSETZT (der alte wird damit ungültig). */
+export async function rettungAnlegen(elternPasswort, speicher) {
+  const meta = await speicher.get(META_SCHLUESSEL);
+  if (!meta) throw new Error("Kein Tresor vorhanden.");
+  const elternKey = await schluesselAusGeheimnis(elternPasswort, fromB64(meta.elternSalt), meta.iterationen);
+  const masterB64 = await entschluesseln(elternKey, meta.elternWrap); // wirft bei falschem Passwort
+  const code = rettungsCodeErzeugen();
+  const rettungSalt = zufallsBytes(16);
+  const rettungKey = await schluesselAusGeheimnis(rettungsCodeNormal(code), rettungSalt);
+  meta.rettungSalt = toB64(rettungSalt);
+  meta.rettungWrap = await verschluesseln(rettungKey, masterB64);
+  await speicher.set(META_SCHLUESSEL, meta);
+  return code;
+}
+
+/** Entsperrt mit dem Wiederherstellungs-Code (Striche/Großschreibung egal). */
+export async function entsperrenMitRettungscode(code, speicher) {
+  const meta = await speicher.get(META_SCHLUESSEL);
+  if (!meta) throw new Error("Kein Tresor vorhanden.");
+  if (!meta.rettungWrap) throw new Error("Für diesen Tresor wurde noch kein Wiederherstellungs-Code erzeugt.");
+  const master = await masterAusWrap(rettungsCodeNormal(code), meta.rettungSalt, meta.rettungWrap, meta.iterationen);
+  await entschluesseln(master, meta.verifier);
+  return master;
+}
+
+/** „Passwort vergessen": setzt per Wiederherstellungs-Code ein NEUES
+    Eltern-Passwort. Lern-PIN und Code selbst bleiben gültig. */
+export async function passwortNeuSetzen(code, neuesPasswort, speicher) {
+  if (!neuesPasswort || String(neuesPasswort).length < 8) {
+    throw new Error("Das neue Eltern-Passwort braucht mindestens 8 Zeichen.");
+  }
+  const meta = await speicher.get(META_SCHLUESSEL);
+  if (!meta) throw new Error("Kein Tresor vorhanden.");
+  if (!meta.rettungWrap) throw new Error("Für diesen Tresor wurde noch kein Wiederherstellungs-Code erzeugt.");
+  const rettungKey = await schluesselAusGeheimnis(rettungsCodeNormal(code), fromB64(meta.rettungSalt), meta.iterationen);
+  let masterB64;
+  try { masterB64 = await entschluesseln(rettungKey, meta.rettungWrap); }
+  catch { throw new Error("Der Wiederherstellungs-Code stimmt nicht."); }
+  const elternSalt = zufallsBytes(16);
+  const elternKey = await schluesselAusGeheimnis(neuesPasswort, elternSalt);
+  meta.elternSalt = toB64(elternSalt);
+  meta.elternWrap = await verschluesseln(elternKey, masterB64);
+  meta.pinVersuche = 0;
+  await speicher.set(META_SCHLUESSEL, meta);
+}
+
 /** Speichert das Datendokument verschlüsselt. */
 export async function datenSpeichern(master, dokument, speicher) {
   const paket = await verschluesseln(master, JSON.stringify(dokument));
