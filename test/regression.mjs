@@ -36,6 +36,24 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.79: Sudoku-Training ----------
+console.log("== v0.79: Sudoku-Training ==");
+test("v0.79: Sudoku in Lern-Stufen (4x4 bis 9x9), eindeutige Raetsel, Regel-Highlight", (() => {
+  const su = quelle("src/calc/sudoku.js");
+  const ui = quelle("src/features/Sudoku.jsx");
+  return su.includes("export function sudokuErzeugen") && su.includes("loesungenZaehlen")
+    && su.includes("export function konflikte") && su.includes("SUDOKU_STUFEN")
+    && su.includes('zahlen: "1\u20134"') && su.includes('zahlen: "1\u20139"')
+    && ui.includes("sudoku-zelle-") && ui.includes("sudoku-zahl-") && ui.includes("sudoku-hinweis")
+    && ui.includes("leuchten") // Konflikt-Felder LEUCHTEN - die Regel wird sichtbar
+    && quelle("src/App.jsx").includes('route === "sudoku"')
+    && quelle("src/features/Start.jsx").includes("zum-sudoku")
+    && quelle("src/calc/migrateData.js").includes("sudokuStand")
+    && quelle("src/calc/suche.js").includes("Sudoku-Training")
+    && quelle("e2e/smoke.spec.js").includes("sudoku-fertig")
+    && releaseNoteVorhanden("rn-095");
+})());
+
 // ---------- v0.78: Match-Engine + Welten-Spiele ----------
 console.log("== v0.78: Match-Engine + Welten-Spiele ==");
 test("v0.78: EINE Engine + zwei Renn-Skins, Spielhalle sortiert nach Lieblings-Welten", (() => {

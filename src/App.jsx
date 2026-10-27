@@ -7,6 +7,7 @@ import Start from "./features/Start.jsx";
 import Ueben from "./features/Ueben.jsx";
 import Spielhalle from "./features/Spielhalle.jsx";
 import Konzentration from "./features/Konzentration.jsx";
+import Sudoku from "./features/Sudoku.jsx";
 import Einstufung from "./features/Einstufung.jsx";
 import KompassPlan from "./features/KompassPlan.jsx";
 import Karteikarten from "./features/Karteikarten.jsx";
@@ -21,7 +22,7 @@ import Datenschutz from "./features/Datenschutz.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.78.0";
+export const APP_VERSION = "0.79.0";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -195,6 +196,7 @@ export default function App() {
         {route === "neu" ? <WasIstNeu /> : route === "ueben" ? <Ueben /> :
          route === "spiele" ? <Spielhalle /> :
          route === "konz" ? <Konzentration /> :
+         route === "sudoku" ? <Sudoku /> :
          route === "schrift" ? <Schrift /> :
          route === "aufsatz" ? <Aufsatz /> :
          route === "plan" ? <Wochenplan /> :

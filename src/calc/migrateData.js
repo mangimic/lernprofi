@@ -10,6 +10,7 @@
 import { STARK_SAETZE } from "./aufgaben/stark.js";
 import { THEMEN_KEYS } from "./aufgaben/themen.js";
 import { SCHWERPUNKT_KEYS } from "./onboarding.js";
+import { sudokuStand } from "./sudoku.js";
 import { FESTE_TERMINE_STANDARD, mittagErzwingen } from "./wochenplan.js";
 
 export const SCHEMA_VERSION = 1;
@@ -43,6 +44,7 @@ export function leeresDokument(heute) {
       aufsatz: { tag: "" },      // Aufsatz-Check: letzter belohnter Tag (1 Münze/Tag)
       wochenplan: null,          // 🗓️ selbst gesetztes Pensum: { montag, bloecke: [{id, tag, typ}] }
       karteikasten: { stand: {}, runden: 0 }, // 🗃️ Leitner-Kasten: Karte → { fach 1-3, zuletzt }
+      sudoku: sudokuStand(null), // 🧩 Sudoku-Training: { stufe, geloest, gesamt }
     },
     einstellungen: {
       thema: "hell",   // "hell" | "dunkel"
@@ -253,6 +255,7 @@ export function migrateData(alt, heute) {
     }
   }
   d.lernstand.karteikasten = { stand: kkStand, runden: Number.isInteger(kk.runden) && kk.runden >= 0 ? kk.runden : 0 };
+  d.lernstand.sudoku = sudokuStand(d.lernstand.sudoku); // 🧩 Stufe/Fortschritt gesäubert
 
   // 📂 Dokumenten-Ablage: nur saubere Einträge, höchstens 60.
   d.doks = (Array.isArray(d.doks) ? d.doks : [])

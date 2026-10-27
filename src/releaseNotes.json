@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-095",
+    "version": "0.79.0",
+    "datum": "2026-10-27",
+    "titel": "Sudoku-Training",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🧩 Neues Sudoku-Training (Startseite): Sudoku lernen Stufe für Stufe – los geht’s mit dem Mini-Sudoku und den Zahlen 1–4, dann 6×6, am Ende das große 9×9 mit den Zahlen 1–9 wie die Profis. Drei gelöste Rätsel schalten die nächste Stufe frei, jedes Rätsel hat garantiert genau eine Lösung."
+      },
+      {
+        "type": "neu",
+        "text": "💡 Lernen statt Raten: Nur die richtige Zahl bleibt stehen – bei einem Fehlversuch LEUCHTEN die Felder auf, die der Zahl widersprechen. So sieht man die Sudoku-Regel (jede Zahl nur einmal pro Reihe, Spalte und Kästchen) direkt am Brett. Kostet keine Münze, zählt aber für die Mini-Missionen."
+      }
+    ]
+  },
+  {
     "id": "rn-094",
     "version": "0.78.0",
     "datum": "2026-10-27",

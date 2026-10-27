@@ -310,6 +310,10 @@ export default function Start() {
           style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
           🧠 Konzentrations-Training (Zahlen · ABC · Blitzlesen)
         </button>
+        <button data-test="zum-sudoku" onClick={() => navTo("sudoku")}
+          style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
+          🧩 Sudoku-Training (Logik, Stufe für Stufe)
+        </button>
         <button data-test="zum-schrift" onClick={() => navTo("schrift")}
           style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
           🖐️ Schreib-Training (1 Satz am Tag, mit der Hand)

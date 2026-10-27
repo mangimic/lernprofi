@@ -1814,6 +1814,55 @@ test("Raketen-Rennen: zweiter Skin derselben Engine startet und zählt", async (
   await expect(page.getByTestId("rakete-stand")).toHaveText("1 : 0");
 });
 
+test("Sudoku-Training: Stufe 1 (4×4) lösen – Fehlversuche zeigen die Regel", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("zum-sudoku").click();
+  await expect(page.getByTestId("sudoku-seite")).toBeVisible();
+  await expect(page.getByTestId("sudoku-stufe")).toContainText("Stufe 1");
+  await expect(page.getByTestId("sudoku-stufe")).toContainText("Zahlen 1–4");
+  await expect(page.locator('[data-test^="sudoku-zelle-"]')).toHaveCount(16);
+  await expect(page.getByTestId("sudoku-zahl-4")).toBeVisible();
+  await expect(page.getByTestId("sudoku-zahl-5")).toHaveCount(0); // Zahlenraum passt zur Stufe
+
+  const zellText = async (r, c) => (await page.getByTestId(`sudoku-zelle-${r}-${c}`).textContent()).trim();
+
+  // 🧠 Lern-Highlight: eine Zahl setzen, die in der Reihe schon steht
+  aussen: for (let r = 0; r < 4; r++) {
+    let leer = -1, belegt = "";
+    for (let c = 0; c < 4; c++) {
+      const t = await zellText(r, c);
+      if (!t) leer = c; else belegt = belegt || t;
+    }
+    if (leer >= 0 && belegt) {
+      await page.getByTestId(`sudoku-zelle-${r}-${leer}`).click();
+      await page.getByTestId(`sudoku-zahl-${belegt}`).click();
+      await expect(page.getByTestId("sudoku-hinweis")).toContainText("steht hier schon");
+      break aussen;
+    }
+  }
+
+  // Rätsel komplett lösen (ohne die Lösung zu kennen: probieren ist erlaubt).
+  // Mit dem letzten richtigen Feld ersetzt die Fertig-Ansicht das Gitter.
+  loesen: for (let r = 0; r < 4; r++) {
+    for (let c = 0; c < 4; c++) {
+      if (await page.getByTestId("sudoku-fertig").count()) break loesen;
+      if (await zellText(r, c)) continue;
+      await page.getByTestId(`sudoku-zelle-${r}-${c}`).click();
+      for (let n = 1; n <= 4; n++) {
+        await page.getByTestId(`sudoku-zahl-${n}`).click();
+        if (await page.getByTestId("sudoku-fertig").count()) break loesen;
+        if ((await zellText(r, c)) === String(n)) break;
+      }
+    }
+  }
+  await expect(page.getByTestId("sudoku-fertig")).toBeVisible();
+  await expect(page.getByTestId("sudoku-fertig")).toContainText("gelöst");
+  // Fortschritt: 1 von 3 zur nächsten Stufe, nächstes Rätsel startet frisch
+  await page.getByTestId("sudoku-nochmal").click();
+  await expect(page.getByTestId("sudoku-fehler")).toContainText("🟢⚪⚪");
+  await expect(page.getByTestId("sudoku-fehler")).toContainText("Fehlversuche: 0");
+});
+
 test("Willkommens-Fragen: Eltern stellen Klasse, Lernzeit und Schwerpunkte ein", async ({ page }) => {
   await tresorAnlegen(page);
 

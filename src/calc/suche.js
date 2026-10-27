@@ -22,6 +22,7 @@ const SEITEN = [
   ["🖐️", "Schreib-Training", "schrift"],
   ["✍️", "Aufsatz-Check", "aufsatz"],
   ["🧠", "Konzentrations-Training", "konz"],
+  ["🧩", "Sudoku-Training", "sudoku"],
   ["🎮", "Spielhalle", "spiele"],
   ["📂", "Unsere Unterlagen", "doks"],
   ["🧪", "Einstufungstest", "einstufung"],
