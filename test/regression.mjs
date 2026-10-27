@@ -36,6 +36,23 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.70: Konto-Fundament (Multi-Tenant, Server) ----------
+console.log("== v0.70: Konto-Fundament ==");
+test("v0.70: Konto-API mit Einladungs-Codes, Sitzungen, Konto-Tresoren und Stamm-Migration", (() => {
+  const ko = quelle("server/_lib/kontoApi.js");
+  const va = quelle("server/_lib/vaultApi.js");
+  return ko.includes("export async function kontoApi") && ko.includes("export async function kontoVonAnfrage")
+    && ko.includes("/api/konto/registrieren") && ko.includes("/api/konto/login")
+    && ko.includes("einladung:") && ko.includes("SESSION_GEHEIM") && ko.includes("HttpOnly")
+    && ko.includes("authHash") && !ko.includes("authBeweis:") // nur der Hash wird gespeichert
+    && va.includes("tresor:${konto.kontoId}") && va.includes("dok:${konto.kontoId}:")
+    && va.includes("ALT_KV_SCHLUESSEL") // Alt-Lage wandert verlustfrei mit
+    && quelle("server/_lib/kiApi.js").includes("STAMM_KONTO") // KI bleibt vorerst Stamm-Konto
+    && quelle("server/index.js").includes("kontoApi")
+    && quelle("server/_lib/kontoApi.test.js").includes("strikt getrennt")
+    && releaseNoteVorhanden("rn-086");
+})());
+
 // ---------- v0.69: Drei neue Welten + Interessen-Picker ----------
 console.log("== v0.69: Drei neue Welten + Interessen-Picker ==");
 test("v0.69: Dinos/Weltraum/Blockwelt in allen Themen-Maps, Interessen im Profil, Picker auf Start", (() => {

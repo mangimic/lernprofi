@@ -10,6 +10,9 @@
   "keep_vars": true,
   // KI (Etappe 7): Schlüssel NIE hier eintragen, sondern einmalig als Secret:
   //   npx wrangler secret put ANTHROPIC_API_KEY
+  // 👪 Konto-Anmeldung (ab v0.70): Sitzungen brauchen einmalig ein Secret
+  //   (langer Zufallswert, z. B. `openssl rand -base64 48`):
+  //   npx wrangler secret put SESSION_GEHEIM
   // Optional: "vars": { "KI_DECKEL_MAX_CENT": "1000" }
   "assets": {
     "directory": "./dist",

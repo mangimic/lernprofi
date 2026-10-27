@@ -23,7 +23,7 @@
      POST /api/ki/bericht  { daten, modell? }                → { gut, beobachtung, tipps, … }
      POST /api/ki/saetze   { woerter, modell? }              → { saetze, … }
    ============================================================ */
-import { zugriffErlaubt } from "./vaultApi.js";
+import { kontoVonAnfrage, STAMM_KONTO } from "./kontoApi.js";
 
 /** Der Anthropic-Schlüssel: Secret heißt bei uns "lernprofiapi"
     (so im Cloudflare-Dashboard angelegt); ANTHROPIC_API_KEY geht auch. */
@@ -315,7 +315,13 @@ async function claudeAnfragen(env, { konfig, system, prompt }) {
 export async function kiApi(request, env, jetzt = new Date()) {
   const url = new URL(request.url);
   if (!url.pathname.startsWith("/api/ki/")) return null;
-  if (!zugriffErlaubt(request, env)) return json(401, { fehler: "Kein Zugang (Cloudflare Access fehlt)." });
+  const konto = await kontoVonAnfrage(request, env, jetzt);
+  if (!konto) return json(401, { fehler: "Kein Zugang (bitte anmelden)." });
+  // 💰 Bis es einen Kostendeckel JE KONTO gibt, zahlt der Anthropic-
+  // Schlüssel nur fürs Stamm-Konto – andere Konten bekommen 403.
+  if (konto.kontoId !== STAMM_KONTO) {
+    return json(403, { fehler: "Leo ist für dieses Konto noch nicht freigeschaltet." });
+  }
 
   const kv = env?.TRESOR;
   const schluesselDa = !!apiSchluessel(env);

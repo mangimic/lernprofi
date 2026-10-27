@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-086",
+    "version": "0.70.0",
+    "datum": "2026-10-27",
+    "titel": "Konto-Fundament (unter der Haube)",
+    "entries": [
+      {
+        "type": "technik",
+        "text": "👪 Vorbereitung für mehrere Familien: Der Server kennt jetzt Konten – jede Familie bekommt ihren eigenen, weiterhin komplett verschlüsselten Tresor und eigene Dokumente. Registrieren geht nur mit Einladungs-Code, Anmelden per E-Mail + Passwort-Beweis (der Server sieht nie das Passwort und kann den Tresor nie öffnen). Euer bestehender Tresor wandert automatisch und verlustfrei aufs neue Konto-Layout."
+      },
+      {
+        "type": "technik",
+        "text": "🔒 Sicherheit: Anmelde-Sitzungen laufen über signierte, nur serverseitig lesbare Cookies (30 Tage je Gerät), Fehlversuche beim Anmelden werden gedrosselt, und Leo (KI) bleibt vorerst dem Stamm-Konto vorbehalten. In der App ändert sich noch nichts – der sichtbare Anmelde-Teil folgt im nächsten Schritt."
+      }
+    ]
+  },
+  {
     "id": "rn-085",
     "version": "0.69.0",
     "datum": "2026-10-26",

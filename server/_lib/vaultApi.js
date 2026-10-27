@@ -11,11 +11,18 @@
                        bei fremder baseRev: 409 { rev } – der Client
                        fragt nach, nichts wird still überschrieben.
 
-   Zugang: Cloudflare Access sitzt vor der Domain; zusätzlich prüft
-   die API den Header Cf-Access-Authenticated-User-Email.
+   Zugang (seit v0.70 Multi-Tenant): kontoVonAnfrage (kontoApi.js)
+   löst jede Anfrage auf EIN Konto auf – Sitzungs-Cookie ODER die
+   Stamm-Brücke (Cloudflare Access → Bestandskonto "stamm").
+   Jedes Konto hat seinen eigenen Tresor (tresor:<kontoId>) und
+   eigene Dokumente (dok:<kontoId>:<id>). Die Alt-Schlüssel ohne
+   Konto-Präfix (tresor:v1, dok:<id>) wandern beim ersten Zugriff
+   des Stamm-Kontos verlustfrei aufs neue Layout.
    DEV_OHNE_ACCESS=1 nur für lokales `wrangler dev`, nie produktiv.
    ============================================================ */
-const KV_SCHLUESSEL = "tresor:v1";
+import { kontoVonAnfrage, STAMM_KONTO } from "./kontoApi.js";
+
+const ALT_KV_SCHLUESSEL = "tresor:v1"; // Lage vor den Konten (nur Stamm)
 const BLOB_SCHLUESSEL = ["tresor.meta", "tresor.daten"];
 const MAX_BYTES = 2 * 1024 * 1024; // 2 MiB Chiffrat reichen weit
 // 📂 Dokumenten-Ablage: je Datei EIN KV-Eintrag "dok:<id>" mit dem
@@ -47,10 +54,20 @@ function blobsGueltig(blobs) {
 export async function vaultApi(request, env) {
   const url = new URL(request.url);
   if (!url.pathname.startsWith("/api/")) return null;
-  if (!zugriffErlaubt(request, env)) return json(401, { fehler: "Kein Zugang (Cloudflare Access fehlt)." });
+  const konto = await kontoVonAnfrage(request, env);
+  if (!konto) return json(401, { fehler: "Bitte anmelden (Sitzung oder Zugang fehlt)." });
   if (!env || !env.TRESOR) return json(503, { fehler: "Sync ist noch nicht eingerichtet (KV-Namespace fehlt)." });
 
-  const stand = async () => (await env.TRESOR.get(KV_SCHLUESSEL, "json")) || { rev: 0, blobs: null, aktualisiert: null };
+  const tresorKey = `tresor:${konto.kontoId}`;
+  const stand = async () => {
+    let s = await env.TRESOR.get(tresorKey, "json");
+    if (!s && konto.kontoId === STAMM_KONTO) {
+      // Einmalige Migration der Alt-Lage (vor den Konten) aufs neue Layout.
+      s = await env.TRESOR.get(ALT_KV_SCHLUESSEL, "json");
+      if (s) await env.TRESOR.put(tresorKey, JSON.stringify(s));
+    }
+    return s || { rev: 0, blobs: null, aktualisiert: null };
+  };
 
   if (url.pathname === "/api/meta" && request.method === "GET") {
     const s = await stand();
@@ -71,15 +88,24 @@ export async function vaultApi(request, env) {
       return json(409, { rev: s.rev, aktualisiert: s.aktualisiert });
     }
     const neu = { rev: s.rev + 1, blobs: eingabe.blobs, aktualisiert: new Date().toISOString() };
-    await env.TRESOR.put(KV_SCHLUESSEL, JSON.stringify(neu));
+    await env.TRESOR.put(tresorKey, JSON.stringify(neu));
     return json(200, { rev: neu.rev });
   }
   const dok = url.pathname.match(/^\/api\/doks\/([^/]+)$/);
   if (dok) {
     const id = dok[1];
     if (!DOK_ID.test(id)) return json(400, { fehler: "Ungültige Dokument-ID." });
+    const dokKey = `dok:${konto.kontoId}:${id}`;
     if (request.method === "GET") {
-      const wert = await env.TRESOR.get(`dok:${id}`);
+      let wert = await env.TRESOR.get(dokKey);
+      if (!wert && konto.kontoId === STAMM_KONTO) {
+        // Alt-Dok ohne Konto-Präfix: lesen, umhängen, Alt-Schlüssel räumen.
+        wert = await env.TRESOR.get(`dok:${id}`);
+        if (wert) {
+          await env.TRESOR.put(dokKey, wert);
+          await env.TRESOR.delete(`dok:${id}`);
+        }
+      }
       if (!wert) return json(404, { fehler: "Dokument nicht gefunden." });
       return new Response(wert, {
         status: 200,
@@ -94,11 +120,12 @@ export async function vaultApi(request, env) {
       }
       const wert = JSON.stringify({ iv: eingabe.iv, chiffrat: eingabe.chiffrat });
       if (wert.length > DOK_MAX_BYTES) return json(413, { fehler: "Dokument zu groß (max. ca. 12 MB Datei)." });
-      await env.TRESOR.put(`dok:${id}`, wert);
+      await env.TRESOR.put(dokKey, wert);
       return json(200, { ok: true });
     }
     if (request.method === "DELETE") {
-      await env.TRESOR.delete(`dok:${id}`);
+      await env.TRESOR.delete(dokKey);
+      if (konto.kontoId === STAMM_KONTO) await env.TRESOR.delete(`dok:${id}`);
       return json(200, { ok: true });
     }
   }
