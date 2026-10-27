@@ -36,6 +36,24 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.76: Rebranding „Leos Welten" ----------
+console.log("== v0.76: Leos Welten ==");
+test("v0.76: sichtbarer Name überall Leos Welten, Infrastruktur-Namen UNVERÄNDERT", (() => {
+  return quelle("index.html").includes("<title>Leos Welten</title>")
+    && quelle("src/App.jsx").includes("🦁 Leos Welten")
+    && quelle("src/features/VaultGate.jsx").includes("🦁 Leos Welten")
+    && quelle("public/manifest.json").includes('"name": "Leos Welten"')
+    && quelle("src/features/Karteikarten.jsx").includes("Leos Welten · Kompass 4")
+    && quelle("src/features/Eltern.jsx").includes("Leos Welten – Wiederherstellungs-Code")
+    // ⚠️ Schutz: Diese Namen sind Teil gespeicherter Daten/Infrastruktur und
+    // dürfen NIE mit umbenannt werden (sonst Tresore/Anmeldungen/Deploy kaputt):
+    && quelle("src/vault.js").includes('"lernprofi-tresor-ok"')
+    && quelle("src/idbShim.js").includes('DB_NAME = "lernprofi"')
+    && quelle("src/konto.js").includes("lernprofi-anmeldung:")
+    && quelle("wrangler.jsonc").includes('"name": "lernprofi"')
+    && releaseNoteVorhanden("rn-092");
+})());
+
 // ---------- v0.75: Willkommens-Fragen + Kennenlern-Runde ----------
 console.log("== v0.75: Willkommens-Fragen ==");
 test("v0.75: Eltern-Fragebogen stellt App ein, Schwerpunkte empfehlen, Einstufung als Kennenlern-Runde", (() => {

@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-092",
+    "version": "0.76.0",
+    "datum": "2026-10-27",
+    "titel": "Wir heißen jetzt Leos Welten!",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🦁 Aus „Lernprofi“ wird Leos Welten – der Name sagt jetzt, was ihr hier erlebt: Leo begleitet dich durch deine Lieblings-Welten, von 🦖 Dinos bis 🚀 Weltraum. Neuer Titel, neues App-Symbol (LW), gleicher Inhalt – alle Daten, Pläne und Münzen bleiben genau, wie sie sind."
+      },
+      {
+        "type": "technik",
+        "text": "⚙️ Bewusst NICHT umbenannt: die technischen Namen unter der Haube (Server-Name, Speicher, Verschlüsselungs-Konstanten, Gerätespeicher). Sie sind Teil der gespeicherten Daten und der Infrastruktur – eine Umbenennung dort würde Tresore und Anmeldungen brechen. Die Adresse der App bleibt daher vorerst dieselbe; eine schönere Domain ist ein eigener, bewusster Schritt."
+      }
+    ]
+  },
+  {
     "id": "rn-091",
     "version": "0.75.0",
     "datum": "2026-10-27",

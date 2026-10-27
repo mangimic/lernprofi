@@ -146,7 +146,7 @@ export default function VaultGate() {
 
   const kopf = (
     <header style={{ textAlign: "center", margin: "18px 0" }}>
-      <h1 style={{ fontSize: "var(--schrift-gross)", margin: 0 }}>✏️ Lernprofi</h1>
+      <h1 style={{ fontSize: "var(--schrift-gross)", margin: 0 }}>🦁 Leos Welten</h1>
     </header>
   );
 

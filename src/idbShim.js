@@ -2,7 +2,7 @@
    Kleine window.storage-Hülle über IndexedDB (Schlüssel/Wert).
    Der Tresor legt hier NUR Chiffrate und technische Metadaten ab.
    ============================================================ */
-const DB_NAME = "lernprofi";
+const DB_NAME = "lernprofi"; // ⚠️ NIE ändern (auch nicht beim Rebranding) – sonst „verschwinden“ die Gerätedaten
 const STORE = "kv";
 
 function oeffnen() {

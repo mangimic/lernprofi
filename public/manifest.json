@@ -1,7 +1,7 @@
 {
-  "name": "Lernprofi",
-  "short_name": "Lernprofi",
-  "description": "Deine Lern-App für Deutsch, Mathe und Sachkunde (Klasse 4)",
+  "name": "Leos Welten",
+  "short_name": "Leos Welten",
+  "description": "Leos Welten – deine Lern-App für Deutsch, Mathe und Sachkunde (Klasse 3/4)",
   "lang": "de",
   "start_url": "/",
   "display": "standalone",

@@ -1,4 +1,8 @@
-# Lernprofi (Neubau)
+# Leos Welten (ehemals „Lernprofi“)
+
+Technische Namen (Worker `lernprofi`, KV, Secrets, IndexedDB,
+Krypto-Konstanten) behalten bewusst den alten Namen – sie sind
+Teil der gespeicherten Daten bzw. der Infrastruktur.
 
 Lern-App für ein Kind (Klasse 4, Baden-Württemberg) – Neubau auf dem
 Familien-Tech-Stack (wie mangieriERP). Die bisherige Single-File-App läuft

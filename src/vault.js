@@ -24,7 +24,7 @@ import {
 export const META_SCHLUESSEL = "tresor.meta";
 export const DATEN_SCHLUESSEL = "tresor.daten";
 export const MAX_PIN_VERSUCHE = 5;
-const VERIFIER_TEXT = "lernprofi-tresor-ok";
+const VERIFIER_TEXT = "lernprofi-tresor-ok"; // ⚠️ NIE ändern (auch nicht beim Rebranding) – sonst öffnen alte Tresore nicht mehr
 
 export async function tresorVorhanden(speicher) {
   return !!(await speicher.get(META_SCHLUESSEL));

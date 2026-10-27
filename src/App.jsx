@@ -21,7 +21,7 @@ import Datenschutz from "./features/Datenschutz.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.75.0";
+export const APP_VERSION = "0.76.0";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -179,7 +179,7 @@ export default function App() {
       }}
     >
       <header style={{ textAlign: "center", marginBottom: T.abstand, position: "relative" }}>
-        <h1 style={{ fontSize: "var(--schrift-gross)", margin: "6px 0 0" }}>✏️ Lernprofi</h1>
+        <h1 style={{ fontSize: "var(--schrift-gross)", margin: "6px 0 0" }}>🦁 Leos Welten</h1>
         <div data-test="version" style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           Version {APP_VERSION}
         </div>

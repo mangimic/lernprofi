@@ -15,6 +15,7 @@ export const EMAIL_GUELTIG = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** Der Anmelde-Beweis: PBKDF2(passwort, Salt aus der E-Mail) als Base64. */
 export async function authBeweis(email, passwort, iterationen = PBKDF2_ITERATIONEN) {
+  // ⚠️ Salt-Präfix NIE ändern (auch nicht beim Rebranding) – sonst passen alle Anmelde-Beweise nicht mehr.
   const salt = new TextEncoder().encode(`lernprofi-anmeldung:${emailNormal(email)}`);
   return toB64(await geheimnisBits(passwort, salt, iterationen));
 }

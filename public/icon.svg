@@ -8,6 +8,6 @@
     </linearGradient>
   </defs>
   <text x="48" y="60" font-family="system-ui, sans-serif" font-size="40" font-weight="800"
-        fill="#ffffff" text-anchor="middle">LP</text>
+        fill="#ffffff" text-anchor="middle">LW</text>
   <path d="M24 72 L72 72" stroke="#ffd34d" stroke-width="6" stroke-linecap="round"/>
 </svg>

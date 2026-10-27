@@ -1,4 +1,4 @@
-# Verzeichnis von Verarbeitungstätigkeiten (Art. 30 DSGVO) – Lernprofi
+# Verzeichnis von Verarbeitungstätigkeiten (Art. 30 DSGVO) – Leos Welten (ehemals Lernprofi)
 
 Internes Dokument des Betreibers. Stand: v0.73. Vor der Freigabe an weitere
 Familien: Verantwortlichen (Name, Anschrift, Kontakt) hier und in der

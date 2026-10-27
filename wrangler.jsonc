@@ -2,7 +2,7 @@
 // Tresor-Sync-API (/api/*) im Worker (server/index.js).
 // Keine Secrets hier ablegen!
 {
-  "name": "lernprofi",
+  "name": "lernprofi", // ⚠️ Infrastruktur-Name bleibt trotz Rebranding: Umbenennen hieße NEUER Worker (Secrets/Access/URL weg)
   "compatibility_date": "2026-10-01",
   "main": "server/index.js",
   // ⚠️ Pflicht bei Git-Deploys: Ohne keep_vars räumt JEDER Deploy die im
