@@ -27,6 +27,13 @@ function Karte({ children }) {
   );
 }
 
+/* 🎟️ Einladungs-Link: …/?einladung=xxxxx-xxxxx springt direkt in die
+   Einrichtung mit vorausgefülltem Code – Eltern tippen nichts ab. */
+function einladungAusUrl() {
+  try { return new URLSearchParams(globalThis.location?.search || "").get("einladung") || ""; }
+  catch { return ""; }
+}
+
 function Feld({ test, ...rest }) {
   return (
     <input
@@ -49,8 +56,10 @@ export default function VaultGate() {
   const [elternWeg, setElternWeg] = useState(false);
   const [pin, setPin] = useState("");
   const [passwort, setPasswort] = useState("");
-  const [einr, setEinr] = useState({ pw1: "", pw2: "", pin1: "", pin2: "", code: "", email: "" });
-  const [weg, setWeg] = useState("einrichten"); // einrichten | anmelden | rettung (neues Gerät)
+  const [einr, setEinr] = useState(() => ({ pw1: "", pw2: "", pin1: "", pin2: "", code: einladungAusUrl(), email: "" }));
+  // Erste Frage auf frischen Geräten: neu hier oder schon ein Konto?
+  // Ein Einladungs-Link überspringt die Weiche (Code ist schon eingetragen).
+  const [weg, setWeg] = useState(() => (einladungAusUrl() ? "einrichten" : "willkommen")); // willkommen | einrichten | anmelden | rettung
   const [anm, setAnm] = useState({ email: "", passwort: "" });
   const [pwVergessen, setPwVergessen] = useState(false); // 🧯 lokaler Rettungs-Weg
   const [rett, setRett] = useState({ email: "", code: "", pw1: "", pw2: "" });
@@ -162,6 +171,30 @@ export default function VaultGate() {
     return <div style={{ paddingTop: 10 }}><Datenschutz zurueck={() => setZeigeDatenschutz(false)} /></div>;
   }
 
+  if (tresor.status === "neu" && weg === "willkommen") {
+    return (
+      <div data-test="gate-willkommen" style={{ maxWidth: 480, margin: "0 auto", padding: "0 16px" }}>
+        {kopf}
+        <Karte>
+          <h2 style={{ marginTop: 0 }}>Willkommen! 👋</h2>
+          <p style={{ color: T.textLeise }}>
+            Die Lern-App, in der Leo 🦁 dein Kind durch seine Lieblings-Welten
+            begleitet – verschlüsselt, werbefrei, für Klasse 3 und 4.
+          </p>
+          <button data-test="willkommen-neu" onClick={() => { setWeg("einrichten"); setFehler(""); }}
+            style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+            ✨ Wir sind neu hier → Einrichten
+          </button>
+          <button data-test="willkommen-konto" onClick={() => { setWeg("anmelden"); setFehler(""); }}
+            style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
+            👪 Wir haben schon ein Konto → Anmelden
+          </button>
+          {datenschutzLink}
+        </Karte>
+      </div>
+    );
+  }
+
   if (tresor.status === "neu" && weg === "rettung") {
     return (
       <div data-test="gate-rettung" style={{ maxWidth: 480, margin: "0 auto", padding: "0 16px" }}>
@@ -220,9 +253,9 @@ export default function VaultGate() {
             style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 8, fontSize: "var(--schrift-klein)" }}>
             🧯 Passwort vergessen? Mit Wiederherstellungs-Code
           </button>
-          <button data-test="anm-zurueck" onClick={() => { setWeg("einrichten"); setFehler(""); }}
+          <button data-test="anm-zurueck" onClick={() => { setWeg("willkommen"); setFehler(""); }}
             style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 4, fontSize: "var(--schrift-klein)" }}>
-            ← Zurück zur Einrichtung
+            ← Zurück
           </button>
           {datenschutzLink}
         </Karte>
@@ -283,6 +316,10 @@ export default function VaultGate() {
           <button data-test="zum-anmelden" onClick={() => { setWeg("anmelden"); setFehler(""); }}
             style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 8, fontSize: "var(--schrift-klein)" }}>
             👪 Wir haben schon ein Familien-Konto → Anmelden
+          </button>
+          <button data-test="einr-zurueck" onClick={() => { setWeg("willkommen"); setFehler(""); }}
+            style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 4, fontSize: "var(--schrift-klein)" }}>
+            ← Zurück
           </button>
           {datenschutzLink}
         </Karte>

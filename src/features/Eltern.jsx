@@ -203,8 +203,19 @@ export default function Eltern() {
     try {
       const erg = await kontoEinladungErzeugen();
       if (!erg.ok) { setEinladungMeldung(`⚠️ ${erg.fehler || "Das hat nicht geklappt."}`); return; }
-      setEinladungen((liste) => [erg.code, ...liste]);
+      // 🎟️ Fertiger Einladungs-LINK: öffnet die Einrichtung mit vorausgefülltem Code.
+      const link = `${globalThis.location.origin}/?einladung=${erg.code}`;
+      setEinladungen((liste) => [{ code: erg.code, link }, ...liste]);
     } catch { setEinladungMeldung("⚠️ Der Server ist gerade nicht erreichbar."); }
+  };
+  const einladungKopieren = async (e) => {
+    const text = `Hallo! Wir laden euch zu Leos Welten ein 🦁 Öffnet einfach diesen Link und richtet euer Familien-Konto ein: ${e.link}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      setEinladungMeldung("✅ Einladung kopiert – einfach in eure Nachricht einfügen.");
+    } catch {
+      setEinladungMeldung("⚠️ Kopieren klappte nicht – den Link bitte markieren und von Hand kopieren.");
+    }
   };
 
   // 🗑️ Löschkonzept (DSGVO): entfernt Konto, Tresor-Chiffrate und alle
@@ -937,12 +948,21 @@ export default function Eltern() {
               style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
               🎟️ Neuen Einladungs-Code erzeugen
             </button>
-            {einladungen.map((code) => (
-              <p key={code} data-test="einladung-code" style={{
-                margin: "8px 0 0", padding: "10px", background: T.grund, borderRadius: T.radiusKlein,
-                fontFamily: "ui-monospace, monospace", fontWeight: 800, textAlign: "center",
-                letterSpacing: 1, userSelect: "all",
-              }}>{code}</p>
+            {einladungen.map((e) => (
+              <div key={e.code} style={{ marginTop: 8, background: T.grund, borderRadius: T.radiusKlein, padding: 10 }}>
+                <p data-test="einladung-code" style={{
+                  margin: 0, fontFamily: "ui-monospace, monospace", fontWeight: 800,
+                  textAlign: "center", letterSpacing: 1, userSelect: "all",
+                }}>{e.code}</p>
+                <p data-test="einladung-link" style={{
+                  margin: "6px 0 8px", fontSize: "var(--schrift-klein)", color: T.textLeise,
+                  textAlign: "center", userSelect: "all", overflowWrap: "anywhere",
+                }}>{e.link}</p>
+                <button data-test="einladung-kopieren" onClick={() => einladungKopieren(e)}
+                  style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+                  📋 Einladung kopieren (Text + Link)
+                </button>
+              </div>
             ))}
             {einladungMeldung && <p data-test="einladung-meldung" style={{ margin: "8px 0 0", color: "var(--warn)", fontSize: "var(--schrift-klein)" }}>{einladungMeldung}</p>}
           </div>

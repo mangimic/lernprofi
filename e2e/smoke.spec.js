@@ -11,6 +11,9 @@ const PIN = "1234";
 
 async function tresorAnlegen(page) {
   await page.goto("/");
+  // Seit v0.77 fragt die Willkommens-Weiche zuerst: neu hier oder schon ein Konto?
+  await expect(page.getByTestId("gate-willkommen")).toBeVisible();
+  await page.getByTestId("willkommen-neu").click();
   await expect(page.getByTestId("gate-einrichten")).toBeVisible();
   await page.getByTestId("einr-pw1").fill(PW);
   await page.getByTestId("einr-pw2").fill(PW);
@@ -1815,6 +1818,7 @@ test("Familien-Konto: Einrichtung mit Einladungs-Code – das Passwort verlässt
   }));
 
   await page.goto("/");
+  await page.getByTestId("willkommen-neu").click();
   await page.getByTestId("einr-pw1").fill(PW);
   await page.getByTestId("einr-pw2").fill(PW);
   await page.getByTestId("einr-pin1").fill(PIN);
@@ -1857,13 +1861,13 @@ test("Datenschutz vor der Anmeldung + Konto löschen räumt den Server", async (
     return r.fulfill({ json: { ok: true, geloescht: 5 } });
   });
 
-  // 📄 Die Datenschutzerklärung ist VOR jeder Anmeldung lesbar
+  // 📄 Die Datenschutzerklärung ist VOR jeder Anmeldung lesbar (ab der Weiche)
   await page.goto("/");
-  await expect(page.getByTestId("gate-einrichten")).toBeVisible();
+  await expect(page.getByTestId("gate-willkommen")).toBeVisible();
   await page.getByTestId("datenschutz-link").click();
   await expect(page.getByTestId("datenschutz-seite")).toContainText("Zero-Knowledge");
   await page.getByTestId("datenschutz-zurueck").click();
-  await expect(page.getByTestId("gate-einrichten")).toBeVisible();
+  await expect(page.getByTestId("gate-willkommen")).toBeVisible();
 
   // Einrichten → Elternbereich: Datenschutz auch von innen erreichbar
   await tresorAnlegen(page);
@@ -1899,9 +1903,32 @@ test("Einladungs-Codes: das Stamm-Konto lädt neue Familien ein", async ({ page 
   await page.getByTestId("eb-tab-konto").click();
   await page.getByTestId("einladung-erzeugen").click();
   await expect(page.getByTestId("einladung-code")).toHaveText("abcde-fghjk");
+  // Jede Einladung kommt als fertiger Link zum Weitergeben
+  await expect(page.getByTestId("einladung-link")).toContainText("/?einladung=abcde-fghjk");
+  await expect(page.getByTestId("einladung-kopieren")).toBeVisible();
   await page.getByTestId("einladung-erzeugen").click();
   await expect(page.getByTestId("einladung-code")).toHaveCount(2);
   await expect(page.getByTestId("einladung-code").first()).toHaveText("mnpqr-stuvw"); // neuester zuerst
+});
+
+test("Willkommens-Weiche: erste Frage neu/Konto – der Einladungs-Link füllt den Code vor", async ({ page }) => {
+  // Frisches Gerät ohne Link: erst die Weiche, beide Wege erreichbar
+  await page.goto("/");
+  await expect(page.getByTestId("gate-willkommen")).toBeVisible();
+  await page.getByTestId("willkommen-konto").click();
+  await expect(page.getByTestId("gate-anmelden")).toBeVisible();
+  await page.getByTestId("anm-zurueck").click();
+  await expect(page.getByTestId("gate-willkommen")).toBeVisible();
+  await page.getByTestId("willkommen-neu").click();
+  await expect(page.getByTestId("gate-einrichten")).toBeVisible();
+  await expect(page.getByTestId("einr-code")).toHaveValue("");
+  await page.getByTestId("einr-zurueck").click();
+  await expect(page.getByTestId("gate-willkommen")).toBeVisible();
+
+  // Mit Einladungs-Link: Weiche übersprungen, Code steht schon drin
+  await page.goto("/?einladung=karte3-wolke7");
+  await expect(page.getByTestId("gate-einrichten")).toBeVisible();
+  await expect(page.getByTestId("einr-code")).toHaveValue("karte3-wolke7");
 });
 
 test("Wiederherstellungs-Code: erzeugen, Passwort vergessen, neues Passwort – PIN bleibt", async ({ page }) => {
@@ -1987,8 +2014,8 @@ test("Neues Gerät: Anmelden holt den verschlüsselten Tresor und entsperrt mit 
   await seiteB.route("**/api/vault", (r) => r.fulfill({ json: { rev, blobs: gespeichert } }));
   await seiteB.route("**/api/konto/login", (r) => r.fulfill({ json: { kontoId: "a1b2c3d4e5f60718" } }));
   await seiteB.goto("/");
-  await expect(seiteB.getByTestId("gate-einrichten")).toBeVisible();
-  await seiteB.getByTestId("zum-anmelden").click();
+  await expect(seiteB.getByTestId("gate-willkommen")).toBeVisible();
+  await seiteB.getByTestId("willkommen-konto").click();
   await seiteB.getByTestId("anm-email").fill("eltern@example.com");
   await seiteB.getByTestId("anm-passwort").fill(PW);
   await seiteB.getByTestId("anm-ok").click();

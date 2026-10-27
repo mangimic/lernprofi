@@ -36,6 +36,20 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.77: Willkommens-Weiche + Einladungs-Link ----------
+console.log("== v0.77: Willkommens-Weiche ==");
+test("v0.77: erste Frage neu/Konto, Einladungs-Link füllt den Code vor, Kopier-Knopf", (() => {
+  const vg = quelle("src/features/VaultGate.jsx");
+  const el = quelle("src/features/Eltern.jsx");
+  return vg.includes("gate-willkommen") && vg.includes("willkommen-neu") && vg.includes("willkommen-konto")
+    && vg.includes("function einladungAusUrl") && vg.includes('get("einladung")')
+    && el.includes("einladung-link") && el.includes("einladung-kopieren")
+    && el.includes("/?einladung=")
+    && quelle("e2e/smoke.spec.js").includes("willkommen-neu")
+    && quelle("e2e/smoke.spec.js").includes('goto("/?einladung=')
+    && releaseNoteVorhanden("rn-093");
+})());
+
 // ---------- v0.76: Rebranding „Leos Welten" ----------
 console.log("== v0.76: Leos Welten ==");
 test("v0.76: sichtbarer Name überall Leos Welten, Infrastruktur-Namen UNVERÄNDERT", (() => {
@@ -134,7 +148,8 @@ test("v0.71: Anmelde-Beweis getrennt vom Wrap, Gate mit Konto-Wegen, Eltern-Kont
     && el.includes("eltern-konto") && el.includes("konto-verknuepfen") && el.includes("konto-abmelden")
     && el.includes("entsperrenMitPasswort") // Stamm-Verknüpfung prüft das Passwort LOKAL am Tresor
     && quelle("server/_lib/kontoApi.js").includes("stamm === true")
-    && quelle("e2e/smoke.spec.js").includes("zum-anmelden")
+    // seit v0.77 führt die Willkommens-Weiche zum Anmelde-Weg
+    && (quelle("e2e/smoke.spec.js").includes("zum-anmelden") || quelle("e2e/smoke.spec.js").includes("willkommen-konto"))
     && quelle("e2e/smoke.spec.js").includes("not.toContain(PW)") // Passwort verlässt das Gerät nie
     && releaseNoteVorhanden("rn-087");
 })());
