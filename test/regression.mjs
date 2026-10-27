@@ -36,6 +36,21 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.75: Willkommens-Fragen + Kennenlern-Runde ----------
+console.log("== v0.75: Willkommens-Fragen ==");
+test("v0.75: Eltern-Fragebogen stellt App ein, Schwerpunkte empfehlen, Einstufung als Kennenlern-Runde", (() => {
+  const ob = quelle("src/calc/onboarding.js");
+  const st = quelle("src/features/Start.jsx");
+  return ob.includes("export const SCHWERPUNKTE") && ob.includes("export function istEmpfohlen")
+    && ob.includes("schlägt") // Einstufung schlägt Schwerpunkte (dokumentiert)
+    && quelle("src/calc/migrateData.js").includes("schwerpunkte") && quelle("src/calc/migrateData.js").includes("onboardingEltern")
+    && st.includes("fragebogen-karte") && st.includes("fb-ok") && st.includes("fb-spaeter")
+    && st.includes("Leo lernt dich kennen") && st.includes("einstufung-start")
+    && quelle("src/features/Ueben.jsx").includes("istEmpfohlen(")
+    && quelle("e2e/smoke.spec.js").includes("fb-schwerpunkt-rechtschreiben")
+    && releaseNoteVorhanden("rn-091");
+})());
+
 // ---------- v0.74: Familien einladen + Access-Ablösung ----------
 console.log("== v0.74: Familien einladen ==");
 test("v0.74: Einladungs-Verwaltung im Elternbereich, Stamm-Sitzung trägt ohne Access, Checkliste", (() => {
@@ -1124,7 +1139,9 @@ test("v0.20: Test ist keine Übung (keine Münzen/Missionen) und stellt Stufen e
 test("v0.20: Trainingsplan auf der Startseite mit Direkt-Knopf + 🎯-Abzeichen im Üben", (() => {
   return quelle("src/features/Start.jsx").includes('data-test="trainingsplan"')
     && quelle("src/features/Start.jsx").includes("uebenZielSetzen(key)")
-    && quelle("src/features/Ueben.jsx").includes("empfehlung?.includes(b.key)")
+    // seit v0.75 über den gemeinsamen Helfer istEmpfohlen (Einstufung schlägt Schwerpunkte)
+    && (quelle("src/features/Ueben.jsx").includes("empfehlung?.includes(b.key)")
+      || quelle("src/features/Ueben.jsx").includes("istEmpfohlen(b.key, data.lernstand.einstufung"))
     && quelle("src/appContext.jsx").includes("uebenZiel");
 })());
 

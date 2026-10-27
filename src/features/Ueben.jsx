@@ -22,6 +22,7 @@ import { missionsOpts, tagesModus } from "../calc/tagesform.js";
 import Vorgang from "./Vorgang.jsx";
 import { kiErklaeren } from "../ki.js";
 import { THEMEN_WELTEN } from "../calc/aufgaben/themen.js";
+import { istEmpfohlen } from "../calc/onboarding.js";
 import { wozuSatz } from "../calc/wozu.js";
 
 /* Üben: drei Übungstypen über denselben Runden-/Stufen-/Münz-Mechanismus:
@@ -706,7 +707,7 @@ export default function Ueben() {
               style={{ ...karte, width: "100%", textAlign: "left", display: "block", border: `1px solid ${T.rand}` }}>
               <b>{b.emoji} {b.name}</b>
               <span style={{ float: "right", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-                {data.lernstand.einstufung?.empfehlung?.includes(b.key) ? "🎯 empfohlen · " : ""}
+                {istEmpfohlen(b.key, data.lernstand.einstufung, data.profil.schwerpunkte) ? "🎯 empfohlen · " : ""}
                 {stufe === null ? "✏️ Üben + Schreiben" : <>🎯 Stufe {stufe}{fortschritt?.krone ? " 👑" : ""}</>}
               </span>
             </button>
@@ -744,7 +745,7 @@ export default function Ueben() {
             {DEUTSCH_GRUPPEN.map((g) => {
               const felder = g.felder.map((key) => fach.bereiche.find((b) => b.key === key)).filter(Boolean);
               const kronen = felder.filter((b) => data.lernstand.stufen[b.key]?.krone).length;
-              const empfohlen = felder.some((b) => data.lernstand.einstufung?.empfehlung?.includes(b.key));
+              const empfohlen = felder.some((b) => istEmpfohlen(b.key, data.lernstand.einstufung, data.profil.schwerpunkte));
               return (
                 <button key={g.key} data-test={`gruppe-${g.key}`}
                   onClick={() => (felder.length === 1 ? starten(felder[0]) : setGruppe(g.key))}

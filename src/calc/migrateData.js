@@ -9,6 +9,7 @@
    ============================================================ */
 import { STARK_SAETZE } from "./aufgaben/stark.js";
 import { THEMEN_KEYS } from "./aufgaben/themen.js";
+import { SCHWERPUNKT_KEYS } from "./onboarding.js";
 import { FESTE_TERMINE_STANDARD, mittagErzwingen } from "./wochenplan.js";
 
 export const SCHEMA_VERSION = 1;
@@ -22,6 +23,8 @@ export function leeresDokument(heute) {
       name: "", klasse: 4,
       interessen: [],      // 🎨 Lieblings-Welten des Kindes (max 3, aus THEMEN_KEYS)
       interessenGefragt: "", // Datum, an dem der Interessen-Picker beantwortet/weggeklickt wurde
+      schwerpunkte: [],    // 👋 Eltern-Fragebogen: wo es gerade hakt (aus SCHWERPUNKT_KEYS)
+      onboardingEltern: "", // Datum, an dem die Willkommens-Fragen beantwortet/übersprungen wurden
     },
     lernstand: {
       stufen: {},      // je Lernfeld: { freigeschaltet, runden, krone }
@@ -88,6 +91,9 @@ export function migrateData(alt, heute) {
   d.profil.interessen = [...new Set((Array.isArray(d.profil.interessen) ? d.profil.interessen : [])
     .filter((k) => THEMEN_KEYS.includes(k)))].slice(0, 3);
   if (typeof d.profil.interessenGefragt !== "string") d.profil.interessenGefragt = "";
+  d.profil.schwerpunkte = [...new Set((Array.isArray(d.profil.schwerpunkte) ? d.profil.schwerpunkte : [])
+    .filter((k) => SCHWERPUNKT_KEYS.includes(k)))];
+  if (typeof d.profil.onboardingEltern !== "string") d.profil.onboardingEltern = "";
 
   d.lernstand = { ...basis.lernstand, ...(istObjekt(quelle.lernstand) ? quelle.lernstand : {}) };
   if (!istObjekt(d.lernstand.stufen)) d.lernstand.stufen = {};

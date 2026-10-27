@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useApp } from "../appContext.jsx";
 import { THEMEN_WELTEN } from "../calc/aufgaben/themen.js";
+import { SCHWERPUNKTE, ZEIT_WAHL } from "../calc/onboarding.js";
 import { koennerEinplanen } from "../calc/koennerPlan.js";
 import { hoerEinplanen } from "../calc/kompassPlan.js";
 import { heutigerTag, lernspur, muenzenNachRunde, aufgabenZaehlen } from "../calc/lerntage.js";
@@ -39,6 +40,24 @@ export default function Start() {
   const heuteFeste = [...(data.einstellungen.festeTermine || [])
     .filter((f) => f.tag === heuteIdx && !istAusgefallen(plan, heuteIdx, f.beginn))]
     .sort((a, b) => a.beginn - b.beginn);
+  // 👋 Willkommens-Fragen (einmalig, nur Eltern-Modus): Klasse, tägliche
+  // Lernzeit und Schwerpunkte stellen die App VOR der ersten Übung richtig
+  // ein – alles später im Elternbereich änderbar.
+  const [fb, setFb] = useState({ klasse: 4, zeit: 20, schwerpunkte: [] });
+  const fbSchwerpunkt = (key) => {
+    setFb((f) => ({ ...f, schwerpunkte: f.schwerpunkte.includes(key) ? f.schwerpunkte.filter((k) => k !== key) : [...f.schwerpunkte, key] }));
+  };
+  const fbSpeichern = (uebernehmen) => {
+    logChange({
+      ...data,
+      profil: {
+        ...data.profil, onboardingEltern: heute,
+        ...(uebernehmen ? { klasse: fb.klasse, schwerpunkte: fb.schwerpunkte } : {}),
+      },
+      einstellungen: uebernehmen ? { ...data.einstellungen, zeitLimit: fb.zeit } : data.einstellungen,
+    }, "profil", "geaendert", uebernehmen ? "Willkommens-Fragen beantwortet" : "Willkommens-Fragen übersprungen");
+  };
+
   // 🎨 Interessen-Picker (einmalig): das Kind wählt bis zu 3 Lieblings-
   // Welten – die erste wird sofort die Übungs-Welt der Satz-Übungen.
   // Später jederzeit änderbar (Welten-Wahl im Üben-Bereich).
@@ -159,6 +178,56 @@ export default function Start() {
           </div>
         );
       })()}
+      {tresor.elternModus && !data.profil.onboardingEltern && (
+        <div data-test="fragebogen-karte" style={{
+          background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand,
+          border: `2px solid ${T.primaer}`,
+        }}>
+          <b>👋 Willkommen! Drei kurze Fragen (für Eltern)</b>
+          <p style={{ margin: "4px 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+            Damit die App von Anfang an passt – alles später im Elternbereich änderbar.
+          </p>
+          <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: "var(--schrift-klein)" }}>1. Welche Klasse?</p>
+          <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+            {[3, 4].map((k) => (
+              <button key={k} data-test={`fb-klasse-${k}`} onClick={() => setFb({ ...fb, klasse: k })}
+                style={{ flex: 1, fontWeight: 700, background: fb.klasse === k ? T.primaer : T.weich, color: fb.klasse === k ? T.primaerText : T.text }}>
+                Klasse {k}
+              </button>
+            ))}
+          </div>
+          <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: "var(--schrift-klein)" }}>2. Tägliche Lernzeit (kurz und regelmäßig schlägt lang und selten)</p>
+          <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+            {ZEIT_WAHL.map((min) => (
+              <button key={min} data-test={`fb-zeit-${min}`} onClick={() => setFb({ ...fb, zeit: min })}
+                style={{ flex: 1, fontWeight: 700, padding: "0 4px", background: fb.zeit === min ? T.primaer : T.weich, color: fb.zeit === min ? T.primaerText : T.text }}>
+                {min} Min
+              </button>
+            ))}
+          </div>
+          <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: "var(--schrift-klein)" }}>3. Wo hakt es gerade? (mehrere möglich – empfiehlt passende Übungen)</p>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
+            {SCHWERPUNKTE.map((s) => (
+              <button key={s.key} data-test={`fb-schwerpunkt-${s.key}`} onClick={() => fbSchwerpunkt(s.key)}
+                style={{
+                  flex: "1 1 auto", fontWeight: 700, padding: "0 12px", whiteSpace: "nowrap",
+                  background: fb.schwerpunkte.includes(s.key) ? T.primaer : T.weich,
+                  color: fb.schwerpunkte.includes(s.key) ? T.primaerText : T.text,
+                }}>
+                {s.emoji} {s.name}
+              </button>
+            ))}
+          </div>
+          <button data-test="fb-ok" onClick={() => fbSpeichern(true)}
+            style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+            ✅ Passt – übernehmen
+          </button>
+          <button data-test="fb-spaeter" onClick={() => fbSpeichern(false)}
+            style={{ width: "100%", marginTop: 6, background: "transparent", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+            Überspringen (Standard-Einstellungen behalten)
+          </button>
+        </div>
+      )}
       {!data.profil.interessenGefragt && !(data.profil.interessen || []).length && (
         <div data-test="interessen-karte" style={{
           background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand,
@@ -346,14 +415,15 @@ export default function Start() {
       )}
       {!einstufung ? (
         <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
-          <b>🧪 Einstufungstest</b>
+          <b>🦁 Leo lernt dich kennen</b>
           <p style={{ margin: "4px 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-            Finde deinen Start: ein paar Aufgaben aus Deutsch und Mathe – danach stellt
-            die App die Stufen genau auf dich ein und baut deinen Trainingsplan.
+            Zeig Leo in einer Kennenlern-Runde, was du schon kannst: ein paar Aufgaben
+            aus Deutsch und Mathe. Danach stellt sich die App genau auf dich ein und
+            baut deinen Trainingsplan.
           </p>
           <button data-test="einstufung-start" onClick={() => navTo("einstufung")}
             style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
-            🧪 Einstufungstest machen
+            🦁 Kennenlern-Runde starten
           </button>
         </div>
       ) : (

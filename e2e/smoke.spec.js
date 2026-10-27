@@ -1757,6 +1757,30 @@ test("Übungs-Welt, Wozu-Anker, Zeitstrahl und Lehrer-Moment", async ({ page }) 
   await expect(page.getByTestId("lehrer-moment")).toHaveCount(0);
 });
 
+test("Willkommens-Fragen: Eltern stellen Klasse, Lernzeit und Schwerpunkte ein", async ({ page }) => {
+  await tresorAnlegen(page);
+
+  // 👋 Drei kurze Fragen, nur im Eltern-Modus, einmalig
+  await expect(page.getByTestId("fragebogen-karte")).toBeVisible();
+  await page.getByTestId("fb-klasse-3").click();
+  await page.getByTestId("fb-zeit-15").click();
+  await page.getByTestId("fb-schwerpunkt-rechtschreiben").click();
+  await page.getByTestId("fb-schwerpunkt-mathe").click();
+  await page.getByTestId("fb-ok").click();
+  await expect(page.getByTestId("fragebogen-karte")).toHaveCount(0);
+  // Die Lernzeit wirkt sofort (Time-Boxing-Anzeige)
+  await expect(page.getByTestId("tages-stand")).toContainText("noch 15 Min");
+  // Die Kennenlern-Runde lädt das Kind mit Leo ein (statt „Test")
+  await expect(page.getByTestId("start-seite")).toContainText("Leo lernt dich kennen");
+
+  // 🎯 Schwerpunkte empfehlen Übungen – bis die Kennenlern-Runde gemessen hat
+  await page.getByTestId("nav-ueben").click();
+  await expect(page.getByTestId("gruppe-schreiben")).toContainText("empfohlen");
+  await page.getByTestId("ueben-fach-mathe").click();
+  await expect(page.getByTestId("bereich-mrechnen")).toContainText("empfohlen");
+  await expect(page.getByTestId("bereich-mgeo")).not.toContainText("empfohlen");
+});
+
 test("Interessen-Picker: Lieblings-Welten wählen steuert die Übungs-Welt", async ({ page }) => {
   await tresorAnlegen(page);
 

@@ -54,6 +54,19 @@ describe("migrateData", () => {
     expect(migrateData({ einstellungen: { uebungsThema: "neon" } }, HEUTE).einstellungen.uebungsThema).toBe("alltag");
   });
 
+  it("schwerpunkte und onboardingEltern: Whitelist, Säuberung, Standardwerte", () => {
+    const leer = migrateData(null, HEUTE);
+    expect(leer.profil.schwerpunkte).toEqual([]);
+    expect(leer.profil.onboardingEltern).toBe("");
+    const d = migrateData({ profil: {
+      schwerpunkte: ["rechtschreiben", "zaubern", "mathe", "rechtschreiben"],
+      onboardingEltern: HEUTE,
+    } }, HEUTE);
+    expect(d.profil.schwerpunkte).toEqual(["rechtschreiben", "mathe"]);
+    expect(d.profil.onboardingEltern).toBe(HEUTE);
+    expect(migrateData({ profil: { schwerpunkte: "alle", onboardingEltern: 7 } }, HEUTE).profil.schwerpunkte).toEqual([]);
+  });
+
   it("ist verlustfrei: unbekannte Schlüssel bleiben erhalten", () => {
     const d = migrateData({ zukunftsFeld: { a: 1 }, profil: { spitzname: "Blitz" } }, HEUTE);
     expect(d.zukunftsFeld).toEqual({ a: 1 });

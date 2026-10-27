@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-091",
+    "version": "0.75.0",
+    "datum": "2026-10-27",
+    "titel": "Willkommens-Fragen & Kennenlern-Runde",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "👋 Willkommens-Fragen für Eltern (einmalig auf der Startseite): Klasse, tägliche Lernzeit und „Wo hakt es gerade?“ – die Antworten stellen die App sofort richtig ein. Die Schwerpunkte markieren passende Übungen als 🎯 empfohlen, bis die Kennenlern-Runde das Können wirklich gemessen hat (dann zählt nur noch deren Ergebnis)."
+      },
+      {
+        "type": "verbessert",
+        "text": "🦁 Aus dem „Einstufungstest“ wird für das Kind die Kennenlern-Runde: „Leo lernt dich kennen – zeig Leo, was du schon kannst.“ Gleicher adaptiver Ablauf, freundlicherer Rahmen. Zusammen mit Welten-Frage und Familien-Konto steht damit der komplette Erst-Start für neue Familien: Eltern-Fragen → Kind wählt Welten → Kennenlern-Runde → fertig eingestellt."
+      }
+    ]
+  },
+  {
     "id": "rn-090",
     "version": "0.74.0",
     "datum": "2026-10-27",
