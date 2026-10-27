@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-094",
+    "version": "0.78.0",
+    "datum": "2026-10-27",
+    "titel": "Dino-Rennen & Raketen-Rennen",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🦖🚀 Zwei neue Spiele in der Spielhalle: Beim Dino-Rennen sprintet dein Dino durchs Urzeit-Tal, beim Raketen-Rennen fliegst du um die Wette zum Mond – richtige Antwort = Riesensprung bzw. voller Schub, falsche = der Gegner zieht davon. Mit Coach Leo als Mutmacher, Dino- und Weltraum-Wissen in den Pausen und Foto-Finish bei Gleichstand!"
+      },
+      {
+        "type": "neu",
+        "text": "⭐ Die Spielhalle kennt jetzt deine Lieblings-Welten: Spiele aus deinen gewählten Welten stehen vorn und tragen ein ⭐. Unter der Haube steckt eine neue gemeinsame Spiel-Engine – jede weitere Welt bekommt ihr Spiel künftig als „Skin“ statt als Neubau (Tennis und Fußball ziehen später um)."
+      }
+    ]
+  },
+  {
     "id": "rn-093",
     "version": "0.77.0",
     "datum": "2026-10-27",

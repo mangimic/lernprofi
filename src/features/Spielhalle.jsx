@@ -8,6 +8,8 @@ import { seeAbenteuerStart } from "../spiele/seeAbenteuer.js";
 import { blockweltStart } from "../spiele/blockwelt.js";
 import { tennisMatchStart } from "../spiele/tennisMatch.js";
 import { fussballMatchStart } from "../spiele/fussballMatch.js";
+import { matchStart } from "../spiele/matchEngine.js";
+import { MATCH_SKINS } from "../spiele/rennen.js";
 import { schachStart } from "../spiele/schach.js";
 
 /* 🎮 Spielhalle: Ein Spielbesuch kostet 1 Münze (verdient beim Üben).
@@ -63,8 +65,12 @@ export default function Spielhalle() {
           update({ ...d, lernstand: { ...d.lernstand, blockwelt: stand } });
         },
       });
-    } else if (modus === "tennis" || modus === "fussball") {
-      const start = modus === "tennis" ? tennisMatchStart : fussballMatchStart;
+    } else if (modus === "tennis" || modus === "fussball" || MATCH_SKINS[modus]) {
+      // Tennis/Fußball sind noch eigene Engines (Migration folgt);
+      // alle neuen Welten-Spiele laufen über die EINE Match-Engine + Skin.
+      const start = modus === "tennis" ? tennisMatchStart
+        : modus === "fussball" ? fussballMatchStart
+        : (h, hooks) => matchStart(h, MATCH_SKINS[modus], hooks);
       engine.current = start(host.current, {
         name: dataRef.current.profil.name || "Du",
         runden: dataRef.current.lernstand.stufen[modus]?.runden || 0,
@@ -105,8 +111,9 @@ export default function Spielhalle() {
         "spiele", "neu", `See-Abenteuer: alle ${ergebnis.fische} Fische, ${ergebnis.geloest} Fragen richtig`,
       );
     } else {
-      // Tennis-/Fußball-Match: Match zählen (Gegner-Rotation) + gewonnene Bälle als Aufgaben
+      // Match-Spiele: Match zählen (Gegner-Rotation) + gewonnene Fragen als Aufgaben
       const key = ergebnis.typ;
+      const label = { tennis: "Tennis-Match", fussball: "Fußball-Match", dino: "Dino-Rennen", rakete: "Raketen-Rennen" }[key] || key;
       const alt = data.lernstand.stufen[key] || { freigeschaltet: 1, runden: 0, krone: false };
       logChange(
         {
@@ -118,13 +125,13 @@ export default function Spielhalle() {
           },
         },
         "spiele", "neu",
-        `${key === "tennis" ? "Tennis" : "Fußball"}-Match gegen ${ergebnis.gegner} ${ergebnis.gewonnen ? "gewonnen" : "gespielt"} (${ergebnis.wins} von ${ergebnis.balls} Bällen)`,
+        `${label} gegen ${ergebnis.gegner} ${ergebnis.gewonnen ? "gewonnen" : "gespielt"} (${ergebnis.wins} von ${ergebnis.balls} Bällen)`,
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modus]);
 
-  if (modus === "see" || modus === "blockwelt" || modus === "tennis" || modus === "fussball" || modus === "schach") {
+  if (modus === "see" || modus === "blockwelt" || modus === "tennis" || modus === "fussball" || modus === "schach" || MATCH_SKINS[modus]) {
     return (
       <div style={karte}>
         <div ref={host} />
@@ -156,7 +163,12 @@ export default function Spielhalle() {
         </div>
       );
     }
-    const tennisTyp = ergebnis.typ === "tennis";
+    const info = {
+      tennis: { name: "🎾 Tennis", einheit: "Bällen", verb: "gewonnen" },
+      fussball: { name: "⚽ Fußball", einheit: "Bällen", verb: "verwandelt" },
+      dino: { name: "🦖 Dino-Rennen", einheit: "Fragen", verb: "geschafft" },
+      rakete: { name: "🚀 Raketen-Rennen", einheit: "Fragen", verb: "geschafft" },
+    }[ergebnis.typ] || { name: ergebnis.typ, einheit: "Fragen", verb: "geschafft" };
     return (
       <div data-test="match-ergebnis">
         <div style={karte}>
@@ -164,8 +176,8 @@ export default function Spielhalle() {
             {ergebnis.gewonnen ? "🏆 Match gewonnen!" : "💪 Starkes Match!"}
           </h2>
           <p>
-            {tennisTyp ? "🎾 Tennis" : "⚽ Fußball"} gegen <b>{ergebnis.gegner}</b>:
-            du hast <b>{ergebnis.wins} von {ergebnis.balls}</b> Bällen {tennisTyp ? "gewonnen" : "verwandelt"} –
+            {info.name} gegen <b>{ergebnis.gegner}</b>:
+            du hast <b>{ergebnis.wins} von {ergebnis.balls}</b> {info.einheit} {info.verb} –
             jeder davon zählt für deine Mini-Missionen.
           </p>
           <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
@@ -190,64 +202,52 @@ export default function Spielhalle() {
             : <>🎟️ Freie Fahrt: Die Münz-Freischaltung ist gerade ausgeschaltet – viel Spaß!</>}
         </p>
       </div>
-      {sichtbar("see") && <button data-test="spiel-see" onClick={() => starten("see", "See-Abenteuer")} disabled={!startbar}
-        style={{ ...karte, width: "100%", textAlign: "left", display: "block", border: `1px solid ${T.rand}`, opacity: startbar ? 1 : 0.6 }}>
-        <b>🎣 See-Abenteuer</b>
-        <span style={{ float: "right", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          {!muenzenAn ? "🎟️ Frei" : startbar ? "🪙 1 Münze einlösen" : "🔒 Übe für 1 Münze"}
-        </span>
-        <p style={{ margin: "6px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          Lauf um den See, wirf die Angel aus und fang alle Fische – vom flinken
-          Barsch bis zum Hecht, der sich dreimal wehrt!
-        </p>
-      </button>}
-      {sichtbar("blockwelt") && <button data-test="spiel-blockwelt" onClick={() => starten("blockwelt", "Blockwelt")} disabled={!startbar}
-        style={{ ...karte, width: "100%", textAlign: "left", display: "block", border: `1px solid ${T.rand}`, opacity: startbar ? 1 : 0.6 }}>
-        <b>⛏️ Blockwelt</b>
-        <span style={{ float: "right", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          {!muenzenAn ? "🎟️ Frei" : startbar ? "🪙 1 Münze einlösen" : "🔒 Übe für 1 Münze"}
-          {data.lernstand.blockwelt?.verdient ? ` · 🎁 ${data.lernstand.blockwelt.verdient}` : ""}
-        </span>
-        <p style={{ margin: "6px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          Bau deine eigene Welt! Blöcke verdienst du mit Fragen, die Werkstatt
-          schaltet Tiere, Möbel und 💥 TNT frei – deine Welt bleibt gespeichert.
-        </p>
-      </button>}
-      {sichtbar("tennis") && <button data-test="spiel-tennis" onClick={() => starten("tennis", "Tennis-Match")} disabled={!startbar}
-        style={{ ...karte, width: "100%", textAlign: "left", display: "block", border: `1px solid ${T.rand}`, opacity: startbar ? 1 : 0.6 }}>
-        <b>🎾 Tennis-Match</b>
-        <span style={{ float: "right", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          {!muenzenAn ? "🎟️ Frei" : startbar ? "🪙 1 Münze einlösen" : "🔒 Übe für 1 Münze"}
-          {matchRunden("tennis") ? ` · ${matchRunden("tennis")} Match${matchRunden("tennis") === 1 ? "" : "es"}` : ""}
-        </span>
-        <p style={{ margin: "6px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          Richtige Antwort = Punkt (15–30–40–Spiel), 2 Spiele gewinnen das Match –
-          mit Coach Leo als Mutmacher an deiner Seite!
-        </p>
-      </button>}
-      {sichtbar("fussball") && <button data-test="spiel-fussball" onClick={() => starten("fussball", "Fußball-Match")} disabled={!startbar}
-        style={{ ...karte, width: "100%", textAlign: "left", display: "block", border: `1px solid ${T.rand}`, opacity: startbar ? 1 : 0.6 }}>
-        <b>⚽ Fußball-Match</b>
-        <span style={{ float: "right", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          {!muenzenAn ? "🎟️ Frei" : startbar ? "🪙 1 Münze einlösen" : "🔒 Übe für 1 Münze"}
-          {matchRunden("fussball") ? ` · ${matchRunden("fussball")} Match${matchRunden("fussball") === 1 ? "" : "es"}` : ""}
-        </span>
-        <p style={{ margin: "6px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          2 Halbzeiten mit je 5 Torchancen: richtig = TOOOR, falsch = Konter –
-          bei Gleichstand entscheidet ein Elfmeter!
-        </p>
-      </button>}
-      {sichtbar("schach") && <button data-test="spiel-schach" onClick={() => starten("schach", "Schach")} disabled={!startbar}
-        style={{ ...karte, width: "100%", textAlign: "left", display: "block", border: `1px solid ${T.rand}`, opacity: startbar ? 1 : 0.6 }}>
-        <b>♟️ Schach</b>
-        <span style={{ float: "right", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          {!muenzenAn ? "🎟️ Frei" : startbar ? "🪙 1 Münze einlösen" : "🔒 Übe für 1 Münze"}
-        </span>
-        <p style={{ margin: "6px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          Schach-Schule mit deinen Eröffnungen, Taktik-Aufgaben zum Antippen
-          und echtes Schach gegen den Computer – mit Tipp und Zug-Zurück.
-        </p>
-      </button>}
+      {(() => {
+        // 🎨 Spiele-Katalog mit Welten-Zuordnung: Spiele aus den
+        // Lieblings-Welten des Kindes stehen vorn (mit ⭐ markiert).
+        const matches = (id, wort = "Match") => (matchRunden(id)
+          ? ` · ${matchRunden(id)} ${wort}${matchRunden(id) === 1 || wort === "Rennen" ? "" : "es"}` : "");
+        const KATALOG = [
+          { id: "see", welt: "angeln", name: "🎣 See-Abenteuer",
+            text: "Lauf um den See, wirf die Angel aus und fang alle Fische – vom flinken Barsch bis zum Hecht, der sich dreimal wehrt!",
+            extra: () => "" },
+          { id: "blockwelt", welt: "gaming", name: "⛏️ Blockwelt",
+            text: "Bau deine eigene Welt! Blöcke verdienst du mit Fragen, die Werkstatt schaltet Tiere, Möbel und 💥 TNT frei – deine Welt bleibt gespeichert.",
+            extra: () => (data.lernstand.blockwelt?.verdient ? ` · 🎁 ${data.lernstand.blockwelt.verdient}` : "") },
+          { id: "tennis", welt: "tennis", name: "🎾 Tennis-Match",
+            text: "Richtige Antwort = Punkt (15–30–40–Spiel), 2 Spiele gewinnen das Match – mit Coach Leo als Mutmacher an deiner Seite!",
+            extra: () => matches("tennis") },
+          { id: "fussball", welt: "fussball", name: "⚽ Fußball-Match",
+            text: "2 Halbzeiten mit je 5 Torchancen: richtig = TOOOR, falsch = Konter – bei Gleichstand entscheidet ein Elfmeter!",
+            extra: () => matches("fussball") },
+          { id: "dino", welt: "dinos", name: "🦖 Dino-Rennen",
+            text: "Renn durchs Urzeit-Tal: richtig = Riesensprung für deinen Dino, falsch = der Gegner sprintet. 2 Runden – bei Gleichstand gibt's ein Foto-Finish!",
+            extra: () => matches("dino", "Rennen") },
+          { id: "rakete", welt: "weltraum", name: "🚀 Raketen-Rennen",
+            text: "Wettflug zum Mond: richtig = voller Schub, falsch = der Gegner zieht davon. 2 Etappen mit Boxenstopp an der Raumstation!",
+            extra: () => matches("rakete", "Rennen") },
+          { id: "schach", welt: null, name: "♟️ Schach",
+            text: "Schach-Schule mit deinen Eröffnungen, Taktik-Aufgaben zum Antippen und echtes Schach gegen den Computer – mit Tipp und Zug-Zurück.",
+            extra: () => "" },
+        ];
+        const interessen = data.profil.interessen || [];
+        const lieblings = (sp) => !!sp.welt && interessen.includes(sp.welt);
+        const sortiert = [...KATALOG].sort((a, b) => (lieblings(b) ? 1 : 0) - (lieblings(a) ? 1 : 0));
+        return sortiert.filter((sp) => sichtbar(sp.id)).map((sp) => (
+          <button key={sp.id} data-test={`spiel-${sp.id}`} onClick={() => starten(sp.id, sp.name.slice(sp.name.indexOf(" ") + 1))} disabled={!startbar}
+            style={{ ...karte, width: "100%", textAlign: "left", display: "block", border: `1px solid ${T.rand}`, opacity: startbar ? 1 : 0.6 }}>
+            <b>{sp.name}</b>
+            <span style={{ float: "right", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+              {lieblings(sp) ? "⭐ Deine Welt · " : ""}
+              {!muenzenAn ? "🎟️ Frei" : startbar ? "🪙 1 Münze einlösen" : "🔒 Übe für 1 Münze"}
+              {sp.extra()}
+            </span>
+            <p style={{ margin: "6px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+              {sp.text}
+            </p>
+          </button>
+        ));
+      })()}
       {!startbar && (
         <button data-test="zum-ueben-aus-halle" onClick={() => navTo("ueben")} style={primaer}>
           ✏️ Erst eine Runde üben

@@ -31,6 +31,8 @@ export const SPIELE_SCHALTER = [
   { id: "blockwelt", name: "⛏️ Blockwelt" },
   { id: "tennis", name: "🎾 Tennis-Match" },
   { id: "fussball", name: "⚽ Fußball-Match" },
+  { id: "dino", name: "🦖 Dino-Rennen" },
+  { id: "rakete", name: "🚀 Raketen-Rennen" },
   { id: "schach", name: "♟️ Schach" },
 ];
 

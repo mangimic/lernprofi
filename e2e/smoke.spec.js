@@ -1760,6 +1760,60 @@ test("Übungs-Welt, Wozu-Anker, Zeitstrahl und Lehrer-Moment", async ({ page }) 
   await expect(page.getByTestId("lehrer-moment")).toHaveCount(0);
 });
 
+test("Dino-Rennen: Welten-Skin auf der Match-Engine – Lieblings-Welt steht vorn", async ({ page }) => {
+  await tresorAnlegen(page);
+  // 🎨 Lieblings-Welten wählen → ihre Spiele stehen in der Spielhalle vorn
+  await page.getByTestId("interesse-dinos").click();
+  await page.getByTestId("interesse-weltraum").click();
+  await page.getByTestId("interessen-ok").click();
+  await muenzeVerdienen(page);
+  await expect(page.locator('[data-test^="spiel-"]').first()).toHaveAttribute("data-test", /spiel-(dino|rakete)/);
+  await expect(page.getByTestId("spiel-dino")).toContainText("⭐ Deine Welt");
+  await expect(page.getByTestId("spiel-rakete")).toContainText("⭐ Deine Welt");
+
+  await page.evaluate(() => { window.__SPIEL_SCHNELL__ = true; });
+  await page.getByTestId("spiel-dino").click();
+  await page.getByTestId("mut-weiter").click();
+  await page.getByTestId("mut-weiter").click();
+  await page.locator(".bubble.sag").click();
+  await page.getByTestId("dino-start").click();
+
+  // Sprung 1 absichtlich daneben → der Gegner sprintet + Mutmacher
+  await page.locator('[data-test="spiel-opt"]:not([data-richtig])').first().click();
+  await expect(page.getByTestId("dino-feedback")).toContainText("Gestolpert");
+  await page.getByTestId("dino-weiter").click();
+  // Sprünge 2–5 richtig → Verschnaufpause mit Dino-Wissen
+  for (let i = 0; i < 4; i++) {
+    await page.locator('[data-test="spiel-opt"][data-richtig="1"]').click();
+    await page.getByTestId("dino-weiter").click();
+  }
+  await expect(page.getByTestId("dino-pause")).toContainText("Dino-Wissen");
+  await page.getByTestId("dino-weiter").click();
+  // Runde 2 fehlerfrei → Rennen gewonnen, Auswertung zählt die Fragen
+  for (let i = 0; i < 5; i++) {
+    await page.locator('[data-test="spiel-opt"][data-richtig="1"]').click();
+    await page.getByTestId("dino-weiter").click();
+  }
+  await expect(page.getByTestId("dino-ende")).toContainText("Rennen gewonnen");
+  await page.getByTestId("dino-fertig").click();
+  await expect(page.getByTestId("match-ergebnis")).toContainText("9 von 10");
+});
+
+test("Raketen-Rennen: zweiter Skin derselben Engine startet und zählt", async ({ page }) => {
+  await tresorAnlegen(page);
+  await muenzeVerdienen(page);
+  await page.evaluate(() => { window.__SPIEL_SCHNELL__ = true; });
+  await page.getByTestId("spiel-rakete").click();
+  await page.getByTestId("mut-weiter").click();
+  await page.getByTestId("mut-weiter").click();
+  await page.locator(".bubble.sag").click();
+  await page.getByTestId("rakete-start").click();
+  await expect(page.getByTestId("rakete")).toContainText("Zündung 1 von 5");
+  await page.locator('[data-test="spiel-opt"][data-richtig="1"]').click();
+  await expect(page.getByTestId("rakete-feedback")).toContainText("Voller Schub");
+  await expect(page.getByTestId("rakete-stand")).toHaveText("1 : 0");
+});
+
 test("Willkommens-Fragen: Eltern stellen Klasse, Lernzeit und Schwerpunkte ein", async ({ page }) => {
   await tresorAnlegen(page);
 

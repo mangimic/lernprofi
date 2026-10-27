@@ -36,6 +36,26 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.78: Match-Engine + Welten-Spiele ----------
+console.log("== v0.78: Match-Engine + Welten-Spiele ==");
+test("v0.78: EINE Engine + zwei Renn-Skins, Spielhalle sortiert nach Lieblings-Welten", (() => {
+  const en = quelle("src/spiele/matchEngine.js");
+  const re = quelle("src/spiele/rennen.js");
+  const sh = quelle("src/features/Spielhalle.jsx");
+  return en.includes("export function matchStart") && en.includes("MENTAL_IDS")
+    && re.includes("DINO_SKIN") && re.includes("RAKETE_SKIN") && re.includes("MATCH_SKINS")
+    && re.includes('wissen: "Dino-Wissen"') && re.includes('wissen: "Weltraum-Wissen"')
+    && quelle("src/spiele/dino.json").includes('"entscheidung"')
+    && quelle("src/spiele/rakete.json").includes('"entscheidung"')
+    && sh.includes("MATCH_SKINS[modus]") && sh.includes("⭐ Deine Welt")
+    && sh.includes('welt: "dinos"') && sh.includes('welt: "weltraum"')
+    && quelle("src/calc/elternWerkzeuge.js").includes("Dino-Rennen")
+    && quelle("src/calc/suche.js").includes("Raketen-Rennen")
+    && quelle("e2e/smoke.spec.js").includes("dino-start")
+    && quelle("e2e/smoke.spec.js").includes("rakete-start")
+    && releaseNoteVorhanden("rn-094");
+})());
+
 // ---------- v0.77: Willkommens-Weiche + Einladungs-Link ----------
 console.log("== v0.77: Willkommens-Weiche ==");
 test("v0.77: erste Frage neu/Konto, Einladungs-Link füllt den Code vor, Kopier-Knopf", (() => {
@@ -1353,7 +1373,9 @@ test("v0.14: Schach-Daten kopiert und in der Spielhalle angebunden (Münz-Gate, 
   const d = JSON.parse(quelle("src/spiele/schach.json"));
   const s2 = quelle("src/features/Spielhalle.jsx");
   return d.lektionen.length === 6 && d.aufgaben.length === 10
-    && s2.includes("schachStart") && s2.includes('data-test="spiel-schach"');
+    && s2.includes("schachStart")
+    // seit v0.78 datengetriebener Katalog: data-test={`spiel-${sp.id}`}
+    && (s2.includes('data-test="spiel-schach"') || (s2.includes("spiel-${sp.id}") && s2.includes('id: "schach"')));
 })());
 
 // ---------- v0.13: Tennis- und Fußball-Match ----------
@@ -1387,7 +1409,9 @@ test("v0.13: Spiel-Daten vollständig kopiert (Gegner, Fakten, Mental-Karten)", 
 test("v0.13: Spielhalle bindet beide Matches an (Münz-Gate, Match-Zähler, Missionen)", (() => {
   const s2 = quelle("src/features/Spielhalle.jsx");
   return s2.includes("tennisMatchStart") && s2.includes("fussballMatchStart")
-    && s2.includes('data-test="spiel-tennis"') && s2.includes('data-test="spiel-fussball"')
+    // seit v0.78 datengetriebener Katalog: data-test={`spiel-${sp.id}`}
+    && (s2.includes('data-test="spiel-tennis"') || (s2.includes("spiel-${sp.id}") && s2.includes('id: "tennis"')))
+    && (s2.includes('data-test="spiel-fussball"') || s2.includes('id: "fussball"'))
     && s2.includes("runden: alt.runden + 1") && s2.includes("aufgabenZaehlen(data.lernstand.lerntage, heute, ergebnis.wins");
 })());
 test("v0.13: Alt-Übernahme bringt die Match-Zähler mit", (() => {
@@ -1514,7 +1538,9 @@ test("v0.8: Spiel-Logik rein (Münz-Regel, Blitz-Fragen, Serien-Fische)", (() =>
 test("v0.8: Spielhalle gated über Münzen und löst genau 1 Münze ein", (() => {
   const h = quelle("src/features/Spielhalle.jsx") + quelle("src/spiele/seeAbenteuer.js") + quelle("src/spiele/fragen.js");
   return h.includes("spielStartbar(muenzen)") && h.includes("muenzeEinloesen(muenzen)")
-    && ["spielhalle", "spiel-see", "spiel-opt", "see-ergebnis"].every((t) => h.includes(`"${t}"`));
+    && ["spielhalle", "spiel-opt", "see-ergebnis"].every((t) => h.includes(`"${t}"`))
+    // seit v0.78 datengetriebener Katalog: data-test={`spiel-${sp.id}`}
+    && (h.includes('"spiel-see"') || (h.includes("spiel-${sp.id}") && h.includes('id: "see"')));
 })());
 
 // ---------- v0.7: Elternbereich + Alt-App-Übernahme ----------
