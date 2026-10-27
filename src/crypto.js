@@ -49,6 +49,18 @@ export async function schluesselAusGeheimnis(geheimnis, salt, iterationen = PBKD
   );
 }
 
+/** Leitet aus einem Geheimnis ROHE Bytes ab (für den Anmelde-Beweis –
+    eigener Salt, damit er unabhängig vom Tresor-Wrap-Schlüssel ist). */
+export async function geheimnisBits(geheimnis, salt, iterationen = PBKDF2_ITERATIONEN) {
+  const basis = await globalThis.crypto.subtle.importKey(
+    "raw", TE.encode(String(geheimnis)), "PBKDF2", false, ["deriveBits"],
+  );
+  const bits = await globalThis.crypto.subtle.deriveBits(
+    { name: "PBKDF2", hash: "SHA-256", salt, iterations: iterationen }, basis, 256,
+  );
+  return new Uint8Array(bits);
+}
+
 /** Importiert rohe 32 Schlüssel-Bytes als (nicht exportierbaren) AES-Schlüssel. */
 export async function schluesselAusBytes(rohBytes) {
   return globalThis.crypto.subtle.importKey(

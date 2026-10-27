@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-087",
+    "version": "0.71.0",
+    "datum": "2026-10-27",
+    "titel": "Familien-Konto & Anmeldung",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "👪 Familien-Konto: Bei der Einrichtung könnt ihr mit Einladungs-Code + E-Mail direkt ein Konto anlegen – und auf einem neuen Gerät holt „Wir haben schon ein Familien-Konto → Anmelden“ den verschlüsselten Tresor vom Server und öffnet ihn mit eurem Eltern-Passwort. Das Passwort verlässt das Gerät dabei nie, der Server kann den Tresor weiterhin nicht lesen."
+      },
+      {
+        "type": "neu",
+        "text": "🔗 Elternbereich → Konto & Daten: Die neue Konto-Karte zeigt den Anmelde-Status. Bestandsgeräte über den Familien-Zugang können dort mit E-Mail + Eltern-Passwort ein echtes Konto verknüpfen (das Passwort wird vorher lokal am Tresor geprüft, damit beides garantiert zusammenpasst) – plus Anmelden und Abmelden je Gerät."
+      }
+    ]
+  },
+  {
     "id": "rn-086",
     "version": "0.70.0",
     "datum": "2026-10-27",

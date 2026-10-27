@@ -1777,3 +1777,90 @@ test("Interessen-Picker: Lieblings-Welten wählen steuert die Übungs-Welt", asy
   await expect(page.getByTestId("frage-karte")).toContainText(/Dino|T-Rex|Langhals|Forscherin|Flugsaurier|Knochen|Nest/);
   await page.getByTestId("abbrechen").click();
 });
+
+test("Familien-Konto: Einrichtung mit Einladungs-Code – das Passwort verlässt das Gerät nie", async ({ page }) => {
+  let registriert = null;
+  await page.route("**/api/konto/registrieren", (r) => {
+    registriert = r.request().postData();
+    return r.fulfill({ status: 201, json: { kontoId: "a1b2c3d4e5f60718" } });
+  });
+  await page.route("**/api/konto", (r) => r.fulfill({
+    json: registriert
+      ? { angemeldet: true, kontoId: "a1b2c3d4e5f60718", art: "sitzung", email: "eltern@example.com" }
+      : { angemeldet: false },
+  }));
+
+  await page.goto("/");
+  await page.getByTestId("einr-pw1").fill(PW);
+  await page.getByTestId("einr-pw2").fill(PW);
+  await page.getByTestId("einr-pin1").fill(PIN);
+  await page.getByTestId("einr-pin2").fill(PIN);
+  // Nur Code ohne E-Mail → freundlicher Fehler, nichts geht kaputt
+  await page.getByTestId("einr-code").fill("abcde-fghjk");
+  await page.getByTestId("einr-ok").click();
+  await expect(page.getByTestId("gate-fehler")).toContainText("E-Mail");
+  // Mit E-Mail: Konto + Tresor in einem Rutsch
+  await page.getByTestId("einr-email").fill("Eltern@Example.com");
+  await page.getByTestId("einr-ok").click();
+  await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
+  // Zero-Knowledge: Der Request trägt den Anmelde-Beweis, NIE das Passwort
+  expect(registriert).toContain("abcde-fghjk");
+  expect(registriert).toContain("eltern@example.com");
+  expect(registriert).toContain("authBeweis");
+  expect(registriert).not.toContain(PW);
+  // Elternbereich zeigt das angemeldete Konto samt Abmelde-Knopf
+  await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-konto").click();
+  await expect(page.getByTestId("konto-status")).toContainText("eltern@example.com");
+  await expect(page.getByTestId("konto-abmelden")).toBeVisible();
+});
+
+test("Neues Gerät: Anmelden holt den verschlüsselten Tresor und entsperrt mit dem Eltern-Passwort", async ({ browser }) => {
+  // Gerät A: rein lokale Einrichtung, Auto-Sicherung schiebt die Chiffrate hoch
+  let rev = 0;
+  let gespeichert = null;
+  const ctxA = await browser.newContext();
+  const seiteA = await ctxA.newPage();
+  await seiteA.route("**/api/meta", (r) => r.fulfill({ json: { rev, aktualisiert: null } }));
+  await seiteA.route("**/api/vault", (r) => {
+    if (r.request().method() === "PUT") {
+      rev++;
+      gespeichert = r.request().postDataJSON().blobs;
+      return r.fulfill({ json: { rev } });
+    }
+    return r.fulfill({ json: { rev, blobs: gespeichert } });
+  });
+  await seiteA.route("**/api/konto", (r) => r.fulfill({ json: { angemeldet: true, kontoId: "stamm", art: "stamm" } }));
+  await tresorAnlegen(seiteA);
+  await seiteA.getByTestId("thema-schalter").click(); // Änderung → Auto-Sicherung
+  await expect.poll(() => rev, { timeout: 15000 }).toBeGreaterThan(0);
+  // Die Auto-Sicherung sammelt 2,5 s – danach ist auch die LETZTE Änderung
+  // (Dunkel-Modus) sicher im hochgeladenen Chiffrat enthalten.
+  await seiteA.waitForTimeout(4000);
+  // Der Server sieht nur Chiffrat – nirgends Klartext oder Passwort
+  const roh = JSON.stringify(gespeichert);
+  expect(roh).not.toContain(PW);
+  expect(roh).not.toContain("dunkel");
+  await ctxA.close();
+
+  // Gerät B (frisch): „Wir haben schon ein Familien-Konto" → Anmelden
+  const ctxB = await browser.newContext();
+  const seiteB = await ctxB.newPage();
+  await seiteB.route("**/api/meta", (r) => r.fulfill({ json: { rev, aktualisiert: null } }));
+  await seiteB.route("**/api/vault", (r) => r.fulfill({ json: { rev, blobs: gespeichert } }));
+  await seiteB.route("**/api/konto/login", (r) => r.fulfill({ json: { kontoId: "a1b2c3d4e5f60718" } }));
+  await seiteB.goto("/");
+  await expect(seiteB.getByTestId("gate-einrichten")).toBeVisible();
+  await seiteB.getByTestId("zum-anmelden").click();
+  await seiteB.getByTestId("anm-email").fill("eltern@example.com");
+  await seiteB.getByTestId("anm-passwort").fill(PW);
+  await seiteB.getByTestId("anm-ok").click();
+  // Der geholte Tresor öffnet sich mit demselben Eltern-Passwort …
+  await expect(seiteB.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
+  await expect(seiteB.getByTestId("nav-eltern")).toBeVisible(); // Eltern-Modus (Passwort-Weg)
+  // … inklusive der Einstellung von Gerät A (Dunkel-Modus kam mit)
+  await expect
+    .poll(async () => seiteB.evaluate(() => document.documentElement.dataset.theme))
+    .toBe("dark");
+  await ctxB.close();
+});

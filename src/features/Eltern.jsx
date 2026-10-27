@@ -5,6 +5,8 @@ import { ZEIT_STUFEN, SPIELE_SCHALTER, spielAktiv, zeitHeute, GESPRAECH_BEREICHE
 import { PAUSEN_INTERVALLE, TAGESFORM_MODI } from "../calc/tagesform.js";
 import { idbStorage } from "../idbShim.js";
 import { syncStatus, hochladen, herunterladen, konfliktUeberschreiben } from "../sync.js";
+import { kontoStatus, kontoRegistrieren, kontoAnmelden, kontoAbmelden, emailNormal, EMAIL_GUELTIG } from "../konto.js";
+import { entsperrenMitPasswort } from "../vault.js";
 import { kiStatus, kiDeckelSetzen, kiErklaeren, kiBericht, kiSaetze } from "../ki.js";
 import { berichtDaten } from "../calc/bericht.js";
 import { BAUSTEINE } from "../calc/wochenplan.js";
@@ -139,6 +141,31 @@ export default function Eltern() {
   const [syncMeldung, setSyncMeldung] = useState("");
   const [frage, setFrage] = useState(null);         // "laden" | {typ:"konflikt", serverRev}
   useEffect(() => { syncStatus().then(setSync); }, []);
+
+  // 👪 Familien-Konto (v0.71): Status anzeigen, verknüpfen/anmelden/abmelden.
+  const [konto, setKonto] = useState(null);         // Antwort von GET /api/konto
+  const [kontoForm, setKontoForm] = useState({ email: "", passwort: "" });
+  const [kontoMeldung, setKontoMeldung] = useState("");
+  useEffect(() => { kontoStatus().then(setKonto); }, []);
+  const kontoAktion = async (arbeit) => {
+    setKontoMeldung("");
+    try {
+      const erg = await arbeit();
+      if (erg && erg.ok === false) { setKontoMeldung(`⚠️ ${erg.fehler || "Das hat nicht geklappt."}`); return; }
+      setKontoForm({ email: "", passwort: "" });
+      setKonto(await kontoStatus());
+    } catch {
+      setKontoMeldung("⚠️ Der Server ist gerade nicht erreichbar.");
+    }
+  };
+  // Stamm-Verknüpfung: das Passwort wird ERST lokal am Tresor geprüft,
+  // damit Konto-Passwort und Tresor-Passwort garantiert dasselbe sind.
+  const stammVerknuepfen = () => kontoAktion(async () => {
+    if (!EMAIL_GUELTIG.test(emailNormal(kontoForm.email))) return { ok: false, fehler: "Bitte eine gültige E-Mail angeben." };
+    try { await entsperrenMitPasswort(kontoForm.passwort, idbStorage); }
+    catch { return { ok: false, fehler: "Das ist nicht euer Eltern-Passwort (es muss dasselbe wie am Tresor sein)." }; }
+    return kontoRegistrieren({ stamm: true, email: kontoForm.email, passwort: kontoForm.passwort });
+  });
 
   // 🤖 KI-Status (Deckel, Verbrauch)
   const [ki, setKi] = useState(null);
@@ -761,6 +788,49 @@ export default function Eltern() {
       </Karte>
       </>)}
       {tab === "konto" && (<>
+      <Karte test="eltern-konto">
+        <b>👪 Familien-Konto</b>
+        <p data-test="konto-status" style={{ margin: "4px 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          {konto === null ? "Prüfe Konto-Status …"
+            : konto.angemeldet && konto.art === "sitzung" ? <>✅ Angemeldet{konto.email ? <> als <b>{konto.email}</b></> : ""} – dieses Gerät sichert in euren Konto-Tresor.</>
+            : konto.angemeldet && konto.art === "stamm" && konto.email ? <>✅ Stamm-Konto verknüpft ({konto.email}) – dieses Gerät läuft über den Familien-Zugang.</>
+            : konto.angemeldet && konto.art === "stamm" ? "🔗 Dieses Gerät läuft über den Familien-Zugang (Cloudflare Access). Mit E-Mail + Eltern-Passwort macht ihr daraus ein echtes Konto – Grundlage für die Anmeldung auf neuen Geräten."
+            : konto.grund === "offline" ? "Gerade keine Verbindung zum Server – Konto-Status kommt wieder, sobald Netz da ist."
+            : "Nicht angemeldet. Mit E-Mail + Eltern-Passwort meldet ihr dieses Gerät an eurem Familien-Konto an."}
+        </p>
+        {konto?.angemeldet && konto.art === "stamm" && !konto.email && (
+          <>
+            <input data-test="konto-email" style={feld} type="email" placeholder="E-Mail"
+              value={kontoForm.email} onChange={(e) => setKontoForm({ ...kontoForm, email: e.target.value })} />
+            <input data-test="konto-passwort" style={feld} type="password" placeholder="Eltern-Passwort (dasselbe wie am Tresor)"
+              value={kontoForm.passwort} onChange={(e) => setKontoForm({ ...kontoForm, passwort: e.target.value })} />
+            <button data-test="konto-verknuepfen" onClick={stammVerknuepfen}
+              style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+              🔗 Konto anlegen und verknüpfen
+            </button>
+          </>
+        )}
+        {konto !== null && !konto.angemeldet && konto.grund !== "offline" && (
+          <>
+            <input data-test="konto-email" style={feld} type="email" placeholder="E-Mail"
+              value={kontoForm.email} onChange={(e) => setKontoForm({ ...kontoForm, email: e.target.value })} />
+            <input data-test="konto-passwort" style={feld} type="password" placeholder="Eltern-Passwort"
+              value={kontoForm.passwort} onChange={(e) => setKontoForm({ ...kontoForm, passwort: e.target.value })} />
+            <button data-test="konto-anmelden" onClick={() => kontoAktion(() => kontoAnmelden(kontoForm.email, kontoForm.passwort))}
+              style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+              🔑 Anmelden
+            </button>
+          </>
+        )}
+        {konto?.angemeldet && konto.art === "sitzung" && (
+          <button data-test="konto-abmelden" onClick={() => kontoAktion(kontoAbmelden)}
+            style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
+            🚪 Dieses Gerät vom Konto abmelden
+          </button>
+        )}
+        {kontoMeldung && <p data-test="konto-meldung" style={{ margin: "8px 0 0", color: "var(--warn)", fontSize: "var(--schrift-klein)" }}>{kontoMeldung}</p>}
+      </Karte>
+
       <Karte test="eltern-profil">
         <b>👤 Profil</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>

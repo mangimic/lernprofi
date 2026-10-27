@@ -142,7 +142,7 @@ export async function kontoApi(request, env, jetzt = new Date()) {
   if (url.pathname === "/api/konto" && request.method === "GET") {
     const konto = await kontoVonAnfrage(request, env, jetzt);
     if (!konto) return json(200, { angemeldet: false });
-    const satz = konto.art === "sitzung" ? await kv.get(`konto:${konto.kontoId}`, "json") : null;
+    const satz = await kv.get(`konto:${konto.kontoId}`, "json"); // auch fürs (verknüpfte) Stamm-Konto
     return json(200, { angemeldet: true, kontoId: konto.kontoId, art: konto.art, ...(satz?.email ? { email: satz.email } : {}) });
   }
   if (request.method !== "POST") return json(404, { fehler: "Unbekannte Konto-Route." });
@@ -169,23 +169,40 @@ export async function kontoApi(request, env, jetzt = new Date()) {
   const beweisGueltig = beweis.length >= 20 && beweis.length <= 200;
 
   // 📝 Registrieren: gültiger Einladungs-Code + freie E-Mail + Auth-Beweis.
+  // Sonderweg { stamm: true }: das Bestandskonto (Access-Brücke) verknüpft
+  // sich OHNE Code mit E-Mail + Beweis – genau einmal.
   if (url.pathname === "/api/konto/registrieren") {
-    const code = typeof eingabe?.einladung === "string" ? eingabe.einladung.trim().toLowerCase() : "";
-    if (!CODE_MUSTER.test(code)) return json(400, { fehler: "Erwartet einen Einladungs-Code (xxxxx-xxxxx)." });
     if (!EMAIL.test(emailNorm) || emailNorm.length > 120) return json(400, { fehler: "Bitte eine gültige E-Mail-Adresse angeben." });
     if (!beweisGueltig) return json(400, { fehler: "Auth-Beweis fehlt oder hat die falsche Länge." });
-    const einladung = await kv.get(`einladung:${code}`, "json");
-    if (!einladung || einladung.benutztVon) return json(403, { fehler: "Dieser Einladungs-Code ist unbekannt oder schon benutzt." });
     if (await kv.get(`email:${emailNorm}`)) return json(409, { fehler: "Für diese E-Mail gibt es schon ein Konto." });
 
-    const kontoId = neueKontoId();
+    let kontoId;
+    let einladungVerbrauchen = null;
+    if (eingabe?.stamm === true) {
+      const konto = await kontoVonAnfrage(request, env, jetzt);
+      if (!konto || konto.kontoId !== STAMM_KONTO) {
+        return json(403, { fehler: "Die Stamm-Verknüpfung geht nur über den Familien-Zugang (Access)." });
+      }
+      if (await kv.get(`konto:${STAMM_KONTO}`)) return json(409, { fehler: "Das Stamm-Konto ist schon verknüpft." });
+      kontoId = STAMM_KONTO;
+    } else {
+      const code = typeof eingabe?.einladung === "string" ? eingabe.einladung.trim().toLowerCase() : "";
+      if (!CODE_MUSTER.test(code)) return json(400, { fehler: "Erwartet einen Einladungs-Code (xxxxx-xxxxx)." });
+      const einladung = await kv.get(`einladung:${code}`, "json");
+      if (!einladung || einladung.benutztVon) return json(403, { fehler: "Dieser Einladungs-Code ist unbekannt oder schon benutzt." });
+      kontoId = neueKontoId();
+      einladungVerbrauchen = { code, einladung };
+    }
     await kv.put(`konto:${kontoId}`, JSON.stringify({
       kontoId, email: emailNorm,
       authHash: await sha256Hex(beweis),
       erstellt: jetzt.toISOString(),
     }));
     await kv.put(`email:${emailNorm}`, kontoId);
-    await kv.put(`einladung:${code}`, JSON.stringify({ ...einladung, benutztVon: kontoId, benutztAm: jetzt.toISOString() }));
+    if (einladungVerbrauchen) {
+      await kv.put(`einladung:${einladungVerbrauchen.code}`,
+        JSON.stringify({ ...einladungVerbrauchen.einladung, benutztVon: kontoId, benutztAm: jetzt.toISOString() }));
+    }
     const token = await sitzungAusstellen(env.SESSION_GEHEIM, kontoId, jetzt);
     return json(201, { kontoId }, { "set-cookie": sitzungsCookie(token) });
   }

@@ -36,6 +36,24 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.71: Client-Anmeldung (Familien-Konto) ----------
+console.log("== v0.71: Client-Anmeldung ==");
+test("v0.71: Anmelde-Beweis getrennt vom Wrap, Gate mit Konto-Wegen, Eltern-Konto-Karte, Stamm-Verknüpfung", (() => {
+  const kc = quelle("src/konto.js");
+  const vg = quelle("src/features/VaultGate.jsx");
+  const el = quelle("src/features/Eltern.jsx");
+  return kc.includes("export async function authBeweis") && kc.includes("lernprofi-anmeldung:")
+    && quelle("src/crypto.js").includes("export async function geheimnisBits")
+    && vg.includes("einr-code") && vg.includes("einr-email")
+    && vg.includes("gate-anmelden") && vg.includes("zum-anmelden") && vg.includes("herunterladen")
+    && el.includes("eltern-konto") && el.includes("konto-verknuepfen") && el.includes("konto-abmelden")
+    && el.includes("entsperrenMitPasswort") // Stamm-Verknüpfung prüft das Passwort LOKAL am Tresor
+    && quelle("server/_lib/kontoApi.js").includes("stamm === true")
+    && quelle("e2e/smoke.spec.js").includes("zum-anmelden")
+    && quelle("e2e/smoke.spec.js").includes("not.toContain(PW)") // Passwort verlässt das Gerät nie
+    && releaseNoteVorhanden("rn-087");
+})());
+
 // ---------- v0.70: Konto-Fundament (Multi-Tenant, Server) ----------
 console.log("== v0.70: Konto-Fundament ==");
 test("v0.70: Konto-API mit Einladungs-Codes, Sitzungen, Konto-Tresoren und Stamm-Migration", (() => {

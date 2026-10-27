@@ -124,6 +124,29 @@ describe("kontoApi – Registrieren und Login", () => {
     expect((await login(BEWEIS)).status).toBe(429); // Drossel gilt auch für richtige
   });
 
+  it("Stamm-Verknüpfung: nur über Access, ohne Code, genau einmal", async () => {
+    const env = mockEnv();
+    const body = { stamm: true, email: "familie@example.com", authBeweis: BEWEIS };
+    // ohne Access-Brücke verboten
+    expect((await kontoApi(anfrage("POST", "/api/konto/registrieren", body), env)).status).toBe(403);
+    const r = await kontoApi(anfrage("POST", "/api/konto/registrieren", body, mitAccess), env);
+    expect(r.status).toBe(201);
+    expect((await r.json()).kontoId).toBe(STAMM_KONTO);
+    expect(env.TRESOR._map.get("email:familie@example.com")).toBe(STAMM_KONTO);
+    // der Access-Weg zeigt jetzt die verknüpfte E-Mail
+    const wer = await kontoApi(anfrage("GET", "/api/konto", null, mitAccess), env);
+    expect(await wer.json()).toMatchObject({ angemeldet: true, kontoId: STAMM_KONTO, email: "familie@example.com" });
+    // nur einmal verknüpfbar
+    const nochmal = await kontoApi(anfrage("POST", "/api/konto/registrieren",
+      { ...body, email: "zweite@example.com" }, mitAccess), env);
+    expect(nochmal.status).toBe(409);
+    // und danach geht der normale Login mit demselben Beweis
+    const login = await kontoApi(anfrage("POST", "/api/konto/login",
+      { email: "familie@example.com", authBeweis: BEWEIS }), env);
+    expect(login.status).toBe(200);
+    expect((await login.json()).kontoId).toBe(STAMM_KONTO);
+  });
+
   it("Abmelden löscht das Cookie; ohne SESSION_GEHEIM → 503; GET /api/konto ehrlich", async () => {
     const env = mockEnv();
     const ab = await kontoApi(anfrage("POST", "/api/konto/abmelden"), env);
