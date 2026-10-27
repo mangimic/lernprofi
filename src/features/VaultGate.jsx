@@ -4,6 +4,7 @@ import { kontoRegistrieren, kontoAnmelden, kontoAnmeldenMitCode, kontoPasswortSe
 import { passwortNeuSetzen } from "../vault.js";
 import { herunterladen } from "../sync.js";
 import { idbStorage } from "../idbShim.js";
+import Datenschutz from "./Datenschutz.jsx";
 
 /* Sperrbildschirm (VaultGate):
    - Noch kein Tresor → Einrichtung durch die Eltern (Passwort 2×, PIN 2×,
@@ -53,6 +54,8 @@ export default function VaultGate() {
   const [anm, setAnm] = useState({ email: "", passwort: "" });
   const [pwVergessen, setPwVergessen] = useState(false); // 🧯 lokaler Rettungs-Weg
   const [rett, setRett] = useState({ email: "", code: "", pw1: "", pw2: "" });
+  const [einverstanden, setEinverstanden] = useState(false); // 📄 Einwilligung (nur Konto-Weg)
+  const [zeigeDatenschutz, setZeigeDatenschutz] = useState(false);
 
   const los = async (arbeit) => {
     setFehler(""); setLaeuft(true);
@@ -72,6 +75,7 @@ export default function VaultGate() {
         throw new Error("Fürs Familien-Konto bitte Einladungs-Code UND E-Mail angeben – oder beide Felder leer lassen.");
       }
       if (String(einr.pw1).length < 8) throw new Error("Das Eltern-Passwort braucht mindestens 8 Zeichen.");
+      if (!einverstanden) throw new Error("Fürs Familien-Konto bitte die Bestätigung ankreuzen (erziehungsberechtigt + Datenschutzerklärung gelesen).");
       let erg;
       try {
         erg = await kontoRegistrieren({ einladung: einr.code, email: einr.email, passwort: einr.pw1 });
@@ -146,6 +150,18 @@ export default function VaultGate() {
     </header>
   );
 
+  const datenschutzLink = (
+    <button data-test="datenschutz-link" onClick={() => setZeigeDatenschutz(true)}
+      style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 4, fontSize: "var(--schrift-klein)" }}>
+      📄 Datenschutzerklärung
+    </button>
+  );
+
+  // 📄 Datenschutz ist VOR jeder Anmeldung lesbar (DSGVO)
+  if (zeigeDatenschutz) {
+    return <div style={{ paddingTop: 10 }}><Datenschutz zurueck={() => setZeigeDatenschutz(false)} /></div>;
+  }
+
   if (tresor.status === "neu" && weg === "rettung") {
     return (
       <div data-test="gate-rettung" style={{ maxWidth: 480, margin: "0 auto", padding: "0 16px" }}>
@@ -208,6 +224,7 @@ export default function VaultGate() {
             style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 4, fontSize: "var(--schrift-klein)" }}>
             ← Zurück zur Einrichtung
           </button>
+          {datenschutzLink}
         </Karte>
       </div>
     );
@@ -240,6 +257,20 @@ export default function VaultGate() {
             value={einr.code} onChange={(e) => setEinr({ ...einr, code: e.target.value })} />
           <Feld test="einr-email" type="email" placeholder="E-Mail (nur mit Einladungs-Code)"
             value={einr.email} onChange={(e) => setEinr({ ...einr, email: e.target.value })} />
+          {(einr.code.trim() !== "" || einr.email.trim() !== "") && (
+            <label style={{
+              display: "flex", gap: 8, alignItems: "flex-start", cursor: "pointer",
+              fontSize: "var(--schrift-klein)", color: T.textLeise, margin: "0 0 8px",
+            }}>
+              <input data-test="einr-einwilligung" type="checkbox" checked={einverstanden}
+                onChange={(e) => setEinverstanden(e.target.checked)}
+                style={{ width: 20, height: 20, marginTop: 2, flexShrink: 0 }} />
+              <span>
+                Ich bin erziehungsberechtigt und lege dieses Konto für mein Kind an.
+                Die <b>Datenschutzerklärung</b> (Link unten) habe ich gelesen.
+              </span>
+            </label>
+          )}
           <p style={{ color: T.warn, fontSize: "var(--schrift-klein)" }}>
             ⚠️ Wichtig: Es gibt <b>keine Passwort-Wiederherstellung</b>. Bewahrt das
             Passwort gut auf und macht regelmäßig den Backup-Export im Elternbereich.
@@ -253,6 +284,7 @@ export default function VaultGate() {
             style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 8, fontSize: "var(--schrift-klein)" }}>
             👪 Wir haben schon ein Familien-Konto → Anmelden
           </button>
+          {datenschutzLink}
         </Karte>
       </div>
     );

@@ -15,6 +15,9 @@ function mockEnv({ mitKv = true, geheim = "test-session-geheimnis" } = {}) {
       async get(k, art) { const v = m.get(k); return art === "json" && v ? JSON.parse(v) : v ?? null; },
       async put(k, v) { m.set(k, v); },
       async delete(k) { m.delete(k); },
+      async list({ prefix = "" } = {}) {
+        return { keys: [...m.keys()].filter((k) => k.startsWith(prefix)).map((name) => ({ name })), list_complete: true };
+      },
     } : undefined,
   };
 }
@@ -215,6 +218,41 @@ describe("kontoApi + vaultApi – Konten sind strikt getrennt", () => {
     expect((await vaultApi(anfrage("PUT", "/api/doks/dabc123", paket, { cookie: a.cookie }), env)).status).toBe(200);
     expect((await vaultApi(anfrage("GET", "/api/doks/dabc123", null, { cookie: a.cookie }), env)).status).toBe(200);
     expect((await vaultApi(anfrage("GET", "/api/doks/dabc123", null, { cookie: b.cookie }), env)).status).toBe(404);
+  });
+
+  it("🗑️ Löschkonzept: ein Aufruf räumt Konto, Tresor, Doks und Index vollständig", async () => {
+    const env = mockEnv();
+    const a = await kontoMitSitzung(env, "a@b.de");
+    const b = await kontoMitSitzung(env, "b@c.de");
+    await vaultApi(anfrage("PUT", "/api/vault", { baseRev: 0, blobs: BLOBS_A }, { cookie: a.cookie }), env);
+    await vaultApi(anfrage("PUT", "/api/vault", { baseRev: 0, blobs: BLOBS_B }, { cookie: b.cookie }), env);
+    const paket = { iv: "aWY=", chiffrat: "Y2hpZmZyYXQ=" };
+    await vaultApi(anfrage("PUT", "/api/doks/dabc123", paket, { cookie: a.cookie }), env);
+    await vaultApi(anfrage("PUT", "/api/doks/dxyz789", paket, { cookie: b.cookie }), env);
+    // falscher Beweis löscht NICHTS
+    const falsch = "ZmFsc2NoZXItYmV3ZWlzLWZhbHNjaGVyLWJld2VpcyE=";
+    expect((await kontoApi(anfrage("POST", "/api/konto/loeschen", { beweis: falsch }, { cookie: a.cookie }), env)).status).toBe(401);
+    expect(env.TRESOR._map.has(`konto:${a.kontoId}`)).toBe(true);
+    // richtiger Beweis: alles von A weg, B bleibt unberührt
+    const weg = await kontoApi(anfrage("POST", "/api/konto/loeschen", { beweis: BEWEIS }, { cookie: a.cookie }), env);
+    expect(weg.status).toBe(200);
+    expect(weg.headers.get("set-cookie")).toContain("Max-Age=0");
+    for (const k of [`konto:${a.kontoId}`, `tresor:${a.kontoId}`, "email:a@b.de", `dok:${a.kontoId}:dabc123`]) {
+      expect(env.TRESOR._map.has(k), k).toBe(false);
+    }
+    expect(env.TRESOR._map.has(`tresor:${b.kontoId}`)).toBe(true);
+    expect(env.TRESOR._map.has(`dok:${b.kontoId}:dxyz789`)).toBe(true);
+    // der Login zum gelöschten Konto ist tot
+    expect((await kontoApi(anfrage("POST", "/api/konto/login", { email: "a@b.de", authBeweis: BEWEIS }), env)).status).toBe(401);
+    // Stamm-Löschung räumt auch die Alt-Lage (tresor:v1, Doks ohne Präfix)
+    env.TRESOR._map.set("tresor:v1", JSON.stringify({ rev: 1, blobs: BLOBS_A }));
+    env.TRESOR._map.set("dok:daltdok1", JSON.stringify(paket));
+    await kontoApi(anfrage("POST", "/api/konto/registrieren",
+      { stamm: true, email: "familie@example.com", authBeweis: BEWEIS }, mitAccess), env);
+    expect((await kontoApi(anfrage("POST", "/api/konto/loeschen", { beweis: BEWEIS }, mitAccess), env)).status).toBe(200);
+    for (const k of ["tresor:v1", "dok:daltdok1", `tresor:${STAMM_KONTO}`, `konto:${STAMM_KONTO}`]) {
+      expect(env.TRESOR._map.has(k), k).toBe(false);
+    }
   });
 
   it("Stamm-Brücke: Access-Header arbeitet auf tresor:stamm, Alt-Lage wandert mit", async () => {

@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-089",
+    "version": "0.73.0",
+    "datum": "2026-10-27",
+    "titel": "Datenschutz & Löschkonzept",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "📄 Datenschutzerklärung in der App: vor der Anmeldung über den Link am Sperrbildschirm, danach im Elternbereich (Konto & Daten). Sie erklärt verständlich, was wo gespeichert ist – allen voran das Zero-Knowledge-Prinzip: Der Server kennt nie Passwort oder Inhalte. Beim Anlegen eines Familien-Kontos bestätigen Eltern jetzt kurz, dass sie erziehungsberechtigt sind und die Erklärung kennen."
+      },
+      {
+        "type": "neu",
+        "text": "🗑️ Konto löschen, richtig: Ein Knopf im Elternbereich (mit Passwort-Bestätigung) entfernt Konto, Tresor-Pakete und alle Dokumente sofort und endgültig vom Server – nachweisbar vollständig, die lokalen Daten auf euren Geräten bleiben. Dazu intern: ein Verarbeitungsverzeichnis mit Checkliste der restlichen Pflichten vor der Freigabe an weitere Familien."
+      }
+    ]
+  },
+  {
     "id": "rn-088",
     "version": "0.72.0",
     "datum": "2026-10-27",

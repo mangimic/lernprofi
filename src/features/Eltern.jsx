@@ -5,7 +5,7 @@ import { ZEIT_STUFEN, SPIELE_SCHALTER, spielAktiv, zeitHeute, GESPRAECH_BEREICHE
 import { PAUSEN_INTERVALLE, TAGESFORM_MODI } from "../calc/tagesform.js";
 import { idbStorage } from "../idbShim.js";
 import { syncStatus, hochladen, herunterladen, konfliktUeberschreiben } from "../sync.js";
-import { kontoStatus, kontoRegistrieren, kontoAnmelden, kontoAbmelden, kontoRettungHinterlegen, emailNormal, EMAIL_GUELTIG } from "../konto.js";
+import { kontoStatus, kontoRegistrieren, kontoAnmelden, kontoAbmelden, kontoRettungHinterlegen, kontoLoeschen, emailNormal, EMAIL_GUELTIG } from "../konto.js";
 import { entsperrenMitPasswort, rettungAnlegen } from "../vault.js";
 import { kiStatus, kiDeckelSetzen, kiErklaeren, kiBericht, kiSaetze } from "../ki.js";
 import { berichtDaten } from "../calc/bericht.js";
@@ -192,6 +192,20 @@ export default function Eltern() {
       <p>Weg: Sperrbildschirm → Eltern-Zugang → „Passwort vergessen“.</p>
       <script>window.print()</script></body>`);
     w.document.close();
+  };
+
+  // 🗑️ Löschkonzept (DSGVO): entfernt Konto, Tresor-Chiffrate und alle
+  // Dokumente ENDGÜLTIG vom Server. Lokale Gerätedaten bleiben.
+  const [loeschPw, setLoeschPw] = useState("");
+  const kontoEntfernen = async () => {
+    setKontoMeldung("");
+    try {
+      const erg = await kontoLoeschen(konto.email, loeschPw);
+      if (!erg.ok) { setKontoMeldung(`⚠️ ${erg.fehler || "Löschen fehlgeschlagen."}`); return; }
+      setLoeschPw("");
+      setKonto(await kontoStatus());
+      setKontoMeldung("✅ Konto und alle Server-Daten sind endgültig gelöscht. Die lokale Kopie auf diesem Gerät bleibt – sichert sie bei Bedarf über den Backup-Export.");
+    } catch { setKontoMeldung("⚠️ Der Server ist gerade nicht erreichbar."); }
   };
 
   // Stamm-Verknüpfung: das Passwort wird ERST lokal am Tresor geprüft,
@@ -898,6 +912,30 @@ export default function Eltern() {
           )}
           {rett.meldung && <p data-test="rett-meldung" style={{ margin: "8px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>{rett.meldung}</p>}
         </div>
+
+        {konto?.angemeldet && konto.email && (
+          <details style={{ marginTop: 14 }}>
+            <summary data-test="loesch-auf" style={{ cursor: "pointer", color: "var(--warn)", fontWeight: 700, fontSize: "var(--schrift-klein)" }}>
+              🗑️ Konto und alle Server-Daten endgültig löschen
+            </summary>
+            <div style={{ marginTop: 8 }}>
+              <p style={{ margin: "0 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+                Entfernt sofort und unwiderruflich: das Konto, die Tresor-Pakete und alle
+                Dokumente vom Server. Die lokalen Daten auf euren Geräten bleiben erhalten.
+              </p>
+              <input data-test="loesch-pw" style={feld} type="password" placeholder="Eltern-Passwort (zur Bestätigung)"
+                value={loeschPw} onChange={(e) => setLoeschPw(e.target.value)} />
+              <button data-test="loesch-ok" onClick={kontoEntfernen} disabled={!loeschPw}
+                style={{ width: "100%", background: "var(--warn)", color: "#fff", fontWeight: 700, opacity: loeschPw ? 1 : 0.5 }}>
+                🗑️ Ja, endgültig löschen
+              </button>
+            </div>
+          </details>
+        )}
+        <button data-test="zum-datenschutz" onClick={() => navTo("datenschutz")}
+          style={{ width: "100%", marginTop: 10, background: "transparent", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          📄 Datenschutzerklärung anzeigen
+        </button>
       </Karte>
 
       <Karte test="eltern-profil">

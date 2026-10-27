@@ -17,10 +17,11 @@ import Schrift from "./features/Schrift.jsx";
 import Aufsatz from "./features/Aufsatz.jsx";
 import Wochenplan from "./features/Wochenplan.jsx";
 import Eltern from "./features/Eltern.jsx";
+import Datenschutz from "./features/Datenschutz.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.72.0";
+export const APP_VERSION = "0.73.0";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -202,6 +203,7 @@ export default function App() {
          route === "kasten" ? <KartenKasten /> :
          route === "doks" ? <Doks /> :
          route === "einstufung" ? <Einstufung /> :
+         route === "datenschutz" ? <Datenschutz zurueck={() => navTo("eltern")} /> :
          route === "eltern" && tresor.elternModus ? <Eltern /> : <Start />}
       </main>
 

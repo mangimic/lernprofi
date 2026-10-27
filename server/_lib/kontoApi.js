@@ -264,5 +264,35 @@ export async function kontoApi(request, env, jetzt = new Date()) {
   if (url.pathname === "/api/konto/abmelden") {
     return json(200, { ok: true }, { "set-cookie": sitzungsCookie("", true) });
   }
+
+  // 🗑️ Löschkonzept (DSGVO): löscht ALLES zu diesem Konto – Konto-Satz,
+  // E-Mail-Index, Tresor-Chiffrate, alle Dokumente, Login-Drossel. Beim
+  // Stamm-Konto auch die Alt-Lage (tresor:v1, Doks ohne Konto-Präfix).
+  // Legitimation: Passwort- oder Rettungs-Beweis. Nicht umkehrbar.
+  if (url.pathname === "/api/konto/loeschen") {
+    const konto = await kontoVonAnfrage(request, env, jetzt);
+    const satz = konto ? await kv.get(`konto:${konto.kontoId}`, "json") : null;
+    if (!satz) return json(401, { fehler: "Bitte zuerst anmelden bzw. das Konto verknüpfen." });
+    const alt = typeof eingabe?.beweis === "string" ? eingabe.beweis : "";
+    const altHash = await sha256Hex(alt);
+    if (alt.length < 20 || (altHash !== satz.authHash && altHash !== satz.rettungAuthHash)) {
+      return json(401, { fehler: "Der Beweis stimmt nicht – nichts wurde gelöscht." });
+    }
+    const loeschen = [`konto:${konto.kontoId}`, `tresor:${konto.kontoId}`,
+      `email:${satz.email}`, `limit:login:${satz.email}`];
+    let cursor;
+    do {
+      const seite = await kv.list({ prefix: "dok:", cursor });
+      for (const { name } of seite.keys) {
+        const rest = name.slice(4);
+        if (rest.startsWith(`${konto.kontoId}:`)) loeschen.push(name);
+        else if (konto.kontoId === STAMM_KONTO && !rest.includes(":")) loeschen.push(name); // Alt-Doks
+      }
+      cursor = seite.list_complete ? null : seite.cursor;
+    } while (cursor);
+    if (konto.kontoId === STAMM_KONTO) loeschen.push("tresor:v1");
+    for (const key of loeschen) await kv.delete(key);
+    return json(200, { ok: true, geloescht: loeschen.length }, { "set-cookie": sitzungsCookie("", true) });
+  }
   return json(404, { fehler: "Unbekannte Konto-Route." });
 }

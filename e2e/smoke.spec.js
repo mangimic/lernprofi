@@ -1799,8 +1799,12 @@ test("Familien-Konto: Einrichtung mit Einladungs-Code – das Passwort verlässt
   await page.getByTestId("einr-code").fill("abcde-fghjk");
   await page.getByTestId("einr-ok").click();
   await expect(page.getByTestId("gate-fehler")).toContainText("E-Mail");
-  // Mit E-Mail: Konto + Tresor in einem Rutsch
+  // Mit E-Mail, aber ohne Einwilligung → freundlicher Fehler (DSGVO-Bestätigung)
   await page.getByTestId("einr-email").fill("Eltern@Example.com");
+  await page.getByTestId("einr-ok").click();
+  await expect(page.getByTestId("gate-fehler")).toContainText("erziehungsberechtigt");
+  // Einwilligung angekreuzt: Konto + Tresor in einem Rutsch
+  await page.getByTestId("einr-einwilligung").check();
   await page.getByTestId("einr-ok").click();
   await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
   // Zero-Knowledge: Der Request trägt den Anmelde-Beweis, NIE das Passwort
@@ -1813,6 +1817,49 @@ test("Familien-Konto: Einrichtung mit Einladungs-Code – das Passwort verlässt
   await page.getByTestId("eb-tab-konto").click();
   await expect(page.getByTestId("konto-status")).toContainText("eltern@example.com");
   await expect(page.getByTestId("konto-abmelden")).toBeVisible();
+});
+
+test("Datenschutz vor der Anmeldung + Konto löschen räumt den Server", async ({ page }) => {
+  let geloescht = null;
+  let verknuepft = true;
+  await page.route("**/api/konto", (r) => r.fulfill({
+    json: verknuepft
+      ? { angemeldet: true, kontoId: "stamm", art: "stamm", email: "eltern@example.com" }
+      : { angemeldet: false },
+  }));
+  await page.route("**/api/konto/loeschen", (r) => {
+    geloescht = r.request().postData();
+    verknuepft = false;
+    return r.fulfill({ json: { ok: true, geloescht: 5 } });
+  });
+
+  // 📄 Die Datenschutzerklärung ist VOR jeder Anmeldung lesbar
+  await page.goto("/");
+  await expect(page.getByTestId("gate-einrichten")).toBeVisible();
+  await page.getByTestId("datenschutz-link").click();
+  await expect(page.getByTestId("datenschutz-seite")).toContainText("Zero-Knowledge");
+  await page.getByTestId("datenschutz-zurueck").click();
+  await expect(page.getByTestId("gate-einrichten")).toBeVisible();
+
+  // Einrichten → Elternbereich: Datenschutz auch von innen erreichbar
+  await tresorAnlegen(page);
+  await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-konto").click();
+  await page.getByTestId("zum-datenschutz").click();
+  await expect(page.getByTestId("datenschutz-seite")).toBeVisible();
+  await page.getByTestId("datenschutz-zurueck").click();
+  await page.getByTestId("eb-tab-konto").click();
+
+  // 🗑️ Konto löschen: Passwort bestätigt, der Server bekommt NIE das Passwort
+  await expect(page.getByTestId("konto-status")).toContainText("eltern@example.com");
+  await page.getByTestId("loesch-auf").click();
+  await expect(page.getByTestId("loesch-ok")).toBeDisabled(); // ohne Passwort kein Löschen
+  await page.getByTestId("loesch-pw").fill(PW);
+  await page.getByTestId("loesch-ok").click();
+  await expect(page.getByTestId("konto-meldung")).toContainText("endgültig gelöscht");
+  await expect(page.getByTestId("konto-status")).toContainText("Nicht angemeldet");
+  expect(geloescht).toContain("beweis");
+  expect(geloescht).not.toContain(PW);
 });
 
 test("Wiederherstellungs-Code: erzeugen, Passwort vergessen, neues Passwort – PIN bleibt", async ({ page }) => {

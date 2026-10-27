@@ -81,3 +81,9 @@ export async function kontoPasswortSetzen({ email, code, altesPasswort, neuesPas
   const beweis = code ? await rettungsBeweis(email, code) : await authBeweis(email, altesPasswort);
   return post("/api/konto/passwort", { beweis, authBeweis: await authBeweis(email, neuesPasswort) });
 }
+
+/** 🗑️ Löscht das Konto samt ALLER Server-Daten (Tresor, Dokumente) –
+    endgültig. Die lokalen Daten auf den Geräten bleiben unberührt. */
+export async function kontoLoeschen(email, passwort) {
+  return post("/api/konto/loeschen", { beweis: await authBeweis(email, passwort) });
+}

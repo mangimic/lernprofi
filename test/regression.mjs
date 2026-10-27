@@ -36,6 +36,24 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.73: DSGVO + Löschkonzept ----------
+console.log("== v0.73: DSGVO + Löschkonzept ==");
+test("v0.73: Datenschutz-Seite vor Anmeldung, Einwilligung, vollständiges Konto-Löschen", (() => {
+  const ds = quelle("src/features/Datenschutz.jsx");
+  const ko = quelle("server/_lib/kontoApi.js");
+  return ds.includes("datenschutz-seite") && ds.includes("Zero-Knowledge")
+    && ds.includes("vor der Freigabe an weitere Familien hier eintragen") // Platzhalter statt echter Namen
+    && quelle("src/features/VaultGate.jsx").includes("datenschutz-link")
+    && quelle("src/features/VaultGate.jsx").includes("einr-einwilligung")
+    && quelle("src/features/Eltern.jsx").includes("loesch-ok")
+    && quelle("src/features/Eltern.jsx").includes("zum-datenschutz")
+    && quelle("src/App.jsx").includes('route === "datenschutz"')
+    && ko.includes("/api/konto/loeschen") && ko.includes('kv.list({ prefix: "dok:"')
+    && quelle("docs/VERARBEITUNGSVERZEICHNIS.md").includes("Art. 30 DSGVO")
+    && quelle("e2e/smoke.spec.js").includes("loesch-ok")
+    && releaseNoteVorhanden("rn-089");
+})());
+
 // ---------- v0.72: Wiederherstellungs-Code ----------
 console.log("== v0.72: Wiederherstellungs-Code ==");
 test("v0.72: dritter Umschlag im Tresor, Rettungs-Wege am Gate, Code-Login am Konto", (() => {
