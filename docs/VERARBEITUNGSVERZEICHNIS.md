@@ -7,7 +7,7 @@ Kontakt-E-Mail hier und in der Datenschutzerklärung
 
 ## 1. Verantwortlicher
 
-MaxClaint GmbH – [Anschrift und Kontakt-E-Mail vor der Freigabe ergänzen]
+MaxClaint GmbH, vertreten durch Michele Mangieri · hello@maxclaint.de · [Anschrift vor der Freigabe ergänzen]
 
 ## 2. Verarbeitungstätigkeiten
 

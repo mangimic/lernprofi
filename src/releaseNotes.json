@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-097",
+    "version": "0.79.2",
+    "datum": "2026-10-27",
+    "titel": "Datenschutz-Kontakt",
+    "entries": [
+      {
+        "type": "hinweis",
+        "text": "\ud83d\udcc4 Die Datenschutzerkl\u00e4rung ist jetzt fast vollst\u00e4ndig: Verantwortliche ist die MaxClaint GmbH, vertreten durch Michele Mangieri, Datenschutz-Kontakt hello@maxclaint.de. Es fehlt nur noch die Post-Anschrift (Platzhalter bleibt markiert)."
+      }
+    ]
+  },
+  {
     "id": "rn-096",
     "version": "0.79.1",
     "datum": "2026-10-27",

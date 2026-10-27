@@ -6,7 +6,7 @@ import { useApp } from "../appContext.jsx";
    Freigabe an weitere Familien ergänzt (keine Privat-Namen im Code). */
 
 const ABSCHNITTE = [
-  ["🏠 Verantwortlicher", "Verantwortlich für diese App („Leos Welten“) ist die MaxClaint GmbH. Anschrift und Kontakt-E-Mail: [vor der Freigabe an weitere Familien hier eintragen]. Fragen zum Datenschutz beantworten wir über diesen Kontakt."],
+  ["🏠 Verantwortlicher", "Verantwortlich für diese App („Leos Welten“) ist die MaxClaint GmbH, vertreten durch Michele Mangieri. Fragen zum Datenschutz: hello@maxclaint.de. Anschrift: [vor der Freigabe an weitere Familien hier eintragen]."],
   ["🔐 Das Wichtigste zuerst: Zero-Knowledge", "Alle Lerninhalte (Profil, Lernstand, Pläne, Dokumente) werden auf eurem Gerät ver- und entschlüsselt. Auf unseren Server gelangen ausschließlich verschlüsselte Pakete – wir können sie technisch nicht lesen, denn den Schlüssel erzeugt euer Eltern-Passwort nur auf dem Gerät und er verlässt es nie."],
   ["👪 Konto-Daten", "Für das Familien-Konto speichern wir: die E-Mail-Adresse (als Anmeldename und Kontaktweg), einen Prüf-Hash des Anmelde-Beweises (nie das Passwort – auch nicht verschlüsselt) und technische Angaben (Erstellungszeit). Die Anmeldung je Gerät läuft über ein technisch notwendiges Sitzungs-Cookie (30 Tage, nur für diese App, kein Tracking)."],
   ["📦 Gespeicherte Inhalte", "Der Tresor (ein verschlüsseltes Datenpaket) und hochgeladene Dokumente (je ein verschlüsseltes Paket) liegen bei unserem Hosting-Dienstleister. Inhalte, Dateinamen und Kategorien stehen nur im verschlüsselten Teil."],

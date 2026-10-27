@@ -36,6 +36,15 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.79.2: Datenschutz-Kontakt ----------
+console.log("== v0.79.2: Datenschutz-Kontakt ==");
+test("v0.79.2: Vertretung und Kontakt-E-Mail benannt, nur die Anschrift bleibt offen", (() => {
+  const ds = quelle("src/features/Datenschutz.jsx");
+  return ds.includes("Michele Mangieri") && ds.includes("hello@maxclaint.de")
+    && quelle("docs/VERARBEITUNGSVERZEICHNIS.md").includes("hello@maxclaint.de")
+    && releaseNoteVorhanden("rn-097");
+})());
+
 // ---------- v0.79.1: Verantwortliche im Datenschutz ----------
 console.log("== v0.79.1: Verantwortliche ==");
 test("v0.79.1: MaxClaint GmbH als Verantwortliche benannt, Anschrift-Platzhalter bleibt markiert", (() => {

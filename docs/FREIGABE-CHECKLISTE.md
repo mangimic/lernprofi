@@ -19,8 +19,9 @@ ausgesperrt ist. Cloudflare Access bleibt bis Schritt 5 als zweiter Zaun an.
 
 ## 2. Rechtliches (einmalig, Pflicht VOR der ersten fremden Familie)
 
-- [x] Verantwortliche eingetragen: MaxClaint GmbH (v0.79.1).
-- [ ] Anschrift + Kontakt-E-Mail ergänzen: in `src/features/Datenschutz.jsx`
+- [x] Verantwortliche eingetragen: MaxClaint GmbH, vertreten durch
+  Michele Mangieri, Kontakt hello@maxclaint.de (v0.79.2).
+- [ ] Post-Anschrift der GmbH ergänzen: in `src/features/Datenschutz.jsx`
   (Abschnitt „Verantwortlicher") und in `docs/VERARBEITUNGSVERZEICHNIS.md`.
 - [ ] Cloudflare-DPA im Dashboard akzeptieren (Auftragsverarbeitung).
 - [ ] KI bleibt für fremde Konten gesperrt (Standard) – erst bei
