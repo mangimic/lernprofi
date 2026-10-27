@@ -87,3 +87,9 @@ export async function kontoPasswortSetzen({ email, code, altesPasswort, neuesPas
 export async function kontoLoeschen(email, passwort) {
   return post("/api/konto/loeschen", { beweis: await authBeweis(email, passwort) });
 }
+
+/** 🎟️ Erzeugt einen Einladungs-Code für eine neue Familie (nur Stamm-Konto).
+    Jeder Code gilt für genau eine Registrierung. */
+export async function kontoEinladungErzeugen() {
+  return post("/api/konto/einladung");
+}

@@ -1862,6 +1862,24 @@ test("Datenschutz vor der Anmeldung + Konto löschen räumt den Server", async (
   expect(geloescht).not.toContain(PW);
 });
 
+test("Einladungs-Codes: das Stamm-Konto lädt neue Familien ein", async ({ page }) => {
+  const codes = ["abcde-fghjk", "mnpqr-stuvw"];
+  let erzeugt = 0;
+  await page.route("**/api/konto", (r) => r.fulfill({
+    json: { angemeldet: true, kontoId: "stamm", art: "stamm", email: "eltern@example.com" },
+  }));
+  await page.route("**/api/konto/einladung", (r) => r.fulfill({ json: { code: codes[erzeugt++] } }));
+
+  await tresorAnlegen(page);
+  await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-konto").click();
+  await page.getByTestId("einladung-erzeugen").click();
+  await expect(page.getByTestId("einladung-code")).toHaveText("abcde-fghjk");
+  await page.getByTestId("einladung-erzeugen").click();
+  await expect(page.getByTestId("einladung-code")).toHaveCount(2);
+  await expect(page.getByTestId("einladung-code").first()).toHaveText("mnpqr-stuvw"); // neuester zuerst
+});
+
 test("Wiederherstellungs-Code: erzeugen, Passwort vergessen, neues Passwort – PIN bleibt", async ({ page }) => {
   await tresorAnlegen(page);
 

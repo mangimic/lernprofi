@@ -5,7 +5,7 @@ import { ZEIT_STUFEN, SPIELE_SCHALTER, spielAktiv, zeitHeute, GESPRAECH_BEREICHE
 import { PAUSEN_INTERVALLE, TAGESFORM_MODI } from "../calc/tagesform.js";
 import { idbStorage } from "../idbShim.js";
 import { syncStatus, hochladen, herunterladen, konfliktUeberschreiben } from "../sync.js";
-import { kontoStatus, kontoRegistrieren, kontoAnmelden, kontoAbmelden, kontoRettungHinterlegen, kontoLoeschen, emailNormal, EMAIL_GUELTIG } from "../konto.js";
+import { kontoStatus, kontoRegistrieren, kontoAnmelden, kontoAbmelden, kontoRettungHinterlegen, kontoLoeschen, kontoEinladungErzeugen, emailNormal, EMAIL_GUELTIG } from "../konto.js";
 import { entsperrenMitPasswort, rettungAnlegen } from "../vault.js";
 import { kiStatus, kiDeckelSetzen, kiErklaeren, kiBericht, kiSaetze } from "../ki.js";
 import { berichtDaten } from "../calc/bericht.js";
@@ -192,6 +192,19 @@ export default function Eltern() {
       <p>Weg: Sperrbildschirm → Eltern-Zugang → „Passwort vergessen“.</p>
       <script>window.print()</script></body>`);
     w.document.close();
+  };
+
+  // 🎟️ Einladungs-Codes (nur Stamm-Konto): ein Code = genau eine neue
+  // Familie. Die Codes werden nur hier angezeigt – persönlich weitergeben.
+  const [einladungen, setEinladungen] = useState([]);
+  const [einladungMeldung, setEinladungMeldung] = useState("");
+  const einladungNeu = async () => {
+    setEinladungMeldung("");
+    try {
+      const erg = await kontoEinladungErzeugen();
+      if (!erg.ok) { setEinladungMeldung(`⚠️ ${erg.fehler || "Das hat nicht geklappt."}`); return; }
+      setEinladungen((liste) => [erg.code, ...liste]);
+    } catch { setEinladungMeldung("⚠️ Der Server ist gerade nicht erreichbar."); }
   };
 
   // 🗑️ Löschkonzept (DSGVO): entfernt Konto, Tresor-Chiffrate und alle
@@ -913,6 +926,28 @@ export default function Eltern() {
           {rett.meldung && <p data-test="rett-meldung" style={{ margin: "8px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>{rett.meldung}</p>}
         </div>
 
+        {konto?.angemeldet && konto.kontoId === "stamm" && (
+          <div style={{ marginTop: 14, borderTop: `1px solid ${T.rand}`, paddingTop: 10 }}>
+            <b>🎟️ Familien einladen</b>
+            <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+              Jeder Code lässt genau EINE neue Familie ein Konto anlegen (Einrichtung →
+              „Einladungs-Code"). Gebt ihn persönlich weiter – er wird nur hier angezeigt.
+            </p>
+            <button data-test="einladung-erzeugen" onClick={einladungNeu}
+              style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
+              🎟️ Neuen Einladungs-Code erzeugen
+            </button>
+            {einladungen.map((code) => (
+              <p key={code} data-test="einladung-code" style={{
+                margin: "8px 0 0", padding: "10px", background: T.grund, borderRadius: T.radiusKlein,
+                fontFamily: "ui-monospace, monospace", fontWeight: 800, textAlign: "center",
+                letterSpacing: 1, userSelect: "all",
+              }}>{code}</p>
+            ))}
+            {einladungMeldung && <p data-test="einladung-meldung" style={{ margin: "8px 0 0", color: "var(--warn)", fontSize: "var(--schrift-klein)" }}>{einladungMeldung}</p>}
+          </div>
+        )}
+
         {konto?.angemeldet && konto.email && (
           <details style={{ marginTop: 14 }}>
             <summary data-test="loesch-auf" style={{ cursor: "pointer", color: "var(--warn)", fontWeight: 700, fontSize: "var(--schrift-klein)" }}>
@@ -963,7 +998,7 @@ export default function Eltern() {
           {sync === null ? "Prüfe Verbindung …"
             : sync.verfuegbar ? <>Verbunden · Server-Stand Rev. {sync.rev}{sync.aktualisiert ? ` vom ${new Date(sync.aktualisiert).toLocaleString("de-DE")}` : " (noch leer)"}. Es wandern nur verschlüsselte Daten – der Server kann nichts lesen.</>
             : sync.grund === "nicht-eingerichtet" ? "Der Sync-Speicher (KV) ist noch nicht eingerichtet – Anleitung: docs/DEPLOY-CLOUDFLARE.md."
-            : sync.grund === "kein-zugang" ? "Cloudflare Access hat diese Anfrage nicht freigegeben – bitte einmal neu anmelden."
+            : sync.grund === "kein-zugang" ? "Der Server hat die Anfrage nicht freigegeben – bitte oben im Familien-Konto anmelden (oder einmal neu über den Familien-Zugang)."
             : "Gerade keine Verbindung zum Server (offline?)."}
         </p>
         {sync?.verfuegbar && !frage && (

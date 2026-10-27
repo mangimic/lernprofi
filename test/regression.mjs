@@ -36,6 +36,20 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.74: Familien einladen + Access-Ablösung ----------
+console.log("== v0.74: Familien einladen ==");
+test("v0.74: Einladungs-Verwaltung im Elternbereich, Stamm-Sitzung trägt ohne Access, Checkliste", (() => {
+  const el = quelle("src/features/Eltern.jsx");
+  return quelle("src/konto.js").includes("export async function kontoEinladungErzeugen")
+    && el.includes("einladung-erzeugen") && el.includes("einladung-code")
+    && el.includes('konto.kontoId === "stamm"')
+    && !el.includes("Cloudflare Access hat diese Anfrage nicht freigegeben") // Text ohne Access-Pflicht
+    && quelle("server/_lib/kontoApi.test.js").includes("ohne Access-Header")
+    && quelle("docs/FREIGABE-CHECKLISTE.md").includes("Access abschalten")
+    && quelle("e2e/smoke.spec.js").includes("einladung-erzeugen")
+    && releaseNoteVorhanden("rn-090");
+})());
+
 // ---------- v0.73: DSGVO + Löschkonzept ----------
 console.log("== v0.73: DSGVO + Löschkonzept ==");
 test("v0.73: Datenschutz-Seite vor Anmeldung, Einwilligung, vollständiges Konto-Löschen", (() => {

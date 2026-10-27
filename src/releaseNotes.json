@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-090",
+    "version": "0.74.0",
+    "datum": "2026-10-27",
+    "titel": "Familien einladen",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🎟️ Einladungs-Codes im Elternbereich: Das Stamm-Konto erzeugt unter Konto & Daten Codes für neue Familien – jeder Code gilt für genau eine Registrierung und wird nur einmal angezeigt (persönlich weitergeben). Die eingeladene Familie richtet sich komplett selbst ein, inklusive eigener Verschlüsselung."
+      },
+      {
+        "type": "technik",
+        "text": "🔓 Bereit für die Ablösung des Familien-Zugangs (Cloudflare Access): Alle Wege – Tresor-Sync, Einladungen, Leo – funktionieren nachweislich auch über die reine Konto-Anmeldung. Die Schritt-für-Schritt-Checkliste (Secret, Rechtliches, Stamm verknüpfen, Geräte anmelden, Access abschalten, Familie einladen) liegt in docs/FREIGABE-CHECKLISTE.md."
+      }
+    ]
+  },
+  {
     "id": "rn-089",
     "version": "0.73.0",
     "datum": "2026-10-27",

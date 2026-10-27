@@ -177,6 +177,13 @@ describe("kontoApi – Registrieren und Login", () => {
       { email: "familie@example.com", authBeweis: BEWEIS }), env);
     expect(login.status).toBe(200);
     expect((await login.json()).kontoId).toBe(STAMM_KONTO);
+    // 🎟️ Access-Ablösung: Die Stamm-SITZUNG (ohne Access-Header) darf
+    // Einladungen erzeugen und den Tresor erreichen – Access kann weg.
+    const sitzung = { cookie: cookieVon(login) };
+    const einl = await kontoApi(anfrage("POST", "/api/konto/einladung", null, sitzung), env);
+    expect(einl.status).toBe(200);
+    expect((await einl.json()).code).toMatch(/^[a-z2-9]{5}-[a-z2-9]{5}$/);
+    expect((await vaultApi(anfrage("GET", "/api/meta", null, sitzung), env)).status).toBe(200);
   });
 
   it("Abmelden löscht das Cookie; ohne SESSION_GEHEIM → 503; GET /api/konto ehrlich", async () => {
