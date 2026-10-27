@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-096",
+    "version": "0.79.1",
+    "datum": "2026-10-27",
+    "titel": "Datenschutz: Verantwortliche benannt",
+    "entries": [
+      {
+        "type": "hinweis",
+        "text": "\ud83d\udcc4 Die Datenschutzerkl\u00e4rung nennt jetzt die Verantwortliche f\u00fcr Leos Welten (MaxClaint GmbH). Anschrift und Kontakt-E-Mail folgen vor der Freigabe an weitere Familien \u2013 der Platzhalter daf\u00fcr bleibt sichtbar markiert."
+      }
+    ]
+  },
+  {
     "id": "rn-095",
     "version": "0.79.0",
     "datum": "2026-10-27",

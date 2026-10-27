@@ -5,13 +5,22 @@ ausgesperrt ist. Cloudflare Access bleibt bis Schritt 5 als zweiter Zaun an.
 
 ## 1. Einmalige Server-Vorbereitung
 
-- [ ] Sitzungs-Secret anlegen (falls noch nicht geschehen):
-  `npx wrangler secret put SESSION_GEHEIM` (langer Zufallswert,
-  z. B. `openssl rand -base64 48`). Dank `keep_vars` überlebt es Deploys.
+- [ ] Sitzungs-Secret `SESSION_GEHEIM` anlegen – einer von zwei Wegen:
+  - **Ohne Terminal (empfohlen, wie beim Secret „lernprofiapi"):**
+    Cloudflare-Dashboard → Workers & Pages → Worker „lernprofi" →
+    Settings → „Variables and Secrets" → Add → Type **Secret**,
+    Name `SESSION_GEHEIM`, Value = langer Zufallswert (z. B. aus dem
+    Passwort-Generator des Passwort-Managers, 50+ Zeichen) → Deploy/Save.
+  - Mit Terminal im Repo: `npx wrangler secret put SESSION_GEHEIM`
+    (Wert aus `openssl rand -base64 48`).
+  Dank `keep_vars` überlebt das Secret alle Git-Deploys. Danach einmal
+  prüfen: Elternbereich → Konto & Daten → Anmelden/Verknüpfen meldet
+  nicht mehr „noch nicht eingerichtet".
 
 ## 2. Rechtliches (einmalig, Pflicht VOR der ersten fremden Familie)
 
-- [ ] Verantwortlichen eintragen: in `src/features/Datenschutz.jsx`
+- [x] Verantwortliche eingetragen: MaxClaint GmbH (v0.79.1).
+- [ ] Anschrift + Kontakt-E-Mail ergänzen: in `src/features/Datenschutz.jsx`
   (Abschnitt „Verantwortlicher") und in `docs/VERARBEITUNGSVERZEICHNIS.md`.
 - [ ] Cloudflare-DPA im Dashboard akzeptieren (Auftragsverarbeitung).
 - [ ] KI bleibt für fremde Konten gesperrt (Standard) – erst bei

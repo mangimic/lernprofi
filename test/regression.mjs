@@ -36,6 +36,15 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.79.1: Verantwortliche im Datenschutz ----------
+console.log("== v0.79.1: Verantwortliche ==");
+test("v0.79.1: MaxClaint GmbH als Verantwortliche benannt, Anschrift-Platzhalter bleibt markiert", (() => {
+  return quelle("src/features/Datenschutz.jsx").includes("MaxClaint GmbH")
+    && quelle("docs/VERARBEITUNGSVERZEICHNIS.md").includes("MaxClaint GmbH")
+    && quelle("docs/FREIGABE-CHECKLISTE.md").includes("SESSION_GEHEIM")
+    && releaseNoteVorhanden("rn-096");
+})());
+
 // ---------- v0.79: Sudoku-Training ----------
 console.log("== v0.79: Sudoku-Training ==");
 test("v0.79: Sudoku in Lern-Stufen (4x4 bis 9x9), eindeutige Raetsel, Regel-Highlight", (() => {
