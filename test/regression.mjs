@@ -36,6 +36,16 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.79.3: Anschrift der Verantwortlichen ----------
+console.log("== v0.79.3: Anschrift ==");
+test("v0.79.3: Verantwortliche vollstaendig (Firma, Anschrift, Vertretung, Kontakt)", (() => {
+  const ds = quelle("src/features/Datenschutz.jsx");
+  return ds.includes("Am Schmelzofen 34, 79183 Waldkirch")
+    && !ds.includes("hier eintragen") // kein offener Platzhalter mehr
+    && quelle("docs/VERARBEITUNGSVERZEICHNIS.md").includes("79183 Waldkirch")
+    && releaseNoteVorhanden("rn-098");
+})());
+
 // ---------- v0.79.2: Datenschutz-Kontakt ----------
 console.log("== v0.79.2: Datenschutz-Kontakt ==");
 test("v0.79.2: Vertretung und Kontakt-E-Mail benannt, nur die Anschrift bleibt offen", (() => {
@@ -159,7 +169,9 @@ test("v0.73: Datenschutz-Seite vor Anmeldung, Einwilligung, vollständiges Konto
   const ds = quelle("src/features/Datenschutz.jsx");
   const ko = quelle("server/_lib/kontoApi.js");
   return ds.includes("datenschutz-seite") && ds.includes("Zero-Knowledge")
-    && ds.includes("vor der Freigabe an weitere Familien hier eintragen") // Platzhalter statt echter Namen
+    // bis v0.79.2 Platzhalter; seit v0.79.3 vollständige Angaben der Verantwortlichen
+    && (ds.includes("vor der Freigabe an weitere Familien hier eintragen")
+      || (ds.includes("hello@maxclaint.de") && ds.includes("79183 Waldkirch")))
     && quelle("src/features/VaultGate.jsx").includes("datenschutz-link")
     && quelle("src/features/VaultGate.jsx").includes("einr-einwilligung")
     && quelle("src/features/Eltern.jsx").includes("loesch-ok")

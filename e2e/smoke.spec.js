@@ -1846,7 +1846,8 @@ test("Sudoku-Training: Stufe 1 (4×4) lösen – Fehlversuche zeigen die Regel",
   loesen: for (let r = 0; r < 4; r++) {
     for (let c = 0; c < 4; c++) {
       if (await page.getByTestId("sudoku-fertig").count()) break loesen;
-      if (await zellText(r, c)) continue;
+      const t = await zellText(r, c);
+      if (t && t !== "?") continue; // „?" = nur ausgewählt (vom Highlight-Schritt), noch leer
       await page.getByTestId(`sudoku-zelle-${r}-${c}`).click();
       for (let n = 1; n <= 4; n++) {
         await page.getByTestId(`sudoku-zahl-${n}`).click();

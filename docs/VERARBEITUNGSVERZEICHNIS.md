@@ -1,13 +1,12 @@
 # Verzeichnis von Verarbeitungstätigkeiten (Art. 30 DSGVO) – Leos Welten (ehemals Lernprofi)
 
-Internes Dokument des Betreibers. Stand: v0.79.1 (Verantwortliche:
-MaxClaint GmbH). Vor der Freigabe an weitere Familien: Anschrift und
-Kontakt-E-Mail hier und in der Datenschutzerklärung
-(src/features/Datenschutz.jsx) ergänzen.
+Internes Dokument des Betreibers. Stand: v0.79.3 – Verantwortliche
+vollständig benannt (auch in der Datenschutzerklärung,
+src/features/Datenschutz.jsx).
 
 ## 1. Verantwortlicher
 
-MaxClaint GmbH, vertreten durch Michele Mangieri · hello@maxclaint.de · [Anschrift vor der Freigabe ergänzen]
+MaxClaint GmbH, Am Schmelzofen 34, 79183 Waldkirch · vertreten durch Michele Mangieri · hello@maxclaint.de
 
 ## 2. Verarbeitungstätigkeiten
 
