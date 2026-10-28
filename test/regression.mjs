@@ -36,6 +36,21 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.81: Angel-Wettfischen ----------
+console.log("== v0.81: Angel-Wettfischen ==");
+test("v0.81: Wettfischen als dritter Welten-Skin (Welt angeln), ohne neue Spiellogik", (() => {
+  const wf = quelle("src/spiele/wettfischenSkin.js");
+  const sh = quelle("src/features/Spielhalle.jsx");
+  return wf.includes("WETTFISCHEN_SKIN") && wf.includes('typ: "abschnitte", abschnitte: 2, chancen: 5')
+    && wf.includes("fischenFisch") // die Fang-Animation hat ihr Ziel-Element
+    && quelle("src/spiele/wettfischen.json").includes('"entscheidung"')
+    && sh.includes("fischen: WETTFISCHEN_SKIN") && sh.includes('welt: "angeln"')
+    && quelle("src/calc/elternWerkzeuge.js").includes("Angel-Wettfischen")
+    && quelle("src/calc/suche.js").includes("Angel-Wettfischen")
+    && quelle("e2e/smoke.spec.js").includes("fischen-start")
+    && releaseNoteVorhanden("rn-100");
+})());
+
 // ---------- v0.80: Tennis + Fussball auf der Match-Engine ----------
 console.log("== v0.80: Ballsport auf der Engine ==");
 test("v0.80: Tennis (saetze-Regeln) und Fussball (abschnitte) als Skins, alte Engines entfernt", (() => {

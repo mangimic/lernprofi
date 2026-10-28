@@ -27,7 +27,7 @@ const SEITEN = [
   ["📂", "Unsere Unterlagen", "doks"],
   ["🧪", "Einstufungstest", "einstufung"],
 ];
-const SPIELE = ["Tennis-Match", "Fußball-Match", "Dino-Rennen", "Raketen-Rennen", "Schach", "Blockwelt"];
+const SPIELE = ["Tennis-Match", "Fußball-Match", "Angel-Wettfischen", "Dino-Rennen", "Raketen-Rennen", "Schach", "Blockwelt"];
 
 /** Baut den durchsuchbaren Index aus App-Daten und festen Inhalten. */
 export function sucheIndex(data, elternModus) {

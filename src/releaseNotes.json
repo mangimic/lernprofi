@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-100",
+    "version": "0.81.0",
+    "datum": "2026-10-28",
+    "titel": "Angel-Wettfischen",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "\ud83c\udfa3 Neues Spiel in der Spielhalle: das Angel-Wettfischen! Tritt am See gegen B\u00e4r Brummel, Otter Oskar oder Adler Arvid an \u2013 richtige Antwort = der Fisch springt in DEINEN Eimer, falsche = er entwischt zum Gegner. 2 Bei\u00dfzeiten mit je 5 W\u00fcrfen, Pausenbrot mit Angel-Wissen, und bei Gleichstand entscheidet der gro\u00dfe Hecht. Mit Coach Leo als Ruhe-Trainer \u2013 denn Angeln ist Geduldssport!"
+      },
+      {
+        "type": "technik",
+        "text": "\u2699\ufe0f Das dritte Welten-Spiel auf der gemeinsamen Match-Engine \u2013 komplett als \u201eSkin\u201c gebaut (Gegner, Fakten, Mental-Karten, See-Grafik, Fang-Animation), ohne eine Zeile neuer Spiellogik."
+      }
+    ]
+  },
+  {
     "id": "rn-099",
     "version": "0.80.0",
     "datum": "2026-10-28",

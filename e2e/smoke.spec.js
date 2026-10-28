@@ -1799,6 +1799,43 @@ test("Dino-Rennen: Welten-Skin auf der Match-Engine – Lieblings-Welt steht vor
   await expect(page.getByTestId("match-ergebnis")).toContainText("9 von 10");
 });
 
+test("Angel-Wettfischen: Heimspiel-Welt auf der Match-Engine", async ({ page }) => {
+  await tresorAnlegen(page);
+  // 🎣 Angeln als Lieblings-Welt → das Wettfischen steht vorn
+  await page.getByTestId("interesse-angeln").click();
+  await page.getByTestId("interessen-ok").click();
+  await muenzeVerdienen(page);
+  await expect(page.getByTestId("spiel-fischen")).toContainText("⭐ Deine Welt");
+
+  await page.evaluate(() => { window.__SPIEL_SCHNELL__ = true; });
+  await page.getByTestId("spiel-fischen").click();
+  await page.getByTestId("mut-weiter").click();
+  await page.getByTestId("mut-weiter").click();
+  await page.locator(".bubble.sag").click();
+  await page.getByTestId("fischen-start").click();
+
+  // Wurf 1 absichtlich daneben → der Fisch entwischt zum Gegner
+  await page.locator('[data-test="spiel-opt"]:not([data-richtig])').first().click();
+  await expect(page.getByTestId("fischen-feedback")).toContainText("Vom Haken");
+  await page.getByTestId("fischen-weiter").click();
+  // Würfe 2–5: gefangen → Pausenbrot mit Angel-Wissen
+  for (let i = 0; i < 4; i++) {
+    await page.locator('[data-test="spiel-opt"][data-richtig="1"]').click();
+    await expect(page.getByTestId("fischen-feedback")).toContainText("Gefangen");
+    await page.getByTestId("fischen-weiter").click();
+  }
+  await expect(page.getByTestId("fischen-pause")).toContainText("Angel-Wissen");
+  await page.getByTestId("fischen-weiter").click();
+  // Beißzeit 2 fehlerfrei → Wettfischen gewonnen
+  for (let i = 0; i < 5; i++) {
+    await page.locator('[data-test="spiel-opt"][data-richtig="1"]').click();
+    await page.getByTestId("fischen-weiter").click();
+  }
+  await expect(page.getByTestId("fischen-ende")).toContainText("Wettfischen gewonnen");
+  await page.getByTestId("fischen-fertig").click();
+  await expect(page.getByTestId("match-ergebnis")).toContainText("9 von 10");
+});
+
 test("Raketen-Rennen: zweiter Skin derselben Engine startet und zählt", async ({ page }) => {
   await tresorAnlegen(page);
   await muenzeVerdienen(page);

@@ -22,7 +22,7 @@ import Datenschutz from "./features/Datenschutz.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.80.0";
+export const APP_VERSION = "0.81.0";
 
 const RN_TYP = {
   neu: "✨ Neu",

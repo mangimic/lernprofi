@@ -47,6 +47,32 @@ describe("Match-Engine-Skins (Dino-Rennen, Raketen-Rennen)", () => {
   });
 });
 
+describe("Angel-Wettfischen (dritter Welten-Skin)", async () => {
+  const { WETTFISCHEN_SKIN } = await import("./wettfischenSkin.js");
+
+  it("Skin vollständig: Gegner, Fakten, alle Mental-Karten ohne Map, bewährte Regeln", () => {
+    const skin = WETTFISCHEN_SKIN;
+    expect(skin.regeln).toEqual({ typ: "abschnitte", abschnitte: 2, chancen: 5 });
+    expect(skin.daten.gegner.map((g) => g.staerke)).toEqual([1, 2, 3]);
+    expect(skin.daten.fakten.length).toBeGreaterThanOrEqual(6);
+    const ids = skin.daten.mental.map((m) => m.id);
+    for (const id of MENTAL_IDS) expect(ids, `fischen mental ${id}`).toContain(id);
+    expect(/adhs|störung|diagnose|defizit|unmotiviert|versager|zappel/i.test(JSON.stringify(skin.daten))).toBe(false);
+  });
+
+  it("Fang-Animation: gefangen springt der Fisch zu DEINEM Eimer (links), sonst zum Gegner", () => {
+    const s = { name: "Kind", mir: 2, ihm: 1, balls: 3, chance: 3, gegner: WETTFISCHEN_SKIN.daten.gegner[0] };
+    const svg = WETTFISCHEN_SKIN.feldSVG(s);
+    expect(svg).toContain('id="fischenFisch"');
+    expect(svg).toContain("🐟 2"); // die Eimer zählen mit
+    expect(svg).toContain("🐟 1");
+    const fang = WETTFISCHEN_SKIN.anim(s, true);
+    expect(fang.id).toBe("fischenFisch");
+    expect(fang.x1).toBeLessThan(fang.x0);   // nach links zu dir
+    expect(WETTFISCHEN_SKIN.anim(s, false).x1).toBeGreaterThan(fang.x0); // nach rechts zum Gegner
+  });
+});
+
 describe("Ballsport-Skins (Tennis, Fußball – Migration auf die Engine)", async () => {
   const { TENNIS_SKIN, FUSSBALL_SKIN } = await import("./ballsport.js");
 

@@ -515,7 +515,7 @@ describe("elternWerkzeuge (Zeitlimit, Spiele-Schalter, Gespräche)", () => {
     expect(E.spielAktiv({ spieleAktiv: {} }, "see")).toBe(true);
     expect(E.spielAktiv({ spieleAktiv: { see: false } }, "see")).toBe(false);
     expect(E.spielAktiv({ spieleAktiv: { see: true } }, "see")).toBe(true);
-    expect(E.SPIELE_SCHALTER.map((s) => s.id)).toEqual(["see", "blockwelt", "tennis", "fussball", "dino", "rakete", "schach"]);
+    expect(E.SPIELE_SCHALTER.map((s) => s.id)).toEqual(["see", "blockwelt", "tennis", "fussball", "fischen", "dino", "rakete", "schach"]);
   });
 
   it("Gesprächsimpulse: 20 Fragen, Frage des Tages determiniert und täglich anders", async () => {

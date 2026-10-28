@@ -9,11 +9,12 @@ import { blockweltStart } from "../spiele/blockwelt.js";
 import { matchStart } from "../spiele/matchEngine.js";
 import { MATCH_SKINS } from "../spiele/rennen.js";
 import { TENNIS_SKIN, FUSSBALL_SKIN } from "../spiele/ballsport.js";
+import { WETTFISCHEN_SKIN } from "../spiele/wettfischenSkin.js";
 import { schachStart } from "../spiele/schach.js";
 
 // 🏁 ALLE Match-Spiele laufen auf EINER Engine (seit v0.80 auch
 // Tennis und Fußball – originalgetreu als Skins portiert).
-const ALLE_SKINS = { ...MATCH_SKINS, tennis: TENNIS_SKIN, fussball: FUSSBALL_SKIN };
+const ALLE_SKINS = { ...MATCH_SKINS, tennis: TENNIS_SKIN, fussball: FUSSBALL_SKIN, fischen: WETTFISCHEN_SKIN };
 
 /* 🎮 Spielhalle: Ein Spielbesuch kostet 1 Münze (verdient beim Üben).
    🎣 See-Abenteuer, ⛏️ Blockwelt, 🎾 Tennis- und ⚽ Fußball-Match sind
@@ -111,7 +112,7 @@ export default function Spielhalle() {
     } else {
       // Match-Spiele: Match zählen (Gegner-Rotation) + gewonnene Fragen als Aufgaben
       const key = ergebnis.typ;
-      const label = { tennis: "Tennis-Match", fussball: "Fußball-Match", dino: "Dino-Rennen", rakete: "Raketen-Rennen" }[key] || key;
+      const label = { tennis: "Tennis-Match", fussball: "Fußball-Match", dino: "Dino-Rennen", rakete: "Raketen-Rennen", fischen: "Angel-Wettfischen" }[key] || key;
       const alt = data.lernstand.stufen[key] || { freigeschaltet: 1, runden: 0, krone: false };
       logChange(
         {
@@ -166,6 +167,7 @@ export default function Spielhalle() {
       fussball: { name: "⚽ Fußball", einheit: "Bällen", verb: "verwandelt" },
       dino: { name: "🦖 Dino-Rennen", einheit: "Fragen", verb: "geschafft" },
       rakete: { name: "🚀 Raketen-Rennen", einheit: "Fragen", verb: "geschafft" },
+      fischen: { name: "🎣 Angel-Wettfischen", einheit: "Fischen", verb: "gefangen" },
     }[ergebnis.typ] || { name: ergebnis.typ, einheit: "Fragen", verb: "geschafft" };
     return (
       <div data-test="match-ergebnis">
@@ -218,6 +220,9 @@ export default function Spielhalle() {
           { id: "fussball", welt: "fussball", name: "⚽ Fußball-Match",
             text: "2 Halbzeiten mit je 5 Torchancen: richtig = TOOOR, falsch = Konter – bei Gleichstand entscheidet ein Elfmeter!",
             extra: () => matches("fussball") },
+          { id: "fischen", welt: "angeln", name: "🎣 Angel-Wettfischen",
+            text: "Wettfischen am See: richtig = der Fisch landet in DEINEM Eimer, falsch = er entwischt zum Gegner. Bei Gleichstand entscheidet der große Hecht!",
+            extra: () => matches("fischen", "Wettfischen") },
           { id: "dino", welt: "dinos", name: "🦖 Dino-Rennen",
             text: "Renn durchs Urzeit-Tal: richtig = Riesensprung für deinen Dino, falsch = der Gegner sprintet. 2 Runden – bei Gleichstand gibt's ein Foto-Finish!",
             extra: () => matches("dino", "Rennen") },
