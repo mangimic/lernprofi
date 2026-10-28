@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-099",
+    "version": "0.80.0",
+    "datum": "2026-10-28",
+    "titel": "Eine Engine f\u00fcr alle Matches",
+    "entries": [
+      {
+        "type": "technik",
+        "text": "\ud83c\udfbe\u26bd Tennis- und Fu\u00dfball-Match laufen jetzt auf derselben Spiel-Engine wie Dino- und Raketen-Rennen \u2013 f\u00fcr euch \u00e4ndert sich nichts: gleiche Felder, gleiche Z\u00e4hlweise (15\u201330\u201340, Entscheidungsball, Halbzeiten, Elfmeter), gleiche Coach-Leo-Karten. Unter der Haube gibt es daf\u00fcr nur noch EINEN getesteten Spielablauf \u2013 neue Welten-Spiele entstehen ab jetzt in Stunden statt Tagen."
+      }
+    ]
+  },
+  {
     "id": "rn-098",
     "version": "0.79.3",
     "datum": "2026-10-28",

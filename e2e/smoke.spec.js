@@ -441,7 +441,7 @@ test("Tennis-Match: Mutmacher-Rollenspiel, 2 Gewinnspiele, Auswertung zählt", a
   await ballSpielen("30 : 0");
   await ballSpielen("40 : 0");
   await ballSpielen("Punkt für dich");
-  await expect(page.getByTestId("tennis-spielende")).toContainText("Spiele 1 : 0");
+  await expect(page.getByTestId("tennis-pause")).toContainText("Spiele 1 : 0"); // Spielende-Schirm der Engine
   await page.getByTestId("tennis-weiter").click();
   // Spiel 2 (ab jetzt schwere Fragen) → Match gewonnen
   for (let i = 0; i < 4; i++) await ballSpielen("Punkt für dich");
@@ -471,7 +471,7 @@ test("Fußball-Match: Konter bei Fehler, Halbzeit, Match-Ende mit Auswertung", a
     await expect(page.getByTestId("fb-feedback")).toContainText("TOOOR");
     await page.getByTestId("fb-weiter").click();
   }
-  await expect(page.getByTestId("fb-halbzeit")).toContainText("4 : 1");
+  await expect(page.getByTestId("fb-pause")).toContainText("4 : 1"); // Halbzeit-Schirm der Engine
   await page.getByTestId("fb-weiter").click();
   // 2. Halbzeit: 5 Tore → kein Gleichstand, direkt zum Ende
   for (let i = 0; i < 5; i++) {

@@ -36,8 +36,7 @@ describe("Match-Engine-Skins (Dino-Rennen, Raketen-Rennen)", () => {
       expect(gegner.id).toBe(`${skin.testPrefix}Gegner`);
       expect(gegner.x1).toBeGreaterThan(gegner.x0);
       // Regeln wie beim Fußball bewährt: 2 Abschnitte × 5 Chancen
-      expect(skin.abschnitte).toBe(2);
-      expect(skin.chancen).toBe(5);
+      expect(skin.regeln).toEqual({ typ: "abschnitte", abschnitte: 2, chancen: 5 });
     });
   }
 
@@ -45,5 +44,42 @@ describe("Match-Engine-Skins (Dino-Rennen, Raketen-Rennen)", () => {
     expect(Object.keys(MATCH_SKINS).sort()).toEqual(["dino", "rakete"]);
     expect(MATCH_SKINS.dino.titel).toContain("Dino");
     expect(MATCH_SKINS.rakete.titel).toContain("Raketen");
+  });
+});
+
+describe("Ballsport-Skins (Tennis, Fußball – Migration auf die Engine)", async () => {
+  const { TENNIS_SKIN, FUSSBALL_SKIN } = await import("./ballsport.js");
+
+  it("mentalMap zeigt nur auf Karten, die es in den JSONs wirklich gibt", () => {
+    for (const skin of [TENNIS_SKIN, FUSSBALL_SKIN]) {
+      const ids = skin.daten.mental.map((m) => m.id);
+      for (const id of MENTAL_IDS) {
+        const ziel = (skin.mentalMap && skin.mentalMap[id]) || id;
+        if (ziel === "-") continue; // bewusst ausgeblendet (Tennis aktion3)
+        expect(ids, `${skin.key}: ${id} → ${ziel}`).toContain(ziel);
+      }
+    }
+  });
+
+  it("Tennis: saetze-Regeln (bis 4 Punkte, 2 Gewinnspiele), 15-30-40-Zählweise, Entscheidungsball bei 40:40", () => {
+    expect(TENNIS_SKIN.regeln).toEqual({ typ: "saetze", punkte: 4, spiele: 2 });
+    const s = { mir: 2, ihm: 3, balls: 4, spielNr: 1, spieleMir: 1, spieleIhm: 0, gegner: TENNIS_SKIN.daten.gegner[0], name: "Kind" };
+    expect(TENNIS_SKIN.texte.stand(s)).toBe("30 : 40");
+    expect(TENNIS_SKIN.texte.entscheidungsBall({ mir: 3, ihm: 3 })).toBe(true);
+    expect(TENNIS_SKIN.texte.entscheidungsBall({ mir: 3, ihm: 2 })).toBe(false);
+    expect(TENNIS_SKIN.texte.endstand(s)).toBe("1 : 0");
+    expect(TENNIS_SKIN.feldSVG(s)).toContain('id="tennisBall"');
+    // Ballflug: gewonnen → am Gegner vorbei, verloren → ins Netz (Mitte)
+    expect(TENNIS_SKIN.anim(s, true).x1).toBe(300);
+    expect(TENNIS_SKIN.anim(s, false).x1).toBe(168);
+  });
+
+  it("Fußball: abschnitte-Regeln (2 Halbzeiten × 5 Chancen), Keeper hält beim Fehler", () => {
+    expect(FUSSBALL_SKIN.regeln).toEqual({ typ: "abschnitte", abschnitte: 2, chancen: 5 });
+    const s = { mir: 1, ihm: 1, balls: 2, chance: 2, abschnitt: 1, gegner: FUSSBALL_SKIN.daten.gegner[0], name: "Kind" };
+    expect(FUSSBALL_SKIN.texte.aktionKopf(s)).toContain("Torchance 3 von 5");
+    expect(FUSSBALL_SKIN.feldSVG(s)).toContain('id="fbBall"');
+    expect(FUSSBALL_SKIN.anim(s, true).x1).toBe(314);  // in die Ecke
+    expect(FUSSBALL_SKIN.anim(s, false).x1).toBe(294); // beim Keeper
   });
 });

@@ -36,6 +36,22 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.80: Tennis + Fussball auf der Match-Engine ----------
+console.log("== v0.80: Ballsport auf der Engine ==");
+test("v0.80: Tennis (saetze-Regeln) und Fussball (abschnitte) als Skins, alte Engines entfernt", (() => {
+  const bs = quelle("src/spiele/ballsport.js");
+  const en = quelle("src/spiele/matchEngine.js");
+  const weg = (pfad) => { try { quelle(pfad); return false; } catch { return true; } };
+  return bs.includes("TENNIS_SKIN") && bs.includes("FUSSBALL_SKIN")
+    && bs.includes('typ: "saetze", punkte: 4, spiele: 2')
+    && bs.includes('typ: "abschnitte", abschnitte: 2, chancen: 5')
+    && bs.includes("mentalMap") && bs.includes('entscheidung: "tiebreak"') && bs.includes('entscheidung: "elfmeter"')
+    && en.includes('"saetze"') && en.includes("rundeVorbei")
+    && weg("src/spiele/tennisMatch.js") && weg("src/spiele/fussballMatch.js")
+    && quelle("src/features/Spielhalle.jsx").includes("ALLE_SKINS")
+    && releaseNoteVorhanden("rn-099");
+})());
+
 // ---------- v0.79.3: Anschrift der Verantwortlichen ----------
 console.log("== v0.79.3: Anschrift ==");
 test("v0.79.3: Verantwortliche vollstaendig (Firma, Anschrift, Vertretung, Kontakt)", (() => {
@@ -93,7 +109,7 @@ test("v0.78: EINE Engine + zwei Renn-Skins, Spielhalle sortiert nach Lieblings-W
     && re.includes('wissen: "Dino-Wissen"') && re.includes('wissen: "Weltraum-Wissen"')
     && quelle("src/spiele/dino.json").includes('"entscheidung"')
     && quelle("src/spiele/rakete.json").includes('"entscheidung"')
-    && sh.includes("MATCH_SKINS[modus]") && sh.includes("⭐ Deine Welt")
+    && (sh.includes("MATCH_SKINS[modus]") || sh.includes("ALLE_SKINS[modus]")) && sh.includes("⭐ Deine Welt")
     && sh.includes('welt: "dinos"') && sh.includes('welt: "weltraum"')
     && quelle("src/calc/elternWerkzeuge.js").includes("Dino-Rennen")
     && quelle("src/calc/suche.js").includes("Raketen-Rennen")
@@ -1431,15 +1447,25 @@ console.log("== v0.13: Tennis- und Fußball-Match ==");
 test("v0.13: APP_VERSION mindestens 0.13.0", versionMindestens("0.13.0"));
 test("v0.13: rn-016 vorhanden", releaseNoteVorhanden("rn-016"));
 test("v0.13: Tennis originalgetreu (15-30-40, Entscheidungsball, 2 Gewinnspiele, Ballflug)", (() => {
-  const t = quelle("src/spiele/tennisMatch.js");
-  return t.includes('["0", "15", "30", "40"]') && t.includes("t.mir === 3 && t.ihm === 3")
-    && t.includes("spieleMir >= 2 || t.spieleIhm >= 2") && t.includes("Math.sin(z * Math.PI) * 34")
+  // bis v0.79 eigene Engine (tennisMatch.js); seit v0.80 Skin auf der Match-Engine
+  let t;
+  try { t = quelle("src/spiele/tennisMatch.js"); }
+  catch { t = quelle("src/spiele/ballsport.js") + quelle("src/spiele/matchEngine.js"); }
+  return t.includes('["0", "15", "30", "40"]')
+    && (t.includes("t.mir === 3 && t.ihm === 3") || t.includes("s.mir === 3 && s.ihm === 3"))
+    && (t.includes("spieleMir >= 2 || t.spieleIhm >= 2") || t.includes("s.spieleMir >= R.spiele || s.spieleIhm >= R.spiele"))
+    && (t.includes("Math.sin(z * Math.PI) * 34") || (t.includes("bogen: 34") && t.includes("Math.sin(z * Math.PI)")))
     && t.includes("prefers-reduced-motion");
 })());
 test("v0.13: Fußball originalgetreu (2 Halbzeiten à 5 Chancen, Elfmeter bei Gleichstand)", (() => {
-  const f = quelle("src/spiele/fussballMatch.js");
-  return f.includes("FB_CHANCEN = 5") && f.includes('f.phase = "halbzeit"')
-    && f.includes('f.phase = "elfmeter"') && f.includes("f.mir === f.ihm");
+  // bis v0.79 eigene Engine (fussballMatch.js); seit v0.80 Skin auf der Match-Engine
+  let f;
+  try { f = quelle("src/spiele/fussballMatch.js"); }
+  catch { f = quelle("src/spiele/ballsport.js") + quelle("src/spiele/matchEngine.js"); }
+  return (f.includes("FB_CHANCEN = 5") || f.includes('typ: "abschnitte", abschnitte: 2, chancen: 5'))
+    && (f.includes('f.phase = "halbzeit"') || f.includes('s.phase = "pause"'))
+    && (f.includes('f.phase = "elfmeter"') || f.includes('s.phase = "entscheidung"'))
+    && (f.includes("f.mir === f.ihm") || f.includes("s.mir === s.ihm"));
 })());
 test("v0.13: Mutmacher-Rollenspiel (sag-Blase muss angetippt werden, Rotation, kein TTS)", (() => {
   const m = quelle("src/spiele/mutmacher.js");
@@ -1456,7 +1482,9 @@ test("v0.13: Spiel-Daten vollständig kopiert (Gegner, Fakten, Mental-Karten)", 
 })());
 test("v0.13: Spielhalle bindet beide Matches an (Münz-Gate, Match-Zähler, Missionen)", (() => {
   const s2 = quelle("src/features/Spielhalle.jsx");
-  return s2.includes("tennisMatchStart") && s2.includes("fussballMatchStart")
+  // seit v0.80 laufen beide als Skins auf der Match-Engine
+  return ((s2.includes("tennisMatchStart") && s2.includes("fussballMatchStart"))
+    || (s2.includes("TENNIS_SKIN") && s2.includes("FUSSBALL_SKIN")))
     // seit v0.78 datengetriebener Katalog: data-test={`spiel-${sp.id}`}
     && (s2.includes('data-test="spiel-tennis"') || (s2.includes("spiel-${sp.id}") && s2.includes('id: "tennis"')))
     && (s2.includes('data-test="spiel-fussball"') || s2.includes('id: "fussball"'))

@@ -6,11 +6,14 @@ import { aufgabenZaehlen } from "../calc/lerntage.js";
 import { missionsOpts } from "../calc/tagesform.js";
 import { seeAbenteuerStart } from "../spiele/seeAbenteuer.js";
 import { blockweltStart } from "../spiele/blockwelt.js";
-import { tennisMatchStart } from "../spiele/tennisMatch.js";
-import { fussballMatchStart } from "../spiele/fussballMatch.js";
 import { matchStart } from "../spiele/matchEngine.js";
 import { MATCH_SKINS } from "../spiele/rennen.js";
+import { TENNIS_SKIN, FUSSBALL_SKIN } from "../spiele/ballsport.js";
 import { schachStart } from "../spiele/schach.js";
+
+// 🏁 ALLE Match-Spiele laufen auf EINER Engine (seit v0.80 auch
+// Tennis und Fußball – originalgetreu als Skins portiert).
+const ALLE_SKINS = { ...MATCH_SKINS, tennis: TENNIS_SKIN, fussball: FUSSBALL_SKIN };
 
 /* 🎮 Spielhalle: Ein Spielbesuch kostet 1 Münze (verdient beim Üben).
    🎣 See-Abenteuer, ⛏️ Blockwelt, 🎾 Tennis- und ⚽ Fußball-Match sind
@@ -65,13 +68,8 @@ export default function Spielhalle() {
           update({ ...d, lernstand: { ...d.lernstand, blockwelt: stand } });
         },
       });
-    } else if (modus === "tennis" || modus === "fussball" || MATCH_SKINS[modus]) {
-      // Tennis/Fußball sind noch eigene Engines (Migration folgt);
-      // alle neuen Welten-Spiele laufen über die EINE Match-Engine + Skin.
-      const start = modus === "tennis" ? tennisMatchStart
-        : modus === "fussball" ? fussballMatchStart
-        : (h, hooks) => matchStart(h, MATCH_SKINS[modus], hooks);
-      engine.current = start(host.current, {
+    } else if (ALLE_SKINS[modus]) {
+      engine.current = matchStart(host.current, ALLE_SKINS[modus], {
         name: dataRef.current.profil.name || "Du",
         runden: dataRef.current.lernstand.stufen[modus]?.runden || 0,
         onFertig: (erg) => { setErgebnis({ typ: modus, ...erg }); setModus("fertig"); },
@@ -131,7 +129,7 @@ export default function Spielhalle() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modus]);
 
-  if (modus === "see" || modus === "blockwelt" || modus === "tennis" || modus === "fussball" || modus === "schach" || MATCH_SKINS[modus]) {
+  if (modus === "see" || modus === "blockwelt" || modus === "schach" || ALLE_SKINS[modus]) {
     return (
       <div style={karte}>
         <div ref={host} />
