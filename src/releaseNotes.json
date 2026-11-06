@@ -1,5 +1,25 @@
 [
   {
+    "id": "rn-102",
+    "version": "0.82.0",
+    "datum": "2026-11-06",
+    "titel": "Geführter Erst-Start",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🚀 Neue Familien werden jetzt in drei Schritten durch den Start geführt – ganz oben auf der Startseite mit Fortschritts-Band: 1 Eltern-Fragen (Klasse, Lernzeit, Schwerpunkte) → Übergabe ans Kind → 2 Lieblings-Welten wählen → 3 Kennenlern-Runde mit Leo. Am Ende: „🎉 Alles eingerichtet“. Die Kennenlern-Runde darf auf später verschoben werden – die Einladung bleibt dann auf der Startseite."
+      },
+      {
+        "type": "neu",
+        "text": "👧 Übergabe ans Kind: Nach den Eltern-Fragen reicht „Jetzt übernimmt mein Kind“ das Gerät weiter – der Eltern-Modus endet, das Kind macht seine zwei Schritte selbst. Wer dabeibleiben will, tippt „Weiter – ich bleibe dabei“. Entsperrt das Kind per PIN, bevor die Eltern dran waren, startet es direkt mit seinen Welten; Schritt 1 wartet dann auf Mama oder Papa."
+      },
+      {
+        "type": "hinweis",
+        "text": "🏠 Für euch ändert sich nichts: Bestehende Familien gelten als längst eingerichtet und sehen den Erst-Start nicht."
+      }
+    ]
+  },
+  {
     "id": "rn-101",
     "version": "0.81.1",
     "datum": "2026-11-06",
