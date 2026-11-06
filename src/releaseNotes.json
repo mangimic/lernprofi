@@ -1,5 +1,37 @@
 [
   {
+    "id": "rn-102",
+    "version": "0.82.0",
+    "datum": "2026-11-06",
+    "titel": "Geführter Erst-Start",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🚀 Neue Familien werden jetzt in drei Schritten durch den Start geführt – ganz oben auf der Startseite mit Fortschritts-Band: 1 Eltern-Fragen (Klasse, Lernzeit, Schwerpunkte) → Übergabe ans Kind → 2 Lieblings-Welten wählen → 3 Kennenlern-Runde mit Leo. Am Ende: „🎉 Alles eingerichtet“. Die Kennenlern-Runde darf auf später verschoben werden – die Einladung bleibt dann auf der Startseite."
+      },
+      {
+        "type": "neu",
+        "text": "👧 Übergabe ans Kind: Nach den Eltern-Fragen reicht „Jetzt übernimmt mein Kind“ das Gerät weiter – der Eltern-Modus endet, das Kind macht seine zwei Schritte selbst. Wer dabeibleiben will, tippt „Weiter – ich bleibe dabei“. Entsperrt das Kind per PIN, bevor die Eltern dran waren, startet es direkt mit seinen Welten; Schritt 1 wartet dann auf Mama oder Papa."
+      },
+      {
+        "type": "hinweis",
+        "text": "🏠 Für euch ändert sich nichts: Bestehende Familien gelten als längst eingerichtet und sehen den Erst-Start nicht."
+      }
+    ]
+  },
+  {
+    "id": "rn-101",
+    "version": "0.81.1",
+    "datum": "2026-11-06",
+    "titel": "Sudoku: Spielstand bleibt sicher",
+    "entries": [
+      {
+        "type": "verbessert",
+        "text": "🧩 Im Sudoku-Training steht „🔄 Anderes Rätsel“ jetzt rechts unten – weit weg von der Zahlenleiste, damit ein Vertipper nicht mehr das halbe Rätsel löscht. Und sobald schon Zahlen gesetzt sind, fragt die App erst nach („Wirklich ein anderes Rätsel?“) – „Weiterspielen“ ist die große Taste, nichts geht aus Versehen verloren. Bei einem leeren Gitter wechselt das Rätsel weiterhin sofort."
+      }
+    ]
+  },
+  {
     "id": "rn-100",
     "version": "0.81.0",
     "datum": "2026-10-28",
@@ -7,11 +39,11 @@
     "entries": [
       {
         "type": "neu",
-        "text": "\ud83c\udfa3 Neues Spiel in der Spielhalle: das Angel-Wettfischen! Tritt am See gegen B\u00e4r Brummel, Otter Oskar oder Adler Arvid an \u2013 richtige Antwort = der Fisch springt in DEINEN Eimer, falsche = er entwischt zum Gegner. 2 Bei\u00dfzeiten mit je 5 W\u00fcrfen, Pausenbrot mit Angel-Wissen, und bei Gleichstand entscheidet der gro\u00dfe Hecht. Mit Coach Leo als Ruhe-Trainer \u2013 denn Angeln ist Geduldssport!"
+        "text": "🎣 Neues Spiel in der Spielhalle: das Angel-Wettfischen! Tritt am See gegen Bär Brummel, Otter Oskar oder Adler Arvid an – richtige Antwort = der Fisch springt in DEINEN Eimer, falsche = er entwischt zum Gegner. 2 Beißzeiten mit je 5 Würfen, Pausenbrot mit Angel-Wissen, und bei Gleichstand entscheidet der große Hecht. Mit Coach Leo als Ruhe-Trainer – denn Angeln ist Geduldssport!"
       },
       {
         "type": "technik",
-        "text": "\u2699\ufe0f Das dritte Welten-Spiel auf der gemeinsamen Match-Engine \u2013 komplett als \u201eSkin\u201c gebaut (Gegner, Fakten, Mental-Karten, See-Grafik, Fang-Animation), ohne eine Zeile neuer Spiellogik."
+        "text": "⚙️ Das dritte Welten-Spiel auf der gemeinsamen Match-Engine – komplett als „Skin“ gebaut (Gegner, Fakten, Mental-Karten, See-Grafik, Fang-Animation), ohne eine Zeile neuer Spiellogik."
       }
     ]
   },
@@ -19,11 +51,11 @@
     "id": "rn-099",
     "version": "0.80.0",
     "datum": "2026-10-28",
-    "titel": "Eine Engine f\u00fcr alle Matches",
+    "titel": "Eine Engine für alle Matches",
     "entries": [
       {
         "type": "technik",
-        "text": "\ud83c\udfbe\u26bd Tennis- und Fu\u00dfball-Match laufen jetzt auf derselben Spiel-Engine wie Dino- und Raketen-Rennen \u2013 f\u00fcr euch \u00e4ndert sich nichts: gleiche Felder, gleiche Z\u00e4hlweise (15\u201330\u201340, Entscheidungsball, Halbzeiten, Elfmeter), gleiche Coach-Leo-Karten. Unter der Haube gibt es daf\u00fcr nur noch EINEN getesteten Spielablauf \u2013 neue Welten-Spiele entstehen ab jetzt in Stunden statt Tagen."
+        "text": "🎾⚽ Tennis- und Fußball-Match laufen jetzt auf derselben Spiel-Engine wie Dino- und Raketen-Rennen – für euch ändert sich nichts: gleiche Felder, gleiche Zählweise (15–30–40, Entscheidungsball, Halbzeiten, Elfmeter), gleiche Coach-Leo-Karten. Unter der Haube gibt es dafür nur noch EINEN getesteten Spielablauf – neue Welten-Spiele entstehen ab jetzt in Stunden statt Tagen."
       }
     ]
   },
@@ -31,11 +63,11 @@
     "id": "rn-098",
     "version": "0.79.3",
     "datum": "2026-10-28",
-    "titel": "Datenschutzerkl\u00e4rung komplett",
+    "titel": "Datenschutzerklärung komplett",
     "entries": [
       {
         "type": "hinweis",
-        "text": "\ud83d\udcc4 Die Datenschutzerkl\u00e4rung ist jetzt vollst\u00e4ndig: Verantwortliche ist die MaxClaint GmbH, Am Schmelzofen 34, 79183 Waldkirch, vertreten durch Michele Mangieri (Kontakt: hello@maxclaint.de). Damit ist der rechtliche Teil f\u00fcr die Freigabe an weitere Familien fertig."
+        "text": "📄 Die Datenschutzerklärung ist jetzt vollständig: Verantwortliche ist die MaxClaint GmbH, Am Schmelzofen 34, 79183 Waldkirch, vertreten durch Michele Mangieri (Kontakt: hello@maxclaint.de). Damit ist der rechtliche Teil für die Freigabe an weitere Familien fertig."
       }
     ]
   },
@@ -47,7 +79,7 @@
     "entries": [
       {
         "type": "hinweis",
-        "text": "\ud83d\udcc4 Die Datenschutzerkl\u00e4rung ist jetzt fast vollst\u00e4ndig: Verantwortliche ist die MaxClaint GmbH, vertreten durch Michele Mangieri, Datenschutz-Kontakt hello@maxclaint.de. Es fehlt nur noch die Post-Anschrift (Platzhalter bleibt markiert)."
+        "text": "📄 Die Datenschutzerklärung ist jetzt fast vollständig: Verantwortliche ist die MaxClaint GmbH, vertreten durch Michele Mangieri, Datenschutz-Kontakt hello@maxclaint.de. Es fehlt nur noch die Post-Anschrift (Platzhalter bleibt markiert)."
       }
     ]
   },
@@ -59,7 +91,7 @@
     "entries": [
       {
         "type": "hinweis",
-        "text": "\ud83d\udcc4 Die Datenschutzerkl\u00e4rung nennt jetzt die Verantwortliche f\u00fcr Leos Welten (MaxClaint GmbH). Anschrift und Kontakt-E-Mail folgen vor der Freigabe an weitere Familien \u2013 der Platzhalter daf\u00fcr bleibt sichtbar markiert."
+        "text": "📄 Die Datenschutzerklärung nennt jetzt die Verantwortliche für Leos Welten (MaxClaint GmbH). Anschrift und Kontakt-E-Mail folgen vor der Freigabe an weitere Familien – der Platzhalter dafür bleibt sichtbar markiert."
       }
     ]
   },

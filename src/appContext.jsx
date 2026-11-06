@@ -288,6 +288,9 @@ export function AppProvider({ children }) {
       const schluessel = await entsperrenMitPasswort(passwort, idbStorage);
       await nachEntsperren(schluessel, true);
     },
+    // 🚀 Erst-Start-Übergabe: Eltern reichen das Gerät weiter – der Tresor
+    // bleibt offen, nur der Eltern-Modus endet (zurück per Eltern-Passwort).
+    kindModus: () => setElternModus(false),
     sperren: () => {
       master.current = null;
       vorher.current = null;

@@ -26,6 +26,7 @@ export function leeresDokument(heute) {
       interessenGefragt: "", // Datum, an dem der Interessen-Picker beantwortet/weggeklickt wurde
       schwerpunkte: [],    // 👋 Eltern-Fragebogen: wo es gerade hakt (aus SCHWERPUNKT_KEYS)
       onboardingEltern: "", // Datum, an dem die Willkommens-Fragen beantwortet/übersprungen wurden
+      erstStart: "offen",  // 🚀 geführter Erst-Start: "offen" (neu) | "fertig" (Bestand oder abgeschlossen)
     },
     lernstand: {
       stufen: {},      // je Lernfeld: { freigeschaltet, runden, krone }
@@ -96,6 +97,12 @@ export function migrateData(alt, heute) {
   d.profil.schwerpunkte = [...new Set((Array.isArray(d.profil.schwerpunkte) ? d.profil.schwerpunkte : [])
     .filter((k) => SCHWERPUNKT_KEYS.includes(k)))];
   if (typeof d.profil.onboardingEltern !== "string") d.profil.onboardingEltern = "";
+  // Erst-Start: nur ein brandneues Dokument (noch ohne Profil) startet „offen";
+  // Bestandsdaten ohne das Feld sind längst eingerichtet → „fertig".
+  const erstStartAlt = istObjekt(quelle.profil) ? quelle.profil.erstStart : undefined;
+  d.profil.erstStart = ["offen", "fertig"].includes(erstStartAlt)
+    ? erstStartAlt
+    : istObjekt(quelle.profil) ? "fertig" : "offen";
 
   d.lernstand = { ...basis.lernstand, ...(istObjekt(quelle.lernstand) ? quelle.lernstand : {}) };
   if (!istObjekt(d.lernstand.stufen)) d.lernstand.stufen = {};

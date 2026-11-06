@@ -36,6 +36,41 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.82: Geführter Erst-Start ----------
+console.log("== v0.82: Geführter Erst-Start ==");
+test("v0.82: Erst-Start in 3 Schritten (Eltern → Übergabe → Welten → Kennenlernen), Bestand bleibt verschont", (() => {
+  const ob = quelle("src/calc/onboarding.js");
+  const es = quelle("src/features/ErstStart.jsx");
+  const st = quelle("src/features/Start.jsx");
+  const md = quelle("src/calc/migrateData.js");
+  return versionMindestens("0.82.0")
+    && ob.includes("export function erstStartLage") && ob.includes('"uebergabe"') && ob.includes("elternWartet")
+    && es.includes('data-test="erststart-karte"') && es.includes('data-test="erststart-uebergabe-kind"')
+    && es.includes('data-test="erststart-uebergabe-weiter"') && es.includes('data-test="erststart-spaeter"')
+    && es.includes('data-test="erststart-fertig"') && es.includes('data-test="erststart-eltern-wartet"')
+    && es.includes("tresor.kindModus()")
+    && quelle("src/appContext.jsx").includes("kindModus: () => setElternModus(false)")
+    && st.includes("<ErstStart />") && st.includes("!erstStartOffen && tresor.elternModus")
+    // Bestandsdaten ohne das Feld gelten als fertig, nur ein neues Dokument startet offen
+    && md.includes('erstStart: "offen"') && md.includes('istObjekt(quelle.profil) ? "fertig" : "offen"')
+    && quelle("src/calc/onboarding.test.js").includes("erstStartLage")
+    && quelle("e2e/smoke.spec.js").includes("erststart-uebergabe-kind")
+    && releaseNoteVorhanden("rn-102");
+})());
+
+// ---------- v0.81.1: Sudoku – „Anderes Rätsel" rechts + Rückfrage ----------
+console.log("== v0.81.1: Sudoku-Rückfrage ==");
+test("v0.81.1: „Anderes Rätsel\" liegt rechts und fragt bei Spielstand nach (Weiterspielen als Standard)", (() => {
+  const ui = quelle("src/features/Sudoku.jsx");
+  return versionMindestens("0.81.1")
+    && ui.includes('justifyContent: "flex-end"') && ui.includes('data-test="sudoku-neu"')
+    && ui.includes("const anderesRaetsel") && ui.includes("Object.keys(gefuellt).length) setFrage(true)")
+    && ui.includes('data-test="sudoku-neu-frage"') && ui.includes('data-test="sudoku-neu-nein"')
+    && ui.includes('data-test="sudoku-neu-ja"')
+    && quelle("e2e/smoke.spec.js").includes("sudoku-neu-frage")
+    && releaseNoteVorhanden("rn-101");
+})());
+
 // ---------- v0.81: Angel-Wettfischen ----------
 console.log("== v0.81: Angel-Wettfischen ==");
 test("v0.81: Wettfischen als dritter Welten-Skin (Welt angeln), ohne neue Spiellogik", (() => {
@@ -169,7 +204,8 @@ test("v0.76: sichtbarer Name überall Leos Welten, Infrastruktur-Namen UNVERÄND
 console.log("== v0.75: Willkommens-Fragen ==");
 test("v0.75: Eltern-Fragebogen stellt App ein, Schwerpunkte empfehlen, Einstufung als Kennenlern-Runde", (() => {
   const ob = quelle("src/calc/onboarding.js");
-  const st = quelle("src/features/Start.jsx");
+  // seit v0.82 liegen die Fragen-Karten in ErstStart.jsx (Start.jsx bindet sie ein)
+  const st = quelle("src/features/Start.jsx") + quelle("src/features/ErstStart.jsx");
   return ob.includes("export const SCHWERPUNKTE") && ob.includes("export function istEmpfohlen")
     && ob.includes("schlägt") // Einstufung schlägt Schwerpunkte (dokumentiert)
     && quelle("src/calc/migrateData.js").includes("schwerpunkte") && quelle("src/calc/migrateData.js").includes("onboardingEltern")
@@ -277,7 +313,8 @@ test("v0.69: Dinos/Weltraum/Blockwelt in allen Themen-Maps, Interessen im Profil
   const sz = quelle("src/calc/aufgaben/saetze.js");
   const d2 = quelle("src/calc/aufgaben/deutsch2.js");
   const mg = quelle("src/calc/migrateData.js");
-  const st = quelle("src/features/Start.jsx");
+  // seit v0.82 liegt die Welten-Karte in ErstStart.jsx (Start.jsx bindet sie ein)
+  const st = quelle("src/features/Start.jsx") + quelle("src/features/ErstStart.jsx");
   return ["dinos", "weltraum", "gaming"].every((k) =>
     th.includes(`key: "${k}"`)
     && (sz.match(new RegExp(`${k}:`, "g")) || []).length >= 5

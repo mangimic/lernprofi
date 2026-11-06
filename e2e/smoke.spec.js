@@ -23,6 +23,15 @@ async function tresorAnlegen(page) {
   await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
 }
 
+// 🚀 Seit v0.82 führt der Erst-Start neue Familien in 3 Schritten. Dieser
+// Helfer bringt einen frisch angelegten Tresor (Eltern-Modus) bis zur
+// Welten-Wahl: Eltern-Fragen überspringen, bei der Übergabe dabei bleiben.
+async function erstStartBisWelten(page) {
+  await page.getByTestId("fb-spaeter").click();
+  await page.getByTestId("erststart-uebergabe-weiter").click();
+  await expect(page.getByTestId("interessen-karte")).toBeVisible();
+}
+
 // 🗂️ Seit v0.45 liegen die Deutsch-Bereiche in Gruppen (weniger Auswahl auf einmal).
 // Der Helfer öffnet die passende Gruppe; eine Ein-Feld-Gruppe (Lesen) startet direkt.
 const GRUPPE_VON = {
@@ -1762,6 +1771,7 @@ test("Übungs-Welt, Wozu-Anker, Zeitstrahl und Lehrer-Moment", async ({ page }) 
 
 test("Dino-Rennen: Welten-Skin auf der Match-Engine – Lieblings-Welt steht vorn", async ({ page }) => {
   await tresorAnlegen(page);
+  await erstStartBisWelten(page);
   // 🎨 Lieblings-Welten wählen → ihre Spiele stehen in der Spielhalle vorn
   await page.getByTestId("interesse-dinos").click();
   await page.getByTestId("interesse-weltraum").click();
@@ -1801,6 +1811,7 @@ test("Dino-Rennen: Welten-Skin auf der Match-Engine – Lieblings-Welt steht vor
 
 test("Angel-Wettfischen: Heimspiel-Welt auf der Match-Engine", async ({ page }) => {
   await tresorAnlegen(page);
+  await erstStartBisWelten(page);
   // 🎣 Angeln als Lieblings-Welt → das Wettfischen steht vorn
   await page.getByTestId("interesse-angeln").click();
   await page.getByTestId("interessen-ok").click();
@@ -1901,6 +1912,145 @@ test("Sudoku-Training: Stufe 1 (4×4) lösen – Fehlversuche zeigen die Regel",
   await expect(page.getByTestId("sudoku-fehler")).toContainText("Fehlversuche: 0");
 });
 
+test("Sudoku-Training: „Anderes Rätsel“ steht rechts und fragt nach, bevor der Spielstand weg ist", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("zum-sudoku").click();
+  await expect(page.getByTestId("sudoku-seite")).toBeVisible();
+
+  // Knopf liegt rechts – weit weg von der Zahlenleiste (die beginnt links)
+  const seite = await page.getByTestId("sudoku-seite").boundingBox();
+  const knopf = await page.getByTestId("sudoku-neu").boundingBox();
+  expect(knopf.x + knopf.width / 2).toBeGreaterThan(seite.x + seite.width / 2);
+
+  // Unberührtes Gitter: nichts zu verlieren → kein Nachfragen, direkt neues Rätsel
+  await page.getByTestId("sudoku-neu").click();
+  await expect(page.getByTestId("sudoku-neu-frage")).toHaveCount(0);
+  await expect(page.locator('[data-test^="sudoku-zelle-"]')).toHaveCount(16);
+
+  // Spielstand erzeugen: ein Fehlversuch (Zähler 1) + eine richtig gesetzte Zahl
+  const zellText = async (r, c) => (await page.getByTestId(`sudoku-zelle-${r}-${c}`).textContent()).trim();
+  let gesetzt = null;
+  suchen: for (let r = 0; r < 4; r++) {
+    for (let c = 0; c < 4; c++) {
+      if (await zellText(r, c)) continue;
+      await page.getByTestId(`sudoku-zelle-${r}-${c}`).click();
+      for (let n = 1; n <= 4; n++) {
+        await page.getByTestId(`sudoku-zahl-${n}`).click();
+        if ((await zellText(r, c)) === String(n)) { gesetzt = { r, c, n }; break suchen; }
+      }
+    }
+  }
+  expect(gesetzt).not.toBeNull();
+  await expect(page.getByTestId("sudoku-fehler")).toContainText("Fehlversuche: 1");
+
+  // Antippen mit Spielstand → Rückfrage statt Sofort-Verlust
+  await page.getByTestId("sudoku-neu").click();
+  await expect(page.getByTestId("sudoku-neu-frage")).toBeVisible();
+  await expect(page.getByTestId("sudoku-neu-frage")).toContainText("Wirklich");
+  // „Weiterspielen“: alles bleibt wie es war
+  await page.getByTestId("sudoku-neu-nein").click();
+  await expect(page.getByTestId("sudoku-neu-frage")).toHaveCount(0);
+  expect(await zellText(gesetzt.r, gesetzt.c)).toBe(String(gesetzt.n));
+  await expect(page.getByTestId("sudoku-fehler")).toContainText("Fehlversuche: 1");
+  // „Ja“: frisches Rätsel, Zähler auf 0
+  await page.getByTestId("sudoku-neu").click();
+  await page.getByTestId("sudoku-neu-ja").click();
+  await expect(page.getByTestId("sudoku-neu-frage")).toHaveCount(0);
+  await expect(page.getByTestId("sudoku-fehler")).toContainText("Fehlversuche: 0");
+  await expect(page.locator('[data-test^="sudoku-zelle-"]')).toHaveCount(16);
+});
+
+test("Erst-Start: drei Schritte – Eltern-Fragen, Übergabe ins Kind, Welten, Später", async ({ page }) => {
+  await tresorAnlegen(page);
+  // Schritt 1 (Eltern): die bekannten drei Fragen, jetzt als erster Schritt
+  await expect(page.getByTestId("erststart-karte")).toBeVisible();
+  await expect(page.getByTestId("erststart-karte")).toContainText("Schritt 1 von 3");
+  await expect(page.getByTestId("fragebogen-karte")).toBeVisible();
+  await page.getByTestId("fb-klasse-3").click();
+  await page.getByTestId("fb-zeit-15").click();
+  await page.getByTestId("fb-ok").click();
+
+  // Übergabe: Eltern reichen das Gerät weiter → Kind-Modus (kein Eltern-Tab mehr)
+  await expect(page.getByTestId("erststart-uebergabe")).toBeVisible();
+  await expect(page.getByTestId("erststart-karte")).toContainText("Schritt 2 von 3");
+  await expect(page.getByTestId("nav-eltern")).toBeVisible();
+  await page.getByTestId("erststart-uebergabe-kind").click();
+  await expect(page.getByTestId("nav-eltern")).toHaveCount(0);
+
+  // Schritt 2 (Kind): Welten wählen
+  await expect(page.getByTestId("interessen-karte")).toBeVisible();
+  await page.getByTestId("interesse-dinos").click();
+  await page.getByTestId("interessen-ok").click();
+
+  // Schritt 3 (Kind): Kennenlern-Runde – darf auf später verschoben werden
+  await expect(page.getByTestId("erststart-karte")).toContainText("Schritt 3 von 3");
+  await expect(page.getByTestId("erststart-kennenlernen")).toBeVisible();
+  await page.getByTestId("erststart-spaeter").click();
+  await expect(page.getByTestId("erststart-karte")).toHaveCount(0);
+  // die bekannte Einladung „Leo lernt dich kennen“ bleibt, bis die Runde gemacht ist
+  await expect(page.getByTestId("einstufung-start")).toBeVisible();
+  await page.waitForTimeout(600); // asynchroner Tresor-Schreibvorgang
+
+  // Der Abschluss überlebt den Neustart (Kind entsperrt per PIN)
+  await page.reload();
+  await expect(page.getByTestId("gate-entsperren")).toBeVisible();
+  await page.getByTestId("pin-eingabe").fill(PIN);
+  await page.getByTestId("pin-ok").click();
+  await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
+  await expect(page.getByTestId("erststart-karte")).toHaveCount(0);
+});
+
+test("Erst-Start: Kennenlern-Runde als Schritt 3 führt zum Abschluss „Alles eingerichtet“", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("fb-spaeter").click();
+  // Eltern bleiben dabei (zweiter, leiser Weg der Übergabe) → Eltern-Tab bleibt
+  await page.getByTestId("erststart-uebergabe-weiter").click();
+  await expect(page.getByTestId("nav-eltern")).toBeVisible();
+  await page.getByTestId("interessen-spaeter").click();
+  await expect(page.getByTestId("erststart-karte")).toContainText("Schritt 3 von 3");
+  await page.getByTestId("erststart-kennenlernen").click();
+  await page.getByTestId("einstufung-los").click();
+  for (let i = 0; i < 40; i++) {
+    if (await page.getByTestId("einstufung-ergebnis").count()) break;
+    await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+    await page.getByTestId("weiter-knopf").click();
+  }
+  await page.getByTestId("einstufung-uebernehmen").click();
+  await expect(page.getByTestId("erststart-fertig")).toBeVisible();
+  await expect(page.getByTestId("erststart-fertig")).toContainText("Alles eingerichtet");
+  await page.getByTestId("erststart-los").click();
+  await expect(page.getByTestId("erststart-karte")).toHaveCount(0);
+  await expect(page.getByTestId("trainingsplan")).toBeVisible();
+});
+
+test("Erst-Start: Kind ist per PIN zuerst da – Welten sofort, Eltern-Schritt wartet", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.reload();
+  await page.getByTestId("pin-eingabe").fill(PIN);
+  await page.getByTestId("pin-ok").click();
+  await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
+  // Kind-Modus: Schritt 1 ist für die Eltern – das Kind startet mit seinen Welten
+  await expect(page.getByTestId("erststart-eltern-wartet")).toBeVisible();
+  await expect(page.getByTestId("interessen-karte")).toBeVisible();
+  await expect(page.getByTestId("fragebogen-karte")).toHaveCount(0);
+  await page.getByTestId("interesse-weltraum").click();
+  await page.getByTestId("interessen-ok").click();
+  await expect(page.getByTestId("erststart-kennenlernen")).toBeVisible();
+  await page.waitForTimeout(600); // asynchroner Tresor-Schreibvorgang
+
+  // Eltern kommen per Passwort → ihr Schritt 1 wird nachgeholt
+  await page.reload();
+  await page.getByTestId("eltern-zugang").click();
+  await page.getByTestId("pw-eingabe").fill(PW);
+  await page.getByTestId("pw-ok").click();
+  await expect(page.getByTestId("start-seite")).toBeVisible({ timeout: 20000 });
+  await expect(page.getByTestId("erststart-karte")).toContainText("Schritt 1 von 3");
+  await expect(page.getByTestId("fragebogen-karte")).toBeVisible();
+  await page.getByTestId("fb-ok").click();
+  // Welten sind schon gewählt → keine Übergabe mehr nötig, direkt Schritt 3
+  await expect(page.getByTestId("erststart-karte")).toContainText("Schritt 3 von 3");
+});
+
 test("Willkommens-Fragen: Eltern stellen Klasse, Lernzeit und Schwerpunkte ein", async ({ page }) => {
   await tresorAnlegen(page);
 
@@ -1927,8 +2077,9 @@ test("Willkommens-Fragen: Eltern stellen Klasse, Lernzeit und Schwerpunkte ein",
 
 test("Interessen-Picker: Lieblings-Welten wählen steuert die Übungs-Welt", async ({ page }) => {
   await tresorAnlegen(page);
+  await erstStartBisWelten(page);
 
-  // 🎨 Die Welten-Frage begrüßt das Kind einmalig auf der Startseite
+  // 🎨 Die Welten-Frage begrüßt das Kind einmalig (Schritt 2 des Erst-Starts)
   await expect(page.getByTestId("interessen-karte")).toBeVisible();
   await expect(page.getByTestId("interessen-ok")).toBeDisabled(); // ohne Auswahl kein Speichern
   await page.getByTestId("interesse-dinos").click();

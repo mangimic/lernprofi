@@ -133,5 +133,6 @@ Cloud-Konfiguration; verzichtet zunächst auf Geräte-Sync.
 | 9d – Durchführung: Heute-Ansicht (Abhaken, Tages-Münze), 5-Min-Pausen-Uhr, Wochen-Bilanz, Zeitfenster 14-19 Uhr, feste Termine, Hausaufgaben-Baustein (v0.27) | ✅ komplett |
 | 9d+ – 30-Min-Fenster, Wochenende ab 9 Uhr, 🎲 Spielzeit 13 Uhr, KW-Anzeige, „Nächste Woche planen“ (Sonntags-Gespräch), 🔁 Wochen-Routine ohne Freunde-Zeit (v0.28) | ✅ komplett |
 | 9e – 🏫 Vormittags-Stundenplan Kl. 4a hinterlegt (Toggle im Plan, Heute-Zeile) (v0.29) | ✅ komplett |
+| Onboarding: Welten-Picker (v0.69), Eltern-Fragen + Kennenlern-Runde (v0.75), Weiche + Einladungs-Link (v0.77), geführter Erst-Start in 3 Schritten (v0.82) | ✅ komplett |
 | 9f – Feste Termine + Stundenplan im Elternbereich pflegbar | ⏳ offen |
 | 8 – Parallelbetrieb + Umstellung | ⏳ offen |
