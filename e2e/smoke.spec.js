@@ -1901,6 +1901,54 @@ test("Sudoku-Training: Stufe 1 (4×4) lösen – Fehlversuche zeigen die Regel",
   await expect(page.getByTestId("sudoku-fehler")).toContainText("Fehlversuche: 0");
 });
 
+test("Sudoku-Training: „Anderes Rätsel“ steht rechts und fragt nach, bevor der Spielstand weg ist", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("zum-sudoku").click();
+  await expect(page.getByTestId("sudoku-seite")).toBeVisible();
+
+  // Knopf liegt rechts – weit weg von der Zahlenleiste (die beginnt links)
+  const seite = await page.getByTestId("sudoku-seite").boundingBox();
+  const knopf = await page.getByTestId("sudoku-neu").boundingBox();
+  expect(knopf.x + knopf.width / 2).toBeGreaterThan(seite.x + seite.width / 2);
+
+  // Unberührtes Gitter: nichts zu verlieren → kein Nachfragen, direkt neues Rätsel
+  await page.getByTestId("sudoku-neu").click();
+  await expect(page.getByTestId("sudoku-neu-frage")).toHaveCount(0);
+  await expect(page.locator('[data-test^="sudoku-zelle-"]')).toHaveCount(16);
+
+  // Spielstand erzeugen: ein Fehlversuch (Zähler 1) + eine richtig gesetzte Zahl
+  const zellText = async (r, c) => (await page.getByTestId(`sudoku-zelle-${r}-${c}`).textContent()).trim();
+  let gesetzt = null;
+  suchen: for (let r = 0; r < 4; r++) {
+    for (let c = 0; c < 4; c++) {
+      if (await zellText(r, c)) continue;
+      await page.getByTestId(`sudoku-zelle-${r}-${c}`).click();
+      for (let n = 1; n <= 4; n++) {
+        await page.getByTestId(`sudoku-zahl-${n}`).click();
+        if ((await zellText(r, c)) === String(n)) { gesetzt = { r, c, n }; break suchen; }
+      }
+    }
+  }
+  expect(gesetzt).not.toBeNull();
+  await expect(page.getByTestId("sudoku-fehler")).toContainText("Fehlversuche: 1");
+
+  // Antippen mit Spielstand → Rückfrage statt Sofort-Verlust
+  await page.getByTestId("sudoku-neu").click();
+  await expect(page.getByTestId("sudoku-neu-frage")).toBeVisible();
+  await expect(page.getByTestId("sudoku-neu-frage")).toContainText("Wirklich");
+  // „Weiterspielen“: alles bleibt wie es war
+  await page.getByTestId("sudoku-neu-nein").click();
+  await expect(page.getByTestId("sudoku-neu-frage")).toHaveCount(0);
+  expect(await zellText(gesetzt.r, gesetzt.c)).toBe(String(gesetzt.n));
+  await expect(page.getByTestId("sudoku-fehler")).toContainText("Fehlversuche: 1");
+  // „Ja“: frisches Rätsel, Zähler auf 0
+  await page.getByTestId("sudoku-neu").click();
+  await page.getByTestId("sudoku-neu-ja").click();
+  await expect(page.getByTestId("sudoku-neu-frage")).toHaveCount(0);
+  await expect(page.getByTestId("sudoku-fehler")).toContainText("Fehlversuche: 0");
+  await expect(page.locator('[data-test^="sudoku-zelle-"]')).toHaveCount(16);
+});
+
 test("Willkommens-Fragen: Eltern stellen Klasse, Lernzeit und Schwerpunkte ein", async ({ page }) => {
   await tresorAnlegen(page);
 

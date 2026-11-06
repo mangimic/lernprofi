@@ -31,6 +31,7 @@ export default function Sudoku() {
   const [hinweis, setHinweis] = useState("");
   const [leuchten, setLeuchten] = useState([]);   // Konflikt-Zellen fürs Lern-Highlight
   const [fertig, setFertig] = useState(null);     // { aufgestiegen, fehler } | null
+  const [frage, setFrage] = useState(false);      // Rückfrage vor „Anderes Rätsel“
 
   const g = raetsel.groesse;
   const wertVon = (r, c) => raetsel.gitter[r][c] || gefuellt[`${r}-${c}`] || 0;
@@ -42,8 +43,14 @@ export default function Sudoku() {
 
   const neuesRaetsel = () => {
     setGefuellt({}); setGewaehlt(null); setFehler(0);
-    setHinweis(""); setLeuchten([]); setFertig(null);
+    setHinweis(""); setLeuchten([]); setFertig(null); setFrage(false);
     setNonce((n) => n + 1);
+  };
+  // „Anderes Rätsel“: Sobald schon Zahlen gesetzt sind, erst nachfragen –
+  // ein Vertipper darf den Spielstand nicht löschen. Leeres Gitter: direkt.
+  const anderesRaetsel = () => {
+    if (Object.keys(gefuellt).length) setFrage(true);
+    else neuesRaetsel();
   };
 
   const zahlSetzen = (wert) => {
@@ -174,10 +181,30 @@ export default function Sudoku() {
             💡 {hinweis}
           </p>
         )}
-        <button data-test="sudoku-neu" onClick={neuesRaetsel}
-          style={{ marginTop: 10, background: "transparent", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          🔄 Anderes Rätsel
-        </button>
+        {/* Bewusst rechts, weit weg von der Zahlenleiste (links): ein
+            Vertipper landet so ins Leere statt auf „Anderes Rätsel“. */}
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
+          <button data-test="sudoku-neu" onClick={anderesRaetsel}
+            style={{ background: "transparent", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+            🔄 Anderes Rätsel
+          </button>
+        </div>
+        {frage && (
+          <div data-test="sudoku-neu-frage" style={{ background: T.grund, borderRadius: T.radiusKlein, padding: 10, marginTop: 8 }}>
+            <p style={{ margin: "0 0 8px" }}>
+              ⚠️ Dein aktuelles Rätsel wird <b>verworfen</b> – alle gesetzten Zahlen sind dann weg.
+              Wirklich ein anderes Rätsel?
+            </p>
+            <button data-test="sudoku-neu-nein" onClick={() => setFrage(false)}
+              style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700, marginBottom: 6 }}>
+              Weiterspielen
+            </button>
+            <button data-test="sudoku-neu-ja" onClick={neuesRaetsel}
+              style={{ width: "100%", background: T.weich, color: T.text }}>
+              Ja, anderes Rätsel
+            </button>
+          </div>
+        )}
       </div>
       <button data-test="sudoku-zurueck" onClick={() => navTo("start")}
         style={{ background: "transparent", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>

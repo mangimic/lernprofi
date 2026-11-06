@@ -36,6 +36,19 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.81.1: Sudoku – „Anderes Rätsel" rechts + Rückfrage ----------
+console.log("== v0.81.1: Sudoku-Rückfrage ==");
+test("v0.81.1: „Anderes Rätsel\" liegt rechts und fragt bei Spielstand nach (Weiterspielen als Standard)", (() => {
+  const ui = quelle("src/features/Sudoku.jsx");
+  return versionMindestens("0.81.1")
+    && ui.includes('justifyContent: "flex-end"') && ui.includes('data-test="sudoku-neu"')
+    && ui.includes("const anderesRaetsel") && ui.includes("Object.keys(gefuellt).length) setFrage(true)")
+    && ui.includes('data-test="sudoku-neu-frage"') && ui.includes('data-test="sudoku-neu-nein"')
+    && ui.includes('data-test="sudoku-neu-ja"')
+    && quelle("e2e/smoke.spec.js").includes("sudoku-neu-frage")
+    && releaseNoteVorhanden("rn-101");
+})());
+
 // ---------- v0.81: Angel-Wettfischen ----------
 console.log("== v0.81: Angel-Wettfischen ==");
 test("v0.81: Wettfischen als dritter Welten-Skin (Welt angeln), ohne neue Spiellogik", (() => {
