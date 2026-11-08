@@ -54,6 +54,16 @@ describe("migrateData", () => {
     expect(migrateData({ einstellungen: { uebungsThema: "neon" } }, HEUTE).einstellungen.uebungsThema).toBe("alltag");
   });
 
+  it("erstStart: neues Dokument startet offen, Bestandsdaten ohne das Feld gelten als fertig", () => {
+    expect(leeresDokument(HEUTE).profil.erstStart).toBe("offen");
+    expect(migrateData(null, HEUTE).profil.erstStart).toBe("offen");
+    // Bestandsfamilie: Profil vorhanden, Feld fehlt → den Erst-Start nie zeigen
+    expect(migrateData({ profil: { name: "Kind" } }, HEUTE).profil.erstStart).toBe("fertig");
+    expect(migrateData({ profil: { erstStart: "offen" } }, HEUTE).profil.erstStart).toBe("offen");
+    expect(migrateData({ profil: { erstStart: "fertig" } }, HEUTE).profil.erstStart).toBe("fertig");
+    expect(migrateData({ profil: { erstStart: 42 } }, HEUTE).profil.erstStart).toBe("fertig");
+  });
+
   it("schwerpunkte und onboardingEltern: Whitelist, Säuberung, Standardwerte", () => {
     const leer = migrateData(null, HEUTE);
     expect(leer.profil.schwerpunkte).toEqual([]);

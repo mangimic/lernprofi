@@ -31,3 +31,25 @@ export function istEmpfohlen(feldKey, einstufung, schwerpunkte) {
   if (einstufung?.empfehlung) return einstufung.empfehlung.includes(feldKey);
   return schwerpunktFelder(schwerpunkte).includes(feldKey);
 }
+
+/* 🚀 Geführter Erst-Start (3 Schritte): 1 Eltern-Fragen → Übergabe ans
+   Kind → 2 Welten-Wahl → 3 Kennenlern-Runde (überspringbar) → Abschluss.
+   profil.erstStart: "offen" (neuer Tresor) | "fertig" (Bestand/abgeschlossen).
+   Liefert null, wenn nichts zu führen ist – sonst den aktuellen Schritt. */
+export function erstStartLage(profil, lernstand, elternModus) {
+  if (!profil || profil.erstStart !== "offen") return null;
+  const erledigt = {
+    eltern: !!profil.onboardingEltern,
+    welten: !!profil.interessenGefragt || (Array.isArray(profil.interessen) && profil.interessen.length > 0),
+    kennenlernen: !!lernstand?.einstufung,
+  };
+  let schritt;
+  if (!erledigt.eltern && elternModus) schritt = "eltern";
+  else if (!erledigt.welten) schritt = erledigt.eltern && elternModus ? "uebergabe" : "welten";
+  else if (!erledigt.kennenlernen) schritt = "kennenlernen";
+  else schritt = "fertig";
+  const nummer = { eltern: 1, uebergabe: 2, welten: 2, kennenlernen: 3, fertig: 3 }[schritt];
+  // Kind ist per PIN da, bevor die Eltern ihren Schritt gemacht haben
+  const elternWartet = !erledigt.eltern && !elternModus;
+  return { schritt, nummer, erledigt, elternWartet };
+}
