@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-104",
+    "version": "0.82.2",
+    "datum": "2026-11-08",
+    "titel": "Navigation auf dem iPad immer links",
+    "entries": [
+      {
+        "type": "geaendert",
+        "text": "📱 Die Navigations-Spalte links gilt auf dem iPad jetzt in beiden Lagen – hochkant und quer. Nur auf dem Handy bleibt die Leiste unten."
+      }
+    ]
+  },
+  {
     "id": "rn-103",
     "version": "0.82.1",
     "datum": "2026-11-08",

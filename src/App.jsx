@@ -22,7 +22,7 @@ import Datenschutz from "./features/Datenschutz.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.82.1";
+export const APP_VERSION = "0.82.2";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -82,10 +82,10 @@ function WasIstNeu() {
   );
 }
 
-// 📱 Hochkant-Tablet (iPad 820×1180): Die Navigation wird eine Spalte am linken
-// Rand, damit sie mit dem Daumen am Rand erreichbar ist. Handy und Querformat
-// behalten die Leiste unten.
-const SEITLICH_QUERY = "(orientation: portrait) and (min-width: 641px)";
+// 📱 Tablet (iPad, beide Lagen): Die Navigation ist eine Spalte am linken
+// Rand, damit sie mit dem Daumen am Rand erreichbar ist. Nur das Handy
+// (bis 640 px) behält die Leiste unten.
+const SEITLICH_QUERY = "(min-width: 641px)";
 const seitlichJetzt = () => typeof window !== "undefined" && !!window.matchMedia && window.matchMedia(SEITLICH_QUERY).matches;
 
 export default function App() {

@@ -2324,7 +2324,8 @@ test("Neues Gerät: Anmelden holt den verschlüsselten Tresor und entsperrt mit 
 test("Navigation: iPad hochkant seitlich als Spalte, sonst unten", async ({ page }) => {
   await tresorAnlegen(page);
   const vp = page.viewportSize();
-  const hochkant = vp.width >= 641 && vp.height > vp.width;
+  // seit v0.82.2: auf dem iPad in BEIDEN Lagen links, nur das Handy behält die Leiste unten
+  const hochkant = vp.width >= 641;
   const leiste = page.getByTestId("nav-leiste");
   await expect(leiste).toBeVisible();
   const box = await leiste.boundingBox();
@@ -2340,7 +2341,7 @@ test("Navigation: iPad hochkant seitlich als Spalte, sonst unten", async ({ page
     const main = await page.locator("main").boundingBox();
     expect(main.x).toBeGreaterThanOrEqual(box.x + box.width - 2);
   } else {
-    // Querformat und Handy: unten wie bisher
+    // Handy: unten wie bisher
     expect(box.y + box.height).toBeGreaterThan(vp.height - 2);
     expect(box.width).toBeGreaterThan(vp.width * 0.8);
   }
