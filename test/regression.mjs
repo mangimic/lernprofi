@@ -36,12 +36,24 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.82.2: Navigation auf dem iPad in beiden Lagen links ----------
+console.log("== v0.82.2: Navigation immer links (Tablet) ==");
+test("v0.82.2: Spalte links ab 641 px Breite in beiden Lagen, Handy unten", (() => {
+  const app = quelle("src/App.jsx");
+  return versionMindestens("0.82.2")
+    && app.includes('SEITLICH_QUERY = "(min-width: 641px)"')
+    && !app.includes("(orientation: portrait) and (min-width: 641px)")
+    && quelle("e2e/smoke.spec.js").includes("const hochkant = vp.width >= 641;")
+    && releaseNoteVorhanden("rn-104");
+})());
+
 // ---------- v0.82.1: Navigation seitlich auf dem iPad hochkant ----------
 console.log("== v0.82.1: Navigation seitlich ==");
 test("v0.82.1: Hochkant-Tablet zeigt die Navigation als Spalte links, sonst unten", (() => {
   const app = quelle("src/App.jsx");
   return versionMindestens("0.82.1")
-    && app.includes("const SEITLICH_QUERY") && app.includes("(orientation: portrait) and (min-width: 641px)")
+    && app.includes("const SEITLICH_QUERY")
+    && (app.includes("(orientation: portrait) and (min-width: 641px)") || app.includes('SEITLICH_QUERY = "(min-width: 641px)"'))
     && app.includes("seitlich ? {") && app.includes('translateX(-110%)')
     && app.includes('paddingLeft: seitlich ? 136')
     && app.includes('data-test="nav-leiste"')
