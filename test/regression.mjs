@@ -36,6 +36,19 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.82.1: Navigation seitlich auf dem iPad hochkant ----------
+console.log("== v0.82.1: Navigation seitlich ==");
+test("v0.82.1: Hochkant-Tablet zeigt die Navigation als Spalte links, sonst unten", (() => {
+  const app = quelle("src/App.jsx");
+  return versionMindestens("0.82.1")
+    && app.includes("const SEITLICH_QUERY") && app.includes("(orientation: portrait) and (min-width: 641px)")
+    && app.includes("seitlich ? {") && app.includes('translateX(-110%)')
+    && app.includes('paddingLeft: seitlich ? 136')
+    && app.includes('data-test="nav-leiste"')
+    && quelle("e2e/smoke.spec.js").includes("Navigation: iPad hochkant seitlich")
+    && releaseNoteVorhanden("rn-103");
+})());
+
 // ---------- v0.82: Geführter Erst-Start ----------
 console.log("== v0.82: Geführter Erst-Start ==");
 test("v0.82: Erst-Start in 3 Schritten (Eltern → Übergabe → Welten → Kennenlernen), Bestand bleibt verschont", (() => {

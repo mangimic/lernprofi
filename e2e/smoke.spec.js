@@ -2320,3 +2320,31 @@ test("Neues Gerät: Anmelden holt den verschlüsselten Tresor und entsperrt mit 
     .toBe("dark");
   await ctxB.close();
 });
+
+test("Navigation: iPad hochkant seitlich als Spalte, sonst unten", async ({ page }) => {
+  await tresorAnlegen(page);
+  const vp = page.viewportSize();
+  const hochkant = vp.width >= 641 && vp.height > vp.width;
+  const leiste = page.getByTestId("nav-leiste");
+  await expect(leiste).toBeVisible();
+  const box = await leiste.boundingBox();
+  if (hochkant) {
+    // Spalte am linken Rand, Knöpfe untereinander
+    expect(box.x).toBeLessThan(4);
+    expect(box.width).toBeLessThan(160);
+    expect(box.height).toBeGreaterThan(vp.height * 0.8);
+    const start = await page.getByTestId("nav-start").boundingBox();
+    const ueben = await page.getByTestId("nav-ueben").boundingBox();
+    expect(ueben.y).toBeGreaterThan(start.y + start.height - 2);
+    // Inhalt wird nicht von der Spalte verdeckt
+    const main = await page.locator("main").boundingBox();
+    expect(main.x).toBeGreaterThanOrEqual(box.x + box.width - 2);
+  } else {
+    // Querformat und Handy: unten wie bisher
+    expect(box.y + box.height).toBeGreaterThan(vp.height - 2);
+    expect(box.width).toBeGreaterThan(vp.width * 0.8);
+  }
+  // Die Knöpfe funktionieren in beiden Lagen
+  await page.getByTestId("nav-ueben").click();
+  await expect(page.getByTestId("nav-ueben")).toHaveCSS("font-weight", /700|800|900/);
+});

@@ -22,7 +22,7 @@ import Datenschutz from "./features/Datenschutz.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.82.0";
+export const APP_VERSION = "0.82.1";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -82,12 +82,26 @@ function WasIstNeu() {
   );
 }
 
+// 📱 Hochkant-Tablet (iPad 820×1180): Die Navigation wird eine Spalte am linken
+// Rand, damit sie mit dem Daumen am Rand erreichbar ist. Handy und Querformat
+// behalten die Leiste unten.
+const SEITLICH_QUERY = "(orientation: portrait) and (min-width: 641px)";
+const seitlichJetzt = () => typeof window !== "undefined" && !!window.matchMedia && window.matchMedia(SEITLICH_QUERY).matches;
+
 export default function App() {
   const { T, route, navTo, isMobile, tresor, data, heute, logChange, fokus } = useApp();
   // 📱 Beim Runterscrollen verschwindet die untere Leiste (mehr Platz),
   // beim Hochscrollen oder oben ist sie sofort wieder da.
   const [navWeg, setNavWeg] = useState(false);
   const [sucheOffen, setSucheOffen] = useState(false); // 🔍 Such-Overlay
+  const [seitlich, setSeitlich] = useState(seitlichJetzt);
+  useEffect(() => {
+    if (!window.matchMedia) return undefined;
+    const mq = window.matchMedia(SEITLICH_QUERY);
+    const auf = () => setSeitlich(mq.matches);
+    mq.addEventListener("change", auf);
+    return () => mq.removeEventListener("change", auf);
+  }, []);
   useEffect(() => {
     // capture:true fängt auch Scrollen in inneren Containern; scrollingElement
     // deckt Browser ab, bei denen window.scrollY nicht mitläuft.
@@ -176,7 +190,8 @@ export default function App() {
         // Der Wochenplan braucht Platz für 7 Tages-Spalten (iPad quer).
         maxWidth: route === "plan" ? "min(1360px, 100%)" : "var(--breite-max)",
         margin: "0 auto",
-        padding: isMobile ? "10px 12px 80px" : "16px 20px 90px",
+        padding: seitlich ? "16px 20px 40px" : isMobile ? "10px 12px 80px" : "16px 20px 90px",
+        paddingLeft: seitlich ? 136 : undefined,
       }}
     >
       <header style={{ textAlign: "center", marginBottom: T.abstand, position: "relative" }}>
@@ -211,7 +226,23 @@ export default function App() {
 
       <nav
         data-test="nav-leiste"
-        style={{
+        style={seitlich ? {
+          position: "fixed",
+          top: 0,
+          bottom: 0,
+          left: 0,
+          width: 112,
+          zIndex: 800,
+          overflowY: "auto",
+          transform: navWeg ? "translateX(-110%)" : "none",
+          transition: "transform 0.25s ease",
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+          padding: "12px 8px",
+          background: T.karte,
+          borderRight: `1px solid ${T.rand}`,
+        } : {
           position: "fixed",
           left: 0,
           right: 0,
@@ -231,7 +262,16 @@ export default function App() {
             key={t.id}
             data-test={t.test}
             onClick={() => navTo(t.id)}
-            style={{
+            style={seitlich ? {
+              flex: "0 0 auto",
+              width: "100%",
+              minHeight: 64,
+              whiteSpace: "normal",
+              lineHeight: 1.2,
+              background: route === t.id ? T.primaer : T.weich,
+              color: route === t.id ? T.primaerText : T.text,
+              fontWeight: 700,
+            } : {
               flex: "0 1 220px",
               background: route === t.id ? T.primaer : T.weich,
               color: route === t.id ? T.primaerText : T.text,

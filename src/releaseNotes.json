@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-103",
+    "version": "0.82.1",
+    "datum": "2026-11-08",
+    "titel": "Navigation seitlich auf dem iPad",
+    "entries": [
+      {
+        "type": "geaendert",
+        "text": "📱 Auf dem iPad im Hochformat steht die Navigation jetzt als Spalte am linken Rand – mit dem Daumen gut erreichbar. Im Querformat und auf dem Handy bleibt sie unten wie bisher."
+      }
+    ]
+  },
+  {
     "id": "rn-102",
     "version": "0.82.0",
     "datum": "2026-11-06",
