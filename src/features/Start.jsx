@@ -1,6 +1,8 @@
 import { useApp } from "../appContext.jsx";
 import ErstStart, { FragebogenKarte, InteressenKarte } from "./ErstStart.jsx";
 import { erstStartLage } from "../calc/onboarding.js";
+import { jetztDran } from "../calc/jetztDran.js";
+import { Icon } from "./Icon.jsx";
 import { koennerEinplanen } from "../calc/koennerPlan.js";
 import { hoerEinplanen } from "../calc/kompassPlan.js";
 import { heutigerTag, lernspur, muenzenNachRunde, aufgabenZaehlen } from "../calc/lerntage.js";
@@ -20,7 +22,7 @@ import {
    Hell/Dunkel. Der Elternbereich hat (nach Passwort-Entsperrung)
    seinen eigenen Tab. */
 export default function Start() {
-  const { data, logChange, T, tresor, navTo, heute, uebenZielSetzen } = useApp();
+  const { data, logChange, T, tresor, navTo, heute, uebenZielSetzen, isMobile } = useApp();
   const einstufung = data.lernstand.einstufung;
   const feldName = (key) => EINSTUFUNG_FELDER.find((f) => f.key === key) || { emoji: "✏️", name: key };
   const dunkel = data.einstellungen.thema === "dunkel";
@@ -97,9 +99,54 @@ export default function Start() {
     logChange(neu, "einstellungen", "geaendert", `Darstellung auf ${dunkel ? "Hell" : "Dunkel"} gestellt`);
   };
 
+  // 🎯 Tagesbühne: genau EINE Handlung ganz oben (Plan-Block → Empfehlung →
+  // Üben) und drei leise Kennzahlen – die restlichen Karten folgen darunter.
+  const dran = jetztDran(data, heute);
+  const dranLos = () => {
+    if (dran.feld) { uebenZielSetzen(dran.feld); navTo("ueben"); return; }
+    navTo(dran.art === "plan" ? "plan" : "ueben");
+  };
+  const kennzahl = (icon, farbe, wert, einheit, text, test) => (
+    <div data-test={test} style={{ background: T.karte, borderRadius: T.radius, padding: "16px 16px 14px", boxShadow: "var(--schatten)", display: "flex", flexDirection: "column", gap: 4, minWidth: 0 }}>
+      <Icon name={icon} size={24} style={{ color: farbe }} />
+      <div style={{ fontSize: 28, fontWeight: 900, lineHeight: 1.05 }}>
+        {wert}{einheit ? <span style={{ fontSize: 15, color: T.textLeise, fontWeight: 800 }}> {einheit}</span> : null}
+      </div>
+      <div style={{ fontSize: "var(--schrift-klein)", fontWeight: 700, color: T.textLeise }}>{text}</div>
+    </div>
+  );
+
   return (
     <div data-test="start-seite">
       <ErstStart />
+      {!erstStartOffen && (
+        <section aria-label="Jetzt dran" data-test="jetzt-dran" style={{
+          background: "var(--tinte)", color: "var(--tinte-text)", borderRadius: 28, padding: isMobile ? "22px 20px" : "28px 30px",
+          marginBottom: T.abstand, display: "flex", gap: 20, alignItems: "center",
+        }}>
+          <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+            <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--primaer)" }}>Jetzt dran</div>
+            <h2 data-test="jetzt-dran-titel" style={{ margin: 0, fontSize: isMobile ? 26 : "var(--schrift-titel)", lineHeight: 1.12 }}>{dran.titel}</h2>
+            <div style={{ fontSize: "var(--schrift)", fontWeight: 700, color: "var(--tinte-leise)" }}>{dran.untertitel}</div>
+            <button data-test="jetzt-dran-los" onClick={dranLos}
+              style={{ marginTop: 8, alignSelf: "flex-start", background: "var(--primaer)", color: "var(--primaer-text)", fontSize: 19, fontWeight: 900, padding: "0 24px", minHeight: 54, borderRadius: 18, display: "inline-flex", alignItems: "center", gap: 10 }}>
+              {dran.knopf} <Icon name="arrow" size={22} weite={2.6} />
+            </button>
+          </div>
+          {!isMobile && (
+            <div style={{ width: 118, height: 118, borderRadius: "50%", background: "rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" }}>
+              <Icon name={dran.art === "plan" ? "calendar" : dran.art === "feld" ? "target" : "pencil"} size={56} weite={1.8} style={{ color: "var(--primaer)" }} />
+            </div>
+          )}
+        </section>
+      )}
+      {!erstStartOffen && (
+        <section aria-label="Heute in Zahlen" data-test="jetzt-dran-stats" style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12, marginBottom: T.abstand }}>
+          {kennzahl("check", "var(--ok)", dran.geschafft, `von ${dran.gesamt}`, "Blöcke heute", "stat-bloecke")}
+          {kennzahl("clock", "var(--warn)", dran.zeitFrei, "Min", "Lernzeit frei", "stat-zeit")}
+          {kennzahl("coin", "var(--see)", dran.muenzen, "", dran.muenzen === 1 ? "Münze" : "Münzen", "stat-muenzen")}
+        </section>
+      )}
       {(() => {
         // 🧭 Kompass-Countdown GANZ OBEN (≤ 10 Wochen vor dem Test):
         // Countdown je Fach + die heutigen Kompass-Themen aus dem
@@ -114,7 +161,7 @@ export default function Start() {
             onKeyDown={(e) => e.key === "Enter" && navTo("kompass")}
             style={{
               background: T.karte, color: T.text, borderRadius: T.radius, padding: T.abstand,
-              marginBottom: T.abstand, border: `2px solid ${T.primaer}`, cursor: "pointer",
+              marginBottom: T.abstand, boxShadow: "var(--schatten)", cursor: "pointer",
             }}>
             <b>🧭 Kompass-Countdown</b>
             <span style={{ float: "right", fontWeight: 800, color: T.primaer }}>
@@ -150,19 +197,19 @@ export default function Start() {
         );
       })()}
       {!erstStartOffen && tresor.elternModus && !data.profil.onboardingEltern && (
-        <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand, border: `2px solid ${T.primaer}` }}>
+        <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand, boxShadow: "var(--schatten)" }}>
           <FragebogenKarte />
         </div>
       )}
       {!erstStartOffen && !data.profil.interessenGefragt && !(data.profil.interessen || []).length && (
-        <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand, border: `2px solid ${T.primaer}` }}>
+        <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand, boxShadow: "var(--schatten)" }}>
           <InteressenKarte />
         </div>
       )}
       {!data.lernstand.koenner?.geplant && (
         <div data-test="koenner-karte" style={{
           background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand,
-          border: "2px solid var(--warn)",
+          boxShadow: "var(--schatten)",
         }}>
           <b>🏅 Mathekönner kommt!</b>
           <p style={{ margin: "4px 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
@@ -170,7 +217,7 @@ export default function Start() {
             Ein Tipp legt sie aufs Wochenende: Samstag 1×1 und Rechengeschichten, Sonntag Zahlen bis 10 000.
           </p>
           <button data-test="koenner-einplanen" onClick={koennerPlanen}
-            style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+            style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
             🗓️ Fürs Wochenende einplanen
           </button>
         </div>
@@ -178,7 +225,7 @@ export default function Start() {
       {!data.lernstand.hoerplan?.geplant && (
         <div data-test="hoer-karte" style={{
           background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand,
-          border: `2px solid ${T.primaer}`,
+          boxShadow: "var(--schatten)",
         }}>
           <b>🔊 Neu: Hör-Detektiv!</b>
           <p style={{ margin: "4px 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
@@ -186,7 +233,7 @@ export default function Start() {
             tz oder z? Ein Tipp legt dir 2 Wochen lang Montag + Donnerstag eine Runde in den Plan.
           </p>
           <button data-test="hoer-einplanen" onClick={hoerPlanen}
-            style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+            style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
             🗓️ 2-Wochen-Plan anlegen
           </button>
         </div>
@@ -201,7 +248,7 @@ export default function Start() {
           {data.einstellungen.zeitLimit > 0 ? ` · ⏰ noch ${zeitUebrigMin(data.lernstand.zeit, data.einstellungen.zeitLimit, heute)} Min` : ""}
         </p>
         <button data-test="zum-ueben" onClick={() => navTo("ueben")}
-          style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
+          style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
           ✏️ Jetzt üben (Deutsch · Mathe · Sachkunde · Stark)
         </button>
         <button data-test="zum-konz" onClick={() => navTo("konz")}

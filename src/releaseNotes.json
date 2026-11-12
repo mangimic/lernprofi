@@ -1,5 +1,29 @@
 [
   {
+    "id": "rn-107",
+    "version": "0.84.0",
+    "datum": "2026-11-12",
+    "titel": "Neues Gesicht: Ruhige Bühne",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🎨 Leos Welten hat ein neues Gesicht: warmer Papiergrund, tiefes Tintenblau für alles Wichtige und ein einziger goldener Knopf für das, was jetzt dran ist. Dazu eine eigene, runde Schrift (Nunito, direkt in der App gespeichert – nichts wird von fremden Servern geladen) und eigene Zeichen statt Emojis in der Navigation."
+      },
+      {
+        "type": "neu",
+        "text": "🎯 Startseite als Tagesbühne: Ganz oben steht genau EINE Handlung – der nächste offene Block aus deinem Plan, sonst dein empfohlenes Lernfeld, sonst „Eine Runde üben“ – mit drei kleinen Kennzahlen (Blöcke heute, freie Lernzeit, Münzen). Alle bekannten Karten bleiben darunter."
+      },
+      {
+        "type": "verbessert",
+        "text": "✨ Übungen zeigen den Fortschritt als Balkenreihe über der Frage. Die Spielhalle zeigt deine Welten als farbige Kacheln, Lieblings-Welten mit dem Abzeichen „Deine Welt“. Der Erst-Start bekommt eine dunkle Bühne mit Leo für Übergabe und Abschluss."
+      },
+      {
+        "type": "hinweis",
+        "text": "🧭 Alle Abläufe, Daten und Einstellungen bleiben gleich – nur die Darstellung ist neu. Die Umstellung läuft in Etappen; Emojis in Aufgabentexten und Statuszeilen verschwinden mit der nächsten."
+      }
+    ]
+  },
+  {
     "id": "rn-106",
     "version": "0.83.1",
     "datum": "2026-11-12",

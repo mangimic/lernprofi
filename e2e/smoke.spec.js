@@ -61,6 +61,9 @@ test("Tresor anlegen, Kind entsperrt nach Neustart selbständig per PIN", async 
   await expect
     .poll(async () => page.evaluate(() => document.documentElement.dataset.theme))
     .toBe("dark");
+  // Der verschlüsselte Tresor-Schreibvorgang läuft asynchron – erst nach ihm
+  // neu laden, sonst kommt unter Last der alte (helle) Stand zurück.
+  await page.waitForTimeout(600);
 
   // Neustart: Gate erscheint, falsche PIN meldet sich freundlich
   await page.reload();
@@ -1778,8 +1781,8 @@ test("Dino-Rennen: Welten-Skin auf der Match-Engine – Lieblings-Welt steht vor
   await page.getByTestId("interessen-ok").click();
   await muenzeVerdienen(page);
   await expect(page.locator('[data-test^="spiel-"]').first()).toHaveAttribute("data-test", /spiel-(dino|rakete)/);
-  await expect(page.getByTestId("spiel-dino")).toContainText("⭐ Deine Welt");
-  await expect(page.getByTestId("spiel-rakete")).toContainText("⭐ Deine Welt");
+  await expect(page.getByTestId("spiel-dino")).toContainText("Deine Welt");
+  await expect(page.getByTestId("spiel-rakete")).toContainText("Deine Welt");
 
   await page.evaluate(() => { window.__SPIEL_SCHNELL__ = true; });
   await page.getByTestId("spiel-dino").click();
@@ -1816,7 +1819,7 @@ test("Angel-Wettfischen: Heimspiel-Welt auf der Match-Engine", async ({ page }) 
   await page.getByTestId("interesse-angeln").click();
   await page.getByTestId("interessen-ok").click();
   await muenzeVerdienen(page);
-  await expect(page.getByTestId("spiel-fischen")).toContainText("⭐ Deine Welt");
+  await expect(page.getByTestId("spiel-fischen")).toContainText("Deine Welt");
 
   await page.evaluate(() => { window.__SPIEL_SCHNELL__ = true; });
   await page.getByTestId("spiel-fischen").click();
@@ -2386,4 +2389,24 @@ test("🕐 Uhrzeit & Zeitspannen: Ziffernblatt lesen, Merk-Bild nach der Antwort
   }
   expect(gefunden, "eine Uhr-PLUS-Aufgabe im ersten Paket").toBe(true);
   await page.getByTestId("abbrechen").click();
+});
+
+test("Tagesbühne: „Jetzt dran“ führt in die Übung, Kennzahlen stehen daneben, Navigation hat Zeichen statt Emojis", async ({ page }) => {
+  await tresorAnlegen(page);
+  // Erst-Start ist offen → die Bühne wartet, bis er abgeschlossen ist
+  await expect(page.getByTestId("jetzt-dran")).toHaveCount(0);
+  await page.getByTestId("fb-spaeter").click();
+  await page.getByTestId("erststart-uebergabe-weiter").click();
+  await page.getByTestId("interessen-spaeter").click();
+  await page.getByTestId("erststart-spaeter").click();
+  await expect(page.getByTestId("jetzt-dran")).toBeVisible();
+  await expect(page.getByTestId("jetzt-dran-titel")).toContainText("Eine Runde üben");
+  await expect(page.getByTestId("stat-muenzen")).toContainText("0");
+  await expect(page.getByTestId("stat-zeit")).toContainText("20");
+  // Navigation: Zeichen (SVG) + Beschriftung, kein Emoji
+  const nav = page.getByTestId("nav-leiste");
+  expect(await nav.locator("svg").count()).toBeGreaterThanOrEqual(5);
+  await expect(page.getByTestId("nav-ueben")).toHaveText("Üben");
+  await page.getByTestId("jetzt-dran-los").click();
+  await expect(page.getByTestId("ueben-fach-mathe")).toBeVisible();
 });
