@@ -161,38 +161,51 @@ function Netz({ b }) {
 }
 
 const UHR_WINK = (grad) => ((grad - 90) * Math.PI) / 180;
-/* Ziffernblatt mit Zeigern; `bogen` = Minuten-Bögen [{von,bis,farbe}]
-   außen am Rand (zeigen den Weg des Minutenzeigers), `frage` = nur „?"
-   statt Zeigern (die Ziel-Uhr vor der Antwort). */
+const UHR_STUNDE = "#d6453d"; // roter kurzer Zeiger – wie im Schulheft
+const UHR_MINUTE = "#2f6fd6"; // blauer langer Zeiger
+/* Ziffernblatt wie im Schulheft: Zahlen 1–12, 60 Minutenstriche (jeder
+   5. länger), roter Stundenzeiger, blauer Minutenzeiger. `bogen` =
+   Minuten-Bögen [{von,bis,farbe}] innen am Rand (zeigen den Weg des
+   Minutenzeigers), `frage` = nur „?" statt Zeigern (die Ziel-Uhr vor
+   der Antwort). Minutengenau ablesbar – das Heft verlangt es. */
 function UhrBild({ zeit, bogen, frage }) {
   const [h, min] = (zeit || "12:00").split(":").map((x) => parseInt(x, 10));
-  const zeiger = (grad, laenge, breite) => (
-    <line x1="48" y1="48" x2={48 + laenge * Math.cos(UHR_WINK(grad))} y2={48 + laenge * Math.sin(UHR_WINK(grad))}
-      stroke={LINIE} strokeWidth={breite} strokeLinecap="round" />
+  const M = 60; // Mittelpunkt (viewBox 120×120)
+  const zeiger = (grad, laenge, breite, farbe, name) => (
+    <line data-zeiger={name} x1={M} y1={M} x2={M + laenge * Math.cos(UHR_WINK(grad))} y2={M + laenge * Math.sin(UHR_WINK(grad))}
+      stroke={farbe} strokeWidth={breite} strokeLinecap="round" />
   );
   const bogenPfad = (von, bis, r) => {
     const a1 = UHR_WINK(von * 6), a2 = UHR_WINK(bis * 6);
     const dauer = (((bis - von) % 60) + 60) % 60;
-    return `M ${48 + r * Math.cos(a1)} ${48 + r * Math.sin(a1)} A ${r} ${r} 0 ${dauer > 30 ? 1 : 0} 1 ${48 + r * Math.cos(a2)} ${48 + r * Math.sin(a2)}`;
+    return `M ${M + r * Math.cos(a1)} ${M + r * Math.sin(a1)} A ${r} ${r} 0 ${dauer > 30 ? 1 : 0} 1 ${M + r * Math.cos(a2)} ${M + r * Math.sin(a2)}`;
   };
   return (
-    <svg width="96" height="96" viewBox="0 0 96 96" role="img" aria-label={frage ? "Uhr mit Fragezeichen" : `Uhr: ${zeit} Uhr`}>
-      <circle cx="48" cy="48" r="44" fill="var(--karte)" stroke={LINIE} strokeWidth="2.5" />
+    <svg width="120" height="120" viewBox="0 0 120 120" role="img" aria-label={frage ? "Uhr mit Fragezeichen" : `Uhr: ${zeit} Uhr`}>
+      <circle cx={M} cy={M} r="56" fill="var(--karte)" stroke={LINIE} strokeWidth="2.5" />
+      {Array.from({ length: 60 }, (_, i) => {
+        const a = UHR_WINK(i * 6);
+        const fuenfer = i % 5 === 0;
+        const innen = fuenfer ? 46 : 50;
+        return <line key={i} x1={M + innen * Math.cos(a)} y1={M + innen * Math.sin(a)}
+          x2={M + 54 * Math.cos(a)} y2={M + 54 * Math.sin(a)} stroke={fuenfer ? LINIE : LEISE} strokeWidth={fuenfer ? 2.5 : 1} />;
+      })}
       {Array.from({ length: 12 }, (_, i) => {
-        const a = UHR_WINK(i * 30);
-        return <line key={i} x1={48 + 38 * Math.cos(a)} y1={48 + 38 * Math.sin(a)}
-          x2={48 + 43 * Math.cos(a)} y2={48 + 43 * Math.sin(a)} stroke={LEISE} strokeWidth={i % 3 === 0 ? 3 : 1.5} />;
+        const n = i + 1;
+        const a = UHR_WINK(n * 30);
+        return <text key={n} x={M + 36 * Math.cos(a)} y={M + 36 * Math.sin(a) + 4} textAnchor="middle"
+          fontSize="11" fontWeight="800" fill={LINIE}>{n}</text>;
       })}
       {(bogen || []).map((bg, i) => (((bg.bis - bg.von) % 60) + 60) % 60 > 0 && (
-        <path key={i} d={bogenPfad(bg.von, bg.bis, 33)} fill="none" stroke={bg.farbe}
+        <path key={i} d={bogenPfad(bg.von, bg.bis, 43)} fill="none" stroke={bg.farbe}
           strokeWidth="5" strokeLinecap="round" opacity="0.85" />
       ))}
       {frage ? (
-        <text x="48" y="60" textAnchor="middle" fontSize="34" fontWeight="800" fill={WARN}>?</text>
+        <text x={M} y={M + 12} textAnchor="middle" fontSize="36" fontWeight="800" fill={WARN}>?</text>
       ) : (<>
-        {zeiger(((h % 12) + min / 60) * 30, 22, 4.5)}
-        {zeiger(min * 6, bogen && bogen.length ? 29 : 33, 3)}
-        <circle cx="48" cy="48" r="3.5" fill={LINIE} />
+        {zeiger(((h % 12) + min / 60) * 30, 26, 5, UHR_STUNDE, "stunde")}
+        {zeiger(min * 6, 42, 3.5, UHR_MINUTE, "minute")}
+        <circle cx={M} cy={M} r="4" fill={LINIE} />
       </>)}
     </svg>
   );

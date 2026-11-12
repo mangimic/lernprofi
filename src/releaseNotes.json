@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-106",
+    "version": "0.83.1",
+    "datum": "2026-11-12",
+    "titel": "Uhr wie im Schulheft",
+    "entries": [
+      {
+        "type": "verbessert",
+        "text": "🕐 Das Ziffernblatt ist jetzt so detailliert wie im Mathe-Heft: Zahlen 1–12, 60 Minutenstriche (jeder fünfte länger), roter Stundenzeiger und blauer Minutenzeiger – damit lässt sich jede Uhrzeit minutengenau ablesen."
+      },
+      {
+        "type": "neu",
+        "text": "📗 Neue Aufgaben nach den Heft-Seiten „Zeit“ und „Zeitspannen“: „Wie spät ist es in 54 Minuten?“ und „Wie spät war es vor 1 h 32 min?“ ab einer Zeiger-Uhr, „Wie viel Zeit ist vergangen?“, Fahrplan-Tabellen (Abfahrt, Fahrzeit, Ankunft – eins fehlt), die Zugfahrt Hannover–Lübeck mit Umsteigen, Umrechnungen mit Vierteln (5 ¼ h), Sekunden (7 min 28 s, 538 s) und Tagen sowie die Tabelle „in einer Dreiviertelstunde / in eineinhalb Stunden“. Alle Lösungen werden im Test nachgerechnet."
+      }
+    ]
+  },
+  {
     "id": "rn-105",
     "version": "0.83.0",
     "datum": "2026-11-12",

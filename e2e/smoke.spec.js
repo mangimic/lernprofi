@@ -2360,7 +2360,13 @@ test("🕐 Uhrzeit & Zeitspannen: Ziffernblatt lesen, Merk-Bild nach der Antwort
   await expect(page.getByTestId("wozu-anker")).toContainText("Uhr");
   // Klasse 4 startet auf Stufe 2: erste Aufgabe = Ziffernblatt minutengenau ablesen
   await expect(page.getByTestId("frage-text")).toContainText("minutengenau");
-  await expect(page.locator('[data-test="aufgaben-bild"][data-art="uhr"]')).toBeVisible();
+  const uhr = page.locator('[data-test="aufgaben-bild"][data-art="uhr"] svg');
+  await expect(uhr).toBeVisible();
+  // 📐 Ziffernblatt wie im Schulheft: Zahlen 1–12, 60 Minutenstriche, zwei farbige Zeiger
+  await expect(uhr.locator("text")).toHaveCount(12);
+  expect(await uhr.locator("line").count()).toBeGreaterThanOrEqual(62);
+  await expect(uhr.locator('[data-zeiger="stunde"]')).toHaveCount(1);
+  await expect(uhr.locator('[data-zeiger="minute"]')).toHaveCount(1);
   await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
   await expect(page.getByTestId("feedback")).toBeVisible();
   await page.getByTestId("weiter-knopf").click();
