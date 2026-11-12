@@ -3,6 +3,7 @@ import { Icon, LeoMark } from "./features/Icon.jsx";
 import { useApp } from "./appContext.jsx";
 import { zeitAbgelaufen } from "./calc/elternWerkzeuge.js";
 import { tagesformNoetig, tagesformEintragen, missionsLaengeHeute } from "./calc/tagesform.js";
+import { modulAn, routeErlaubt } from "./calc/module.js";
 import releaseNotes from "./releaseNotes.json";
 import Start from "./features/Start.jsx";
 import Training from "./features/Training.jsx";
@@ -24,7 +25,7 @@ import Datenschutz from "./features/Datenschutz.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.85.2";
+export const APP_VERSION = "0.86.0";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -181,7 +182,8 @@ export default function App() {
   const tabs = [
     { id: "start", label: "Start", icon: "home", test: "nav-start" },
     { id: "ueben", label: "Üben", icon: "pencil", test: "nav-ueben" },
-    { id: "plan", label: "Plan", icon: "calendar", test: "nav-plan" },
+    // 🧩 Plan gehört nicht zum Lern-App-Kern – nur mit freigeschaltetem Modul (v0.86)
+    ...(modulAn(data, "plan") ? [{ id: "plan", label: "Plan", icon: "calendar", test: "nav-plan" }] : []),
     { id: "spiele", label: "Spiele", icon: "gamepad", test: "nav-spiele" },
     { id: "training", label: "Training", icon: "target", test: "nav-training" },
     ...(tresor.elternModus ? [{ id: "eltern", label: "Eltern", icon: "wrench", test: "nav-eltern" }] : []),
@@ -227,7 +229,7 @@ export default function App() {
       {sucheOffen && <Suche zu={() => setSucheOffen(false)} />}
 
       <main>
-        {route === "neu" ? <WasIstNeu /> : route === "ueben" ? <Ueben /> :
+        {!routeErlaubt(route, data) ? <Start /> : route === "neu" ? <WasIstNeu /> : route === "ueben" ? <Ueben /> :
          route === "spiele" ? <Spielhalle /> :
          route === "training" ? <Training /> :
          route === "konz" ? <Konzentration /> :

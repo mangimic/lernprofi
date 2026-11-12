@@ -16,6 +16,43 @@ describe("migrateData", () => {
     }
   });
 
+  it("v0.86 Module: neu = Lern-App-Kern, Bestand (Einstellungen ohne Module) = Vollausbau", () => {
+    // Neues Dokument und alles ohne Einstellungen: Kern, keine Termine, kein Mittags-Block
+    for (const d of [leeresDokument(HEUTE), migrateData(null, HEUTE), migrateData({ profil: { name: "Kind" } }, HEUTE)]) {
+      expect(d.einstellungen.module).toEqual({ plan: false, ki: false, schrift: false });
+      expect(d.einstellungen.festeTermine).toEqual([]);
+      expect(d.einstellungen.schule).toEqual({ tage: [0, 1, 2, 3, 4], von: 470, bis: 780, stunden: {}, mittag: false });
+    }
+    expect(leeresDokument(HEUTE).schemaVersion).toBe(2);
+    // Bestandsfamilie: Termine bleiben, Mittag bleibt, alle Module an
+    const termin = { tag: 2, beginn: 900, dauer: 60, name: "Chor", emoji: "🎵", hinweis: "", aktiv: true };
+    const bestand = migrateData({ einstellungen: { festeTermine: [termin] } }, HEUTE);
+    expect(bestand.einstellungen.module).toEqual({ plan: true, ki: true, schrift: true });
+    expect(bestand.einstellungen.schule.mittag).toBe(true);
+    expect(bestand.einstellungen.festeTermine.filter((f) => f.name === "Mittag & Spielzeit").length).toBe(7);
+    expect(bestand.einstellungen.festeTermine.at(-1)).toEqual(termin);
+    expect(migrateData(bestand, HEUTE)).toEqual(bestand); // idempotent, Module bleiben an
+    // Uralt-Stand ohne Termin-Liste: nur der Mittags-Block, KEIN fremder Termin
+    const uralt = migrateData({ einstellungen: {} }, HEUTE);
+    expect(uralt.einstellungen.festeTermine.every((f) => f.name === "Mittag & Spielzeit")).toBe(true);
+    expect(uralt.einstellungen.festeTermine.length).toBe(7);
+    // Gespeicherte Module zählen genau (nur echte true), Fremdes fliegt raus
+    const teil = migrateData({ einstellungen: { module: { plan: true, ki: "ja", quatsch: true } } }, HEUTE);
+    expect(teil.einstellungen.module).toEqual({ plan: true, ki: false, schrift: false });
+    expect(teil.einstellungen.schule.mittag).toBe(false);
+  });
+
+  it("v0.86 Schule: Stundenplan nur im Raster, Fächer gekürzt, AG-Marker bleibt", () => {
+    const d = migrateData({ einstellungen: { module: { plan: true }, schule: { mittag: true, stunden: {
+      0: [[470, 515, "Deutsch"], [1, 2, "Unfug"], [625, 670, "  Werken  ", true], [515, 560, ""]],
+      6: [[470, 515, "Sonntag"]], 1: "kaputt",
+    } } } }, HEUTE);
+    expect(d.einstellungen.schule.stunden).toEqual({ 0: [[470, 515, "Deutsch"], [625, 670, "Werken", true]] });
+    expect(d.einstellungen.schule.mittag).toBe(true);
+    expect(d.einstellungen.festeTermine.length).toBe(7);
+    expect(migrateData(d, HEUTE)).toEqual(d);
+  });
+
   it("ist idempotent", () => {
     const einmal = migrateData({ profil: { name: "Kind" } }, HEUTE);
     const zweimal = migrateData(einmal, HEUTE);

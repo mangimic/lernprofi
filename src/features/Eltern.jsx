@@ -9,7 +9,8 @@ import { kontoStatus, kontoRegistrieren, kontoAnmelden, kontoAbmelden, kontoRett
 import { entsperrenMitPasswort, rettungAnlegen } from "../vault.js";
 import { kiStatus, kiDeckelSetzen, kiErklaeren, kiBericht, kiSaetze } from "../ki.js";
 import { berichtDaten } from "../calc/bericht.js";
-import { BAUSTEINE } from "../calc/wochenplan.js";
+import { BAUSTEINE, stundenplanAusText, stundenplanAlsText, mittagErzwingen } from "../calc/wochenplan.js";
+import { modulAn, modulInfo } from "../calc/module.js";
 import { aktiveKarten } from "../calc/karteikarten.js";
 import { kastenZaehler } from "../calc/karteikasten.js";
 
@@ -79,6 +80,7 @@ export default function Eltern() {
   const [pinNeu, setPinNeu] = useState({ pw: "", pin: "" });
   const [terminNeu, setTerminNeu] = useState({ tag: "", art: "ka", fach: "" }); // Termin-Eingabe
   const [katEntwurf, setKatEntwurf] = useState(null); // Plan-Kategorien im Bearbeiten-Modus
+  const [schuleEntwurf, setSchuleEntwurf] = useState(null); // 🏫 Stundenplan-Text im Bearbeiten (null = gespeicherter Stand)
 
   const feld = {
     width: "100%", minHeight: "var(--touch)", fontSize: "var(--schrift)",
@@ -274,7 +276,8 @@ export default function Eltern() {
         position: "sticky", top: 0, zIndex: 5, display: "flex", gap: 6, overflowX: "auto",
         padding: "8px 2px", margin: "0 -2px 10px", background: "var(--grund)",
       }}>
-        {ELTERN_GRUPPEN.map((g) => (
+        {/* 🧩 Gruppen abgeschalteter Module (Plan, Leo) fehlen im Lern-App-Kern */}
+        {ELTERN_GRUPPEN.filter((g) => (g.key !== "plan" || modulAn(data, "plan")) && (g.key !== "leo" || modulAn(data, "ki"))).map((g) => (
           <button key={g.key} data-test={`eb-tab-${g.key}`} onClick={() => setTab(g.key)}
             style={{
               whiteSpace: "nowrap", fontWeight: 700, borderRadius: 20, padding: "8px 14px",
@@ -307,6 +310,7 @@ export default function Eltern() {
         ) : <p style={{ color: T.textLeise }}>Noch keine Lerntage – die Übersicht füllt sich beim Üben.</p>}
       </Karte>
 
+      {modulAn(data, "ki") && (
       <Karte test="eltern-bericht">
         <b>Leos Wochenbericht</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
@@ -348,6 +352,7 @@ export default function Eltern() {
           </>
         )}
       </Karte>
+      )}
 
       <Karte test="eltern-gespraech">
         <b>Gesprächsimpulse</b>
@@ -496,6 +501,7 @@ export default function Eltern() {
         </button>
       </Karte>
 
+      {modulAn(data, "ki") && modulAn(data, "schrift") && (
       <Karte test="eltern-saetze">
         <b>Persönliche Übungssätze</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
@@ -525,7 +531,7 @@ export default function Eltern() {
           <>
             <input data-test="saetze-woerter" type="text" value={saetzeWoerter}
               onChange={(e) => setSaetzeWoerter(e.target.value)} maxLength={200}
-              placeholder="Interessen, z. B.: Schlagzeug, Angeln, Pfadfinder"
+              placeholder="Interessen, z. B.: Fußball, Pferde, Lego"
               style={{ width: "100%", boxSizing: "border-box", minHeight: "var(--touch)", borderRadius: T.radiusKlein, border: `1px solid ${T.rand}`, padding: "0 12px", background: T.grund, color: T.text }} />
             <button data-test="saetze-holen" disabled={!!vorschlaege?.laden || saetzeWoerter.trim().length < 2 || !ki?.verfuegbar}
               onClick={async () => {
@@ -568,8 +574,41 @@ export default function Eltern() {
           </>
         )}
       </Karte>
+      )}
       </>)}
-      {tab === "plan" && (<>
+      {tab === "plan" && modulAn(data, "plan") && (<>
+      <Karte test="eltern-schule">
+        <b>Schulzeiten &amp; Stundenplan</b>
+        <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          Je Zeile ein Tag, die Fächer der 1. bis 6. Stunde mit Komma getrennt. „-“ lässt eine Stunde frei,
+          „(AG)“ hinter dem Fach markiert sie als freiwillig. Der Plan bleibt verschlüsselt im Tresor und
+          erscheint im Wochenplan unter „Schulstunden“.
+        </p>
+        <textarea data-test="schule-text" rows={5} spellCheck={false}
+          value={schuleEntwurf ?? stundenplanAlsText(data.einstellungen.schule.stunden)}
+          onChange={(e) => setSchuleEntwurf(e.target.value)}
+          style={{ ...feld, minHeight: 132, padding: "8px 12px", fontFamily: "inherit", lineHeight: 1.5, resize: "vertical" }} />
+        <button data-test="schule-speichern" disabled={schuleEntwurf === null}
+          onClick={() => {
+            einstellung({ schule: { ...data.einstellungen.schule, stunden: stundenplanAusText(schuleEntwurf) } }, "Stundenplan gespeichert");
+            setSchuleEntwurf(null);
+          }}
+          style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700, opacity: schuleEntwurf === null ? 0.55 : 1 }}>
+          Stundenplan speichern
+        </button>
+        <p style={{ margin: "12px 0 6px", fontSize: "var(--schrift-klein)" }}>
+          <b>Mittag &amp; Spielzeit</b> <span style={{ color: T.textLeise }}>– 13 bis 14 Uhr an allen Tagen im Wochenplan blocken</span>
+        </p>
+        <Seg test="mittag" werte={[{ v: 1, label: "An" }, { v: 0, label: "Aus" }]}
+          aktiv={data.einstellungen.schule.mittag ? 1 : 0}
+          auf={(v) => einstellung({
+            schule: { ...data.einstellungen.schule, mittag: v === 1 },
+            festeTermine: v === 1
+              ? mittagErzwingen(data.einstellungen.festeTermine)
+              : data.einstellungen.festeTermine.filter((f) => !(f.beginn === 780 && f.name === "Mittag & Spielzeit")),
+          }, `Mittag & Spielzeit ${v === 1 ? "geblockt" : "freigegeben"}`)} />
+      </Karte>
+
       <Karte test="eltern-termine">
         <b>Termine für den Wochenplan</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
@@ -746,6 +785,7 @@ export default function Eltern() {
         </button>
       </Karte>
 
+      {modulAn(data, "plan") && (
       <Karte test="eltern-doks">
         <b>Unterlagen (Dokumenten-Ablage)</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
@@ -759,8 +799,9 @@ export default function Eltern() {
           Ablage öffnen
         </button>
       </Karte>
+      )}
       </>)}
-      {tab === "leo" && (<>
+      {tab === "leo" && modulAn(data, "ki") && (<>
       <Karte test="eltern-ki">
         <b>KI-Funktionen</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
@@ -770,10 +811,10 @@ export default function Eltern() {
         </p>
         {[
           { key: "erklaeren", name: "„Erklär es mir anders“ (nach Fehlversuchen)", da: true },
-          { key: "schrift", name: "Schrift-Blick (Foto vom Blatt prüfen)", da: true },
+          ...(modulAn(data, "schrift") ? [{ key: "schrift", name: "Schrift-Blick (Foto vom Blatt prüfen)", da: true }] : []),
           { key: "aufsatz", name: "Aufsatz-Check (Foto vom Text)", da: true },
           { key: "bericht", name: "Wochenbericht", da: true },
-          { key: "saetze", name: "Persönliche Übungssätze", da: true },
+          ...(modulAn(data, "schrift") ? [{ key: "saetze", name: "Persönliche Übungssätze", da: true }] : []),
         ].map((f) => (
           <div key={f.key} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, opacity: f.da ? 1 : 0.55 }}>
             <span style={{ flex: 1, fontSize: "var(--schrift-klein)" }}>{f.name}{f.da ? "" : " · kommt als Nächstes"}</span>
@@ -1000,6 +1041,10 @@ export default function Eltern() {
         </p>
         <input data-test="profil-name" style={feld} placeholder="Vorname (freiwillig)" value={data.profil.name}
           onChange={(e) => logChange({ ...data, profil: { ...data.profil, name: e.target.value } }, "profil", "geaendert", "Name angepasst")} />
+        {/* 🧩 Was ist für diese Familie freigeschaltet? (reine Anzeige, v0.86) */}
+        <p data-test="module-info" style={{ margin: "4px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          {modulInfo(data)}
+        </p>
       </Karte>
 
       <Karte test="eltern-sync">

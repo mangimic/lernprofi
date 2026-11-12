@@ -19,7 +19,7 @@ export const DEUTSCH_LISTE = [
   { key: "gws", emoji: "📖", name: "Grundwortschatz" },
   ...DEUTSCH_BEREICHE,
   ...KOMPASS_DEUTSCH_BEREICHE, // 🧭 die Aufgabenformate aus dem Kompass-4-Test
-  HOEREN_BEREICH, // 🔊 gezieltes Rechtschreib-Training nach Felix' Fehlermustern
+  HOEREN_BEREICH, // 🔊 gezieltes Rechtschreib-Training nach typischen Fehlermustern
   { key: "vorgang", emoji: "📝", name: "Vorgangsbeschreibung", typ: "modul" },
 ];
 

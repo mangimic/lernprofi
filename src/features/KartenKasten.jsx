@@ -111,7 +111,7 @@ export default function KartenKasten() {
           <p data-test="kasten-frage" style={{ fontSize: "var(--schrift-gross)", fontWeight: 800, margin: "6px 0 4px", whiteSpace: "pre-line" }}>{karte.vs}</p>
           {karte.hinweis && <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>{karte.hinweis}</p>}
           {felder ? (
-            /* ⌨️ Zahlen-Karte: Ergebnis eintippen, objektiv prüfen – Felix
+            /* ⌨️ Zahlen-Karte: Ergebnis eintippen, objektiv prüfen – das Kind
                sieht sofort je Feld ✓ oder die Korrektur, die Wertung folgt
                automatisch aus dem Ergebnis. */
             <form onSubmit={(e) => {

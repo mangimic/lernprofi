@@ -11,9 +11,13 @@ import { STARK_SAETZE } from "./aufgaben/stark.js";
 import { THEMEN_KEYS } from "./aufgaben/themen.js";
 import { SCHWERPUNKT_KEYS } from "./onboarding.js";
 import { sudokuStand } from "./sudoku.js";
-import { FESTE_TERMINE_STANDARD, mittagErzwingen } from "./wochenplan.js";
+import { mittagErzwingen, SCHULE_STANDARD, SCHUL_RASTER } from "./wochenplan.js";
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2; // v0.86: Module + Schulzeiten als Daten
+
+/** 🧩 Module, die nicht zum Lern-App-Kern gehören (v0.86). Neue Dokumente
+    starten ohne sie; Bestandsdokumente (vor v0.86) behalten alles. */
+export const MODULE = ["plan", "ki", "schrift"];
 
 /** Leeres, gültiges Dokument (Startzustand eines neuen Profils). */
 export function leeresDokument(heute) {
@@ -64,7 +68,9 @@ export function leeresDokument(heute) {
       uebungsThema: "alltag", // Übungs-Welt der Satz-Übungen (Kind wählt selbst)
       eigeneSaetze: [],    // von den Eltern freigegebene Schreib-Sätze (max 12)
       termine: [],         // 🗓️ Klassenarbeiten/Kompass-Tests/WDWs: { id, tag, art, fach }
-      festeTermine: FESTE_TERMINE_STANDARD, // 🔒 wöchentlich feste Termine (Minuten-Slots)
+      module: { plan: false, ki: false, schrift: false }, // 🧩 freigeschaltete Module (Kern = alles aus)
+      schule: { ...SCHULE_STANDARD },  // 🏫 Schulzeiten, Stundenplan (Eltern pflegen ihn), Mittags-Block
+      festeTermine: [],    // 🔒 wöchentlich feste Termine (Minuten-Slots) – reine Familien-Daten
       planRoutine: [],     // 🔁 Wochen-Routine: { tag, slot, typ } (ohne Freunde-Zeit)
       bausteine: { aus: [], namen: {}, eigene: [] }, // 🧩 Plan-Kategorien: ausgeblendet/umbenannt/eigene
       kartenAus: [],       // 🗃️ ausgeblendete Karteikarten (IDs)
@@ -161,6 +167,28 @@ export function migrateData(alt, heute) {
   };
 
   d.einstellungen = { ...basis.einstellungen, ...(istObjekt(quelle.einstellungen) ? quelle.einstellungen : {}) };
+  // 🧩 Bestand oder neu? Ein Dokument, das schon Einstellungen hat, aber
+  // noch keine Module kennt, stammt von vor v0.86 → Vollausbau samt
+  // Mittags-Block. Alles andere startet im Lern-App-Kern.
+  const bestand = istObjekt(quelle.einstellungen) && !istObjekt(quelle.einstellungen.module);
+  const mod = istObjekt(d.einstellungen.module) ? d.einstellungen.module : {};
+  d.einstellungen.module = Object.fromEntries(MODULE.map((m) => [m, bestand ? true : mod[m] === true]));
+  const sch = istObjekt(quelle.einstellungen) && istObjekt(quelle.einstellungen.schule) ? quelle.einstellungen.schule : {};
+  const stunden = {};
+  if (istObjekt(sch.stunden)) {
+    for (const tag of [0, 1, 2, 3, 4]) {
+      const liste = (Array.isArray(sch.stunden[tag]) ? sch.stunden[tag] : [])
+        .filter((e) => Array.isArray(e) && SCHUL_RASTER.some(([von, bis]) => von === e[0] && bis === e[1])
+          && typeof e[2] === "string" && e[2].trim())
+        .map((e) => (e[3] === true ? [e[0], e[1], e[2].trim().slice(0, 24), true] : [e[0], e[1], e[2].trim().slice(0, 24)]))
+        .slice(0, SCHUL_RASTER.length);
+      if (liste.length) stunden[tag] = liste;
+    }
+  }
+  d.einstellungen.schule = {
+    tage: [0, 1, 2, 3, 4], von: SCHULE_STANDARD.von, bis: SCHULE_STANDARD.bis, stunden,
+    mittag: bestand ? true : sch.mittag === true,
+  };
   if (!["hell", "dunkel"].includes(d.einstellungen.thema)) d.einstellungen.thema = "hell";
   if (!Number.isInteger(d.einstellungen.missionsZiel) || d.einstellungen.missionsZiel < 1) {
     d.einstellungen.missionsZiel = 4;
@@ -202,8 +230,8 @@ export function migrateData(alt, heute) {
           aktiv: f.aktiv === true,
         };
       }).slice(0, 30)
-    : FESTE_TERMINE_STANDARD;
-  d.einstellungen.festeTermine = mittagErzwingen(d.einstellungen.festeTermine);
+    : [];
+  if (d.einstellungen.schule.mittag) d.einstellungen.festeTermine = mittagErzwingen(d.einstellungen.festeTermine);
   d.einstellungen.planRoutine = (Array.isArray(d.einstellungen.planRoutine) ? d.einstellungen.planRoutine : [])
     .filter((r) => istObjekt(r) && Number.isInteger(r.tag) && r.tag >= 0 && r.tag <= 6
       && Number.isInteger(r.slot) && typeof r.typ === "string")

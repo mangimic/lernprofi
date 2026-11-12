@@ -14,6 +14,7 @@ import { SACH_BEREICHE } from "./aufgaben/sachkunde.js";
 import { STARK_BEREICHE } from "./aufgaben/stark.js";
 import { aktiveKarten } from "./karteikarten.js";
 import { TERMIN_ARTEN } from "./wochenplan.js";
+import { routeErlaubt, modulAn } from "./module.js";
 
 const SEITEN = [
   ["🧭", "Kompass-Countdown & Lernplan", "kompass"],
@@ -45,17 +46,18 @@ export function sucheIndex(data, elternModus) {
       detail: `Karteikarte · ${k.fach === "mathe" ? "Mathe" : "Deutsch"}`, ziel: { route: "kasten" },
     });
   }
-  for (const t of data.einstellungen.termine) {
+  for (const t of (modulAn(data, "plan") ? data.einstellungen.termine : [])) {
     const art = TERMIN_ARTEN[t.art] || { emoji: "📅", name: "Termin" };
     eintraege.push({
       emoji: art.emoji, titel: `${art.name}${t.fach ? ` ${t.fach}` : ""}`,
       detail: `Termin · ${t.tag.split("-").reverse().join(".")}`, ziel: { route: "plan" },
     });
   }
-  for (const d of data.doks) {
+  for (const d of (modulAn(data, "plan") ? data.doks : [])) {
     eintraege.push({ emoji: "📂", titel: d.name, detail: "Unterlagen", ziel: { route: "doks" } });
   }
   for (const [emoji, titel, route] of SEITEN) {
+    if (!routeErlaubt(route, data)) continue; // 🧩 Seiten abgeschalteter Module fehlen
     eintraege.push({ emoji, titel, detail: "Seite", ziel: { route } });
   }
   for (const name of SPIELE) {

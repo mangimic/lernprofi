@@ -7,9 +7,13 @@ import { wochenMontag, tagDatum, WOCHENTAGE } from "./wochenplan.js";
 const HEUTE = "2026-01-14";
 const montag = wochenMontag(HEUTE);
 const idx = WOCHENTAGE.findIndex((_, i) => tagDatum(montag, i) === HEUTE);
-const doc = (aenderung = {}) => {
+// Plan-Tests laufen im Vollausbau; der Kern (Modul Plan aus) hat einen eigenen Test.
+const doc = (aenderung = {}, module = { plan: true, ki: true, schrift: true }) => {
   const d = leeresDokument(HEUTE);
-  return { ...d, ...aenderung, lernstand: { ...d.lernstand, ...aenderung.lernstand }, profil: { ...d.profil, ...aenderung.profil } };
+  return {
+    ...d, ...aenderung, lernstand: { ...d.lernstand, ...aenderung.lernstand }, profil: { ...d.profil, ...aenderung.profil },
+    einstellungen: { ...d.einstellungen, ...aenderung.einstellungen, module },
+  };
 };
 const block = (id, typ, notiz, fertig, slot) => ({ id, tag: idx, typ, notiz, fertig, slot });
 
@@ -62,6 +66,20 @@ describe("jetztDran – die EINE Handlung der Tagesbühne", () => {
     expect(j.muenzen).toBe(7);
     expect(j.zeitFrei).toBe(12);
     expect(j.gesamt).toBe(0);
+  });
+
+  it("Kern (Modul Plan aus): ein offener Plan-Block wird nie zur Handlung, Blöcke zählen nicht", () => {
+    const d = doc({
+      lernstand: { wochenplan: { montag, bloecke: [block("b1", "eigen", "Lesen", false, 900)] } },
+      profil: { schwerpunkte: ["mathe"] },
+    }, { plan: false, ki: false, schrift: false });
+    const j = jetztDran(d, HEUTE);
+    expect(j.art).toBe("feld");
+    expect(j.blockId).toBeNull();
+    expect(j.gesamt).toBe(0);
+    expect(j.geschafft).toBe(0);
+    // ganz ohne Empfehlung bleibt es beim freien Üben
+    expect(jetztDran(doc({}, { plan: false, ki: false, schrift: false }), HEUTE).art).toBe("ueben");
   });
 
   it("feldTitel kennt Deutsch, Mathe, Sachkunde und Stark", () => {

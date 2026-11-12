@@ -3,7 +3,8 @@ import { koennerEinplanen, KOENNER_FELD_NAMEN } from "./koennerPlan.js";
 import { feldVonNotiz } from "./kompassPlan.js";
 import { MK_DATEN, MK_BEREICHE } from "./aufgaben/mathekoenner.js";
 import { MATHE_DATEN, MATHE_BEREICHE } from "./aufgaben/mathe.js";
-import { planFuerWoche, blockHinzu, planSchreiben, FESTE_TERMINE_STANDARD } from "./wochenplan.js";
+import { planFuerWoche, blockHinzu, planSchreiben } from "./wochenplan.js";
+import { TEST_FESTE } from "./testFixtures.js";
 
 const MONTAG = "2026-10-12"; // Montag → Wochenende 17./18.10.
 
@@ -19,7 +20,7 @@ describe("Mathekönner", () => {
   });
 
   it("plant Sa 1×1 + Rechengeschichten (mit Pause), So Zahlenraum – idempotent", () => {
-    const erg = koennerEinplanen(null, MONTAG, FESTE_TERMINE_STANDARD);
+    const erg = koennerEinplanen(null, MONTAG, TEST_FESTE);
     expect(erg.eingeplant).toBe(3);
     expect(erg.montag).toBe(MONTAG);
     const plan = planFuerWoche(erg.doc, MONTAG);
@@ -30,7 +31,7 @@ describe("Mathekönner", () => {
     expect(so.map((b) => b.notiz)).toEqual(["Zahlen bis 10 000"]);
     expect(so[0].typ).toBe("mathe");
     // Zweiter Lauf ändert nichts
-    const nochmal = koennerEinplanen(erg.doc, MONTAG, FESTE_TERMINE_STANDARD);
+    const nochmal = koennerEinplanen(erg.doc, MONTAG, TEST_FESTE);
     expect(nochmal.eingeplant).toBe(0);
     expect(nochmal.schonDa).toBe(3);
     expect(planFuerWoche(nochmal.doc, MONTAG).bloecke.length).toBe(3);

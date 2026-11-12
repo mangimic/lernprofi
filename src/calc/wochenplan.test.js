@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   BAUSTEINE, TERMIN_ARTEN, FESTE_TERMINE_STANDARD, festerTermin, blockNotiz, schulZeilen,
+  stundenplanAusText, stundenplanAlsText, schuleText, SCHULE_STANDARD,
   istAusgefallen, ausfallSetzen, ausfallAufheben, blockVerschieben, wocheKopieren, blockUnfertig,
   blockDauer, blockDauerVon, spanFrei, auffrischungen,
   kalenderWoche, routineAusPlan, routineAnwenden, schulStunden, schulFaecher,
@@ -8,6 +9,7 @@ import {
   blockHinzu, blockWeg, blockFertig, tagGeschafft, heuteBelohnt, belohnungEintragen,
   wochenBilanz, termineDerWoche, planPruefung, bausteinInfo, blockTyp, bausteinListe, bausteinAnzeige,
 } from "./wochenplan.js";
+import { TEST_FESTE, TEST_SCHULE, TEST_STUNDENPLAN_TEXT } from "./testFixtures.js";
 
 describe("wochenplan – Wochen-Rechnung", () => {
   it("wochenMontag und tagDatum über Monats-/Jahresgrenzen", () => {
@@ -150,29 +152,49 @@ describe("wochenplan – Wochen-Rechnung", () => {
     expect(frei.bloecke).toEqual([{ id: 1, tag: 1, slot: 900, typ: "lernen" }]);
   });
 
-  it("Stundenplan: 5 Schultage, saubere Zeiten, Fächerfolge ohne AGs und Dubletten", () => {
+  it("Stundenplan (Daten der Familie): Raster, Fächerfolge ohne AGs und Dubletten, Pausen", () => {
     for (let t = 0; t <= 4; t++) {
-      expect(schulStunden(t).length).toBeGreaterThanOrEqual(5);
-      for (const [von, bis] of schulStunden(t)) {
+      expect(schulStunden(TEST_SCHULE, t).length).toBeGreaterThanOrEqual(5);
+      for (const [von, bis] of schulStunden(TEST_SCHULE, t)) {
         expect(von).toBeGreaterThanOrEqual(470); // frühestens 7:50
         expect(bis).toBeGreaterThan(von);
         expect(bis).toBeLessThanOrEqual(780);    // spätestens 13:00
       }
     }
-    expect(schulStunden(5)).toEqual([]);
-    expect(schulFaecher(0)).toEqual(["Deutsch", "Französisch", "Mathe", "SU", "Italienisch"]); // Doppelstunde nur 1×
-    expect(schulFaecher(3)).toEqual(["Mathe", "KoKo", "KuW"]);
-    expect(schulFaecher(4)).toContain("Musik");
-    expect(schulStunden(4).at(-1)).toEqual([735, 780, "BSS (Sport)"]); // Fr: Sport bis 13 Uhr
-    expect(schulFaecher(1).join(" ")).not.toContain("Chor"); // AG ist freiwillig
-    expect(schulFaecher(6)).toEqual([]);
-    // Anzeige-Zeilen: exakt die Zeitfenster vom Blatt, Pausen einsortiert
-    const mo = schulZeilen(0);
+    expect(schulStunden(TEST_SCHULE, 5)).toEqual([]);
+    expect(schulFaecher(TEST_SCHULE, 0)).toEqual(["Deutsch", "Englisch", "Mathe", "Sachkunde", "Kunst"]); // Doppelstunde nur 1×
+    expect(schulFaecher(TEST_SCHULE, 3)).toEqual(["Mathe", "Werken", "Religion"]);
+    expect(schulFaecher(TEST_SCHULE, 4)).toContain("Musik");
+    expect(schulStunden(TEST_SCHULE, 4).at(-1)).toEqual([735, 780, "Sport"]);
+    expect(schulFaecher(TEST_SCHULE, 1).join(" ")).not.toContain("Garten"); // AG ist freiwillig
+    expect(schulFaecher(TEST_SCHULE, 6)).toEqual([]);
+    // Anzeige-Zeilen: Zeitfenster des Rasters, Pausen einsortiert
+    const mo = schulZeilen(TEST_SCHULE, 0);
     expect(mo[0]).toMatchObject({ von: 470, bis: 515, fach: "Deutsch" }); // 7:50-8:35
     expect(mo[2]).toMatchObject({ von: 560, bis: 575, pause: true });     // 9:20-9:35 Pause
     expect(mo[5]).toMatchObject({ von: 670, bis: 685, pause: true });     // 11:10-11:25 Pause
     expect(mo.map((z) => z.von)).toEqual([...mo.map((z) => z.von)].sort((a, b) => a - b));
-    expect(schulZeilen(6)).toEqual([]); // Wochenende: keine Zeilen, keine Pausen
+    expect(schulZeilen(TEST_SCHULE, 6)).toEqual([]); // Wochenende: keine Zeilen, keine Pausen
+    // Ohne eingetragenen Stundenplan (neue Familie): nichts, auch keine Pausen
+    expect(schulZeilen(SCHULE_STANDARD, 0)).toEqual([]);
+    expect(schulFaecher(SCHULE_STANDARD, 0)).toEqual([]);
+    expect(schulFaecher(undefined, 0)).toEqual([]);
+    expect(schuleText(SCHULE_STANDARD)).toBe("7:50–13:00");
+    expect(FESTE_TERMINE_STANDARD).toEqual([]); // v0.86: kein Termin mehr im Code
+  });
+
+  it("Stundenplan als Text: Eltern-Editor liest und schreibt Mo–Fr, „-“ lässt frei, (AG) = freiwillig", () => {
+    const st = stundenplanAusText("Mo: Deutsch, Mathe, -, Musik (AG)\nSa: Unfug\nquatsch\nfr: Sport,,Lesen");
+    expect(st).toEqual({
+      0: [[470, 515, "Deutsch"], [515, 560, "Mathe"], [625, 670, "Musik", true]],
+      4: [[470, 515, "Sport"], [580, 625, "Lesen"]],
+    });
+    expect(stundenplanAlsText(st).split("\n")).toEqual(["Mo: Deutsch, Mathe, -, Musik (AG)", "Di: ", "Mi: ", "Do: ", "Fr: Sport, -, Lesen"]);
+    // Rundreise über den fiktiven Test-Plan; mehr als 6 Stunden werden abgeschnitten
+    expect(stundenplanAlsText(stundenplanAusText(TEST_STUNDENPLAN_TEXT))).toBe(TEST_STUNDENPLAN_TEXT);
+    expect(stundenplanAusText("Di: a, b, c, d, e, f, g, h")[1].length).toBe(6);
+    expect(stundenplanAusText("")).toEqual({});
+    expect(stundenplanAusText(null)).toEqual({});
   });
 
   it("Durchführung: abhaken, Tag geschafft, Belohnung nur 1× je Datum, Bilanz", () => {
@@ -199,27 +221,27 @@ describe("wochenplan – Wochen-Rechnung", () => {
   });
 
   it("feste Termine: gültige Slots, Wächter zählt Aktiv-Termine als Ausgleich", () => {
-    for (const f of FESTE_TERMINE_STANDARD) {
+    for (const f of TEST_FESTE) {
       expect(f.tag).toBeGreaterThanOrEqual(0); expect(f.tag).toBeLessThanOrEqual(6);
       expect(f.beginn).toBeGreaterThanOrEqual(540); expect(f.beginn).toBeLessThanOrEqual(1110);
       expect(f.beginn % 30).toBe(0);
       expect(f.dauer).toBeGreaterThanOrEqual(30);
       expect(typeof f.aktiv).toBe("boolean");
     }
-    expect(festerTermin(FESTE_TERMINE_STANDARD, 0, 1080)?.name).toBe("Bandprobe");
-    expect(festerTermin(FESTE_TERMINE_STANDARD, 0, 990)?.name).toBe("Musikalische Spiele"); // 16:30 ist mit abgedeckt
-    expect(festerTermin(FESTE_TERMINE_STANDARD, 1, 990)).toBeNull(); // Schlagzeug nur 30 Min
+    expect(festerTermin(TEST_FESTE, 0, 1080)?.name).toBe("Orchester");
+    expect(festerTermin(TEST_FESTE, 0, 990)?.name).toBe("Töpfern"); // 16:30 ist mit abgedeckt
+    expect(festerTermin(TEST_FESTE, 1, 990)).toBeNull(); // Schlagzeug nur 30 Min
     // 🍽️ 13-14 Uhr ist an ALLEN 7 Tagen blockiert (Mittag & Spielzeit)
     for (let t = 0; t <= 6; t++) {
-      expect(festerTermin(FESTE_TERMINE_STANDARD, t, 780)?.name).toBe("Mittag & Spielzeit");
-      expect(festerTermin(FESTE_TERMINE_STANDARD, t, 810)?.name).toBe("Mittag & Spielzeit");
+      expect(festerTermin(TEST_FESTE, t, 780)?.name).toBe("Mittag & Spielzeit");
+      expect(festerTermin(TEST_FESTE, t, 810)?.name).toBe("Mittag & Spielzeit");
     }
-    expect(festerTermin(FESTE_TERMINE_STANDARD, 4, 840)).toBeNull();
-    // Lernzeit am Montag: ohne feste Termine „einseitig", MIT Bandprobe & Co. ok
+    expect(festerTermin(TEST_FESTE, 4, 840)).toBeNull();
+    // Lernzeit am Montag: ohne feste Termine „einseitig", MIT Orchester & Co. ok
     let p = leererPlan("2026-10-05");
     p = blockHinzu(p, 0, "hausaufgaben", 840);
     expect(planPruefung(p, [], 20).tage[0].status).toBe("einseitig");
-    expect(planPruefung(p, [], 20, FESTE_TERMINE_STANDARD).tage[0].status).toBe("ok");
+    expect(planPruefung(p, [], 20, TEST_FESTE).tage[0].status).toBe("ok");
   });
 
   it("Verschieben, Woche kopieren und die Familienregel (erst HA & Schlagzeug, dann Üben)", () => {
@@ -246,19 +268,19 @@ describe("wochenplan – Wochen-Rechnung", () => {
     expect(kopie.fertig).toBeUndefined(); // Haken wandern nicht mit
     // Familienregel: Üben ohne HA/Schlagzeug davor → gelber Reihenfolge-Hinweis
     let r = blockHinzu(leererPlan("2026-10-05"), 5, "lernen", 660);
-    expect(planPruefung(r, [], 20, FESTE_TERMINE_STANDARD).tage[5].status).toBe("reihenfolge");
+    expect(planPruefung(r, [], 20, TEST_FESTE).tage[5].status).toBe("reihenfolge");
     r = blockHinzu(r, 5, "hausaufgaben", 570);
-    expect(planPruefung(r, [], 20, FESTE_TERMINE_STANDARD).tage[5].hinweis).toContain("Schlagzeug");
+    expect(planPruefung(r, [], 20, TEST_FESTE).tage[5].hinweis).toContain("Schlagzeug");
     r = blockHinzu(r, 5, "schlagzeug", 600);
-    expect(planPruefung(r, [], 20, FESTE_TERMINE_STANDARD).tage[5].status).toBe("ok");
+    expect(planPruefung(r, [], 20, TEST_FESTE).tage[5].status).toBe("ok");
     // Dienstag reicht die feste Schlagzeug-Stunde (16:00) als Schlagzeug vor dem Üben um 16:30
     let di = blockHinzu(leererPlan("2026-10-05"), 1, "hausaufgaben", 900);
     di = blockHinzu(di, 1, "lernen", 990);
-    expect(planPruefung(di, [], 20, FESTE_TERMINE_STANDARD).tage[1].status).toBe("ok");
+    expect(planPruefung(di, [], 20, TEST_FESTE).tage[1].status).toBe("ok");
     // Hausaufgaben verdrängen das Üben NICHT: HA + 2 Boxen ist kein „voll"
-    expect(planPruefung(r, [], 20, FESTE_TERMINE_STANDARD).tage[5].lernMin).toBe(10); // nur die Box zählt
+    expect(planPruefung(r, [], 20, TEST_FESTE).tage[5].lernMin).toBe(10); // nur die Box zählt
     let voll = blockHinzu(r, 5, "lernen", 690);
-    expect(planPruefung(voll, [], 20, FESTE_TERMINE_STANDARD).tage[5].status).toBe("ok"); // HA + 2 Boxen
+    expect(planPruefung(voll, [], 20, TEST_FESTE).tage[5].status).toBe("ok"); // HA + 2 Boxen
   });
 
   it("Von-bis: lange Bausteine belegen mehrere Fenster, Dauer änderbar, Kopie behält sie", () => {
@@ -285,23 +307,23 @@ describe("wochenplan – Wochen-Rechnung", () => {
   it("Ausfälle: Termin fällt nur diese Woche aus, Wächter rechnet ohne ihn", () => {
     let p = leererPlan("2026-10-05");
     expect(istAusgefallen(p, 1, 1020)).toBe(false);
-    p = ausfallSetzen(p, 1, 1020); // Di Sport fällt aus
+    p = ausfallSetzen(p, 1, 1020); // Di Turnen fällt aus
     expect(istAusgefallen(p, 1, 1020)).toBe(true);
     expect(ausfallSetzen(p, 1, 1020)).toBe(p); // idempotent
     // Der Wächter zählt den ausgefallenen Sport nicht mehr als Ausgleich
     p = blockHinzu(p, 1, "lernen", 900);
     p = blockHinzu(p, 1, "schrift", 930);
-    expect(planPruefung(p, [], 20, FESTE_TERMINE_STANDARD).tage[1].frei).toBe(1); // nur Schlagzeug (Mittag zählt nicht)
+    expect(planPruefung(p, [], 20, TEST_FESTE).tage[1].frei).toBe(1); // nur Schlagzeug (Mittag zählt nicht)
     const zurueck = ausfallAufheben(p, 1, 1020);
     expect(istAusgefallen(zurueck, 1, 1020)).toBe(false);
-    expect(planPruefung(zurueck, [], 20, FESTE_TERMINE_STANDARD).tage[1].frei).toBe(2); // + Sport
+    expect(planPruefung(zurueck, [], 20, TEST_FESTE).tage[1].frei).toBe(2); // + Turnen
     // Fallen ALLE Aktiv-Termine des Tages aus, wird ein reiner Lerntag „einseitig"
     let nurLernen = ausfallSetzen(ausfallSetzen(leererPlan("2026-10-05"), 1, 960), 1, 1020);
     nurLernen = blockHinzu(nurLernen, 1, "hausaufgaben", 900);
-    expect(planPruefung(nurLernen, [], 20, FESTE_TERMINE_STANDARD).tage[1].status).toBe("einseitig");
+    expect(planPruefung(nurLernen, [], 20, TEST_FESTE).tage[1].status).toBe("einseitig");
     // Zurückholen räumt Bausteine aus dem Termin-Fenster (mit Dauer)
     let belegt = ausfallSetzen(leererPlan("2026-10-05"), 1, 1020);
-    belegt = blockHinzu(belegt, 1, "freunde", 1050); // ins freie Sport-Fenster gelegt
+    belegt = blockHinzu(belegt, 1, "freunde", 1050); // ins freie Turn-Fenster gelegt
     belegt = blockHinzu(belegt, 1, "lernen", 900);   // außerhalb – bleibt
     const wiederDa = ausfallAufheben(belegt, 1, 1020, 60);
     expect(istAusgefallen(wiederDa, 1, 1020)).toBe(false);

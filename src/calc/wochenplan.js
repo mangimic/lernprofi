@@ -2,7 +2,7 @@ import { schulfreiAm } from "./kalender.js";
 
 /* ============================================================
    🗓️ MEIN WOCHENPLAN – reine Logik (Etappe 9).
-   Felix setzt sich sein Pensum SELBST: Bausteine (Lernen, Schlagzeug,
+   Das Kind setzt sich sein Pensum SELBST: Bausteine (Lernen, Schlagzeug,
    Sport, Pfadfinder, Freunde …) wandern per Antippen oder Ziehen in
    die Wochentage. Lern-Bausteine sind feste 10-Minuten-Boxen
    (Timeboxing 10/5 wie zu Hause bewährt).
@@ -82,7 +82,7 @@ export function tagDatum(montag, idx) {
   return new Date(Date.UTC(j, (m || 1) - 1, (t || 1) + idx)).toISOString().slice(0, 10);
 }
 
-/* ⏰ Zeitfenster: Felix' Nachmittag von 14 bis 19 Uhr, je Tag fünf
+/* ⏰ Zeitfenster: der Nachmittag von 14 bis 19 Uhr, je Tag fünf
    Stunden-Slots. Der Vormittag (Schul-Stundenplan) kommt später als
    eigener Abschnitt dazu – die Slot-Struktur ist darauf vorbereitet. */
 /* Ein „Slot" ist seit v0.28 eine halbe Stunde, gespeichert als Minuten
@@ -105,12 +105,14 @@ export function tagesStunden(tag, datum) {
 export const uhr = (m) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, "0")}`;
 export const slotLabel = (m) => `${uhr(m)} Uhr`;
 
-/* 🔒 Feste Termine der Familie (Stand Okt 2026, von den Eltern gepflegt;
-   liegen als Daten in den Einstellungen – hier nur der Startwert).
+/* 🔒 Feste Termine sind reine DATEN der Familie: Sie liegen in
+   einstellungen.festeTermine (verschlüsselt im Tresor) und werden im
+   Wochenplan gepflegt. Im Code steht kein Termin – der Startwert ist leer.
    aktiv=true heißt: zählt beim Wächter als Ausgleich zum Lernen. */
-/** 🍽️ 13-14 Uhr ist IMMER blockiert: Mittagessen und freie Spielzeit –
-    an allen 7 Tagen. mittagErzwingen stellt das auch für gespeicherte
-    Termin-Listen sicher (alte „Spielzeit"-Einträge werden ersetzt). */
+/** 🍽️ „Mittag & Spielzeit" 13-14 Uhr an allen 7 Tagen – eine Familien-
+    Einstellung (einstellungen.schule.mittag). mittagErzwingen stellt den
+    Block für gespeicherte Termin-Listen sicher (alte „Spielzeit"-Einträge
+    werden ersetzt). */
 export function mittagErzwingen(feste) {
   const ohne = (feste || []).filter((f) => !(f.beginn === 780 && (f.name === "Spielzeit" || f.name === "Mittag & Spielzeit")));
   // aktiv:false – Mittag und Spielzeit sind Grundversorgung, kein geplanter
@@ -121,51 +123,76 @@ export function mittagErzwingen(feste) {
   return [...mittag, ...ohne].slice(0, 30);
 }
 
-export const FESTE_TERMINE_STANDARD = mittagErzwingen([
-  { tag: 0, beginn: 960, dauer: 60, name: "Musikalische Spiele", emoji: "🎵", hinweis: "freiwillig", aktiv: true },
-  { tag: 0, beginn: 1080, dauer: 60, name: "Bandprobe", emoji: "🎸", hinweis: "", aktiv: true },
-  { tag: 1, beginn: 840, dauer: 60, name: "Italienisch (Schule)", emoji: "🏫", hinweis: "bis 14:50", aktiv: false },
-  { tag: 1, beginn: 960, dauer: 30, name: "Schlagzeug-Stunde", emoji: "🥁", hinweis: "", aktiv: true },
-  { tag: 1, beginn: 1020, dauer: 60, name: "Sport", emoji: "⚽", hinweis: "", aktiv: true },
-  { tag: 2, beginn: 900, dauer: 60, name: "Lernbetreuung", emoji: "🤝", hinweis: "", aktiv: false },
-  { tag: 3, beginn: 1020, dauer: 60, name: "Tennis", emoji: "🎾", hinweis: "", aktiv: true },
-  { tag: 3, beginn: 1110, dauer: 90, name: "Pfadfinder", emoji: "🏕️", hinweis: "bis 20:00", aktiv: true },
-]);
-/** 🏫 Schulzeiten (Anzeige im Tageskopf; Vormittags-Stundenplan folgt). */
-export const SCHULE = { tage: [0, 1, 2, 3, 4], text: "7:50–13:00", jeTag: {} }; // Fr: Sport bis 13 Uhr
+/** Startwert neuer Dokumente: keine festen Termine (v0.86 – vorher standen
+    hier Termine einer echten Familie im Code). */
+export const FESTE_TERMINE_STANDARD = [];
 
-/* 🏫 Stundenplan Klasse 4a (Schuljahr 2026/27, ab 14.09.2026) – reine
-   Anzeige, der Vormittag ist nicht planbar. Einträge: [von, bis, Fach,
-   freiwillig?] in Minuten. AGs (Bläserklasse/Chor) sind freiwillig.
-   Ohne Lehrkräfte-Namen (Datensparsamkeit). */
-export const SCHULSTUNDEN = {
-  0: [[470, 515, "Deutsch"], [515, 560, "Deutsch"], [580, 625, "Französisch"], [625, 670, "Mathe"], [690, 735, "SU"], [735, 780, "Italienisch"]],
-  1: [[470, 515, "Mathe"], [515, 560, "Deutsch · Leseband"], [580, 625, "D1 / It2"], [625, 670, "D2 / It1"], [690, 735, "SU"], [735, 780, "Chor (AG)", true]],
-  2: [[470, 515, "Deutsch"], [515, 560, "Französisch"], [580, 625, "Mathe"], [625, 670, "Mathe"], [690, 735, "Deutsch · Leseband"], [735, 780, "BSS (Sport)"]],
-  3: [[470, 515, "Mathe"], [515, 560, "Mathe"], [580, 625, "KoKo"], [625, 670, "KoKo"], [690, 735, "KuW"], [735, 780, "KuW"]],
-  4: [[470, 515, "SU"], [515, 560, "D1 / It2"], [580, 625, "D2 / It1"], [625, 670, "Musik"], [690, 735, "BSS (Sport)"], [735, 780, "BSS (Sport)"]],
-};
-export function schulStunden(tag) {
-  return SCHULSTUNDEN[tag] || [];
+/* 🏫 Schulzeiten und Vormittags-Stundenplan sind ebenfalls DATEN
+   (einstellungen.schule) – reine Anzeige, der Vormittag ist nicht planbar.
+   Raster: sechs Schulstunden, [von, bis] in Minuten seit Mitternacht.
+   Einträge je Tag: [von, bis, Fach, freiwillig?]. Ohne Lehrkräfte-Namen. */
+export const SCHUL_RASTER = [[470, 515], [515, 560], [580, 625], [625, 670], [690, 735], [735, 780]];
+export const SCHULE_STANDARD = { tage: [0, 1, 2, 3, 4], von: 470, bis: 780, stunden: {}, mittag: false };
+
+/** „7:50–13:00" für den Tageskopf. */
+export function schuleText(schule) {
+  const s = schule || SCHULE_STANDARD;
+  return `${uhr(s.von)}–${uhr(s.bis)}`;
 }
-/** Schul-Pausen laut Stundenplan (werden mit angezeigt). */
+export function schulStunden(schule, tag) {
+  return (schule && schule.stunden && schule.stunden[tag]) || [];
+}
+/** Schul-Pausen laut Raster (werden mit angezeigt). */
 export const SCHUL_PAUSEN = [[560, 575], [670, 685]]; // 9:20-9:35 · 11:10-11:25
 
 /** Anzeige-Zeilen eines Schultags: Stunden + Pausen, nach Uhrzeit sortiert. */
-export function schulZeilen(tag) {
-  const zeilen = schulStunden(tag).map(([von, bis, fach, ag]) => ({ von, bis, fach, ag: !!ag, pause: false }));
+export function schulZeilen(schule, tag) {
+  const zeilen = schulStunden(schule, tag).map(([von, bis, fach, ag]) => ({ von, bis, fach, ag: !!ag, pause: false }));
   if (!zeilen.length) return [];
   for (const [von, bis] of SCHUL_PAUSEN) zeilen.push({ von, bis, fach: "Pause", ag: false, pause: true });
   return zeilen.sort((a, b) => a.von - b.von);
 }
 
 /** Fächerfolge des Tages fürs Kind (ohne freiwillige AGs, ohne Dubletten). */
-export function schulFaecher(tag) {
+export function schulFaecher(schule, tag) {
   const liste = [];
-  for (const [, , fach, ag] of schulStunden(tag)) {
+  for (const [, , fach, ag] of schulStunden(schule, tag)) {
     if (!ag && !liste.includes(fach)) liste.push(fach);
   }
   return liste;
+}
+
+/** Stundenplan als Text (Eltern-Editor): je Zeile ein Tag,
+    „Mo: Deutsch, Mathe, -, Musik (AG)". „-" lässt die Stunde frei,
+    „(AG)" markiert sie als freiwillig. Unbekannte Zeilen werden ignoriert. */
+export function stundenplanAusText(text) {
+  const stunden = {};
+  for (const zeile of String(text || "").split("\n")) {
+    const m = zeile.match(/^\s*(Mo|Di|Mi|Do|Fr)\s*:\s*(.*)$/i);
+    if (!m) continue;
+    const tag = WOCHENTAGE.findIndex((w) => w.toLowerCase() === m[1].toLowerCase());
+    const liste = [];
+    m[2].split(",").slice(0, SCHUL_RASTER.length).forEach((roh, i) => {
+      const ag = /\(AG\)\s*$/i.test(roh);
+      const fach = roh.replace(/\(AG\)\s*$/i, "").trim().slice(0, 24);
+      if (!fach || fach === "-") return;
+      const [von, bis] = SCHUL_RASTER[i];
+      liste.push(ag ? [von, bis, fach, true] : [von, bis, fach]);
+    });
+    if (liste.length) stunden[tag] = liste;
+  }
+  return stunden;
+}
+export function stundenplanAlsText(stunden) {
+  return [0, 1, 2, 3, 4].map((tag) => {
+    const liste = (stunden && stunden[tag]) || [];
+    const felder = SCHUL_RASTER.map(([von]) => {
+      const e = liste.find((x) => x[0] === von);
+      return e ? `${e[2]}${e[3] ? " (AG)" : ""}` : "-";
+    });
+    while (felder.length && felder[felder.length - 1] === "-") felder.pop();
+    return `${WOCHENTAGE[tag]}: ${felder.join(", ")}`;
+  }).join("\n");
 }
 
 /** Der feste Termin, der die Slot-Minute abdeckt (Termine haben eine Dauer). */

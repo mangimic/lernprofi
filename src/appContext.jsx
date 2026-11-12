@@ -265,7 +265,11 @@ export function AppProvider({ children }) {
       }
     } catch { /* ohne Netz einfach lokal weiterarbeiten */ }
 
-    const sauber = migrateData(geladen, heute);
+    // 🧪 Nur für die Smoke-Tests: Ein frisch angelegter Tresor darf mit einem
+    // fiktiven Start-Dokument beginnen (window.__ERSTDOK__) – so lassen sich
+    // Module und Termine testen, ohne dass echte Daten im Code stehen.
+    const seed = !geladen && typeof window !== "undefined" && window.__ERSTDOK__ ? window.__ERSTDOK__ : null;
+    const sauber = migrateData(geladen || seed, heute);
     setData(sauber);
     if (!geladen) speichern(sauber); // Erstbefüllung direkt ablegen
     setElternModus(eltern);
@@ -311,7 +315,16 @@ export function AppProvider({ children }) {
       // Alt-App-Export? → über den geprüften Übernahme-Konverter, mit Bericht.
       if (istAltExport(roh)) {
         const { dokument, bericht } = importAltdaten(roh, heute);
-        logChange(dokument, "daten", "geaendert", "Lernstand aus der Alt-App übernommen");
+        // 🧩 Der Alt-Import bringt nur den Lernstand – freigeschaltete Module,
+        // Schulzeiten und feste Termine dieses Tresors bleiben, wie sie sind.
+        const mit = {
+          ...dokument,
+          einstellungen: {
+            ...dokument.einstellungen, module: data.einstellungen.module,
+            schule: data.einstellungen.schule, festeTermine: data.einstellungen.festeTermine,
+          },
+        };
+        logChange(migrateData(mit, heute), "daten", "geaendert", "Lernstand aus der Alt-App übernommen");
         return bericht;
       }
       const dokument = roh && typeof roh === "object" && "daten" in roh ? roh.daten : roh;

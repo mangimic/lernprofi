@@ -25,6 +25,7 @@ import { kiErklaeren } from "../ki.js";
 import { THEMEN_WELTEN } from "../calc/aufgaben/themen.js";
 import { istEmpfohlen } from "../calc/onboarding.js";
 import { wozuSatz } from "../calc/wozu.js";
+import { modulAn } from "../calc/module.js";
 
 /* Üben: drei Übungstypen über denselben Runden-/Stufen-/Münz-Mechanismus:
    - "mc":        Frage mit 2-3 Antwort-Knöpfen (Mathe, Sachkunde, Deutsch-MC, Stark)
@@ -420,7 +421,7 @@ export default function Ueben() {
               🧭 <b>Wozu?</b> {wozuSatz(runde.key)}
             </p>
           )}
-          {runde.index === 0 && KOMPASS_ORIGINAL[runde.key] && (() => {
+          {runde.index === 0 && modulAn(data, "plan") && KOMPASS_ORIGINAL[runde.key] && (() => {
             const o = KOMPASS_ORIGINAL[runde.key];
             // 📂 Liegt das passende Heft in der Dokumenten-Ablage? Dann öffnet
             // ein Tipp das Original direkt (entschlüsselt im Browser).
@@ -611,7 +612,7 @@ export default function Ueben() {
               runde.typ === "mc" ? (runde.gewaehlt !== null && !antwortRichtig(a, runde.gewaehlt))
               : runde.typ === "tippen" ? (runde.geprueft && !runde.geprueft.richtig)
               : (runde.meldung && !runde.meldung.ok && !runde.fertig);
-            if (!data.einstellungen.ki.erklaeren || !falsch) return null;
+            if (!modulAn(data, "ki") || !data.einstellungen.ki.erklaeren || !falsch) return null;
             const k = runde.ki;
             if (!k) {
               return (

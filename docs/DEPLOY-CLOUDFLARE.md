@@ -44,7 +44,7 @@ Zaun sofort wieder. Die Schritte bleiben als Anleitung stehen:
 1. Dashboard → **Zero Trust → Access → Applications → Add application → Self-hosted**.
 2. Domain: die Worker-URL (bzw. eigene Domain), Name „Lernprofi“.
 3. Policy „Familie“: *Allow* → Include → **Emails** → die Eltern-E-Mail(s).
-   Session-Dauer großzügig wählen (z. B. 1 Monat), damit Felix nicht
+   Session-Dauer großzügig wählen (z. B. 1 Monat), damit das Kind nicht
    ständig durch den Access-Login muss.
 4. Die API prüft zusätzlich den Header `Cf-Access-Authenticated-User-Email` –
    ohne Access-Session antwortet `/api/*` mit 401.
