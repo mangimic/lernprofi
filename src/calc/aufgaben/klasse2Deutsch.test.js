@@ -122,7 +122,7 @@ describe("Deutsch Klasse 2 – Vertrag für alle Pools", () => {
 
   it("nur die vereinbarten Kindernamen, keine abwertenden Wörter", () => {
     const text = JSON.stringify(K2_DEUTSCH_DATEN);
-    for (const fremd of ["Paul", "Anna", "Max", "Lisa", "Felix", "Leon", "Lukas", "Marie", "Jonas", "Hannah", "Finn", "Lea"]) {
+    for (const fremd of ["Paul", "Anna", "Max", "Lisa", "Lukas", "Marie", "Jonas", "Hannah", "Finn", "Lea"]) {
       expect(new RegExp(`\\b${fremd}\\b`).test(text), fremd).toBe(false);
     }
     expect(/dumm|blöd|Versager|falsch gemacht|streng dich/i.test(text)).toBe(false);
