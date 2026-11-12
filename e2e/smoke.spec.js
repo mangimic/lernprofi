@@ -139,7 +139,7 @@ test("Release-Notes öffnen und zurück", async ({ page }) => {
 
 test("Übungsrunde Mathe: 10 Aufgaben, Münze, Stufe 3 freigeschaltet", async ({ page }) => {
   await tresorAnlegen(page);
-  await page.getByTestId("zum-ueben").click();
+  await page.getByTestId("nav-ueben").click();
   await expect(page.getByTestId("ueben-bereiche")).toBeVisible();
   await page.getByTestId("ueben-fach-mathe").click();
   await page.getByTestId("bereich-mrechnen").click();
@@ -164,7 +164,7 @@ test("Übungsrunde Mathe: 10 Aufgaben, Münze, Stufe 3 freigeschaltet", async ({
 
 test("Sachkunde-Runde zählt falsch beantwortete Aufgaben nicht als gelöst", async ({ page }) => {
   await tresorAnlegen(page);
-  await page.getByTestId("zum-ueben").click();
+  await page.getByTestId("nav-ueben").click();
   await page.getByTestId("ueben-fach-sachkunde").click();
   await page.getByTestId("bereich-srad").click();
   await expect(page.getByTestId("frage-karte")).toBeVisible();
@@ -184,7 +184,7 @@ test("Sachkunde-Runde zählt falsch beantwortete Aufgaben nicht als gelöst", as
 
 test("Deutsch: dass/das-Frage hat genau 2 Antworten, Stark mit Leo ist da", async ({ page }) => {
   await tresorAnlegen(page);
-  await page.getByTestId("zum-ueben").click();
+  await page.getByTestId("nav-ueben").click();
   // Deutsch ist der Standard-Tab: Leo-Knopf + Gruppen statt 15 Einzel-Bereiche
   await expect(page.getByTestId("leo-wahl")).toContainText("Leo wählt");
   await expect(page.getByTestId("gruppe-texte")).toBeVisible();
@@ -206,7 +206,7 @@ test("Deutsch: dass/das-Frage hat genau 2 Antworten, Stark mit Leo ist da", asyn
 
 test("Wörter antippen: Subjekt finden, Lösung wird markiert", async ({ page }) => {
   await tresorAnlegen(page);
-  await page.getByTestId("zum-ueben").click();
+  await page.getByTestId("nav-ueben").click();
   await deutschBereich(page, "subj");
   await expect(page.getByTestId("frage-karte")).toBeVisible();
   await expect(page.getByTestId("frage-text")).toContainText(/Wer oder was/);
@@ -228,7 +228,7 @@ test("Wörter antippen: Subjekt finden, Lösung wird markiert", async ({ page })
 
 test("Neue Deutsch-Bereiche: Zeitformen (3 Optionen) und Grundwortschatz mit Regel", async ({ page }) => {
   await tresorAnlegen(page);
-  await page.getByTestId("zum-ueben").click();
+  await page.getByTestId("nav-ueben").click();
   await deutschBereich(page, "zeit");
   await expect(page.getByTestId("frage-text")).toContainText("Zeitform");
   await expect(page.locator('[data-test="antwort-opt"]')).toHaveCount(3);
@@ -241,7 +241,7 @@ test("Neue Deutsch-Bereiche: Zeitformen (3 Optionen) und Grundwortschatz mit Reg
 
 test("🧭 Kompass-Training: Lese-Detektiv mit Textabschnitt, Steigern und Verbformen", async ({ page }) => {
   await tresorAnlegen(page);
-  await page.getByTestId("zum-ueben").click();
+  await page.getByTestId("nav-ueben").click();
   // 🔍 Lese-Detektiv: Klasse 4 startet auf Stufe 2 – erster Abschnitt ist der Honig-Text
   await deutschBereich(page, "lesen");
   await expect(page.getByTestId("frage-kontext")).toContainText("Honig");
@@ -311,7 +311,7 @@ test("Spielhalle: Münze einlösen und im echten See-Abenteuer einen Fisch fange
 test("Blockwelt: Block verdienen (streng bei Fehlern), setzen und abbauen", async ({ page }) => {
   await tresorAnlegen(page);
   // 1 Münze verdienen
-  await page.getByTestId("zum-ueben").click();
+  await page.getByTestId("nav-ueben").click();
   await deutschBereich(page, "dd");
   for (let i = 0; i < 10; i++) {
     await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
@@ -354,6 +354,7 @@ test("Blockwelt: Block verdienen (streng bei Fehlern), setzen und abbauen", asyn
 
 test("Konzentration: Zahlenkette wächst nach fehlerfreiem Aufsagen, ABC zählt Stolperer", async ({ page }) => {
   await tresorAnlegen(page);
+  await page.getByTestId("nav-training").click();
   await page.getByTestId("zum-konz").click();
   await expect(page.getByTestId("konz")).toBeVisible();
 
@@ -388,12 +389,14 @@ test("Konzentration: Blitzlesen-Runde im Zeitraffer + Mut-Satz des Tages bleibt"
   await tresorAnlegen(page);
 
   // 🦁 Mut-Satz wählen: danach gehört er dem Tag (keine Auswahl mehr)
+  await page.getByTestId("mut-satz-oeffnen").click();
   await expect(page.getByTestId("mut-satz-wahl").first()).toBeVisible();
   await page.getByTestId("mut-satz-wahl").nth(2).click();
   await expect(page.getByTestId("mut-satz-heute")).toContainText("Fehler machen");
   await expect(page.getByTestId("mut-satz-wahl")).toHaveCount(0);
 
   // ⚡ Blitzlesen: 60 Sekunden laufen im Zeitraffer ab, letztes Wort antippen
+  await page.getByTestId("nav-training").click();
   await page.getByTestId("zum-konz").click();
   await page.evaluate(() => { window.__SPIEL_SCHNELL__ = true; });
   await page.getByTestId("konz-tab-blitz").click();
@@ -410,6 +413,7 @@ test("Konzentration: Blitzlesen-Runde im Zeitraffer + Mut-Satz des Tages bleibt"
   await page.getByTestId("pin-eingabe").fill(PIN);
   await page.getByTestId("pin-ok").click();
   await expect(page.getByTestId("mut-satz-heute")).toContainText("Fehler machen");
+  await page.getByTestId("nav-training").click();
   await page.getByTestId("zum-konz").click();
   await page.getByTestId("tf-skip").click(); // Tagesform-Frage (erste Lerneinheit als Kind)
   await page.getByTestId("konz-tab-blitz").click();
@@ -728,7 +732,7 @@ test("Tagesform & Fokus: roter Tag macht Missionen kürzer, Bewegungspause kommt
 
 test("🖼️ Aufgaben-Bilder: Zahlenstrahl, Figur, Kugel-Säcke und Verkehrsschilder", async ({ page }) => {
   await tresorAnlegen(page);
-  await page.getByTestId("zum-ueben").click();
+  await page.getByTestId("nav-ueben").click();
   await page.getByTestId("ueben-fach-mathe").click();
   await page.getByTestId("bereich-mzahlen").click(); // Stufe 2: erste Aufgabe = Nachbarzehner von 7496
   await expect(page.locator('[data-test="aufgaben-bild"][data-art="strahl"]')).toBeVisible();
@@ -894,6 +898,7 @@ test("Schreib-Training: Satz des Tages, Foto → Leos Schrift-Blick, Schrift-Rei
 
   await tresorAnlegen(page);
   // Ohne Freigabe: Aufgabe sichtbar, Foto-Teil nur als Hinweis
+  await page.getByTestId("nav-training").click();
   await page.getByTestId("zum-schrift").click();
   await expect(page.getByTestId("schrift-satz")).toContainText("„");
   await expect(page.getByTestId("schrift-freigabe-hinweis")).toBeVisible();
@@ -904,6 +909,7 @@ test("Schreib-Training: Satz des Tages, Foto → Leos Schrift-Blick, Schrift-Rei
   await page.getByTestId("eb-tab-leo").click();
   await page.getByTestId("ki-schrift-1").click();
   await page.getByTestId("nav-start").click();
+  await page.getByTestId("nav-training").click();
   await page.getByTestId("zum-schrift").click();
 
   // Foto hochladen (Mini-PNG) → Sterne selbst getaktet → Übe-Buchstabe + Mach-Aufgabe
@@ -948,6 +954,7 @@ test("Aufsatz-Check: Textart wählen, Foto → 2 Sterne + markierte Stelle + Mac
 
   await tresorAnlegen(page);
   // Ohne Freigabe nur der Hinweis
+  await page.getByTestId("nav-training").click();
   await page.getByTestId("zum-aufsatz").click();
   await expect(page.getByTestId("aufsatz-freigabe-hinweis")).toBeVisible();
   await expect(page.getByTestId("aufsatz-foto")).toHaveCount(0);
@@ -957,6 +964,7 @@ test("Aufsatz-Check: Textart wählen, Foto → 2 Sterne + markierte Stelle + Mac
   await page.getByTestId("eb-tab-leo").click();
   await page.getByTestId("ki-aufsatz-1").click();
   await page.getByTestId("nav-start").click();
+  await page.getByTestId("nav-training").click();
   await page.getByTestId("zum-aufsatz").click();
 
   // Textart wählen + Foto hochladen
@@ -1025,6 +1033,7 @@ test("Wochenbericht + persönliche Übungssätze: Eltern geben frei, prüfen und
 
   // Das Schreib-Training nutzt jetzt einen eigenen Satz
   await page.getByTestId("nav-start").click();
+  await page.getByTestId("nav-training").click();
   await page.getByTestId("zum-schrift").click();
   await expect(page.getByTestId("schrift-eigene")).toBeVisible();
   await expect(page.getByTestId("schrift-satz")).toContainText(/Schlagzeug|Pfadfinder/);
@@ -1458,6 +1467,7 @@ test("🧭 Kompass-Countdown: Termine automatisch im Plan, Wochen-Fahrplan, Chip
 
 test("🗃️ Digitaler Karteikasten: Runde ziehen, werten, Nochmal kommt wieder, Stand überlebt Neustart", async ({ page }) => {
   await tresorAnlegen(page);
+  await page.getByTestId("nav-training").click();
   await page.getByTestId("zum-kasten").click();
   await expect(page.getByTestId("kasten-fach-1")).toContainText("64"); // alle Karten starten in Fach 1
   await page.getByTestId("kasten-start").click();
@@ -1479,6 +1489,7 @@ test("🗃️ Digitaler Karteikasten: Runde ziehen, werten, Nochmal kommt wieder
   await page.reload();
   await page.getByTestId("pin-eingabe").fill(PIN);
   await page.getByTestId("pin-ok").click();
+  await page.getByTestId("nav-training").click();
   await page.getByTestId("zum-kasten").click();
   await page.getByTestId("tf-gruen").click();
   await expect(page.getByTestId("kasten-fach-2")).toContainText("4");
@@ -1495,6 +1506,7 @@ test("🗃️ Karteikasten: Zahlen-Karten fragen das Ergebnis per Eingabe ab, We
   for (let i = 1; i <= 32; i++) await page.getByTestId(`karten-an-d${i}`).click();
   await expect(page.getByTestId("karten-zaehler")).toContainText("32 aktiv · 32 ausgeblendet");
   await page.getByTestId("nav-start").click();
+  await page.getByTestId("nav-training").click();
   await page.getByTestId("zum-kasten").click();
   await expect(page.getByTestId("kasten-fach-1")).toContainText("32");
   await page.getByTestId("kasten-start").click();
@@ -1554,9 +1566,10 @@ test("📂 Dokumenten-Ablage: Eltern laden verschlüsselt hoch, Öffnen entschl�
   const tab = page.waitForEvent("popup");
   await page.locator('[data-test^="dok-oeffnen-"]').click();
   await (await tab).close();
-  // Startseite zeigt die Kachel fürs Kind; die Lese-Übung verlinkt das Heft direkt
-  await page.getByTestId("nav-start").click();
+  // Der Hub „Training" zeigt die Kachel fürs Kind; die Lese-Übung verlinkt das Heft direkt
+  await page.getByTestId("nav-training").click();
   await expect(page.getByTestId("zum-doks")).toContainText("1");
+  await page.getByTestId("nav-start").click();
   if (await page.getByTestId("kompass-karte").count()) {
     await page.getByTestId("kompass-karte").click();
     await page.locator('[data-test="kp-fokus-lesen"]').first().click();
@@ -1683,6 +1696,7 @@ test("🗃️ Karteikarten: 4 je A4-Blatt, Rückseiten gespiegelt, Fach-Filter u
   await expect(page.getByTestId("karte-vs").last()).toContainText("Fahrradhelm");
   // … und der digitale Kasten zieht denselben Satz
   await page.getByTestId("nav-start").click();
+  await page.getByTestId("nav-training").click();
   await page.getByTestId("zum-kasten").click();
   await expect(page.getByTestId("kasten-fach-1")).toContainText("64");
 });
@@ -1867,6 +1881,7 @@ test("Raketen-Rennen: zweiter Skin derselben Engine startet und zählt", async (
 
 test("Sudoku-Training: Stufe 1 (4×4) lösen – Fehlversuche zeigen die Regel", async ({ page }) => {
   await tresorAnlegen(page);
+  await page.getByTestId("nav-training").click();
   await page.getByTestId("zum-sudoku").click();
   await expect(page.getByTestId("sudoku-seite")).toBeVisible();
   await expect(page.getByTestId("sudoku-stufe")).toContainText("Stufe 1");
@@ -1917,6 +1932,7 @@ test("Sudoku-Training: Stufe 1 (4×4) lösen – Fehlversuche zeigen die Regel",
 
 test("Sudoku-Training: „Anderes Rätsel“ steht rechts und fragt nach, bevor der Spielstand weg ist", async ({ page }) => {
   await tresorAnlegen(page);
+  await page.getByTestId("nav-training").click();
   await page.getByTestId("zum-sudoku").click();
   await expect(page.getByTestId("sudoku-seite")).toBeVisible();
 
@@ -2094,7 +2110,7 @@ test("Interessen-Picker: Lieblings-Welten wählen steuert die Übungs-Welt", asy
   // Die erste gewählte Welt ist sofort die Übungs-Welt – und die
   // Lieblings-Welten stehen in der Welt-Wahl vorn
   await page.getByTestId("nav-ueben").click();
-  await expect(page.locator('[data-test^="thema-"]').first()).toHaveAttribute("data-test", "thema-dinos");
+  await expect(page.locator('[data-test^="thema-"]:not([data-test="thema-schalter"])').first()).toHaveAttribute("data-test", "thema-dinos");
   await deutschBereich(page, "subj");
   await expect(page.getByTestId("frage-karte")).toContainText(/Dino|T-Rex|Langhals|Forscherin|Flugsaurier|Knochen|Nest/);
   await page.getByTestId("abbrechen").click();
@@ -2409,4 +2425,30 @@ test("Tagesbühne: „Jetzt dran“ führt in die Übung, Kennzahlen stehen dane
   await expect(page.getByTestId("nav-ueben")).toHaveText("Üben");
   await page.getByTestId("jetzt-dran-los").click();
   await expect(page.getByTestId("ueben-fach-mathe")).toBeVisible();
+});
+
+test("Hub „Training“: Kacheln führen zu den Trainings, die Startseite passt auf eine Bildschirmhöhe", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("fb-spaeter").click();
+  await page.getByTestId("erststart-uebergabe-weiter").click();
+  await page.getByTestId("interessen-spaeter").click();
+  await page.getByTestId("erststart-spaeter").click();
+  await expect(page.getByTestId("jetzt-dran")).toBeVisible();
+  // Start-Diät: auf dem iPad hochkant bleibt die Seite (fast) ohne Scrollen
+  const vp = page.viewportSize();
+  if (vp.width >= 641 && vp.height > vp.width) {
+    const h = await page.evaluate(() => document.documentElement.scrollHeight);
+    expect(h, "Startseite nahezu eine Bildschirmhöhe").toBeLessThanOrEqual(vp.height + 260);
+  }
+  await expect(page.getByTestId("zum-sudoku")).toHaveCount(0); // Einstiege wohnen im Hub
+  await page.getByTestId("nav-training").click();
+  await expect(page.getByTestId("training-seite")).toBeVisible();
+  await expect(page.getByTestId("zum-konz")).toBeVisible();
+  await page.getByTestId("zum-sudoku").click();
+  await expect(page.getByTestId("sudoku-seite")).toBeVisible();
+  // Kopf-Symbole: Darstellung und „Neu?" sind überall erreichbar
+  await page.getByTestId("thema-schalter").click();
+  await expect.poll(async () => page.evaluate(() => document.documentElement.dataset.theme)).toBe("dark");
+  await page.getByTestId("nav-neu").click();
+  await expect(page.getByTestId("rn-liste")).toBeVisible();
 });

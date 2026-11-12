@@ -25,7 +25,6 @@ export default function Start() {
   const { data, logChange, T, tresor, navTo, heute, uebenZielSetzen, isMobile } = useApp();
   const einstufung = data.lernstand.einstufung;
   const feldName = (key) => EINSTUFUNG_FELDER.find((f) => f.key === key) || { emoji: "✏️", name: key };
-  const dunkel = data.einstellungen.thema === "dunkel";
   const tag = heutigerTag(data.lernstand.lerntage, heute);
   const spur = lernspur(data.lernstand.lerntage, heute);
   const mut = data.lernstand.mutSatz;
@@ -91,13 +90,6 @@ export default function Start() {
     );
   };
 
-  const themaWechseln = () => {
-    const neu = {
-      ...data,
-      einstellungen: { ...data.einstellungen, thema: dunkel ? "hell" : "dunkel" },
-    };
-    logChange(neu, "einstellungen", "geaendert", `Darstellung auf ${dunkel ? "Hell" : "Dunkel"} gestellt`);
-  };
 
   // 🎯 Tagesbühne: genau EINE Handlung ganz oben (Plan-Block → Empfehlung →
   // Üben) und drei leise Kennzahlen – die restlichen Karten folgen darunter.
@@ -206,81 +198,32 @@ export default function Start() {
           <InteressenKarte />
         </div>
       )}
-      {!data.lernstand.koenner?.geplant && (
-        <div data-test="koenner-karte" style={{
-          background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand,
-          boxShadow: "var(--schatten)",
-        }}>
-          <b style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><Icon name="star" size={20} /> Mathekönner kommt!</b>
-          <p style={{ margin: "4px 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-            Deine drei Schwerpunkte stehen bereit: das 1×1 · Rechengeschichten · Zahlen bis 10 000.
-            Ein Tipp legt sie aufs Wochenende: Samstag 1×1 und Rechengeschichten, Sonntag Zahlen bis 10 000.
-          </p>
-          <button data-test="koenner-einplanen" onClick={koennerPlanen}
-            style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
-            Fürs Wochenende einplanen
-          </button>
+      {(!data.lernstand.koenner?.geplant || !data.lernstand.hoerplan?.geplant) && (
+        <div data-test="tipps-zeile" style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: T.abstand }}>
+          <span style={{ fontSize: "var(--schrift-klein)", fontWeight: 800, color: T.textLeise }}>Tipps zum Einplanen:</span>
+          {!data.lernstand.koenner?.geplant && (
+            <button data-test="koenner-einplanen" onClick={koennerPlanen}
+              style={{ minHeight: 40, padding: "0 14px", borderRadius: 999, background: T.karte, color: T.text, boxShadow: "var(--schatten)", fontSize: "var(--schrift-klein)" }}>
+              Mathekönner fürs Wochenende
+            </button>
+          )}
+          {!data.lernstand.hoerplan?.geplant && (
+            <button data-test="hoer-einplanen" onClick={hoerPlanen}
+              style={{ minHeight: 40, padding: "0 14px", borderRadius: 999, background: T.karte, color: T.text, boxShadow: "var(--schatten)", fontSize: "var(--schrift-klein)" }}>
+              Hör-Detektiv, 2 Wochen
+            </button>
+          )}
         </div>
       )}
-      {!data.lernstand.hoerplan?.geplant && (
-        <div data-test="hoer-karte" style={{
-          background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand,
-          boxShadow: "var(--schatten)",
-        }}>
-          <b style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><Icon name="sparkle" size={20} /> Neu: Hör-Detektiv!</b>
-          <p style={{ margin: "4px 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-            Dein Training für knifflige Wörter: d oder t? f oder v? Wo versteckt sich das r?
-            tz oder z? Ein Tipp legt dir 2 Wochen lang Montag + Donnerstag eine Runde in den Plan.
-          </p>
-          <button data-test="hoer-einplanen" onClick={hoerPlanen}
-            style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
-            2-Wochen-Plan anlegen
-          </button>
-        </div>
-      )}
-      <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
-        <h2 style={{ margin: "0 0 6px" }}>Hallo!</h2>
-        <p data-test="tages-stand" style={{ margin: "0 0 10px", color: T.textLeise }}>
+      <div style={{ background: T.karte, borderRadius: T.radius, padding: "12px 16px", marginBottom: T.abstand, display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
+        <h2 style={{ margin: 0, fontSize: "var(--schrift-gross)" }}>Hallo!</h2>
+        <p data-test="tages-stand" style={{ margin: 0, color: T.textLeise, fontWeight: 700 }}>
           {data.lernstand.muenzen} Münze{data.lernstand.muenzen === 1 ? "" : "n"} ·
           heute {tag.missionen} Mini-Mission{tag.missionen === 1 ? "" : "en"}
           {tag.zielErreicht ? " · Tagesziel geschafft!" : ""}
           {spur > 1 ? ` · ${spur} Tage Lernspur` : ""}
           {data.einstellungen.zeitLimit > 0 ? ` · noch ${zeitUebrigMin(data.lernstand.zeit, data.einstellungen.zeitLimit, heute)} Min` : ""}
         </p>
-        <button data-test="zum-ueben" onClick={() => navTo("ueben")}
-          style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
-          <Icon name="pencil" size={20} /> Jetzt üben (Deutsch · Mathe · Sachkunde · Stark)
-        </button>
-        <button data-test="zum-konz" onClick={() => navTo("konz")}
-          style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
-          <Icon name="target" size={20} /> Konzentrations-Training (Zahlen · ABC · Blitzlesen)
-        </button>
-        <button data-test="zum-sudoku" onClick={() => navTo("sudoku")}
-          style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
-          <Icon name="puzzle" size={20} /> Sudoku-Training (Logik, Stufe für Stufe)
-        </button>
-        <button data-test="zum-schrift" onClick={() => navTo("schrift")}
-          style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
-          <Icon name="pencil" size={20} /> Schreib-Training (1 Satz am Tag, mit der Hand)
-        </button>
-        <button data-test="zum-aufsatz" onClick={() => navTo("aufsatz")}
-          style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
-          <Icon name="book" size={20} /> Aufsatz-Check (Leo liest dein Foto)
-        </button>
-        <button data-test="zum-kasten" onClick={() => navTo("kasten")}
-          style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
-          <Icon name="flag" size={20} /> Karteikasten (5 Karten ziehen · Gewusst wandert weiter)
-        </button>
-        <button data-test="zum-plan" onClick={() => navTo("plan")}
-          style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
-          <Icon name="calendar" size={20} /> Mein Wochenplan (DU bestimmst dein Pensum)
-        </button>
-        {data.doks.length > 0 && (
-          <button data-test="zum-doks" onClick={() => navTo("doks")}
-            style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
-            <Icon name="lock" size={20} /> Unsere Unterlagen ({data.doks.length})
-          </button>
-        )}
       </div>
       {(heutePlan.length > 0 || heuteFeste.length > 0) && (
         <div data-test="heute-plan" style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
@@ -363,15 +306,14 @@ export default function Start() {
         </div>
       )}
       {!einstufung ? (
-        <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
-          <b style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><LeoMark size={26} /> Leo lernt dich kennen</b>
-          <p style={{ margin: "4px 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-            Zeig Leo in einer Kennenlern-Runde, was du schon kannst: ein paar Aufgaben
-            aus Deutsch und Mathe. Danach stellt sich die App genau auf dich ein und
-            baut deinen Trainingsplan.
-          </p>
+        <div style={{ background: T.karte, borderRadius: T.radius, padding: "12px 16px", marginBottom: T.abstand, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+          <LeoMark size={34} />
+          <span style={{ flex: 1, minWidth: 180 }}>
+            <b>Leo lernt dich kennen</b>
+            <span style={{ display: "block", color: T.textLeise, fontSize: "var(--schrift-klein)", fontWeight: 700 }}>Ein paar Aufgaben aus Deutsch und Mathe – danach stellt sich die App auf dich ein.</span>
+          </span>
           <button data-test="einstufung-start" onClick={() => navTo("einstufung")}
-            style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
+            style={{ background: T.weich, color: T.text, padding: "0 16px" }}>
             Kennenlern-Runde starten
           </button>
         </div>
@@ -408,11 +350,11 @@ export default function Start() {
             </p>
           </>
         ) : (
-          <>
-            <p style={{ margin: "4px 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-              Such dir einen Satz aus, der dich heute stark macht – sprich ihn einmal laut!
-            </p>
-            <div style={{ display: "grid", gap: 6 }}>
+          <details data-test="mut-satz-details" style={{ marginTop: 4 }}>
+            <summary data-test="mut-satz-oeffnen" style={{ cursor: "pointer", color: T.textLeise, fontSize: "var(--schrift-klein)", fontWeight: 700 }}>
+              Such dir einen Satz aus, der dich heute stark macht – tipp hier und sprich ihn einmal laut!
+            </summary>
+            <div style={{ display: "grid", gap: 6, marginTop: 8 }}>
               {STARK_SAETZE.map((satz, i) => (
                 <button key={i} data-test="mut-satz-wahl" onClick={() => mutWaehlen(i)}
                   style={{ textAlign: "left", background: T.weich, color: T.text }}>
@@ -420,28 +362,9 @@ export default function Start() {
                 </button>
               ))}
             </div>
-          </>
+          </details>
         )}
       </div>
-      <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand }}>
-        <b>Darstellung</b>
-        <p style={{ margin: "4px 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          Hell oder Dunkel – wie du magst.
-        </p>
-        <button
-          data-test="thema-schalter"
-          onClick={themaWechseln}
-          style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}
-        >
-          <Icon name={dunkel ? "sun" : "moon"} size={20} /> {dunkel ? "Hell einschalten" : "Dunkel einschalten"}
-        </button>
-      </div>
-      {tresor.elternModus && (
-        <button data-test="zum-eltern" onClick={() => navTo("eltern")}
-          style={{ width: "100%", marginTop: T.abstand, background: T.weich, color: T.text, fontWeight: 700 }}>
-          <Icon name="wrench" size={20} /> Zum Elternbereich
-        </button>
-      )}
     </div>
   );
 }
