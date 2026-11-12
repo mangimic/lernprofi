@@ -30,7 +30,16 @@ Eltern-Passwort anmelden und „⬇️ Server-Stand holen“. Damit kommen die
 Tresor-Hüllen UND die Daten des Familien-Tresors auf das Gerät – ab dann
 gelten überall dieselbe Lern-PIN und dasselbe Eltern-Passwort.
 
-## 🔐 Cloudflare Access (Zero Trust) vor die Domain
+## 🔐 Cloudflare Access (Zero Trust) – HISTORISCH, seit 12.11.2026 abgeschaltet
+
+Access war der Zaun der Bauzeit (Etappen 6–8). Seit v0.70 hat die App ein
+eigenes Familien-Konto (E-Mail + Eltern-Passwort, Sitzungs-Cookie); seit
+dem Abschalten sehen Familien nur noch die App. Der Header
+`Cf-Access-Authenticated-User-Email` kommt nicht mehr an, die Stamm-Brücke
+in `kontoVonAnfrage()` ist damit tot – Stamm nur über die verknüpfte
+Sitzung. Rückweg: Anwendung neu anlegen (Schritte unten), dann greift der
+Zaun sofort wieder. Die Schritte bleiben als Anleitung stehen:
+
 
 1. Dashboard → **Zero Trust → Access → Applications → Add application → Self-hosted**.
 2. Domain: die Worker-URL (bzw. eigene Domain), Name „Lernprofi“.
