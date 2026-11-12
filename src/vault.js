@@ -5,7 +5,7 @@
 
    Kindgerechter Zugang (Variante b):
    - Die Eltern legen den Tresor mit dem ELTERN-PASSWORT an und
-     vergeben Felix' 4-stellige LERN-PIN.
+     vergeben die 4-stellige LERN-PIN des Kindes.
    - Beide Geheimnisse hüllen denselben zufälligen Master-Schlüssel
      ein (PBKDF2 → AES-GCM-Wrap). Entsperren geht mit PIN ODER Passwort.
    - Nach MAX_PIN_VERSUCHE Fehlversuchen ist der PIN-Weg gesperrt,

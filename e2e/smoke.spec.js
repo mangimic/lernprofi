@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { TEST_FESTE, TEST_SCHULE } from "../src/calc/testFixtures.js";
 
 /* Kernabläufe der Etappe 2: Tresor anlegen, mit Lern-PIN und mit
    Eltern-Passwort entsperren, PIN-Fehler, Elternbereich, Sperren –
@@ -8,6 +9,20 @@ import { test, expect } from "@playwright/test";
 
 const PW = "test-eltern-passwort";
 const PIN = "1234";
+
+// 🧩 Seit v0.86 startet eine neue Familie im Lern-App-Kern (ohne Plan, Leo,
+// Schreib-Training) und ohne Termine im Code. Die bestehenden Abläufe testen
+// den VOLLAUSBAU: Ein fiktives Start-Dokument (alle Module an, erfundene
+// feste Termine, erfundener Stundenplan) wird über den Test-Seed
+// window.__ERSTDOK__ in den frisch angelegten Tresor gelegt. Tests, deren
+// Titel mit „Kern:" beginnt, laufen OHNE Seed – so wie eine fremde Familie.
+const VOLLAUSBAU = {
+  einstellungen: { module: { plan: true, ki: true, schrift: true }, festeTermine: TEST_FESTE, schule: TEST_SCHULE },
+};
+test.beforeEach(async ({ page }, info) => {
+  if (info.title.startsWith("Kern:")) return;
+  await page.addInitScript((seed) => { window.__ERSTDOK__ = seed; }, VOLLAUSBAU);
+});
 
 async function tresorAnlegen(page) {
   await page.goto("/");
@@ -1074,24 +1089,24 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await expect(page.getByTestId("plan-legende")).toContainText("blockiert");
   await expect(page.getByTestId("fest-1-960")).toContainText("Schlagzeug-Stunde");
   await expect(page.getByTestId("fest-1-990")).toHaveCount(0); // Schlagzeug nur 30 Min
-  await expect(page.getByTestId("fest-0-990")).toContainText("↳"); // Musikalische Spiele läuft 60 Min
+  await expect(page.getByTestId("fest-0-990")).toContainText("↳"); // Töpfern läuft 60 Min
   await expect(page.getByTestId("baustein-hausaufgaben")).toContainText("Hausaufgaben");
   await page.getByTestId("kat-zu").click(); // Auswahl wieder schließen
-  await expect(page.getByTestId("fest-3-1110")).toContainText("Pfadfinder");
+  await expect(page.getByTestId("fest-3-1110")).toContainText("Jugendfeuerwehr");
   // 🏫 Schul-Zeilen und Morgen-Auffrischung gibt es nur außerhalb der Ferien –
   // läuft der Test in einer Ferienwoche (z. B. Herbstferien), zeigt der Plan
   // stattdessen das Ferien-Banner und dieser Abschnitt ruht.
   const ferienWoche = /ferien|schulfrei/i.test(await page.getByTestId("tag-0").textContent());
   if (!ferienWoche) {
     await expect(page.getByTestId("tag-0")).toContainText("Schule 7:50");
-    await expect(page.getByTestId("tag-4")).toContainText("7:50–13:00"); // Fr: Sport bis 13 Uhr
+    await expect(page.getByTestId("tag-4")).toContainText("7:50–13:00");
     // 🏫 Vormittag aufklappen: Stundenplan je Tag, AGs als freiwillig
     await page.getByTestId("schule-zeigen").click();
-    await expect(page.getByTestId("schule-3")).toContainText("KoKo");
-    await expect(page.getByTestId("schule-0")).toContainText("7:50–8:35"); // Zeitfenster wie auf dem Blatt
+    await expect(page.getByTestId("schule-3")).toContainText("Werken");
+    await expect(page.getByTestId("schule-0")).toContainText("7:50–8:35"); // Zeitfenster des Rasters
     await expect(page.getByTestId("schule-0")).toContainText("9:20–9:35 Pause");
-    await expect(page.getByTestId("schule-0")).toContainText("Italienisch"); // Mo 12:15 (Änderung Okt 2026)
-    await expect(page.getByTestId("schule-1")).toContainText("freiwillig"); // Chor-AG
+    await expect(page.getByTestId("schule-0")).toContainText("Kunst"); // Mo, 6. Stunde
+    await expect(page.getByTestId("schule-1")).toContainText("freiwillig"); // Garten-AG
     await page.getByTestId("schule-zeigen").click();
     await expect(page.getByTestId("schule-3")).toHaveCount(0);
     await expect(page.getByTestId("plan-hinweise")).toContainText("Klassenarbeit");
@@ -1140,7 +1155,7 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await expect(page.getByTestId("plan-hinweise")).toHaveCount(0);
   await expect(page.getByTestId("plan-ok")).toBeVisible();
 
-  // 📝 Felix trägt selbst einen Termin ein (Wörter der Woche, Montag) – und entfernt ihn wieder
+  // 📝 Das Kind trägt selbst einen Termin ein (Wörter der Woche, Montag) – und entfernt ihn wieder
   await page.getByTestId("kind-termin").click();
   await page.getByTestId("kat-termin").click();
   await page.getByTestId("kt-art-wdw").click();
@@ -1181,11 +1196,11 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
 
   // ❌ Ausfall: fester Termin antippen → fällt diese Woche aus → Fenster wird frei → ↩️ holt ihn zurück
   await page.getByTestId("fest-1-1020").click();
-  await expect(page.getByTestId("fest-dialog")).toContainText("Sport");
+  await expect(page.getByTestId("fest-dialog")).toContainText("Turnen");
   await page.getByTestId("fest-ausfall").click();
   await expect(page.getByTestId("fest-1-1020")).toHaveCount(0);
   await expect(page.getByTestId("slot-1-1020")).toContainText("frei"); // Fenster ist einfach frei …
-  await expect(page.getByTestId("ausfall-liste")).toContainText("Sport"); // … der Ausfall steht unterm Board
+  await expect(page.getByTestId("ausfall-liste")).toContainText("Turnen"); // … der Ausfall steht unterm Board
   // das freie Fenster lässt sich sofort neu verplanen
   await page.getByTestId("kind-termin").click();
   await page.getByTestId("baustein-freunde").click();
@@ -1199,9 +1214,9 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
   await expect(page.getByTestId("verschieb-hinweis")).toBeVisible();
   await page.getByTestId("slot-1-1020").click();
   await expect(page.getByTestId("slot-1-1020")).toContainText("Freunde · Oma");
-  // Zurückholen (aus der Liste) bringt den Sport zurück und räumt NUR sein Fenster
+  // Zurückholen (aus der Liste) bringt das Turnen zurück und räumt NUR sein Fenster
   await page.getByTestId("ausfall-zurueck").click();
-  await expect(page.getByTestId("fest-1-1020")).toContainText("Sport");
+  await expect(page.getByTestId("fest-1-1020")).toContainText("Turnen");
   await expect(page.getByTestId("ausfall-liste")).toHaveCount(0);
   await expect(page.getByTestId("plan-block")).toHaveCount(7); // die 7 geplanten Bausteine bleiben
 
@@ -2451,4 +2466,91 @@ test("Hub „Training“: Kacheln führen zu den Trainings, die Startseite passt
   await expect.poll(async () => page.evaluate(() => document.documentElement.dataset.theme)).toBe("dark");
   await page.getByTestId("nav-neu").click();
   await expect(page.getByTestId("rn-liste")).toBeVisible();
+});
+
+// ---------- v0.86: Lern-App-Kern (neue Familie, OHNE Test-Seed) ----------
+test("Kern: neue Familie sieht weder Plan noch Leo noch Schreib-Training – und keine Termine", async ({ page }) => {
+  const fehler = [];
+  page.on("pageerror", (e) => fehler.push(String(e)));
+  await tresorAnlegen(page);
+  await page.getByTestId("fb-spaeter").click();
+  await page.getByTestId("erststart-uebergabe-weiter").click();
+  await page.getByTestId("interessen-spaeter").click();
+  await page.getByTestId("erststart-spaeter").click();
+  await expect(page.getByTestId("jetzt-dran")).toBeVisible();
+  // Navigation: Start, Üben, Spiele, Training (+ Eltern) – kein Plan
+  await expect(page.getByTestId("nav-plan")).toHaveCount(0);
+  await expect(page.getByTestId("nav-training")).toBeVisible();
+  // Startseite: Mini-Missionen statt Plan-Blöcke, keine Plan-/Kompass-/Einplan-Karten
+  await expect(page.getByTestId("stat-missionen")).toContainText("von 4");
+  await expect(page.getByTestId("stat-bloecke")).toHaveCount(0);
+  await expect(page.getByTestId("heute-plan")).toHaveCount(0);
+  await expect(page.getByTestId("tipps-zeile")).toHaveCount(0);
+  await expect(page.getByTestId("kompass-karte")).toHaveCount(0);
+  // Training: nur die Kern-Kacheln
+  await page.getByTestId("nav-training").click();
+  await expect(page.getByTestId("zum-konz")).toBeVisible();
+  await expect(page.getByTestId("zum-sudoku")).toBeVisible();
+  await expect(page.getByTestId("zum-kasten")).toBeVisible();
+  await expect(page.getByTestId("zum-schrift")).toHaveCount(0);
+  await expect(page.getByTestId("zum-aufsatz")).toHaveCount(0);
+  // Suche: kein Wochenplan, kein Schreib-Training – die Spielhalle schon
+  await page.getByTestId("suche-knopf").click();
+  await page.getByTestId("suche-eingabe").fill("wochenplan");
+  await expect(page.getByTestId("suche-leer")).toBeVisible();
+  await page.getByTestId("suche-eingabe").fill("schreib-training");
+  await expect(page.getByTestId("suche-leer")).toBeVisible();
+  await page.getByTestId("suche-eingabe").fill("spielhalle");
+  await expect(page.getByTestId("suche-treffer").first()).toContainText("Spielhalle");
+  await page.keyboard.press("Escape");
+  // Elternbereich: keine Gruppen „Plan & Termine" und „Leo (KI)", kein Wochenbericht, keine Unterlagen
+  await page.getByTestId("nav-eltern").click();
+  await expect(page.getByTestId("eb-tab-plan")).toHaveCount(0);
+  await expect(page.getByTestId("eb-tab-leo")).toHaveCount(0);
+  await expect(page.getByTestId("eltern-bericht")).toHaveCount(0);
+  await page.getByTestId("eb-tab-regeln").click();
+  await expect(page.getByTestId("eltern-saetze")).toHaveCount(0);
+  await page.getByTestId("eb-tab-material").click();
+  await expect(page.getByTestId("eltern-karten")).toBeVisible();
+  await expect(page.getByTestId("eltern-doks")).toHaveCount(0);
+  await page.getByTestId("eb-tab-konto").click();
+  await expect(page.getByTestId("module-info")).toContainText("Lern-App-Kern");
+  // Üben läuft; nach einem Fehler gibt es KEINEN „Erklär es mir anders"-Knopf
+  await page.getByTestId("nav-ueben").click();
+  await page.getByTestId("ueben-fach-mathe").click();
+  await page.getByTestId("bereich-mrechnen").click();
+  await page.locator('[data-test="antwort-opt"]:not([data-richtig])').first().click();
+  await expect(page.getByTestId("feedback")).toBeVisible();
+  await expect(page.getByTestId("ki-erklaer-knopf")).toHaveCount(0);
+  expect(fehler).toEqual([]);
+});
+
+test("Stundenplan: Eltern tragen ihn als Text ein – Wochenplan zeigt die Schulstunden, Mittag ist schaltbar", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-plan").click();
+  // Der fiktive Start-Plan steht als Text im Editor; ein neuer Plan ersetzt ihn
+  await expect(page.getByTestId("schule-text")).toHaveValue(/Mo: Deutsch, Deutsch, Englisch/);
+  await page.getByTestId("schule-text").fill("Mo: Lesen, Rechnen, -, Turnen (AG)\nMi: Malen");
+  await page.getByTestId("schule-speichern").click();
+  await expect(page.getByTestId("schule-text")).toHaveValue("Mo: Lesen, Rechnen, -, Turnen (AG)\nDi: \nMi: Malen\nDo: \nFr: ");
+  // Mittag & Spielzeit ausschalten → der 13-Uhr-Block verschwindet aus dem Wochenplan
+  await page.getByTestId("mittag-0").click();
+  await page.getByTestId("nav-plan").click();
+  await expect(page.getByTestId("fest-0-780")).toHaveCount(0);
+  await expect(page.getByTestId("fest-1-960")).toContainText("Schlagzeug-Stunde"); // andere Termine bleiben
+  const ferienWoche = /ferien|schulfrei/i.test(await page.getByTestId("tag-0").textContent());
+  if (!ferienWoche) {
+    await page.getByTestId("schule-zeigen").click();
+    await expect(page.getByTestId("schule-0")).toContainText("Lesen");
+    await expect(page.getByTestId("schule-0")).toContainText("Turnen · freiwillig");
+    await expect(page.getByTestId("schule-2")).toContainText("Malen");
+    await expect(page.getByTestId("schule-1")).toHaveCount(0); // Di ohne Stunden: keine Zeilen, keine Pausen
+  }
+  // … und wieder an
+  await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-plan").click();
+  await page.getByTestId("mittag-1").click();
+  await page.getByTestId("nav-plan").click();
+  await expect(page.getByTestId("fest-0-780")).toContainText("Mittag & Spielzeit");
 });

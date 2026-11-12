@@ -168,7 +168,7 @@ export const KOMPASS_ORIGINAL = {
 //    Freizeit-Baustein (nie feste Termine, nie Pflicht-/Lern-Blöcke, nie Erledigtes).
 // 3. Läuft doppelt sicher: Was schon drinsteht, wird nicht noch einmal eingeplant.
 
-const UEBEN_TAGE = [0, 1, 3, 4]; // Mo, Di, Do, Fr – Mi hat die Lernbetreuung
+const UEBEN_TAGE = [0, 1, 3, 4]; // Mo, Di, Do, Fr – der Mittwoch bleibt übungsfrei
 const ERSETZBAR = new Set(["sport", "angeln", "pfadfinder", "freunde", "frei", "eigen"]);
 
 function slotFrei(plan, feste, tag, slot) {

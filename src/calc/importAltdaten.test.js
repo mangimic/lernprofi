@@ -45,7 +45,7 @@ describe("importAltdaten", () => {
 
   it("übernimmt Name, Münzen, Stufen, Lerntage, Rekorde und Tagesziel", () => {
     const { dokument } = importAltdaten(ALT_EXPORT, HEUTE);
-    expect(dokument.schemaVersion).toBe(1);
+    expect(dokument.schemaVersion).toBe(2);
     expect(dokument.profil.name).toBe("Testkind");
     expect(dokument.profil.klasse).toBe(4);
     expect(dokument.lernstand.muenzen).toBe(7);
@@ -90,7 +90,7 @@ describe("importAltdaten", () => {
   it("übersteht kaputte Eingaben (leer, Müll) und liefert ein gültiges Dokument", () => {
     for (const roh of [null, {}, { daten: null }, { app: "lernprofi" }, { progress: "quatsch" }]) {
       const { dokument } = importAltdaten(roh, HEUTE);
-      expect(dokument.schemaVersion).toBe(1);
+      expect(dokument.schemaVersion).toBe(2);
       expect(dokument.lernstand.muenzen).toBe(0);
     }
   });

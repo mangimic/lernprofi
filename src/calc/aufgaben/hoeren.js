@@ -1,6 +1,6 @@
 /* ============================================================
    🔊 HÖR-DETEKTIV – gezieltes Rechtschreib-Training nach echten
-   Fehlermustern aus Felix' Kompass-Archiv-Blatt (Aufgabe 9/2024):
+   Fehlermustern aus einem Kompass-Archiv-Blatt (Aufgabe 9/2024):
    „Atickel" (r überhört), „fohrne" (f/v + Dehnungs-h zu viel),
    „tran" (d/t am Anfang), „setsen" (tz nach kurzem Vokal).
    Vier Muster, vier Strategien:

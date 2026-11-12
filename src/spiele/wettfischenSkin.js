@@ -1,6 +1,6 @@
 /* ============================================================
    🎣 ANGEL-WETTFISCHEN – dritter Welten-Skin auf der Match-Engine
-   (Welt „angeln", Felix' Heimspiel). Richtige Antwort = DU fängst
+   (Welt „angeln", ein Heimspiel für Angel-Fans). Richtige Antwort = DU fängst
    den Fisch, falsche = er entwischt zum Gegner. 2 Beißzeiten mit
    je 5 Würfen – bei Gleichstand entscheidet der große Hecht.
    Die Fang-Animation: der Fisch springt aus der See-Mitte zu

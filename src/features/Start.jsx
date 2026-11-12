@@ -3,6 +3,7 @@ import ErstStart, { FragebogenKarte, InteressenKarte } from "./ErstStart.jsx";
 import { erstStartLage } from "../calc/onboarding.js";
 import { jetztDran } from "../calc/jetztDran.js";
 import { Icon, LeoMark } from "./Icon.jsx";
+import { modulAn, routeErlaubt } from "../calc/module.js";
 import { koennerEinplanen } from "../calc/koennerPlan.js";
 import { hoerEinplanen } from "../calc/kompassPlan.js";
 import { heutigerTag, lernspur, muenzenNachRunde, aufgabenZaehlen } from "../calc/lerntage.js";
@@ -27,6 +28,7 @@ export default function Start() {
   const feldName = (key) => EINSTUFUNG_FELDER.find((f) => f.key === key) || { emoji: "✏️", name: key };
   const tag = heutigerTag(data.lernstand.lerntage, heute);
   const spur = lernspur(data.lernstand.lerntage, heute);
+  const planAn = modulAn(data, "plan"); // 🧩 Lern-App-Kern: ohne Plan-Karten (v0.86)
   const mut = data.lernstand.mutSatz;
   const mutHeute = mut.tag === heute;
 
@@ -134,7 +136,9 @@ export default function Start() {
       )}
       {!erstStartOffen && (
         <section aria-label="Heute in Zahlen" data-test="jetzt-dran-stats" style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12, marginBottom: T.abstand }}>
-          {kennzahl("check", "var(--ok)", dran.geschafft, `von ${dran.gesamt}`, "Blöcke heute", "stat-bloecke")}
+          {planAn
+            ? kennzahl("check", "var(--ok)", dran.geschafft, `von ${dran.gesamt}`, "Blöcke heute", "stat-bloecke")
+            : kennzahl("check", "var(--ok)", tag.missionen, `von ${data.einstellungen.missionsZiel}`, "Mini-Missionen", "stat-missionen")}
           {kennzahl("clock", "var(--warn)", dran.zeitFrei, "Min", "Lernzeit frei", "stat-zeit")}
           {kennzahl("coin", "var(--see)", dran.muenzen, "", dran.muenzen === 1 ? "Münze" : "Münzen", "stat-muenzen")}
         </section>
@@ -143,7 +147,7 @@ export default function Start() {
         // 🧭 Kompass-Countdown GANZ OBEN (≤ 10 Wochen vor dem Test):
         // Countdown je Fach + die heutigen Kompass-Themen aus dem
         // Wochenplan, jedes mit ▶️ direkt in die Übung.
-        const ziele = kompassTermine(data.einstellungen.termine, heute);
+        const ziele = planAn ? kompassTermine(data.einstellungen.termine, heute) : [];
         if (!ziele.length || tageBis(heute, ziele[0].tag) > 70) return null;
         const heuteKompass = heutePlan
           .map((b) => ({ b, feld: b.typ !== "eigen" ? feldVonNotiz(b.notiz) : null }))
@@ -198,7 +202,7 @@ export default function Start() {
           <InteressenKarte />
         </div>
       )}
-      {(!data.lernstand.koenner?.geplant || !data.lernstand.hoerplan?.geplant) && (
+      {planAn && (!data.lernstand.koenner?.geplant || !data.lernstand.hoerplan?.geplant) && (
         <div data-test="tipps-zeile" style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: T.abstand }}>
           <span style={{ fontSize: "var(--schrift-klein)", fontWeight: 800, color: T.textLeise }}>Tipps zum Einplanen:</span>
           {!data.lernstand.koenner?.geplant && (
@@ -225,7 +229,7 @@ export default function Start() {
           {data.einstellungen.zeitLimit > 0 ? ` · noch ${zeitUebrigMin(data.lernstand.zeit, data.einstellungen.zeitLimit, heute)} Min` : ""}
         </p>
       </div>
-      {(heutePlan.length > 0 || heuteFeste.length > 0) && (
+      {planAn && (heutePlan.length > 0 || heuteFeste.length > 0) && (
         <div data-test="heute-plan" style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
           <b style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><Icon name="calendar" size={20} /> Heute auf deinem Plan</b>
           {schulfreiAm(heute) && (
@@ -241,9 +245,9 @@ export default function Start() {
               Heute: {a.text} – du hast verteilt geübt, du kannst das!
             </p>
           ))}
-          {schulFaecher(heuteIdx).length > 0 && (
+          {schulFaecher(data.einstellungen.schule, heuteIdx).length > 0 && (
             <p data-test="heute-schule" style={{ margin: "6px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-              Heute in der Schule: {schulFaecher(heuteIdx).join(" · ")}
+              Heute in der Schule: {schulFaecher(data.einstellungen.schule, heuteIdx).join(" · ")}
             </p>
           )}
           <div style={{ display: "grid", gap: 6, margin: "8px 0 0" }}>
@@ -261,7 +265,8 @@ export default function Start() {
             ))}
             {heutePlan.map((b) => {
               const info = bausteinAnzeige(b.typ, data.einstellungen);
-              const ziel = planZiel[b.typ];
+              // 🧩 „Los" nur, wenn das Ziel freigeschaltet ist (z. B. Schreib-Training)
+              const ziel = planZiel[b.typ] && routeErlaubt(planZiel[b.typ], data) ? planZiel[b.typ] : null;
               return (
                 <div key={b.id} data-test="heute-block" style={{
                   display: "flex", alignItems: "center", gap: 8,

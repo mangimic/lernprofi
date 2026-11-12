@@ -5,8 +5,9 @@ import {
 } from "./kalender.js";
 import {
   tagesStunden, planFuerWoche, planSchreiben, blockHinzu, blockNotiz, leererPlan,
-  planPruefung, FESTE_TERMINE_STANDARD, terminSerie, blockSerie, blockSerieEntfernen,
+  planPruefung, terminSerie, blockSerie, blockSerieEntfernen,
 } from "./wochenplan.js";
+import { TEST_FESTE } from "./testFixtures.js";
 
 describe("kalender – Schuljahr 2026/27 (BW)", () => {
   it("Ferien und Feiertage: Ränder stimmen, Lücken sind Schule", () => {
@@ -34,7 +35,7 @@ describe("kalender – Schuljahr 2026/27 (BW)", () => {
     expect(tagesStunden(5, "2026-10-17")[0]).toBe(540); // Samstag sowieso
     // Familienregel ruht in den Ferien (keine Hausaufgaben)
     const ferienwoche = blockHinzu(leererPlan("2026-10-26"), 1, "mathe", 600);
-    expect(planPruefung(ferienwoche, [], 20, FESTE_TERMINE_STANDARD).tage[1].status).not.toBe("reihenfolge");
+    expect(planPruefung(ferienwoche, [], 20, TEST_FESTE).tage[1].status).not.toBe("reihenfolge");
   });
 
   it("Monatsgitter: Mo-basiert, deckt den Monat, Navigation über Jahresgrenze", () => {

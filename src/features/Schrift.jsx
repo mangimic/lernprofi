@@ -21,7 +21,7 @@ export default function Schrift() {
   const [anzeige, setAnzeige] = useState(null); // 👁️ Blatt aus der Reise groß ansehen
   const karte = { background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand };
 
-  // Satz des Tages: Hat Felix heute seinen Mut-Satz gewählt, ist DER die
+  // Satz des Tages: Hat das Kind heute seinen Mut-Satz gewählt, ist DER die
   // Schreibaufgabe (doppelt wirksam) – sonst rotiert die Übungs-Welt.
   const mut = data.lernstand.mutSatz;
   const mutHeute = mut.tag === heute;

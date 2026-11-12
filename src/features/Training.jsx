@@ -1,5 +1,6 @@
 import { useApp } from "../appContext.jsx";
 import { Icon, LeoMark } from "./Icon.jsx";
+import { modulAn } from "../calc/module.js";
 
 /* 🎯 Hub „Training" (v0.85): sammelt alle Trainings, die kein eigener
    Navigationspunkt sind, als Kacheln auf EINEM Bildschirm – vorher
@@ -11,10 +12,11 @@ export default function Training() {
   const kacheln = [
     { test: "zum-konz", route: "konz", icon: "target", titel: "Konzentration", text: "Zahlenkette, ABC und Blitzlesen – kurze Runden für den Fokus." },
     { test: "zum-sudoku", route: "sudoku", icon: "puzzle", titel: "Sudoku", text: "Logik lernen Stufe für Stufe, von 4×4 bis 9×9." },
-    { test: "zum-schrift", route: "schrift", icon: "pencil", titel: "Schreib-Training", text: "Ein Satz am Tag mit der Hand, Leo schaut auf die Schrift." },
-    { test: "zum-aufsatz", route: "aufsatz", icon: "book", titel: "Aufsatz-Check", text: "Foto vom Text, Leo markiert genau eine Stelle." },
+    // 🧩 Schreib-Training, Aufsatz-Check und Unterlagen gibt es nur mit freigeschaltetem Modul (v0.86)
+    ...(modulAn(data, "schrift") ? [{ test: "zum-schrift", route: "schrift", icon: "pencil", titel: "Schreib-Training", text: "Ein Satz am Tag mit der Hand, Leo schaut auf die Schrift." }] : []),
+    ...(modulAn(data, "ki") ? [{ test: "zum-aufsatz", route: "aufsatz", icon: "book", titel: "Aufsatz-Check", text: "Foto vom Text, Leo markiert genau eine Stelle." }] : []),
     { test: "zum-kasten", route: "kasten", icon: "flag", titel: "Karteikasten", text: "Fünf Karten ziehen – Gewusstes wandert ein Fach weiter." },
-    ...(data.doks.length > 0 ? [{ test: "zum-doks", route: "doks", icon: "lock", titel: `Unterlagen (${data.doks.length})`, text: "Eure verschlüsselte Ablage mit Heften und Blättern." }] : []),
+    ...(modulAn(data, "plan") && data.doks.length > 0 ? [{ test: "zum-doks", route: "doks", icon: "lock", titel: `Unterlagen (${data.doks.length})`, text: "Eure verschlüsselte Ablage mit Heften und Blättern." }] : []),
   ];
   const kachel = { textAlign: "left", display: "flex", flexDirection: "column", gap: 8, minHeight: 150, padding: 18, borderRadius: 26, background: T.karte, color: T.text, boxShadow: "var(--schatten)" };
   return (

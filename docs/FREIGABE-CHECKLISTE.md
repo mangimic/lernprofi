@@ -91,6 +91,12 @@ Handgriff im Dashboard.
 
 ## 6. Familie einladen
 
+> Seit v0.86 startet jede neu eingerichtete Familie im **Lern-App-Kern**
+> (Start, Üben, Spiele, Training, Eltern) – ohne Wochenplan, Leo-KI und
+> Schreib-Training und ohne Termine oder Stundenplan im Programm. Euer
+> eigener Tresor behält alles; den Vormittags-Stundenplan tragt ihr einmal
+> im Elternbereich → Plan & Termine → „Schulzeiten & Stundenplan“ neu ein.
+
 - [ ] Elternbereich → Konto & Daten → „🎟️ Neuen Einladungs-Code erzeugen".
 - [ ] Code persönlich weitergeben (gilt für genau eine Registrierung).
 - [ ] Die Familie richtet sich selbst ein: App öffnen → Tresor einrichten →

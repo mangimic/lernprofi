@@ -4,7 +4,7 @@
    werden bei Änderungen per Alternative (a|b) erweitert, nie
    gelöscht. Lauf: node test/regression.mjs → FAIL 0 Pflicht.
    ============================================================ */
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -35,6 +35,51 @@ function versionMindestens(v) {
   return true;
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
+
+// ---------- v0.86.0: Lern-App-Kern (Module) + keine Termine/Stundenpläne mehr im Code ----------
+console.log("== v0.86.0: Lern-App-Kern + Leak-Fix ==");
+test("v0.86: Datenmodell – Module (neu aus, Bestand an), Schule als Daten, Startwert ohne Termine", (() => {
+  const m = quelle("src/calc/migrateData.js");
+  const w = quelle("src/calc/wochenplan.js");
+  return versionMindestens("0.86.0")
+    && m.includes("SCHEMA_VERSION = 2") && m.includes('MODULE = ["plan", "ki", "schrift"]')
+    && m.includes("module: { plan: false, ki: false, schrift: false }")
+    && m.includes("const bestand = istObjekt(quelle.einstellungen) && !istObjekt(quelle.einstellungen.module)")
+    && m.includes("festeTermine: [],") && m.includes("if (d.einstellungen.schule.mittag)")
+    && w.includes("FESTE_TERMINE_STANDARD = []") && !w.includes("SCHULSTUNDEN = {")
+    && w.includes("stundenplanAusText") && w.includes("stundenplanAlsText") && w.includes("schuleText")
+    && quelle("src/calc/testFixtures.js").includes("FIKTIVE Testdaten")
+    && !quelle("src/main.jsx").includes("testFixtures") && !quelle("src/appContext.jsx").includes("testFixtures");
+})());
+test("v0.86: Module steuern Navigation, Routen, Start, Training, Üben, Eltern und Suche", (() => {
+  const mo = quelle("src/calc/module.js");
+  const app = quelle("src/App.jsx");
+  const st = quelle("src/features/Start.jsx");
+  const tr = quelle("src/features/Training.jsx");
+  const el = quelle("src/features/Eltern.jsx");
+  return mo.includes("export function modulAn") && mo.includes("export function routeErlaubt")
+    && mo.includes('{ plan: "plan", kompass: "plan", doks: "plan", schrift: "schrift", aufsatz: "ki" }')
+    && app.includes('modulAn(data, "plan") ? [{ id: "plan"') && app.includes("!routeErlaubt(route, data) ? <Start />")
+    && st.includes('"Mini-Missionen", "stat-missionen")') && st.includes("planAn && (heutePlan.length > 0")
+    && tr.includes('modulAn(data, "schrift") ? [{ test: "zum-schrift"') && tr.includes('modulAn(data, "ki") ? [{ test: "zum-aufsatz"')
+    && quelle("src/features/Ueben.jsx").includes('!modulAn(data, "ki") || !data.einstellungen.ki.erklaeren')
+    && el.includes('data-test="module-info"') && el.includes('tab === "plan" && modulAn(data, "plan")')
+    && el.includes('tab === "leo" && modulAn(data, "ki")') && el.includes('test="eltern-schule"')
+    && el.includes('data-test="schule-text"') && el.includes('test="mittag"')
+    && quelle("src/calc/suche.js").includes("if (!routeErlaubt(route, data)) continue;")
+    && quelle("src/calc/jetztDran.js").includes('modulAn(data, "plan")')
+    && quelle("src/appContext.jsx").includes("window.__ERSTDOK__")
+    && quelle("src/appContext.jsx").includes("module: data.einstellungen.module");
+})());
+test("v0.86: Tests – Vollausbau per fiktivem Start-Dokument, Kern-Test ohne Seed, Stundenplan-Editor, Release-Note", (() => {
+  const sm = quelle("e2e/smoke.spec.js");
+  return sm.includes('info.title.startsWith("Kern:")') && sm.includes("window.__ERSTDOK__ = seed")
+    && sm.includes("Kern: neue Familie sieht weder Plan noch Leo noch Schreib-Training")
+    && sm.includes("Stundenplan: Eltern tragen ihn als Text ein")
+    && quelle("src/calc/module.test.js").includes("routeErlaubt sperrt Plan, Kompass, Unterlagen, Schrift und Aufsatz im Kern")
+    && quelle("src/calc/migrateData.test.js").includes("v0.86 Module: neu = Lern-App-Kern")
+    && releaseNoteVorhanden("rn-113");
+})());
 
 // ---------- v0.85.2: Access abgeschaltet – Familien-Konto ist der einzige Zaun ----------
 console.log("== v0.85.2: Access abgeschaltet ==");
@@ -1067,7 +1112,8 @@ test("v0.32: Mittag 13-14 an allen Tagen erzwungen, Arzttermin ohne Ausgleich, F
   const w = quelle("src/calc/wochenplan.js");
   return w.includes("mittagErzwingen") && w.includes('name: "Mittag & Spielzeit"')
     && w.includes("[0, 1, 2, 3, 4, 5, 6].map") && w.includes('typ: "arzt"')
-    && w.includes("i.ausgleich !== false") && w.includes('[735, 780, "BSS (Sport)"]],')
+    && w.includes("i.ausgleich !== false")
+    && w.includes("SCHUL_RASTER = [[470, 515]") // seit v0.86: Stundenplan ist Familien-Datum, im Code steht nur das Raster
     && quelle("src/calc/migrateData.js").includes("mittagErzwingen(")
     && releaseNoteVorhanden("rn-044");
 })());
@@ -1116,7 +1162,8 @@ test("v0.30.2: Anzeige-Zeilen mit von-bis und einsortierten Pausen", (() => {
 console.log("== v0.30.1: Stundenplan-Korrektur ==");
 test("v0.30.1: Montag 12:15 ist Italienisch (regulär)", (() => {
   const w = quelle("src/calc/wochenplan.js");
-  return /0: \[.*\[735, 780, "Italienisch"\]\]/.test(w) && releaseNoteVorhanden("rn-040");
+  // seit v0.86: kein Stundenplan mehr im Code – die 6. Stunde (12:15–13:00) lebt nur noch als Raster-Slot
+  return w.includes("[735, 780]]") && !w.includes("SCHULSTUNDEN = {") && releaseNoteVorhanden("rn-040");
 })());
 
 // ---------- v0.30: Baustein-Notizen ----------
@@ -1139,10 +1186,11 @@ test("v0.29: APP_VERSION mindestens 0.29.0", versionMindestens("0.29.0"));
 test("v0.29: Release-Note rn-038 vorhanden", releaseNoteVorhanden("rn-038"));
 test("v0.29: Stundenplan hinterlegt – 5 Tage, AG-Kennzeichnung, keine Lehrkraft-Namen", (() => {
   const w = quelle("src/calc/wochenplan.js");
-  return w.includes("SCHULSTUNDEN") && w.includes("schulFaecher") && w.includes("KoKo")
-    && w.includes("Leseband") && (w.includes("Bläserklasse (AG)") || w.includes("Chor (AG)")) // Mo-AG wurde Okt 2026 zu Italienisch
-    && !/Häußler|Weinmann|Kemper|Cecere|Lindinger|Hanser|gsakb/i.test(w)
-    && (w.includes('jeTag: { 4: "7:50–12:15" }') || w.includes("jeTag: {}")); // seit v0.32: Fr Sport bis 13 Uhr
+  // seit v0.86: Der Stundenplan ist ein Datum der Familie (einstellungen.schule.stunden, Eltern-Editor);
+  // im Code stehen nur Raster, Leser und die AG-Kennzeichnung – keine Fächer, keine Namen.
+  return w.includes("schulFaecher(schule, tag)") && w.includes("stundenplanAusText") && w.includes("(AG)")
+    && !w.includes("SCHULSTUNDEN = {") && w.includes("SCHULE_STANDARD")
+    && quelle("src/calc/migrateData.js").includes("d.einstellungen.schule =");
 })());
 test("v0.29: Schulstunden-Toggle im Plan + Heute-in-der-Schule-Zeile", (() => {
   return quelle("src/features/Wochenplan.jsx").includes('data-test="schule-zeigen"')
@@ -1159,7 +1207,8 @@ test("v0.28: Minuten-Slots – Werktag ab 13 Uhr (Spielzeit), Wochenende ab 9, T
   return w.includes("SLOT_MIN = 30") && w.includes("WERKTAG_START = 13 * 60")
     && w.includes("WOCHEMEND_START") === false && w.includes("WOCHENEND_START = 9 * 60")
     && (w.includes('name: "Spielzeit"') || w.includes('name: "Mittag & Spielzeit"')) // seit v0.32 Mittagsblock
-    && w.includes("dauer: 30") && w.includes("f.beginn + f.dauer")
+    && (w.includes("dauer: 30") || quelle("src/calc/testFixtures.js").includes("dauer: 30")) // seit v0.86: Termine mit Dauer nur noch als fiktive Testdaten
+    && w.includes("f.beginn + f.dauer")
     && quelle("src/calc/migrateData.js").includes("(f.slot + 14) * 60");
 })());
 test("v0.28: Kalenderwoche, Folgewoche-Vorplanung und Routine ohne Freunde-Zeit", (() => {
@@ -1181,14 +1230,14 @@ test("v0.27: Slots 14-19, feste Termine als Daten, Wächter zählt Aktiv-Termine
   return (w.includes("SLOT_STUNDEN = [14, 15, 16, 17, 18]") || w.includes("WERKTAG_START")) // seit v0.28 Minuten-Slots
     && w.includes("FESTE_TERMINE_STANDARD")
     && w.includes("festerTermin") && w.includes("slotBelegt") && w.includes("SCHULE")
-    && w.includes("Bandprobe") && w.includes("Pfadfinder") && w.includes("f.aktiv")
+    && w.includes("FESTE_TERMINE_STANDARD = []") && w.includes("f.aktiv") // seit v0.86: Startwert leer, Termine nur im Tresor
     && w.includes('typ: "hausaufgaben"')
     && quelle("src/calc/migrateData.js").includes("festeTermine");
 })());
 test("v0.27: Plan-Board – Stunden-Raster, 🔒-Felder, Schule im Tageskopf, breite Ansicht, Nav-Tab", (() => {
   const f = quelle("src/features/Wochenplan.jsx");
   return f.includes("StundenSlot") && f.includes("fest-") && f.includes("slot-")
-    && f.includes("SCHULE.text") && f.includes("festerTermin")
+    && (f.includes("SCHULE.text") || f.includes("schuleText(schuleDaten)")) && f.includes("festerTermin")
     && quelle("src/App.jsx").includes('route === "plan" ? "min(1360px') 
     && quelle("src/App.jsx").includes("nav-plan");
 })());
@@ -2051,8 +2100,26 @@ test("v0.1: _headers mit nosniff, HSTS und no-store für version.json", (() => {
   const h = quelle("public/_headers");
   return h.includes("nosniff") && h.includes("Strict-Transport-Security") && h.includes("no-store");
 })());
-test("v0.1: keine echten Kind-Daten im Code (nur „Kind“/„Profil“)", !/Felix|Geburtstag|Schule am/i.test(
-  quelle("src/App.jsx") + quelle("src/features/Start.jsx") + quelle("src/calc/migrateData.js") + quelle("src/calc/migrateData.test.js") + quelle("src/releaseNotes.json")));
+test("v0.1: keine echten Kind-Daten im Code (nur „Kind“/„Profil“)", (() => {
+  // Der Vorname wird aus Teilen gebaut, damit diese Datei sich nicht selbst trifft.
+  const vorname = ["Fe", "lix"].join("");
+  // (1) wie seit v0.1: fünf Kern-Dateien ohne Name, Geburtstag, Schul-Angabe
+  const kern = quelle("src/App.jsx") + quelle("src/features/Start.jsx") + quelle("src/calc/migrateData.js") + quelle("src/calc/migrateData.test.js") + quelle("src/releaseNotes.json");
+  if (new RegExp(`${vorname}|Geburtstag|Schule am`, "i").test(kern)) return false;
+  // (2) seit v0.86: der Vorname steht in KEINER Datei unter src, server, e2e, test und docs
+  const muster = new RegExp(vorname, "i");
+  const treffer = [];
+  const lauf = (ordner) => {
+    for (const e of readdirSync(join(wurzel, ordner), { withFileTypes: true })) {
+      const pfad = `${ordner}/${e.name}`;
+      if (e.isDirectory()) lauf(pfad);
+      else if (/\.(js|jsx|mjs|json|md|css|html)$/.test(e.name) && muster.test(quelle(pfad))) treffer.push(pfad);
+    }
+  };
+  ["src", "server", "e2e", "test", "docs"].forEach(lauf);
+  if (treffer.length) console.log("     Treffer:", treffer.join(", "));
+  return treffer.length === 0;
+})());
 test("v0.1: data-test-Attribute an geprüften Elementen", (() => {
   const a = quelle("src/App.jsx") + quelle("src/features/Start.jsx");
   return a.includes('data-test="app-shell"') && a.includes('data-test="version"')

@@ -44,7 +44,7 @@ stehen dem heute entgegen:
 
 ## Anti-Ziele
 
-- Felix' Daten in einen anderen Winkel des Codes verschieben.
+- Daten des Kindes in einen anderen Winkel des Codes verschieben.
 - Klasse 1/2 nur als Auswahl ohne passende Inhalte („leere Klasse“).
 - Instruktionstexte, die ein Erstklässler lesen müsste, ohne Vorlesen.
 
@@ -244,6 +244,32 @@ K = Feld der Kennenlern-Runde dieser Klasse (je 3 Deutsch + 3 Mathe).
   Plan/KI/Schrift; Stamm-Dokument (`vollausbau`) mit allem.
 - Regression: Blöcke v0.86.0, v0.87.0, v0.88.0; v0.1-Check gegen den
   Vornamen ohne Ausnahmen.
+
+## Entscheidungen bei der Umsetzung (Etappe 1, v0.86.0)
+
+- **Unterlagen (Dokumenten-Ablage) zählen zum Modul `plan`** (Familien-
+  Organisation): Route `doks`, Kachel und Eltern-Karte erscheinen nur dort.
+- **Alt-App-Import behält Module, Schulzeiten und feste Termine des
+  aktuellen Tresors** – er bringt nur den Lernstand. Ein Neubau-Backup von
+  vor v0.86 gilt als Bestand (Vollausbau).
+- **Stundenplan-Editor als Text** statt 30 Einzelfelder: je Zeile ein Tag
+  (`Mo: Fach, Fach, …`), „-“ lässt eine Stunde frei, „(AG)“ = freiwillig.
+- **Start im Kern:** statt „Blöcke heute“ zeigt die erste Kennzahl die
+  Mini-Missionen des Tages (`stat-missionen`).
+- **Tests:** Der Vollausbau wird über ein fiktives Start-Dokument getestet
+  (`window.__ERSTDOK__`, nur bei der Erstbefüllung eines neuen Tresors
+  gelesen). Feste Termine und Stundenplan der Tests liegen in
+  `src/calc/testFixtures.js` (nicht im Bundle).
+- **Release-Notes und alte Regressions-Checks** nannten echte Termine,
+  Fächer und Namen Dritter; die Texte sind neutralisiert, die Checks prüfen
+  den neuen Stand (hier ging Datenschutz vor „nie löschen“).
+- **Blitzlesen** nutzt eine eigene Tier-Wortliste – für Klasse 1/2 bleibt
+  es unverändert (der Prüfer hatte hier eine falsche Quelle vermutet).
+- **Bleibt bewusst:** Plan-Bausteine und Welten (Schlagzeug, Angeln,
+  Pfadfinder, Tennis …) sind allgemeine Hobby-Kategorien ohne Personenbezug;
+  die „Familienregel“ im Plan-Wächter ist Logik des Moduls Plan.
+- **Git-Historie:** Ältere Commits enthalten die Termine weiterhin; ein
+  Umschreiben der Historie bräuchte einen Force-Push (Repo-Regel: nie).
 
 ## Was dem Bauenden überlassen bleibt
 

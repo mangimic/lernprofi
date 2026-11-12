@@ -1,5 +1,5 @@
 /* 🖼️ AUFGABEN-BILDER: kleine, deterministische Grafiken zu einzelnen
-   Übungsaufgaben (Felix lernt visuell). Eine Aufgabe trägt dafür ein
+   Übungsaufgaben (viele Kinder lernen visuell). Eine Aufgabe trägt dafür ein
    `bild`-Feld, z. B. { art: "strahl", von: 330, bis: 360, … }.
    Wichtig: Die Bilder UNTERSTÜTZEN das Denken, sie verraten keine
    Lösung (Nachbarzehner stehen z. B. als „?" am Strahl).

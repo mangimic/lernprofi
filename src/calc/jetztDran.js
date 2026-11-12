@@ -13,6 +13,7 @@ import { zeitUebrigMin } from "./elternWerkzeuge.js";
 import { DEUTSCH_LISTE } from "./uebenGruppen.js";
 import { MATHE_BEREICHE } from "./aufgaben/mathe.js";
 import { SACH_BEREICHE } from "./aufgaben/sachkunde.js";
+import { modulAn } from "./module.js";
 
 /** Anzeigename eines Lernfelds (Deutsch, Mathe, Sachkunde, Stark). */
 export function feldTitel(key) {
@@ -25,7 +26,10 @@ export function jetztDran(data, heute) {
   const montag = wochenMontag(heute);
   const plan = planFuerWoche(data.lernstand.wochenplan, montag);
   const idx = WOCHENTAGE.findIndex((_, i) => tagDatum(montag, i) === heute);
-  const heutePlan = plan.bloecke.filter((b) => b.tag === idx).sort((a, b) => (a.slot ?? 9999) - (b.slot ?? 9999));
+  // 🧩 Ohne das Modul „Plan" (Lern-App-Kern) gibt es keine Plan-Blöcke auf der Bühne.
+  const heutePlan = modulAn(data, "plan")
+    ? plan.bloecke.filter((b) => b.tag === idx).sort((a, b) => (a.slot ?? 9999) - (b.slot ?? 9999))
+    : [];
   const geschafft = heutePlan.filter((b) => b.fertig).length;
   const kennzahlen = {
     geschafft, gesamt: heutePlan.length,

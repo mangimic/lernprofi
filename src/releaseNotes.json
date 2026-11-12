@@ -1,5 +1,29 @@
 [
   {
+    "id": "rn-113",
+    "version": "0.86.0",
+    "datum": "2026-11-12",
+    "titel": "Lern-App-Kern für neue Familien, keine Termine mehr im Code",
+    "entries": [
+      {
+        "type": "fix",
+        "text": "🔒 Datenschutz: Feste Termine und der Stundenplan standen bisher als Startwerte im Programm und wären bei neuen Familien aufgetaucht. Jetzt sind beides reine Daten im verschlüsselten Tresor – im Programm steht kein Termin, kein Stundenplan und kein Name mehr. Eure eigenen festen Termine bleiben unverändert erhalten."
+      },
+      {
+        "type": "neu",
+        "text": "🧩 Neue Familien starten mit dem Lern-App-Kern: Start, Üben, Spiele, Training und Elternbereich. Wochenplan, Leo-KI und Schreib-Training folgen in einer späteren Ausbaustufe. Bestehende Tresore behalten alles – im Elternbereich unter „Konto & Daten“ steht, was freigeschaltet ist."
+      },
+      {
+        "type": "neu",
+        "text": "🏫 Schulzeiten & Stundenplan im Elternbereich (Plan & Termine): Den Stundenplan als Text eintragen – je Zeile ein Tag, die Fächer mit Komma getrennt, „(AG)“ für freiwillige Stunden. „Mittag & Spielzeit“ lässt sich dort an- und abschalten."
+      },
+      {
+        "type": "hinweis",
+        "text": "✍️ Für eure Familie: Den Vormittags-Stundenplan bitte einmal im Elternbereich neu eintragen – er wird nicht mehr mit dem Programm ausgeliefert."
+      }
+    ]
+  },
+  {
     "id": "rn-112",
     "version": "0.85.2",
     "datum": "2026-11-12",
@@ -1063,7 +1087,7 @@
       },
       {
         "type": "neu",
-        "text": "⚽ Sport fragt beim Platzieren direkt: „Welcher Sport?“ (z. B. Tennis oder BJJ) – die Antwort steht am Baustein und bleibt jederzeit änderbar (Baustein antippen)."
+        "text": "⚽ Sport fragt beim Platzieren direkt: „Welcher Sport?“ (z. B. Tennis oder Schwimmen) – die Antwort steht am Baustein und bleibt jederzeit änderbar (Baustein antippen)."
       }
     ]
   },
@@ -1115,7 +1139,7 @@
       },
       {
         "type": "neu",
-        "text": "🥁📚 Familienregel im Wächter: Vor dem Üben gehören Hausaufgaben UND Schlagzeug in den Plan (die feste Schlagzeug-Stunde am Dienstag zählt mit). Fehlt etwas davor, zeigt der Tag eine gelbe Ampel mit Hinweis. Hausaufgaben verdrängen das Üben dabei nicht mehr – gegen das Tages-Limit zählen nur die 10-Minuten-Boxen."
+        "text": "🥁📚 Familienregel im Wächter: Vor dem Üben gehören Hausaufgaben UND Schlagzeug in den Plan (eine feste Schlagzeug-Stunde zählt mit). Fehlt etwas davor, zeigt der Tag eine gelbe Ampel mit Hinweis. Hausaufgaben verdrängen das Üben dabei nicht mehr – gegen das Tages-Limit zählen nur die 10-Minuten-Boxen."
       },
       {
         "type": "neu",
@@ -1151,7 +1175,7 @@
       },
       {
         "type": "geaendert",
-        "text": "🏫 Freitag: Sport (BSS) geht bis 13 Uhr – der Stundenplan und die Schulzeit-Anzeige sind angepasst."
+        "text": "🏫 Stundenplan und Schulzeit-Anzeige sind angepasst."
       },
       {
         "type": "verbessert",
@@ -1179,7 +1203,7 @@
     "entries": [
       {
         "type": "neu",
-        "text": "❌ Feste Termine sind jetzt antippbar: „Fällt diese Woche aus?“ gibt das Zeitfenster für genau diese Woche frei (z. B. wenn Sport oder Tennis ausfällt) – es lässt sich sofort neu verplanen. Nächste Woche ist der Termin automatisch wieder da, und ↩️ holt ihn auch vorher zurück."
+        "text": "❌ Feste Termine sind jetzt antippbar: „Fällt diese Woche aus?“ gibt das Zeitfenster für genau diese Woche frei (z. B. wenn der Sport ausfällt) – es lässt sich sofort neu verplanen. Nächste Woche ist der Termin automatisch wieder da, und ↩️ holt ihn auch vorher zurück."
       },
       {
         "type": "verbessert",
@@ -1207,7 +1231,7 @@
     "entries": [
       {
         "type": "geaendert",
-        "text": "🏫 Montag 12:15–13:00 ist jetzt Italienisch-Unterricht (regulär) – vorher stand dort die freiwillige Bläserklassen-AG. Die Montags-Fächerfolge in der Heute-Ansicht zeigt Italienisch mit an."
+        "text": "🏫 Der Stundenplan wurde aktualisiert – die Fächerfolge in der Heute-Ansicht zeigt die Änderung mit an."
       }
     ]
   },
@@ -1235,7 +1259,7 @@
     "entries": [
       {
         "type": "neu",
-        "text": "🏫 Stundenplan der Klasse 4a (ab 14.09.2026) ist hinterlegt: Der Knopf „Schulstunden“ klappt im Wochenplan den Vormittag jedes Schultags auf – mit Uhrzeiten und Fächern (AGs wie Bläserklasse und Chor als „freiwillig“ markiert). Freitag endet um 12:15, die anderen Tage um 13 Uhr. Ohne Namen von Lehrkräften – Datensparsamkeit gilt auch hier."
+        "text": "🏫 Der Stundenplan ist hinterlegt: Der Knopf „Schulstunden“ klappt im Wochenplan den Vormittag jedes Schultags auf – mit Uhrzeiten und Fächern (AGs als „freiwillig“ markiert). Ohne Namen von Lehrkräften – Datensparsamkeit gilt auch hier."
       },
       {
         "type": "neu",
@@ -1243,7 +1267,7 @@
       },
       {
         "type": "verbessert",
-        "text": "Der feste Dienstags-Termin Italienisch zeigt „bis 14:50“ (laut Stundenplan)."
+        "text": "Feste Termine können einen Hinweis wie „bis 14:50“ tragen."
       }
     ]
   },
@@ -1255,7 +1279,7 @@
     "entries": [
       {
         "type": "neu",
-        "text": "⏰ 30-Minuten-Fenster statt voller Stunden: Jeder Baustein bekommt ein halbstündiges Fenster – auch 10 Minuten Schlagzeug-Üben haben so einen ehrlichen Platz. Feste Termine haben jetzt echte Dauern (Schlagzeug-Stunde 30 Min, Pfadfinder bis 20 Uhr) und belegen mehrere Fenster."
+        "text": "⏰ 30-Minuten-Fenster statt voller Stunden: Jeder Baustein bekommt ein halbstündiges Fenster – auch 10 Minuten Schlagzeug-Üben haben so einen ehrlichen Platz. Feste Termine haben jetzt echte Dauern (zum Beispiel 30 oder 90 Minuten) und belegen mehrere Fenster."
       },
       {
         "type": "neu",
@@ -1279,7 +1303,7 @@
     "entries": [
       {
         "type": "neu",
-        "text": "⏰ Zeitfenster 14–19 Uhr: Jeder Tag hat fünf Stunden-Felder – Bausteine landen jetzt in einer konkreten Stunde (eine pro Stunde). Feste Termine der Woche (Bandprobe, Schlagzeug-Stunde, Sport, Lernbetreuung, Tennis, Pfadfinder, Italienisch) sind mit 🔒 vorbelegt, die Schulzeit steht im Tageskopf. Der Vormittags-Stundenplan folgt als Nächstes."
+        "text": "⏰ Zeitfenster 14–19 Uhr: Jeder Tag hat fünf Stunden-Felder – Bausteine landen jetzt in einer konkreten Stunde (eine pro Stunde). Feste Termine der Woche sind mit 🔒 vorbelegt, die Schulzeit steht im Tageskopf. Der Vormittags-Stundenplan folgt als Nächstes."
       },
       {
         "type": "neu",
@@ -1295,7 +1319,7 @@
       },
       {
         "type": "verbessert",
-        "text": "🗓️ Plan ist jetzt ein eigener Tab in der unteren Leiste, und die Plan-Seite nutzt die volle iPad-Breite (7 Tages-Spalten nebeneinander). Der Wächter rechnet feste Aktiv-Termine als Ausgleich – ein Tag mit Bandprobe und zwei Lernboxen ist nicht mehr „einseitig“."
+        "text": "🗓️ Plan ist jetzt ein eigener Tab in der unteren Leiste, und die Plan-Seite nutzt die volle iPad-Breite (7 Tages-Spalten nebeneinander). Der Wächter rechnet feste Aktiv-Termine als Ausgleich – ein Tag mit einem festen Termin und zwei Lernboxen ist nicht mehr „einseitig“."
       }
     ]
   },
@@ -1339,7 +1363,7 @@
       },
       {
         "type": "neu",
-        "text": "🔤 Persönliche Übungssätze (Eltern): Interessen eingeben (z. B. „Schlagzeug, Pfadfinder, Angeln“), Leo schlägt 8 Abschreib-Sätze vor – die Eltern prüfen jeden Satz, wählen aus und spielen erst dann ein. Das 🖐️ Schreib-Training nutzt diese Sätze ab sofort statt der Welt-Rotation („✨ Extra für dich gemacht!“); ein Klick entfernt sie wieder."
+        "text": "🔤 Persönliche Übungssätze (Eltern): Interessen eingeben (z. B. „Fußball, Pferde, Lego“), Leo schlägt 8 Abschreib-Sätze vor – die Eltern prüfen jeden Satz, wählen aus und spielen erst dann ein. Das 🖐️ Schreib-Training nutzt diese Sätze ab sofort statt der Welt-Rotation („✨ Extra für dich gemacht!“); ein Klick entfernt sie wieder."
       },
       {
         "type": "technik",

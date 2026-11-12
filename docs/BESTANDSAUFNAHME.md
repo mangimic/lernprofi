@@ -9,7 +9,7 @@ Stand: 07.10.2026 · App-Version 1.85.0 · erstellt zur Prüfung der Zielarchite
 |---|---|
 | Produkt | „Lernprofi – Deutsch & Mathe Klasse 3/4“, Lern-PWA für ein Kind (jetzt **Klasse 4**, Baden-Württemberg) + Elternbereich |
 | Form | **Eine einzige HTML-Datei** `lernprofi/index.html`: 10.787 Zeilen, 856 KB, ~400 Funktionen – HTML, CSS und Vanilla-JavaScript ohne Build-Schritt |
-| Repository | `mangimic/hello-world`, Unterordner `lernprofi/` (Monorepo mit weiteren Apps: felix/, leon/, bauchweg/) |
+| Repository | `mangimic/hello-world`, Unterordner `lernprofi/` (Monorepo mit weiteren Apps) |
 | Framework | keines (kein React, kein CSS-Framework, keine Laufzeit-Abhängigkeiten) |
 | PWA | `manifest.json`, `icon.svg`, `service-worker.js` (62 Zeilen, Cache `lern-app-v85`: HTML network-first, Rest cache-first mit Laufzeit-Cache) → voll offlinefähig nach dem ersten Laden |
 | Sprachausgabe | `stimme/` (39 MB, selbst ausgeliefert): Piper/VITS-TTS mit ONNX-Runtime-WASM + Phonemizer; das Stimmmodell (~30 MB, `de_DE-thorsten-low`) lädt das Gerät einmalig von huggingface.co in OPFS. Fallback: System-Sprachausgabe (Web Speech API) mit Qualitäts-Ampel und Sprachpaket-Anleitung |

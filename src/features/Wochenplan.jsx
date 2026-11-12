@@ -4,7 +4,7 @@ import { useApp } from "../appContext.jsx";
 import {
   WOCHENTAGE, TERMIN_ARTEN, LERN_MINUTEN, tagesStunden, uhr, bausteinInfo,
   wochenMontag, tagDatum, planFuerWoche, blockHinzu, blockWeg, slotBelegt,
-  termineDerWoche, planPruefung, wochenBilanz, festerTermin, SCHULE, auffrischungen,
+  termineDerWoche, planPruefung, wochenBilanz, festerTermin, schuleText, auffrischungen,
   kalenderWoche, routineAusPlan, routineAnwenden, schulZeilen, blockNotiz,
   istAusgefallen, ausfallSetzen, ausfallAufheben, blockVerschieben, wocheKopieren,
   blockDauer, blockDauerVon, slotBelegt as slotBelegtCalc, planSchreiben, terminSerie,
@@ -13,7 +13,7 @@ import {
 import { schulfreiAm, ferienAm, monatsGitter, monatsName, monatSchritt, FERIEN_BW, SCHULJAHR } from "../calc/kalender.js";
 import { feldVonNotiz } from "../calc/kompassPlan.js";
 
-/* 🗓️ MEIN WOCHENPLAN (Etappe 9): Felix setzt sein Pensum selbst.
+/* 🗓️ MEIN WOCHENPLAN (Etappe 9): Das Kind setzt sein Pensum selbst.
    Bedienung doppelt (ADHS-gerecht, iPad-tauglich):
    1. ANTIPPEN: Baustein tippen → Tag tippen (große Flächen, kein
       Feinmotorik-Frust) – das ist auch der Weg der Smoke-Tests.
@@ -126,12 +126,12 @@ function StundenSlot({ tagIdx, slot, block, blockStart, fest, wahlAktiv, aufTipp
   );
 }
 
-function TagSpalte({ idx, datum, heuteIdx, termine, bloecke, feste, ausfaelle, pruefung, wahlAktiv, schuleAuf, auffrischen, aufTipp, aufWeg, aufEdit, aufFest, aufTermin }) {
+function TagSpalte({ idx, datum, heuteIdx, termine, bloecke, feste, ausfaelle, pruefung, wahlAktiv, schuleAuf, schuleDaten, auffrischen, aufTipp, aufWeg, aufEdit, aufFest, aufTermin }) {
   const { T } = useApp();
   const p = pruefung.tage[idx];
   const ampel = p.status === "voll" ? "🔴" : p.status === "einseitig" || p.status === "reihenfolge" ? "🟡" : p.lern + p.frei > 0 ? "🟢" : "";
   const frei = schulfreiAm(datum);
-  const schule = SCHULE.tage.includes(idx) && !frei;
+  const schule = (schuleDaten?.tage || []).includes(idx) && !frei;
   return (
     <div data-test={`tag-${idx}`} style={{
       flex: "1 1 160px", minWidth: 160, background: T.karte,
@@ -142,14 +142,14 @@ function TagSpalte({ idx, datum, heuteIdx, termine, bloecke, feste, ausfaelle, p
         {WOCHENTAGE[idx]} {datum.slice(8)}.{datum.slice(5, 7)}.{idx === heuteIdx ? " · heute" : ""} <span data-test={`ampel-${idx}`}>{ampel}</span>
       </div>
       <div style={{ color: T.textLeise, fontSize: "11.5px", marginBottom: 4, minHeight: 15 }}>
-        {frei ? `${frei.emoji} ${frei.name}` : schule ? `🏫 Schule ${SCHULE.jeTag?.[idx] || SCHULE.text}` : "schulfrei"}
+        {frei ? `${frei.emoji} ${frei.name}` : schule ? `🏫 Schule ${schuleText(schuleDaten)}` : "schulfrei"}
       </div>
-      {schule && schuleAuf && (
+      {schule && schuleAuf && schulZeilen(schuleDaten, idx).length > 0 && (
         <div data-test={`schule-${idx}`} style={{
           background: T.grund, borderRadius: 6, padding: "4px 6px", marginBottom: 4,
           fontSize: "11px", lineHeight: 1.5, color: T.textLeise,
         }}>
-          {schulZeilen(idx).map((z, i) => (
+          {schulZeilen(schuleDaten, idx).map((z, i) => (
             <div key={i} style={{ opacity: z.ag || z.pause ? 0.65 : 1, fontStyle: z.pause ? "italic" : "normal" }}>
               <b>{uhr(z.von)}–{uhr(z.bis)}</b> {z.fach}{z.ag ? " · freiwillig" : ""}
             </div>
@@ -416,10 +416,13 @@ export default function Wochenplan() {
             style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: palette ? T.primaer : T.weich, color: palette ? T.primaerText : T.text }}>
             📝 Termin eintragen
           </button>
-          <button data-test="schule-zeigen" onClick={() => setSchuleAuf(!schuleAuf)}
-            style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: schuleAuf ? T.primaer : T.weich, color: schuleAuf ? T.primaerText : T.text }}>
-            Schulstunden
-          </button>
+          {/* 🏫 Nur wenn die Eltern einen Stundenplan eingetragen haben (Elternbereich → Plan & Termine) */}
+          {Object.keys(data.einstellungen.schule.stunden).length > 0 && (
+            <button data-test="schule-zeigen" onClick={() => setSchuleAuf(!schuleAuf)}
+              style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: schuleAuf ? T.primaer : T.weich, color: schuleAuf ? T.primaerText : T.text }}>
+              Schulstunden
+            </button>
+          )}
         </div>
         {ansicht === "monat" ? (
           <MonatsBlatt monat={monat} setMonat={setMonat} termine={data.einstellungen.termine}
@@ -494,7 +497,7 @@ export default function Wochenplan() {
           )}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "stretch", background: T.grund, borderRadius: T.radiusKlein, padding: 8 }}>
             {WOCHENTAGE.map((_, i) => (
-              <TagSpalte key={i} idx={i} datum={tagDatum(montag, i)} heuteIdx={heuteIdx} wahlAktiv={!!wahl} feste={feste} schuleAuf={schuleAuf}
+              <TagSpalte key={i} idx={i} datum={tagDatum(montag, i)} heuteIdx={heuteIdx} wahlAktiv={!!wahl} feste={feste} schuleAuf={schuleAuf} schuleDaten={data.einstellungen.schule}
                 aufEdit={(b) => setEditor({ id: b.id, notiz: b.notiz || "" })}
                 ausfaelle={plan.ausfaelle}
                 aufFest={(f) => setFestDialog(f)}

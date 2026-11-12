@@ -5,7 +5,7 @@ import { missionsOpts } from "../calc/tagesform.js";
 import { kiAufsatz } from "../ki.js";
 import { bildVerkleinern } from "../foto.js";
 
-/* ✍️ Aufsatz-Check (KI-Etappe 7d): Felix' Aufsatz entsteht ANALOG auf
+/* ✍️ Aufsatz-Check (KI-Etappe 7d): Der Aufsatz des Kindes entsteht ANALOG auf
    Papier – hier wird er nur fotografiert. Leo liest den Text und gibt
    ADHS-gerechtes Feedback: 2 ⭐-Stärken, dann genau EINE markierte
    Stelle (zeigen statt Fehlerliste!) und eine Mach-Aufgabe mit Stimme.
