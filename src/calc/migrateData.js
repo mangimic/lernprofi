@@ -66,6 +66,7 @@ export function leeresDokument(heute) {
         modell: "sonnet",  // Leo-Modell: haiku (günstig) | sonnet (empfohlen) | opus (Premium)
       },
       uebungsThema: "alltag", // Übungs-Welt der Satz-Übungen (Kind wählt selbst)
+      vorlesen: "",        // 🔊 "" = Standard je Klasse (1: auto, 2: knopf, 3/4: aus) | "auto" | "knopf" | "aus"
       eigeneSaetze: [],    // von den Eltern freigegebene Schreib-Sätze (max 12)
       termine: [],         // 🗓️ Klassenarbeiten/Kompass-Tests/WDWs: { id, tag, art, fach }
       module: { plan: false, ki: false, schrift: false }, // 🧩 freigeschaltete Module (Kern = alles aus)
@@ -96,7 +97,7 @@ export function migrateData(alt, heute) {
 
   d.profil = { ...basis.profil, ...(istObjekt(quelle.profil) ? quelle.profil : {}) };
   if (typeof d.profil.name !== "string") d.profil.name = "";
-  if (![3, 4].includes(d.profil.klasse)) d.profil.klasse = 4;
+  if (![1, 2, 3, 4].includes(d.profil.klasse)) d.profil.klasse = 4; // seit v0.87 auch Klasse 1 und 2
   d.profil.interessen = [...new Set((Array.isArray(d.profil.interessen) ? d.profil.interessen : [])
     .filter((k) => THEMEN_KEYS.includes(k)))].slice(0, 3);
   if (typeof d.profil.interessenGefragt !== "string") d.profil.interessenGefragt = "";
@@ -206,6 +207,7 @@ export function migrateData(alt, heute) {
   if (typeof d.einstellungen.tagesformAktiv !== "boolean") d.einstellungen.tagesformAktiv = true;
   if (typeof d.einstellungen.pausenAktiv !== "boolean") d.einstellungen.pausenAktiv = true;
   if (![5, 10, 15].includes(d.einstellungen.pausenIntervall)) d.einstellungen.pausenIntervall = 10;
+  if (!["", "auto", "knopf", "aus"].includes(d.einstellungen.vorlesen)) d.einstellungen.vorlesen = "";
   if (!THEMEN_KEYS.includes(d.einstellungen.uebungsThema)) {
     d.einstellungen.uebungsThema = "alltag";
   }

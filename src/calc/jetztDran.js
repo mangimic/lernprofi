@@ -10,17 +10,10 @@ import { wochenMontag, planFuerWoche, tagDatum, WOCHENTAGE, bausteinAnzeige, slo
 import { feldVonNotiz } from "./kompassPlan.js";
 import { schwerpunktFelder } from "./onboarding.js";
 import { zeitUebrigMin } from "./elternWerkzeuge.js";
-import { DEUTSCH_LISTE } from "./uebenGruppen.js";
-import { MATHE_BEREICHE } from "./aufgaben/mathe.js";
-import { SACH_BEREICHE } from "./aufgaben/sachkunde.js";
+import { feldTitel, feldInKlasse } from "./klassen.js";
 import { modulAn } from "./module.js";
 
-/** Anzeigename eines Lernfelds (Deutsch, Mathe, Sachkunde, Stark). */
-export function feldTitel(key) {
-  if (key === "stark") return "Stark mit Leo";
-  const b = [...DEUTSCH_LISTE, ...MATHE_BEREICHE, ...SACH_BEREICHE].find((x) => x.key === key);
-  return b ? b.name : key;
-}
+export { feldTitel }; // Anzeigename eines Lernfelds – lebt seit v0.87 in klassen.js
 
 export function jetztDran(data, heute) {
   const montag = wochenMontag(heute);
@@ -49,8 +42,11 @@ export function jetztDran(data, heute) {
       ...kennzahlen,
     };
   }
-  const gemessen = data.lernstand.einstufung?.empfehlung?.[0];
-  const geschaetzt = schwerpunktFelder(data.profil.schwerpunkte)[0];
+  // 🎒 Nur Felder der aktuellen Klasse empfehlen (nach einem Klassenwechsel
+  // zeigt eine alte Empfehlung sonst auf Felder, die es dort nicht gibt).
+  const klasse = data.profil.klasse;
+  const gemessen = (data.lernstand.einstufung?.empfehlung || []).find((k) => feldInKlasse(k, klasse));
+  const geschaetzt = schwerpunktFelder(data.profil.schwerpunkte, klasse).find((k) => feldInKlasse(k, klasse));
   const feld = gemessen || geschaetzt || null;
   if (feld) {
     return {

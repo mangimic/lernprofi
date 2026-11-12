@@ -4,6 +4,31 @@
    Grundschule, Ratechance 33 %). Genutzt von See-Abenteuer & Blockwelt. */
 import { MATHE_DATEN } from "../calc/aufgaben/mathe.js";
 import { gwsPool } from "../calc/aufgaben/deutschKonverter.js";
+import { spielQuellen } from "../calc/klassen.js";
+import { vorlesen, vorlesbar, sprechSauber } from "../vorlesen.js";
+
+/* 🎒 Klasse und Vorlese-Modus setzt die Spielhalle vor jedem Spiel (v0.87).
+   Klasse 1/2 zieht ihre Fragen aus den eigenen Pools (calc/klassen.js);
+   Klasse 3/4 behält die bewährten Blitz-Fragen. */
+let aktiv = { klasse: 4, vorlesen: "aus", quellen: null };
+export function spielKlasseSetzen(klasse, vorleseModus = "aus") {
+  if (aktiv.klasse !== klasse) aktiv = { ...aktiv, klasse, quellen: spielQuellen(klasse) };
+  aktiv.vorlesen = vorleseModus;
+}
+/** Vorlesetext einer Spiel-Frage (ohne Emojis und HTML). */
+export function spielSprechText(q) {
+  return sprechSauber(q.sprich || q.frage || "Welches Wort ist richtig geschrieben?");
+}
+// 🔊 Ein Lautsprecher-Knopf je Frage; EIN delegierter Klick-Hörer für alle Spiele.
+if (typeof document !== "undefined") {
+  document.addEventListener("click", (e) => {
+    const knopf = e.target && e.target.closest ? e.target.closest("[data-sprich]") : null;
+    if (!knopf) return;
+    e.stopPropagation();
+    vorlesen(knopf.getAttribute("data-sprich"));
+  }, true);
+}
+const attr = (s) => String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 
 const GWS = gwsPool();
 const WORT_POOL = {
@@ -22,6 +47,14 @@ export function spielMatheFrage(schwer) {
 }
 
 export function spielFrage(schwer) {
+  if (aktiv.quellen) {
+    // Klasse 1/2: eine kurze Aufgabe aus den Pools der Klasse (leicht/schwer)
+    const liste = schwer && aktiv.quellen.schwer.length ? aktiv.quellen.schwer : aktiv.quellen.leicht;
+    const a = liste[Math.floor(Math.random() * liste.length)];
+    const q = { w: { richtig: a.r, falsch: a.x[0], dritte: a.x[1] }, tipp: a.tipp, schwer: !!schwer, eigen: true, frage: a.f, sprich: a.sprich };
+    if (aktiv.vorlesen === "auto") setTimeout(() => vorlesen(spielSprechText(q)), 300);
+    return q;
+  }
   if (Math.random() < 0.5) { const m = spielMatheFrage(schwer); if (m) return m; }
   const pool = schwer ? WORT_POOL.schwer : WORT_POOL.leicht;
   const t = pool[Math.floor(Math.random() * pool.length)];
@@ -29,7 +62,11 @@ export function spielFrage(schwer) {
 }
 
 export function spielFrageText(q) {
-  return q.mathe ? ("🔢 <b>" + q.frage + "</b>") : "Welches Wort ist <b>richtig</b> geschrieben?";
+  const text = q.eigen ? ("<b>" + q.frage + "</b>")
+    : q.mathe ? ("🔢 <b>" + q.frage + "</b>") : "Welches Wort ist <b>richtig</b> geschrieben?";
+  if (aktiv.vorlesen === "aus" || !vorlesbar()) return text;
+  return text + ` <button type="button" class="spiel-vorlesen" data-test="spiel-vorlesen" aria-label="Frage vorlesen" data-sprich="${attr(spielSprechText(q))}">`
+    + '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4z"/><path d="M16.5 9a4 4 0 010 6M19 6.5a8 8 0 010 11"/></svg></button>';
 }
 
 /* Gegen das Raten: dritte falsche Schreibweise aus typischen

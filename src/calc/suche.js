@@ -8,10 +8,7 @@
    deutscher Normalisierung (Umlaute, ß) findet alles in <1 ms und
    bleibt Zero-Knowledge: nichts verlässt das Gerät.
    ============================================================ */
-import { DEUTSCH_LISTE } from "./uebenGruppen.js";
-import { MATHE_BEREICHE } from "./aufgaben/mathe.js";
-import { SACH_BEREICHE } from "./aufgaben/sachkunde.js";
-import { STARK_BEREICHE } from "./aufgaben/stark.js";
+import { bereicheFuerKlasse } from "./klassen.js";
 import { aktiveKarten } from "./karteikarten.js";
 import { TERMIN_ARTEN } from "./wochenplan.js";
 import { routeErlaubt, modulAn } from "./module.js";
@@ -33,14 +30,13 @@ const SPIELE = ["Tennis-Match", "Fußball-Match", "Angel-Wettfischen", "Dino-Ren
 /** Baut den durchsuchbaren Index aus App-Daten und festen Inhalten. */
 export function sucheIndex(data, elternModus) {
   const eintraege = [];
-  const uebung = (fach, b) => eintraege.push({
-    emoji: b.emoji, titel: b.name, detail: `Übung · ${fach}`, ziel: { route: "ueben", feld: b.key },
-  });
-  for (const b of DEUTSCH_LISTE) uebung("Deutsch", b);
-  for (const b of MATHE_BEREICHE) uebung("Mathe", b);
-  for (const b of SACH_BEREICHE) uebung("Sachkunde", b);
-  for (const b of STARK_BEREICHE) uebung("Stark mit Leo", b);
-  for (const k of aktiveKarten(data.einstellungen)) {
+  const klasse = data.profil?.klasse ?? 4;
+  // 🎒 Übungen der eigenen Klasse (v0.87)
+  for (const b of bereicheFuerKlasse(klasse)) {
+    eintraege.push({ emoji: b.emoji, titel: b.name, detail: `Übung · ${b.fachName}`, ziel: { route: "ueben", feld: b.key } });
+  }
+  // 🗃️ Die Karteikarten sind Kompass-4-Stoff – für Klasse 1/2 gibt es sie nicht.
+  for (const k of (klasse >= 3 ? aktiveKarten(data.einstellungen) : [])) {
     eintraege.push({
       emoji: "🗃️", titel: k.vs.split("\n")[0].slice(0, 60),
       detail: `Karteikarte · ${k.fach === "mathe" ? "Mathe" : "Deutsch"}`, ziel: { route: "kasten" },
@@ -58,6 +54,7 @@ export function sucheIndex(data, elternModus) {
   }
   for (const [emoji, titel, route] of SEITEN) {
     if (!routeErlaubt(route, data)) continue; // 🧩 Seiten abgeschalteter Module fehlen
+    if (route === "kasten" && klasse < 3) continue;
     eintraege.push({ emoji, titel, detail: "Seite", ziel: { route } });
   }
   for (const name of SPIELE) {

@@ -271,6 +271,24 @@ K = Feld der Kennenlern-Runde dieser Klasse (je 3 Deutsch + 3 Mathe).
 - **Git-Historie:** Ältere Commits enthalten die Termine weiterhin; ein
   Umschreiben der Historie bräuchte einen Force-Push (Repo-Regel: nie).
 
+## Entscheidungen bei der Umsetzung (Etappe 2, v0.87.0)
+
+- **Lese-Aufgaben bleiben bei den Antworten stumm** (`k1lesen`,
+  `k1saetze`): Die Frage wird vorgelesen, die Antworten nicht – sonst wäre
+  die Aufgabe gelöst (`antwortenVorlesbar`).
+- **Wählbare Klassen:** Bis Klasse 2 Inhalte hat, bieten Erst-Start und
+  Elternbereich 1, 3 und 4 an (`KLASSEN_WAEHLBAR`).
+- **Wortlisten** leben in der jeweiligen Inhalts-Datei (`K1_WOERTER` in
+  `klasse1Deutsch.js`) statt in einer gemeinsamen `woerter12.js`.
+- **Jede Inhalts-Datei hat ihre eigene Testdatei**, die Lösungen
+  nachrechnet (Terme, Geldsummen, Uhrzeiten, Silben, Anlaute, Reime).
+- **Rechen- und Vergleichszeichen** werden fürs Vorlesen ausgeschrieben
+  („4 < 9“ → „4 ist kleiner als 9“); Uhrzeiten bleiben unberührt.
+- **Dichte Zahlenstrahlen** (0–20 in Einerschritten) beschriften nur
+  Fünfer und die Nachbarn der Lücke.
+- **Kennenlern-Runde** zeigt jetzt Bilder und Zahlenblöcke der Aufgaben
+  (vorher nur Text) – nötig für Anlaute und Zwanzigerfeld.
+
 ## Was dem Bauenden überlassen bleibt
 
 - Wortlisten (mit Silben, Artikel, Mehrzahl, Emoji-Bild) – gepflegt in

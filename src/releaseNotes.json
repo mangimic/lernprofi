@@ -1,5 +1,29 @@
 [
   {
+    "id": "rn-114",
+    "version": "0.87.0",
+    "datum": "2026-11-12",
+    "titel": "Klasse 1 ist da – mit Vorlesen",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🎒 Klasse 1 mit eigener Lernwelt nach dem Bildungsplan: in Mathe Zahlen bis 20, Zahlen zerlegen, Plus und Minus bis 20, Geld, Formen & Muster und die Uhr mit vollen Stunden; in Deutsch Anlaute, Laute hören, Silben, Reime, Wörter erlesen und erste Sätze. Über 800 Aufgaben, viele mit Bild (Zwanzigerfeld, Münzen, Formen, Bildzeichen)."
+      },
+      {
+        "type": "neu",
+        "text": "🔊 Vorlesen: In Klasse 1 liest die App jede Frage von selbst vor, ein Lautsprecher-Knopf wiederholt Frage und Antworten – auch in den Spielen und in der Kennenlern-Runde. Das läuft über die Sprachausgabe des Geräts, ohne Internet. Bei Lese-Aufgaben bleiben die Antworten stumm, damit das Kind selbst liest. Im Elternbereich unter „Üben & Regeln“ einstellbar (Auto, Knopf, Aus)."
+      },
+      {
+        "type": "neu",
+        "text": "👤 Die Klasse lässt sich im Elternbereich unter „Konto & Daten“ wechseln. Kennenlern-Runde, Empfehlungen, Schwerpunkt-Fragen, Suche und Spiel-Fragen richten sich nach der Klasse; Münzen und Spielstände bleiben beim Wechsel erhalten."
+      },
+      {
+        "type": "hinweis",
+        "text": "✏️ Klasse 2 folgt als Nächstes. Der Karteikasten bleibt Klasse 3 und 4 vorbehalten (Kompass-Stoff)."
+      }
+    ]
+  },
+  {
     "id": "rn-113",
     "version": "0.86.0",
     "datum": "2026-11-12",

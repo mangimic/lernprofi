@@ -33,6 +33,7 @@ const PFADE = {
   x: <><path d="M6 6l12 12M18 6L6 18" /></>,
   play: <><path d="M7 5l12 7-12 7z" /></>,
   flag: <><path d="M5 21V4h11l-1.5 4L16 12H5" /></>,
+  speaker: <><path d="M4 10v4h4l5 4V6l-5 4z" /><path d="M16.5 9a4 4 0 010 6M19 6.5a8 8 0 010 11" /></>,
   heart: <><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z" /></>,
 };
 

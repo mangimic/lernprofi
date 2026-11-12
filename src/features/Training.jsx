@@ -15,7 +15,8 @@ export default function Training() {
     // 🧩 Schreib-Training, Aufsatz-Check und Unterlagen gibt es nur mit freigeschaltetem Modul (v0.86)
     ...(modulAn(data, "schrift") ? [{ test: "zum-schrift", route: "schrift", icon: "pencil", titel: "Schreib-Training", text: "Ein Satz am Tag mit der Hand, Leo schaut auf die Schrift." }] : []),
     ...(modulAn(data, "ki") ? [{ test: "zum-aufsatz", route: "aufsatz", icon: "book", titel: "Aufsatz-Check", text: "Foto vom Text, Leo markiert genau eine Stelle." }] : []),
-    { test: "zum-kasten", route: "kasten", icon: "flag", titel: "Karteikasten", text: "Fünf Karten ziehen – Gewusstes wandert ein Fach weiter." },
+    // 🗃️ Die Karteikarten sind Kompass-4-Stoff – für Klasse 1/2 gibt es den Kasten nicht (v0.87)
+    ...(data.profil.klasse >= 3 ? [{ test: "zum-kasten", route: "kasten", icon: "flag", titel: "Karteikasten", text: "Fünf Karten ziehen – Gewusstes wandert ein Fach weiter." }] : []),
     ...(modulAn(data, "plan") && data.doks.length > 0 ? [{ test: "zum-doks", route: "doks", icon: "lock", titel: `Unterlagen (${data.doks.length})`, text: "Eure verschlüsselte Ablage mit Heften und Blättern." }] : []),
   ];
   const kachel = { textAlign: "left", display: "flex", flexDirection: "column", gap: 8, minHeight: 150, padding: 18, borderRadius: 26, background: T.karte, color: T.text, boxShadow: "var(--schatten)" };

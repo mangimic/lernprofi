@@ -2554,3 +2554,190 @@ test("Stundenplan: Eltern tragen ihn als Text ein – Wochenplan zeigt die Schul
   await page.getByTestId("nav-plan").click();
   await expect(page.getByTestId("fest-0-780")).toContainText("Mittag & Spielzeit");
 });
+
+// ---------- v0.87: Klasse 1 – eigene Lernwelt mit Vorlesen ----------
+// Sprachausgabe als Attrappe: sammelt, was vorgelesen würde (headless hat keine Stimme).
+async function sprachAttrappe(page) {
+  await page.addInitScript(() => {
+    window.__GESPROCHEN__ = [];
+    window.SpeechSynthesisUtterance = function (text) { this.text = text; };
+    Object.defineProperty(window, "speechSynthesis", {
+      configurable: true,
+      value: { cancel() {}, speak(u) { window.__GESPROCHEN__.push(u.text); } },
+    });
+  });
+}
+const gesprochen = (page) => page.evaluate(() => window.__GESPROCHEN__);
+
+async function erstStartKlasse(page, klasse) {
+  await tresorAnlegen(page);
+  await page.getByTestId(`fb-klasse-${klasse}`).click();
+  await page.getByTestId("fb-ok").click();
+  await page.getByTestId("erststart-uebergabe-weiter").click();
+  await page.getByTestId("interessen-spaeter").click();
+}
+
+test("Kern: Klasse 1 – eigene Lernfelder, Bild-Aufgaben, Frage wird automatisch vorgelesen", async ({ page }) => {
+  const fehler = [];
+  page.on("pageerror", (e) => fehler.push(String(e)));
+  await sprachAttrappe(page);
+  await erstStartKlasse(page, 1);
+  await page.getByTestId("erststart-spaeter").click();
+  await expect(page.getByTestId("jetzt-dran")).toBeVisible();
+  // Üben: Deutsch in Gruppen, Mathe flach – keine Sachkunde, keine Klasse-4-Felder, keine Übungs-Welt
+  await page.getByTestId("nav-ueben").click();
+  await expect(page.getByTestId("ueben-fach-sachkunde")).toHaveCount(0);
+  await expect(page.getByTestId("thema-angeln")).toHaveCount(0);
+  await expect(page.getByTestId("gruppe-saetze")).toHaveCount(0);
+  await page.getByTestId("ueben-fach-mathe").click();
+  await expect(page.getByTestId("bereich-k1zahlen")).toBeVisible();
+  await expect(page.getByTestId("bereich-k1uhr")).toBeVisible();
+  await expect(page.getByTestId("bereich-mrechnen")).toHaveCount(0);
+  // Plus bis 20: die Frage wird von selbst vorgelesen, Lautsprecher an Frage und Antworten
+  await page.getByTestId("bereich-k1plus").click();
+  await expect(page.getByTestId("frage-karte")).toBeVisible();
+  await expect.poll(async () => (await gesprochen(page)).length).toBeGreaterThanOrEqual(1);
+  expect((await gesprochen(page))[0]).toMatch(/plus|Wie viel|zusammen/i);
+  await expect(page.getByTestId("vorlesen-frage")).toBeVisible();
+  await expect(page.getByTestId("vorlesen-antwort")).toHaveCount(3);
+  const vorher = (await gesprochen(page)).length;
+  await page.getByTestId("vorlesen-antwort").first().click();
+  await expect.poll(async () => (await gesprochen(page)).length).toBe(vorher + 1);
+  // Eine ganze Runde spielen: Stufe 1, 1 Münze
+  for (let i = 0; i < 10; i++) {
+    await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+    await page.getByTestId("weiter-knopf").click();
+  }
+  await expect(page.getByTestId("runde-ergebnis")).toContainText("10 von 10");
+  await page.getByTestId("zu-bereichen").click();
+  // Deutsch: Anlaute zeigen ein Bild zur Frage
+  await page.getByTestId("ueben-fach-deutsch").click();
+  await page.locator('[data-test^="gruppe-"]').first().click();
+  await page.getByTestId("bereich-k1anlaut").click();
+  await expect(page.locator('[data-test="aufgaben-bild"][data-art="emoji"]')).toBeVisible();
+  await expect(page.getByTestId("vorlesen-antwort")).toHaveCount(3);
+  await page.getByTestId("abbrechen").click();
+  // Wörter erlesen: die Frage hat einen Lautsprecher, die Antworten NICHT (das Kind liest selbst)
+  await page.getByTestId("gruppe-zurueck").click();
+  await page.locator('[data-test^="gruppe-"]').last().click();
+  await page.getByTestId("bereich-k1lesen").click();
+  await expect(page.getByTestId("vorlesen-frage")).toBeVisible();
+  await expect(page.getByTestId("vorlesen-antwort")).toHaveCount(0);
+  await page.getByTestId("abbrechen").click();
+  // Training: kein Karteikasten (Kompass-4-Stoff); Suche findet Klasse-1-Felder
+  await page.getByTestId("nav-training").click();
+  await expect(page.getByTestId("zum-kasten")).toHaveCount(0);
+  await expect(page.getByTestId("zum-sudoku")).toBeVisible();
+  await page.getByTestId("suche-knopf").click();
+  await page.getByTestId("suche-eingabe").fill("anlaute");
+  await expect(page.getByTestId("suche-treffer").first()).toContainText("Anlaute");
+  await page.getByTestId("suche-eingabe").fill("dass");
+  await expect(page.getByTestId("suche-leer")).toBeVisible();
+  await page.keyboard.press("Escape");
+  expect(fehler).toEqual([]);
+});
+
+test("Kern: Kennenlern-Runde Klasse 1 läuft mit Bildern durch und empfiehlt Klasse-1-Felder", async ({ page }) => {
+  await sprachAttrappe(page);
+  await erstStartKlasse(page, 1);
+  await page.getByTestId("erststart-kennenlernen").click();
+  await page.getByTestId("einstufung-los").click();
+  await expect(page.getByTestId("einstufung-frage")).toContainText("Anlaute");
+  await expect(page.locator('[data-test="aufgaben-bild"]')).toBeVisible(); // Anlaut-Bild
+  await expect.poll(async () => (await gesprochen(page)).length).toBeGreaterThanOrEqual(1);
+  // Alle Fragen FALSCH beantworten → alle sechs Felder landen auf Stufe 1 und werden empfohlen (max. 3)
+  for (let i = 0; i < 12; i++) {
+    await page.locator('[data-test="antwort-opt"]:not([data-richtig])').first().click();
+    await page.getByTestId("weiter-knopf").click();
+  }
+  await expect(page.getByTestId("einstufung-ergebnis")).toBeVisible();
+  await expect(page.getByTestId("einstufung-zeile")).toHaveCount(6);
+  await expect(page.getByTestId("einstufung-ergebnis")).toContainText("Plus bis 20");
+  await page.getByTestId("einstufung-uebernehmen").click();
+  await page.getByTestId("erststart-los").click();
+  await expect(page.getByTestId("jetzt-dran-titel")).toContainText("Anlaute");
+  await expect(page.getByTestId("plan-feld")).toHaveCount(3);
+  await page.getByTestId("jetzt-dran-los").click();
+  await expect(page.getByTestId("frage-karte")).toBeVisible();
+});
+
+test("Kern: Klassenwechsel im Elternbereich räumt Empfehlungen, Vorlesen ist einstellbar", async ({ page }) => {
+  await sprachAttrappe(page);
+  await tresorAnlegen(page);
+  await page.getByTestId("fb-klasse-4").click();
+  await page.getByTestId("fb-schwerpunkt-mathe").click();
+  await page.getByTestId("fb-ok").click();
+  await page.getByTestId("erststart-uebergabe-weiter").click();
+  await page.getByTestId("interessen-spaeter").click();
+  await page.getByTestId("erststart-spaeter").click();
+  await expect(page.getByTestId("jetzt-dran-titel")).toContainText("Rechnen"); // Schwerpunkt Klasse 4
+  // Eltern stellen auf Klasse 1 um → Schwerpunkt weg, Bühne zeigt freies Üben
+  await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-konto").click();
+  await page.getByTestId("klasse-1").click();
+  await page.getByTestId("nav-start").click();
+  await expect(page.getByTestId("jetzt-dran-titel")).toContainText("Eine Runde üben");
+  await page.getByTestId("nav-ueben").click();
+  await page.getByTestId("ueben-fach-mathe").click();
+  await expect(page.getByTestId("bereich-k1plus")).toBeVisible();
+  // Vorlesen aus → keine Lautsprecher, nichts wird gesprochen
+  await page.getByTestId("nav-eltern").click();
+  await page.getByTestId("eb-tab-regeln").click();
+  await page.getByTestId("vorlesen-aus").click();
+  await page.getByTestId("nav-ueben").click();
+  await page.getByTestId("ueben-fach-mathe").click();
+  await page.getByTestId("bereich-k1plus").click();
+  await expect(page.getByTestId("frage-karte")).toBeVisible();
+  await expect(page.getByTestId("vorlesen-frage")).toHaveCount(0);
+  await page.waitForTimeout(500);
+  expect(await gesprochen(page)).toEqual([]);
+});
+
+test("Kern: Klasse 1 ohne Sprachausgabe – Üben läuft, kein Lautsprecher, kein Fehler", async ({ page }) => {
+  const fehler = [];
+  page.on("pageerror", (e) => fehler.push(String(e)));
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "speechSynthesis", { configurable: true, value: undefined });
+  });
+  await erstStartKlasse(page, 1);
+  await page.getByTestId("erststart-spaeter").click();
+  await page.getByTestId("nav-ueben").click();
+  await page.getByTestId("ueben-fach-mathe").click();
+  await page.getByTestId("bereich-k1zahlen").click();
+  await expect(page.getByTestId("frage-karte")).toBeVisible();
+  await expect(page.getByTestId("vorlesen-frage")).toHaveCount(0);
+  await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+  await expect(page.getByTestId("feedback")).toBeVisible();
+  expect(fehler).toEqual([]);
+});
+
+test("Kern: Spiele in Klasse 1 – Fragen aus den Klasse-1-Feldern, mit Lautsprecher und Vorlesen", async ({ page }) => {
+  await sprachAttrappe(page);
+  await erstStartKlasse(page, 1);
+  await page.getByTestId("erststart-spaeter").click();
+  // 1 Münze verdienen
+  await page.getByTestId("nav-ueben").click();
+  await page.getByTestId("ueben-fach-mathe").click();
+  await page.getByTestId("bereich-k1minus").click();
+  for (let i = 0; i < 10; i++) {
+    await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+    await page.getByTestId("weiter-knopf").click();
+  }
+  await expect(page.getByTestId("runde-ergebnis")).toBeVisible();
+  await page.getByTestId("nav-spiele").click();
+  await page.getByTestId("spiel-see").click();
+  await expect(page.getByTestId("see-spiel")).toBeVisible();
+  await page.evaluate(() => { window.__SPIEL_SCHNELL__ = true; window.__GESPROCHEN__.length = 0; });
+  await page.locator('[data-test="spiel-spot"]').first().click();
+  await expect(page.getByTestId("spiel-frage")).toBeVisible({ timeout: 15000 });
+  // Keine Klasse-4-Rechtschreibfrage, sondern eine kurze Klasse-1-Aufgabe mit drei Antworten
+  await expect(page.getByTestId("spiel-frage")).not.toContainText("richtig geschrieben");
+  await expect(page.getByTestId("spiel-opt")).toHaveCount(3);
+  // automatisch vorgelesen + Lautsprecher zum Wiederholen
+  await expect.poll(async () => (await gesprochen(page)).length).toBeGreaterThanOrEqual(1);
+  const vorher = (await gesprochen(page)).length;
+  await page.getByTestId("spiel-vorlesen").click();
+  await expect.poll(async () => (await gesprochen(page)).length).toBe(vorher + 1);
+  await page.locator('[data-test="spiel-opt"][data-richtig="1"]').click();
+  await expect(page.getByTestId("spiel-weiter")).toBeEnabled({ timeout: 10000 });
+});

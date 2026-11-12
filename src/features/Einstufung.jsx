@@ -1,30 +1,37 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApp } from "../appContext.jsx";
-import { MATHE_DATEN } from "../calc/aufgaben/mathe.js";
-import { ddPool } from "../calc/aufgaben/deutsch.js";
-import { zeitPool, faellePool, gwsPool } from "../calc/aufgaben/deutschKonverter.js";
+import { einstufungFelder, einstufungPools, vorleseModus, antwortenVorlesbar } from "../calc/klassen.js";
+import AufgabenBild from "./AufgabenBild.jsx";
+import { ZahlenBloecke } from "./Ueben.jsx";
+import VorleseKnopf from "./VorleseKnopf.jsx";
+import { vorlesen, vorleseStopp, sprechText, sprechSauber } from "../vorlesen.js";
 import { rngAusSeed } from "../calc/rng.js";
 import { antwortOptionen, antwortRichtig } from "../calc/aufgabenRunde.js";
 import {
-  EINSTUFUNG_FELDER, PRO_STUFE, einstufungPlan, einstufungStufe,
+  PRO_STUFE, einstufungPlan, einstufungStufe,
   einstufungAnwenden, einstufungEmpfehlung, stufenDeutung,
 } from "../calc/einstufung.js";
 
-/* 🧪 Einstufungstest: 6 Kern-Lernfelder, je Feld erst 2 leichte
+/* 🧪 Einstufungstest: 6 Kern-Lernfelder der Klasse (calc/klassen.js), je Feld erst 2 leichte
    Aufgaben – sind beide richtig, kommen 2 schwere dazu (adaptiv).
    Das Ergebnis stellt die Start-Stufe JEDES getesteten Felds genau
    ein (auch nach unten) und erstellt den Trainingsplan für die
    Startseite. Der Test ist keine Übung: keine Münzen, keine
    Missionen – und kein Tipp vor der Antwort. */
 
-const POOLS = {
-  gws: gwsPool(), dd: ddPool(), zeit: zeitPool(), faelle: faellePool(),
-  mrechnen: MATHE_DATEN.mrechnen, mzahlen: MATHE_DATEN.mzahlen,
-};
-
 export default function Einstufung() {
   const { data, logChange, T, heute, navTo } = useApp();
   const [lauf, setLauf] = useState(null); // null (Intro) | Test-Zustand | { fertig: true, ... }
+  const klasse = data.profil.klasse;
+  // 🔊 Klasse 1 bekommt jede Frage vorgelesen, Klasse 2 auf Knopfdruck (Eltern-Einstellung schlägt den Standard)
+  const vorleseArt = vorleseModus(data.einstellungen, klasse);
+  const frageNr = lauf && !lauf.fertig ? lauf.nr : null;
+  useEffect(() => {
+    if (vorleseArt !== "auto" || frageNr === null) return undefined;
+    const t = setTimeout(() => vorlesen(sprechText(lauf.plan[lauf.feldIdx][lauf.teil][lauf.i])), 350);
+    return () => { clearTimeout(t); vorleseStopp(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vorleseArt, frageNr]);
 
   const karte = { background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand };
   const primaer = { width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 };
@@ -32,7 +39,7 @@ export default function Einstufung() {
 
   const starten = () => {
     const rng = rngAusSeed(`einstufung:${heute}`);
-    const plan = einstufungPlan(POOLS, rng);
+    const plan = einstufungPlan(einstufungPools(klasse), rng, einstufungFelder(klasse));
     setLauf({
       plan, rng,
       feldIdx: 0, teil: "easy", i: 0,
@@ -181,19 +188,27 @@ export default function Einstufung() {
           {lauf.teil === "easy" ? " · leicht" : " · schwer"} · Aufgabe {lauf.nr}
         </p>
         {a.kontext && <p style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px" }}>{a.kontext}</p>}
-        <p data-test="frage-text" style={{ fontSize: "var(--schrift-gross)", fontWeight: 700, margin: "10px 0" }}>{a.f}</p>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "10px 0" }}>
+          <p data-test="frage-text" style={{ flex: 1, fontSize: "var(--schrift-gross)", fontWeight: 700, margin: 0 }}>{a.f}</p>
+          {vorleseArt !== "aus" && <VorleseKnopf test="vorlesen-frage" text={sprechText(a)} label="Frage vorlesen" />}
+        </div>
+        {a.bloecke && <ZahlenBloecke b={a.bloecke} />}
+        {a.bild && <AufgabenBild b={a.bild} />}
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {lauf.optionen.map((o) => (
-            <button key={o} data-test="antwort-opt" data-richtig={o === a.r ? "1" : undefined}
-              disabled={beantwortet} onClick={() => antworten(o)}
-              style={{
-                background: beantwortet && o === a.r ? "var(--ok)" : T.weich,
-                color: beantwortet && o === a.r ? "#fff" : T.text,
-                fontWeight: 700, textAlign: "left", padding: "0 14px",
-                opacity: beantwortet && o !== a.r && o !== lauf.gewaehlt ? 0.6 : 1,
-              }}>
-              {o}
-            </button>
+            <div key={o} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <button data-test="antwort-opt" data-richtig={o === a.r ? "1" : undefined}
+                disabled={beantwortet} onClick={() => antworten(o)}
+                style={{
+                  flex: 1, background: beantwortet && o === a.r ? "var(--ok)" : T.weich,
+                  color: beantwortet && o === a.r ? "#fff" : T.text,
+                  fontWeight: 700, textAlign: "left", padding: "0 14px",
+                  opacity: beantwortet && o !== a.r && o !== lauf.gewaehlt ? 0.6 : 1,
+                }}>
+                {o}
+              </button>
+              {vorleseArt !== "aus" && antwortenVorlesbar(feld.key) && <VorleseKnopf test="vorlesen-antwort" text={sprechSauber(o)} klein label={`Antwort vorlesen: ${o}`} />}
+            </div>
           ))}
         </div>
         {beantwortet && (

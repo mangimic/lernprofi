@@ -12,6 +12,8 @@ import { MATCH_SKINS } from "../spiele/rennen.js";
 import { TENNIS_SKIN, FUSSBALL_SKIN } from "../spiele/ballsport.js";
 import { WETTFISCHEN_SKIN } from "../spiele/wettfischenSkin.js";
 import { schachStart } from "../spiele/schach.js";
+import { spielKlasseSetzen } from "../spiele/fragen.js";
+import { vorleseModus } from "../calc/klassen.js";
 
 // 🏁 ALLE Match-Spiele laufen auf EINER Engine (seit v0.80 auch
 // Tennis und Fußball – originalgetreu als Skins portiert).
@@ -40,6 +42,9 @@ export default function Spielhalle() {
   const muenzenAn = data.einstellungen.muenzenAktiv;
   const startbar = !muenzenAn || spielStartbar(muenzen);
   const sichtbar = (id) => spielAktiv(data.einstellungen, id);
+
+  // 🎒 Die Spiel-Fragen folgen der Klasse; Klasse 1/2 bekommt sie vorgelesen (v0.87)
+  spielKlasseSetzen(data.profil.klasse, vorleseModus(data.einstellungen, data.profil.klasse));
 
   const starten = (id, name) => {
     if (!startbar) return;

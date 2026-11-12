@@ -9,7 +9,7 @@ import { hoerEinplanen } from "../calc/kompassPlan.js";
 import { heutigerTag, lernspur, muenzenNachRunde, aufgabenZaehlen } from "../calc/lerntage.js";
 import { missionsOpts } from "../calc/tagesform.js";
 import { zeitUebrigMin } from "../calc/elternWerkzeuge.js";
-import { EINSTUFUNG_FELDER } from "../calc/einstufung.js";
+import { feldTitel, feldInKlasse } from "../calc/klassen.js";
 import { STARK_SAETZE } from "../calc/aufgaben/stark.js";
 import { schulfreiAm } from "../calc/kalender.js";
 import { kompassTermine, tageBis, feldVonNotiz } from "../calc/kompassPlan.js";
@@ -25,7 +25,9 @@ import {
 export default function Start() {
   const { data, logChange, T, tresor, navTo, heute, uebenZielSetzen, isMobile } = useApp();
   const einstufung = data.lernstand.einstufung;
-  const feldName = (key) => EINSTUFUNG_FELDER.find((f) => f.key === key) || { emoji: "✏️", name: key };
+  const feldName = (key) => ({ name: feldTitel(key) });
+  // 🎒 Nur Empfehlungen der aktuellen Klasse zeigen (v0.87)
+  const empfehlung = (einstufung?.empfehlung || []).filter((k) => feldInKlasse(k, data.profil.klasse));
   const tag = heutigerTag(data.lernstand.lerntage, heute);
   const spur = lernspur(data.lernstand.lerntage, heute);
   const planAn = modulAn(data, "plan"); // 🧩 Lern-App-Kern: ohne Plan-Karten (v0.86)
@@ -328,7 +330,7 @@ export default function Start() {
           <p style={{ margin: "4px 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
             Aus deinem Einstufungstest vom {einstufung.tag} – übe am besten zuerst hier:
           </p>
-          {einstufung.empfehlung.length ? einstufung.empfehlung.map((key) => (
+          {empfehlung.length ? empfehlung.map((key) => (
             <button key={key} data-test="plan-feld" data-key={key}
               onClick={() => { uebenZielSetzen(key); navTo("ueben"); }}
               style={{ width: "100%", marginBottom: 8, background: T.weich, color: T.text, fontWeight: 700, textAlign: "left", padding: "0 14px" }}>

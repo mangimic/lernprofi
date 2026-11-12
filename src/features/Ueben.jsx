@@ -1,19 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon, LeoMark } from "./Icon.jsx";
 import { useApp } from "../appContext.jsx";
-import { MATHE_DATEN, MATHE_BEREICHE } from "../calc/aufgaben/mathe.js";
-import { SACH_DATEN, SACH_BEREICHE } from "../calc/aufgaben/sachkunde.js";
-import { GESCH_DATEN, ddPool, doppelPool } from "../calc/aufgaben/deutsch.js";
-import { subjektPool, praedikatPool, gkPool } from "../calc/aufgaben/saetze.js";
-import { umstellenPool, umSatzText, umstellenPruefen } from "../calc/aufgaben/satzglieder.js";
-import { KOMPASS_DEUTSCH_DATEN } from "../calc/aufgaben/kompassDeutsch.js";
-import { HOEREN_DATEN } from "../calc/aufgaben/hoeren.js";
-import { DEUTSCH_GRUPPEN, DEUTSCH_LISTE, leoWahl } from "../calc/uebenGruppen.js";
+import { umSatzText, umstellenPruefen } from "../calc/aufgaben/satzglieder.js";
+import { leoWahl } from "../calc/uebenGruppen.js";
+import { faecherFuerKlasse, vorleseModus, antwortenVorlesbar } from "../calc/klassen.js";
+import VorleseKnopf from "./VorleseKnopf.jsx";
+import { vorlesen, vorleseStopp, sprechText, sprechSauber } from "../vorlesen.js";
 import { KOMPASS_ORIGINAL } from "../calc/kompassPlan.js";
 import { dokHolen, dokAnzeigen } from "../doks.js";
 import AufgabenBild from "./AufgabenBild.jsx";
-import { zeitPool, wortartenPool, faellePool, redePool, gwsPool } from "../calc/aufgaben/deutschKonverter.js";
-import { STARK_DATEN, STARK_BEREICHE } from "../calc/aufgaben/stark.js";
 import { rngAusSeed } from "../calc/rng.js";
 import { aktiveStufe, leererFortschritt, rundeAbschliessen, STUFEN_NAMEN, stufenMax, stufenVorgabe } from "../calc/stufen.js";
 import { paketWaehlen, antwortOptionen, antwortRichtig } from "../calc/aufgabenRunde.js";
@@ -33,18 +28,8 @@ import { modulAn } from "../calc/module.js";
    - "umstellen": Satzglied-Bausteine neu zusammenbauen + Zeit/Ort erkennen
    Feinschliff (Fokus-Modus) folgt später. */
 
-// 🎨 Die Satz-Übungen folgen der gewählten Übungs-Welt (Alltag/Angeln/
-// Tennis/Fußball) – Regel- und Wissens-Pools bleiben themenfrei.
-function deutschDaten(thema) {
-  return {
-    subj: subjektPool(thema), praed: praedikatPool(thema), gk: gkPool(thema), rede: redePool(thema),
-    zeit: zeitPool(thema), wa: wortartenPool(thema), faelle: faellePool(thema), gws: gwsPool(),
-    gesch: GESCH_DATEN, dd: ddPool(), doppel: doppelPool(), satzglied: umstellenPool(),
-    ...KOMPASS_DEUTSCH_DATEN, // Kompass-Training (themenfrei)
-    ...HOEREN_DATEN, // Hör-Detektiv (Rechtschreib-Fehlermuster)
-  };
-}
-// (Die Deutsch-Bereichsliste lebt in calc/uebenGruppen.js – auch die Suche nutzt sie.)
+// 🎒 Fächer, Bereiche und Aufgaben-Pools kommen je Klassenstufe aus
+// calc/klassen.js (v0.87) – auch Suche, Einstufung und Spiele fragen dort.
 
 /* 🟫 Zahlenblöcke (Dienes-Material wie in der Schule): Tausenderwürfel,
    Hunderterplatte, Zehnerstange, Einerwürfel – als Grafik statt nur
@@ -96,7 +81,7 @@ function zbTausender(key) {
     </svg>
   );
 }
-function ZahlenBloecke({ b }) {
+export function ZahlenBloecke({ b }) {
   const gruppen = [
     { n: b.t || 0, mal: zbTausender, name: "Tausender" },
     { n: b.h || 0, mal: zbHunderter, name: "Hunderter" },
@@ -141,14 +126,6 @@ function ZeitStrahl() {
 
 // Zeichen je Fach (Designrichtung „Ruhige Bühne": eigene Zeichen statt Emojis)
 const FACH_ICON = { deutsch: "book", mathe: "numbers", sachkunde: "compass", stark: "heart" };
-function faecherBauen(thema) {
-  return [
-    { id: "deutsch", emoji: "📗", name: "Deutsch", bereiche: DEUTSCH_LISTE, daten: deutschDaten(thema) },
-    { id: "mathe", emoji: "🔢", name: "Mathe", bereiche: MATHE_BEREICHE, daten: MATHE_DATEN },
-    { id: "sachkunde", emoji: "🌍", name: "Sachkunde", bereiche: SACH_BEREICHE, daten: SACH_DATEN },
-    { id: "stark", emoji: "💪", name: "Stark", bereiche: STARK_BEREICHE, daten: { stark: STARK_DATEN } },
-  ];
-}
 
 export default function Ueben() {
   const { data, logChange, T, heute, fokus, uebenZiel, uebenZielSetzen, navZurueck, tresor } = useApp();
@@ -156,8 +133,19 @@ export default function Ueben() {
   const [gruppe, setGruppe] = useState(null); // geöffnete Deutsch-Gruppe (weniger Auswahl auf einmal)
   const [runde, setRunde] = useState(null);
   const thema = data.einstellungen.uebungsThema;
-  const faecher = useMemo(() => faecherBauen(thema), [thema]);
-  const fach = faecher.find((f) => f.id === fachId);
+  const klasse = data.profil.klasse;
+  const faecher = useMemo(() => faecherFuerKlasse(klasse, thema), [klasse, thema]);
+  const fach = faecher.find((f) => f.id === fachId) || faecher[0];
+  // 🔊 Vorlesen (Klasse 1 automatisch, Klasse 2 auf Knopfdruck – Eltern können es ändern)
+  const vorleseArt = vorleseModus(data.einstellungen, klasse);
+  const frageIdx = runde && !runde.ergebnis && runde.typ === "mc" ? runde.index : null;
+  const frageKey = runde?.key;
+  useEffect(() => {
+    if (vorleseArt !== "auto" || frageIdx === null) return undefined;
+    const t = setTimeout(() => vorlesen(sprechText(runde.aufgaben[frageIdx])), 350);
+    return () => { clearTimeout(t); vorleseStopp(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vorleseArt, frageIdx, frageKey]);
 
   const karte = { background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand };
   const primaerKnopf = { width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 };
@@ -459,21 +447,27 @@ export default function Ueben() {
               ) : (
                 <p data-test="frage-kontext" style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px" }}>{a.kontext}</p>
               ))}
-              <p data-test="frage-text" style={{ fontSize: "var(--schrift-gross)", fontWeight: 700, margin: "10px 0" }}>{a.f}</p>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "10px 0" }}>
+                <p data-test="frage-text" style={{ flex: 1, fontSize: "var(--schrift-gross)", fontWeight: 700, margin: 0 }}>{a.f}</p>
+                {vorleseArt !== "aus" && <VorleseKnopf test="vorlesen-frage" text={sprechText(a)} label="Frage vorlesen" />}
+              </div>
               {a.bloecke && <ZahlenBloecke b={a.bloecke} />}
               {a.bild && <AufgabenBild b={a.bild} />}
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {runde.optionen[runde.index].map((o) => (
-                  <button key={o} data-test="antwort-opt" data-richtig={o === a.r ? "1" : undefined}
-                    disabled={beantwortet} onClick={() => antwortenMc(o)}
-                    style={{
-                      background: beantwortet && o === a.r ? "var(--ok)" : T.weich,
-                      color: beantwortet && o === a.r ? "#fff" : T.text,
-                      fontWeight: 700, textAlign: "left", padding: "0 14px",
-                      opacity: beantwortet && o !== a.r && o !== runde.gewaehlt ? 0.6 : 1,
-                    }}>
-                    {o}
-                  </button>
+                  <div key={o} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <button data-test="antwort-opt" data-richtig={o === a.r ? "1" : undefined}
+                      disabled={beantwortet} onClick={() => antwortenMc(o)}
+                      style={{
+                        flex: 1, background: beantwortet && o === a.r ? "var(--ok)" : T.weich,
+                        color: beantwortet && o === a.r ? "#fff" : T.text,
+                        fontWeight: 700, textAlign: "left", padding: "0 14px",
+                        opacity: beantwortet && o !== a.r && o !== runde.gewaehlt ? 0.6 : 1,
+                      }}>
+                      {o}
+                    </button>
+                    {vorleseArt !== "aus" && antwortenVorlesbar(runde.key) && <VorleseKnopf test="vorlesen-antwort" text={sprechSauber(o)} klein label={`Antwort vorlesen: ${o}`} />}
+                  </div>
                 ))}
               </div>
               {beantwortet && (
@@ -682,7 +676,7 @@ export default function Ueben() {
           </button>
         ))}
       </div>
-      {fachId === "deutsch" && !gruppe && (
+      {fach.welten && !gruppe && (
         <div style={{ ...karte, paddingTop: 12, paddingBottom: 12 }}>
           <p style={{ margin: "0 0 8px", fontSize: "var(--schrift-klein)" }}>
             <b>Deine Übungs-Welt</b> <span style={{ color: T.textLeise }}>– für die Satz-Übungen (Subjekte bis Die 4 Fälle)</span>
@@ -717,7 +711,7 @@ export default function Ueben() {
               style={{ ...karte, width: "100%", textAlign: "left", display: "block", boxShadow: "var(--schatten)" }}>
               <b>{b.name}</b>
               <span style={{ float: "right", color: T.textLeise, fontSize: "var(--schrift-klein)", fontWeight: 700 }}>
-                {istEmpfohlen(b.key, data.lernstand.einstufung, data.profil.schwerpunkte) ? "empfohlen · " : ""}
+                {istEmpfohlen(b.key, data.lernstand.einstufung, data.profil.schwerpunkte, klasse) ? "empfohlen · " : ""}
                 {stufe === null ? "Üben + Schreiben" : <>Stufe {stufe}{fortschritt?.krone ? " · Krone" : ""}</>}
               </span>
             </button>
@@ -732,11 +726,11 @@ export default function Ueben() {
             <span style={{ float: "right", fontSize: "var(--schrift-klein)", opacity: 0.9 }}>heute: {wahl.name}</span>
           </button>
         );
-        if (fachId !== "deutsch") {
+        if (!fach.gruppen) {
           return (<>{leoKnopf}{fach.bereiche.map(bereichKnopf)}</>);
         }
-        if (gruppe) {
-          const g = DEUTSCH_GRUPPEN.find((x) => x.key === gruppe);
+        if (gruppe && fach.gruppen.some((x) => x.key === gruppe)) {
+          const g = fach.gruppen.find((x) => x.key === gruppe);
           return (
             <>
               <button data-test="gruppe-zurueck" onClick={() => setGruppe(null)}
@@ -752,10 +746,10 @@ export default function Ueben() {
         return (
           <>
             {leoKnopf}
-            {DEUTSCH_GRUPPEN.map((g) => {
+            {fach.gruppen.map((g) => {
               const felder = g.felder.map((key) => fach.bereiche.find((b) => b.key === key)).filter(Boolean);
               const kronen = felder.filter((b) => data.lernstand.stufen[b.key]?.krone).length;
-              const empfohlen = felder.some((b) => istEmpfohlen(b.key, data.lernstand.einstufung, data.profil.schwerpunkte));
+              const empfohlen = felder.some((b) => istEmpfohlen(b.key, data.lernstand.einstufung, data.profil.schwerpunkte, klasse));
               return (
                 <button key={g.key} data-test={`gruppe-${g.key}`}
                   onClick={() => (felder.length === 1 ? starten(felder[0]) : setGruppe(g.key))}
