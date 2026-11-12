@@ -129,10 +129,10 @@ export default function Einstufung() {
           </p>
           <p style={{ color: T.textLeise }}>
             Danach stellt die App die Stufen genau auf dich ein und baut deinen
-            🎯 Trainingsplan. Der Test dauert nur ein paar Minuten, es gibt keine Noten –
+            Trainingsplan. Der Test dauert nur ein paar Minuten, es gibt keine Noten –
             und Fehler sind ausdrücklich erlaubt: Sie zeigen nur, wo wir üben.
           </p>
-          <button data-test="einstufung-los" onClick={starten} style={primaer}>🧪 Los geht's!</button>
+          <button data-test="einstufung-los" onClick={starten} style={primaer}>Los geht's!</button>
         </div>
         <button data-test="einstufung-abbruch" onClick={() => navTo("start")}
           style={{ background: "transparent", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
@@ -156,7 +156,7 @@ export default function Einstufung() {
           ))}
           <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
             „Übernehmen“ stellt die Stufen dieser Bereiche genau darauf ein und legt deinen
-            🎯 Trainingsplan auf die Startseite{lauf.empfehlung.length ? ` (zuerst: ${lauf.empfehlung.map((k) => lauf.ergebnisse[k].name).join(", ")})` : " – alles auf Profi-Stufe, stark!"}.
+            Trainingsplan auf die Startseite{lauf.empfehlung.length ? ` (zuerst: ${lauf.empfehlung.map((k) => lauf.ergebnisse[k].name).join(", ")})` : " – alles auf Profi-Stufe, stark!"}.
           </p>
           <button data-test="einstufung-uebernehmen" onClick={uebernehmen} style={{ ...primaer, marginBottom: 8 }}>
             ✅ Übernehmen & Trainingsplan erstellen
@@ -177,8 +177,8 @@ export default function Einstufung() {
     <div data-test="einstufung-frage">
       <div style={karte}>
         <p style={{ margin: "0 0 2px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          🧪 Einstufung · Bereich {lauf.feldIdx + 1} von {lauf.plan.length}: {feld.emoji} {feld.name} ·
-          {lauf.teil === "easy" ? " 🌱 leicht" : " 🔥 schwer"} · Aufgabe {lauf.nr}
+          Einstufung · Bereich {lauf.feldIdx + 1} von {lauf.plan.length}: {feld.emoji} {feld.name} ·
+          {lauf.teil === "easy" ? " · leicht" : " · schwer"} · Aufgabe {lauf.nr}
         </p>
         {a.kontext && <p style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px" }}>{a.kontext}</p>}
         <p data-test="frage-text" style={{ fontSize: "var(--schrift-gross)", fontWeight: 700, margin: "10px 0" }}>{a.f}</p>

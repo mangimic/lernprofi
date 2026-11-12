@@ -39,8 +39,8 @@ function deutschDaten(thema) {
     subj: subjektPool(thema), praed: praedikatPool(thema), gk: gkPool(thema), rede: redePool(thema),
     zeit: zeitPool(thema), wa: wortartenPool(thema), faelle: faellePool(thema), gws: gwsPool(),
     gesch: GESCH_DATEN, dd: ddPool(), doppel: doppelPool(), satzglied: umstellenPool(),
-    ...KOMPASS_DEUTSCH_DATEN, // 🧭 Kompass-Training (themenfrei)
-    ...HOEREN_DATEN, // 🔊 Hör-Detektiv (Rechtschreib-Fehlermuster)
+    ...KOMPASS_DEUTSCH_DATEN, // Kompass-Training (themenfrei)
+    ...HOEREN_DATEN, // Hör-Detektiv (Rechtschreib-Fehlermuster)
   };
 }
 // (Die Deutsch-Bereichsliste lebt in calc/uebenGruppen.js – auch die Suche nutzt sie.)
@@ -152,7 +152,7 @@ function faecherBauen(thema) {
 export default function Ueben() {
   const { data, logChange, T, heute, fokus, uebenZiel, uebenZielSetzen, navZurueck, tresor } = useApp();
   const [fachId, setFachId] = useState("deutsch");
-  const [gruppe, setGruppe] = useState(null); // 🗂️ geöffnete Deutsch-Gruppe (weniger Auswahl auf einmal)
+  const [gruppe, setGruppe] = useState(null); // geöffnete Deutsch-Gruppe (weniger Auswahl auf einmal)
   const [runde, setRunde] = useState(null);
   const thema = data.einstellungen.uebungsThema;
   const faecher = useMemo(() => faecherBauen(thema), [thema]);
@@ -181,8 +181,8 @@ export default function Ueben() {
       fertig: false,    // umstellen: Aufgabe gelöst
       fehlversuch: false,
       meldung: null,    // umstellen: { ok, text }
-      ki: null,         // 🦁 Erklärer: null | {laden} | {blasen, mach, offen} | {fehler}
-      lehrer: null,     // 🧑‍🏫 Lehrer-Moment: null | {offen} | {fertig}
+      ki: null,         // Erklärer: null | {laden} | {blasen, mach, offen} | {fehler}
+      lehrer: null,     // Lehrer-Moment: null | {offen} | {fertig}
       lehrerWar: false, // einmal pro Runde
       ergebnis: null,
     });
@@ -256,7 +256,7 @@ export default function Ueben() {
       const lehrerJetzt = lehrerDran(runde, true);
       setRunde({
         ...runde, folge, fertig: true, geloest: runde.geloest + (runde.fehlversuch ? 0 : 1),
-        meldung: { ok: true, text: "Super umgestellt! 🌟 Das Prädikat steht an 2. Stelle – der Satz stimmt." },
+        meldung: { ok: true, text: "Super umgestellt! Das Prädikat steht an 2. Stelle – der Satz stimmt." },
         lehrer: lehrerJetzt ? { offen: true } : runde.lehrer, lehrerWar: runde.lehrerWar || lehrerJetzt,
       });
     } else {
@@ -383,11 +383,11 @@ export default function Ueben() {
           )}
           <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
             Heute: {tag.missionen} Mini-Mission{tag.missionen === 1 ? "" : "en"}
-            {tag.zielErreicht ? " · 🎯 Tagesziel erreicht!" : ""}
+            {tag.zielErreicht ? " · Tagesziel erreicht!" : ""}
             {lernspur(data.lernstand.lerntage, heute) > 1 ? ` · 🛤️ Lernspur: ${lernspur(data.lernstand.lerntage, heute)} Tage` : ""}
           </p>
           <button data-test="nochmal-knopf" onClick={() => starten(runde)} style={{ ...primaerKnopf, marginBottom: 8 }}>
-            🔁 Noch eine Runde
+            Noch eine Runde
           </button>
           <button data-test="zu-bereichen" onClick={rundeZu}
             style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
@@ -434,7 +434,7 @@ export default function Ueben() {
                     <button data-test="original-dok"
                       onClick={() => dokHolen(heftDok.id).then((p) => tresor.dateiEntschluesseln(p)).then((b) => dokAnzeigen(b, heftDok.name)).catch(() => {})}
                       style={{ background: "transparent", color: T.primaer, padding: 0, minHeight: 0, height: "auto", fontWeight: 800, textDecoration: "underline" }}>
-                      📂 Heft öffnen
+                      Heft öffnen
                     </button>
                   </>
                 ) : " – liegt im Papier-Ordner."}
@@ -490,7 +490,7 @@ export default function Ueben() {
                     Ausgangssatz: <b style={{ fontSize: "var(--schrift-gross)" }}>{umSatzText(a.teile, a.teile.map((_, i) => i))}</b>
                   </p>
                   <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-                    💡 Baue ihn <b>NEU</b> – das Prädikat (Verb) bleibt an <b>2. Stelle</b>.
+                    Baue ihn <b>NEU</b> – das Prädikat (Verb) bleibt an <b>2. Stelle</b>.
                   </p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                     {a.teile.map((t2, i) => (
@@ -594,7 +594,7 @@ export default function Ueben() {
               <div className="mut-kopf">🧑‍🏫 <b>Lehrer-Moment</b> – jetzt bist DU dran!</div>
               <div className="bubble coach">
                 {runde.lehrer.fertig
-                  ? "🌟 Stark erklärt! Was du erklären kannst, sitzt doppelt."
+                  ? "Stark erklärt! Was du erklären kannst, sitzt doppelt."
                   : "Richtig! Jetzt sag mir LAUT, WARUM das stimmt – ich höre zu! 👂"}
               </div>
               {!runde.lehrer.fertig && (
@@ -617,16 +617,16 @@ export default function Ueben() {
               return (
                 <button data-test="ki-erklaer-knopf" onClick={erklaerungHolen}
                   style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
-                  🦁 Erklär es mir anders
+                  Erklär es mir anders
                 </button>
               );
             }
-            if (k.laden) return <p data-test="ki-laden" style={{ color: T.textLeise }}>🦁 Leo überlegt …</p>;
+            if (k.laden) return <p data-test="ki-laden" style={{ color: T.textLeise }}>Leo überlegt …</p>;
             if (k.fehler) {
               return (
                 <p data-test="ki-fehler" style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-                  {k.fehler === "deckel" ? "🦁 Leos Erklär-Budget ist für diesen Monat aufgebraucht – der Tipp oben hilft dir weiter!"
-                    : "🦁 Leo ist gerade nicht erreichbar – der Tipp oben hilft dir weiter!"}
+                  {k.fehler === "deckel" ? "Leos Erklär-Budget ist für diesen Monat aufgebraucht – der Tipp oben hilft dir weiter!"
+                    : "Leo ist gerade nicht erreichbar – der Tipp oben hilft dir weiter!"}
                 </p>
               );
             }
@@ -635,7 +635,7 @@ export default function Ueben() {
                 <div className="mut-kopf">🦁 <b>Coach Leo</b> erklärt es anders
                   {/* Δ1: sichtbarer Fortschritt – das Kind sieht, wie viel noch kommt */}
                   <span data-test="ki-zaehler" style={{ float: "right", fontWeight: 700 }}>
-                    💬 {k.offen} von {k.blasen.length}
+                    {k.offen} von {k.blasen.length}
                   </span>
                 </div>
                 {k.blasen.slice(0, k.offen).map((b, i) => (
@@ -644,7 +644,7 @@ export default function Ueben() {
                 {k.offen < k.blasen.length ? (
                   <button data-test="ki-weiter" className="bw-knopf mut-weiter"
                     onClick={() => setRunde({ ...runde, ki: { ...k, offen: k.offen + 1 } })}>
-                    💬 Weiter
+                    Weiter
                   </button>
                 ) : (
                   <div className="bubble kind" data-test="ki-mach">👆 <b>Mach-Aufgabe:</b> {k.mach}</div>
@@ -772,7 +772,7 @@ export default function Ueben() {
       })()}
       <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
         Tipp: Eine fehlerfreie Runde schaltet die nächste Stufe frei – und jede
-        Runde bringt eine 🪙 Münze für die Spielhalle.
+        Runde bringt eine Münze für die Spielhalle.
       </p>
     </div>
   );

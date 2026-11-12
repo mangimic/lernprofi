@@ -18,30 +18,30 @@ import { kastenZaehler } from "../calc/karteikasten.js";
    Backup/Import (inkl. Alt-App-Übernahme mit Bericht) · PIN · Sperren. */
 
 const STUFEN_FELDER = [
-  { key: "subj", name: "🔎 Subjekte" }, { key: "praed", name: "🧲 Prädikate" },
-  { key: "rede", name: "💬 Wörtliche Rede" }, { key: "zeit", name: "⏳ Zeitformen" },
-  { key: "wa", name: "🏷️ Wortarten" }, { key: "faelle", name: "🎯 Die 4 Fälle" },
-  { key: "gk", name: "🔠 Groß & Klein" }, { key: "gws", name: "📖 Grundwortschatz" },
-  { key: "gesch", name: "📚 Geschichten-Werkstatt" }, { key: "dd", name: "🔤 das oder dass?" },
+  { key: "subj", name: "Subjekte" }, { key: "praed", name: "Prädikate" },
+  { key: "rede", name: "Wörtliche Rede" }, { key: "zeit", name: "⏳ Zeitformen" },
+  { key: "wa", name: "🏷️ Wortarten" }, { key: "faelle", name: "Die 4 Fälle" },
+  { key: "gk", name: "🔠 Groß & Klein" }, { key: "gws", name: "Grundwortschatz" },
+  { key: "gesch", name: "📚 Geschichten-Werkstatt" }, { key: "dd", name: "das oder dass?" },
   { key: "doppel", name: "🔡 Doppelte Mitlaute" },
-  { key: "mrechnen", name: "🧮 Rechnen" }, { key: "mzahlen", name: "🔢 Zahlen-Profi" },
-  { key: "mgeo", name: "📐 Formen & Flächen" }, { key: "mgroessen", name: "⏰ Größen" },
-  { key: "mdaten", name: "🎲 Daten & Zufall" },
-  { key: "sstrom", name: "⚡ Strom & Energie" }, { key: "srad", name: "🚲 Radfahrprüfung" },
-  { key: "skarte", name: "🗺️ Karten & BW" }, { key: "sgemeinde", name: "🏛️ Gemeinde" },
-  { key: "skoerper", name: "🫀 Körper" }, { key: "szeit", name: "🕰️ Zeit & Geschichte" },
-  { key: "stark", name: "💪 Stark mit Leo" },
+  { key: "mrechnen", name: "Rechnen" }, { key: "mzahlen", name: "Zahlen-Profi" },
+  { key: "mgeo", name: "Formen & Flächen" }, { key: "mgroessen", name: "Größen" },
+  { key: "mdaten", name: "Daten & Zufall" },
+  { key: "sstrom", name: "Strom & Energie" }, { key: "srad", name: "Radfahrprüfung" },
+  { key: "skarte", name: "Karten & BW" }, { key: "sgemeinde", name: "Gemeinde" },
+  { key: "skoerper", name: "Körper" }, { key: "szeit", name: "Zeit & Geschichte" },
+  { key: "stark", name: "Stark mit Leo" },
 ];
 
 
 /* 📑 Eltern-Navigation: sechs Aufgaben-Gruppen statt einer langen Liste. */
 const ELTERN_GRUPPEN = [
   { key: "stand", name: "📈 Lernstand" },
-  { key: "regeln", name: "🎯 Üben & Regeln" },
-  { key: "plan", name: "🗓️ Plan & Termine" },
-  { key: "material", name: "🗃️ Material" },
-  { key: "leo", name: "🤖 Leo (KI)" },
-  { key: "konto", name: "🔐 Konto & Daten" },
+  { key: "regeln", name: "Üben & Regeln" },
+  { key: "plan", name: "Plan & Termine" },
+  { key: "material", name: "Material" },
+  { key: "leo", name: "Leo (KI)" },
+  { key: "konto", name: "Konto & Daten" },
 ];
 
 function Karte({ children, test }) {
@@ -77,8 +77,8 @@ export default function Eltern() {
   const [meldung, setMeldung] = useState("");
   const [bericht, setBericht] = useState(null);
   const [pinNeu, setPinNeu] = useState({ pw: "", pin: "" });
-  const [terminNeu, setTerminNeu] = useState({ tag: "", art: "ka", fach: "" }); // 🗓️ Termin-Eingabe
-  const [katEntwurf, setKatEntwurf] = useState(null); // 🧩 Plan-Kategorien im Bearbeiten-Modus
+  const [terminNeu, setTerminNeu] = useState({ tag: "", art: "ka", fach: "" }); // Termin-Eingabe
+  const [katEntwurf, setKatEntwurf] = useState(null); // Plan-Kategorien im Bearbeiten-Modus
 
   const feld = {
     width: "100%", minHeight: "var(--touch)", fontSize: "var(--schrift)",
@@ -105,7 +105,7 @@ export default function Eltern() {
       a.download = `lernprofi-backup-${heute}.json`;
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-      setMeldung("💾 Backup gespeichert (Download-Ordner).");
+      setMeldung("Backup gespeichert (Download-Ordner).");
     } catch { setMeldung("Export hat nicht geklappt – bitte noch einmal."); }
   };
 
@@ -209,7 +209,7 @@ export default function Eltern() {
     } catch { setEinladungMeldung("⚠️ Der Server ist gerade nicht erreichbar."); }
   };
   const einladungKopieren = async (e) => {
-    const text = `Hallo! Wir laden euch zu Leos Welten ein 🦁 Öffnet einfach diesen Link und richtet euer Familien-Konto ein: ${e.link}`;
+    const text = `Hallo! Wir laden euch zu Leos Welten ein Öffnet einfach diesen Link und richtet euer Familien-Konto ein: ${e.link}`;
     try {
       await navigator.clipboard.writeText(text);
       setEinladungMeldung("✅ Einladung kopiert – einfach in eure Nachricht einfügen.");
@@ -243,10 +243,10 @@ export default function Eltern() {
 
   // 🤖 KI-Status (Deckel, Verbrauch)
   const [ki, setKi] = useState(null);
-  const [kiTest, setKiTest] = useState(null); // 🧪 Verbindungstest: null | {laden} | {ok,…} | {grund, detail}
-  const [wBericht, setWBericht] = useState(null); // 📊 Wochenbericht: null | {laden} | {ok, gut, beobachtung, tipps} | {grund}
+  const [kiTest, setKiTest] = useState(null); // Verbindungstest: null | {laden} | {ok,…} | {grund, detail}
+  const [wBericht, setWBericht] = useState(null); // Wochenbericht: null | {laden} | {ok, gut, beobachtung, tipps} | {grund}
   const [saetzeWoerter, setSaetzeWoerter] = useState("");
-  const [vorschlaege, setVorschlaege] = useState(null); // 🔤 null | {laden} | {saetze, auswahl} | {grund}
+  const [vorschlaege, setVorschlaege] = useState(null); // null | {laden} | {saetze, auswahl} | {grund}
   useEffect(() => { kiStatus().then(setKi); }, []);
   const [tab, setTab] = useState("stand"); // 📑 aktive Gruppe der Eltern-Navigation
   const syncAktion = async (arbeit, erfolgsText) => {
@@ -292,7 +292,7 @@ export default function Eltern() {
         <b>📈 Lern-Übersicht</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           Nur Zahlen, keine Bewertung. Heute: {tagHeute.missionen} Mission{tagHeute.missionen === 1 ? "" : "en"}
-          {tagHeute.zielErreicht ? " · 🎯 Ziel erreicht" : ""}{spur > 0 ? ` · 🛤️ Lernspur ${spur} Tag${spur === 1 ? "" : "e"}` : ""}
+          {tagHeute.zielErreicht ? " · Ziel erreicht" : ""}{spur > 0 ? ` · 🛤️ Lernspur ${spur} Tag${spur === 1 ? "" : "e"}` : ""}
           {" · 🪙 "}{data.lernstand.muenzen} Münzen
         </p>
         {tage.length ? (
@@ -308,7 +308,7 @@ export default function Eltern() {
       </Karte>
 
       <Karte test="eltern-bericht">
-        <b>📊 Leos Wochenbericht</b>
+        <b>Leos Wochenbericht</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           Leo fasst die letzten 7 Tage zusammen: Lichtblicke, eine Beobachtung, 2-3 Tipps.
           Es gehen nur anonyme Zähler zum Server – nie der Name, nie Texte des Kindes.
@@ -325,16 +325,16 @@ export default function Eltern() {
                 setWBericht(await kiBericht({ daten: berichtDaten(data, heute), modell: data.einstellungen.ki.modell }));
               }}
               style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
-              {wBericht?.laden ? "📊 Leo schaut auf die Woche …" : "📊 Wochenbericht erstellen"}
+              {wBericht?.laden ? "Leo schaut auf die Woche …" : "Wochenbericht erstellen"}
             </button>
             {wBericht && !wBericht.laden && (wBericht.ok ? (
               <div data-test="bericht-ansicht" style={{ marginTop: 10, background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px" }}>
                 {wBericht.zuerst && (
-                  <p data-test="bericht-zuerst" style={{ margin: "0 0 8px", fontWeight: 800 }}>🎯 {wBericht.zuerst}</p>
+                  <p data-test="bericht-zuerst" style={{ margin: "0 0 8px", fontWeight: 800 }}>{wBericht.zuerst}</p>
                 )}
                 {wBericht.gut.map((g, i) => <p key={i} style={{ margin: "0 0 6px" }}>⭐ {g}</p>)}
                 <p style={{ margin: "0 0 6px" }}>👀 {wBericht.beobachtung}</p>
-                {wBericht.tipps.map((t2, i) => <p key={i} style={{ margin: "0 0 6px" }}>💡 {t2}</p>)}
+                {wBericht.tipps.map((t2, i) => <p key={i} style={{ margin: "0 0 6px" }}>{t2}</p>)}
                 <p style={{ margin: 0, color: T.textLeise, fontSize: "12.5px" }}>
                   Kosten: {String(wBericht.kostenCent).replace(".", ",")} ct · Der Bericht wird nicht gespeichert.
                 </p>
@@ -350,7 +350,7 @@ export default function Eltern() {
       </Karte>
 
       <Karte test="eltern-gespraech">
-        <b>💬 Gesprächsimpulse</b>
+        <b>Gesprächsimpulse</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           Das sind keine Tests, sondern <b>Tür-Öffner</b> – Gespräche, die prägen, lange bevor es
           darauf ankommt. Sie passen gut zu dem, was Ihr Kind in „💪 Stark mit Leo“ übt.
@@ -379,7 +379,7 @@ export default function Eltern() {
       </>)}
       {tab === "regeln" && (<>
       <Karte test="eltern-ziel">
-        <b>🎯 Tagesziel</b>
+        <b>Tagesziel</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           So viele Mini-Missionen (je 4 Aufgaben) füllen die Lernspur.
         </p>
@@ -412,9 +412,9 @@ export default function Eltern() {
       </Karte>
 
       <Karte test="eltern-lernen">
-        <b>🧭 Lernen</b>
+        <b>Lernen</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          <b>🚦 Tagesform-Frage:</b> Beim ersten Üben des Tages fragt Leo, wie sich Lernen heute
+          <b>Tagesform-Frage:</b> Beim ersten Üben des Tages fragt Leo, wie sich Lernen heute
           anfühlt. An schweren Tagen werden die Mini-Missionen kürzer (3 statt 4 Aufgaben), das
           Tagesziel kleiner und die Stufen steigen nicht – die Antwort gilt nur für den einen Tag
           und ist keine Bewertung.
@@ -444,7 +444,7 @@ export default function Eltern() {
       </Karte>
 
       <Karte test="eltern-spiele">
-        <b>🎮 Spiele & Lernzeit</b>
+        <b>Spiele & Lernzeit</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           Deaktivierte Spiele verschwinden aus der Spielhalle – die Lernfelder bleiben immer verfügbar.
         </p>
@@ -461,7 +461,7 @@ export default function Eltern() {
             </div>
           </div>
         ))}
-        <p style={{ margin: "14px 0 8px" }}><b>🪙 Spiele freischalten (erst üben, dann spielen)</b></p>
+        <p style={{ margin: "14px 0 8px" }}><b>Spiele freischalten (erst üben, dann spielen)</b></p>
         <p style={{ margin: "0 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           Ist die Freischaltung an, kostet jeder Spielbesuch <b>1 Münze</b> – verdient pro Übungsrunde.
         </p>
@@ -473,9 +473,9 @@ export default function Eltern() {
             { ...data, lernstand: { ...data.lernstand, muenzen: data.lernstand.muenzen + 3 } },
             "spiele", "geaendert", "3 Münzen geschenkt",
           )}>
-          🎁 3 Münzen schenken (jetzt {data.lernstand.muenzen})
+          3 Münzen schenken (jetzt {data.lernstand.muenzen})
         </button>
-        <p style={{ margin: "14px 0 8px" }}><b>⏰ Lernzeit pro Tag (Time-Boxing)</b></p>
+        <p style={{ margin: "14px 0 8px" }}><b>Lernzeit pro Tag (Time-Boxing)</b></p>
         <p style={{ margin: "0 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           Ist die Zeit um, zeigt die App einen freundlichen Stopp-Bildschirm. Gezählt wird nur,
           solange die App sichtbar ist. Empfohlen: <b>20 Minuten</b>.
@@ -492,14 +492,14 @@ export default function Eltern() {
             { ...data, lernstand: { ...data.lernstand, zeit: { tag: heute, sek: 0 } } },
             "einstellungen", "geaendert", "Lernzeit für heute wieder freigegeben",
           )}>
-          🔓 Heute wieder freigeben (Zähler auf 0)
+          Heute wieder freigeben (Zähler auf 0)
         </button>
       </Karte>
 
       <Karte test="eltern-saetze">
-        <b>🔤 Persönliche Übungssätze</b>
+        <b>Persönliche Übungssätze</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          Leo baut Abschreib-Sätze aus den Interessen Ihres Kindes fürs 🖐️ Schreib-Training.
+          Leo baut Abschreib-Sätze aus den Interessen Ihres Kindes fürs Schreib-Training.
           Sie sehen jeden Satz <b>vor</b> dem Einspielen und wählen aus – nichts landet ungeprüft beim Kind.
         </p>
         {data.einstellungen.eigeneSaetze.length > 0 && (
@@ -508,7 +508,7 @@ export default function Eltern() {
               <b>Aktiv im Schreib-Training ({data.einstellungen.eigeneSaetze.length}):</b>
             </p>
             {data.einstellungen.eigeneSaetze.map((s, i) => (
-              <p key={i} style={{ margin: "0 0 2px", fontSize: "var(--schrift-klein)" }}>✍️ {s}</p>
+              <p key={i} style={{ margin: "0 0 2px", fontSize: "var(--schrift-klein)" }}>{s}</p>
             ))}
             <button data-test="saetze-leeren"
               onClick={() => einstellung({ eigeneSaetze: [] }, "Eigene Übungssätze entfernt")}
@@ -534,7 +534,7 @@ export default function Eltern() {
                 setVorschlaege(e.ok ? { saetze: e.saetze, auswahl: e.saetze.map(() => true), kostenCent: e.kostenCent } : { grund: e.grund });
               }}
               style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
-              {vorschlaege?.laden ? "🔤 Leo denkt sich Sätze aus …" : "🔤 Vorschläge holen"}
+              {vorschlaege?.laden ? "Leo denkt sich Sätze aus …" : "Vorschläge holen"}
             </button>
             {vorschlaege && !vorschlaege.laden && (vorschlaege.saetze ? (
               <div data-test="saetze-vorschlaege" style={{ marginTop: 10 }}>
@@ -571,7 +571,7 @@ export default function Eltern() {
       </>)}
       {tab === "plan" && (<>
       <Karte test="eltern-termine">
-        <b>🗓️ Termine für den Wochenplan</b>
+        <b>Termine für den Wochenplan</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           Klassenarbeiten, Kompass-Tests und Wörter der Woche eintragen – sie erscheinen im
           Wochenplan des Kindes, und der 🦁-Wächter empfiehlt, das Üben davor zu verteilen.
@@ -581,7 +581,7 @@ export default function Eltern() {
             {[...data.einstellungen.termine].sort((a, b) => a.tag.localeCompare(b.tag)).map((t) => (
               <div key={t.id} data-test="termin-zeile" style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, fontSize: "var(--schrift-klein)" }}>
                 <span style={{ flex: 1 }}>
-                  {{ ka: "📝 Klassenarbeit", kompass: "🧭 Kompass-Test", wdw: "🔤 Wörter der Woche" }[t.art]}
+                  {{ ka: "📝 Klassenarbeit", kompass: "Kompass-Test", wdw: "Wörter der Woche" }[t.art]}
                   {t.fach ? ` · ${t.fach}` : ""} · {t.tag.split("-").reverse().join(".")}
                 </span>
                 <button data-test="termin-edit" aria-label="Termin bearbeiten"
@@ -606,8 +606,8 @@ export default function Eltern() {
             onChange={(e) => setTerminNeu({ ...terminNeu, art: e.target.value })}
             style={{ ...feld, width: "auto", flex: "1 1 170px", marginBottom: 0 }}>
             <option value="ka">📝 Klassenarbeit</option>
-            <option value="kompass">🧭 Kompass-Test</option>
-            <option value="wdw">🔤 Wörter der Woche</option>
+            <option value="kompass">Kompass-Test</option>
+            <option value="wdw">Wörter der Woche</option>
           </select>
           <input data-test="termin-fach" type="text" maxLength={40} placeholder="Fach/Thema (optional)"
             value={terminNeu.fach} onChange={(e) => setTerminNeu({ ...terminNeu, fach: e.target.value })}
@@ -636,7 +636,7 @@ export default function Eltern() {
       </Karte>
 
       <Karte test="eltern-kategorien">
-        <b>🧩 Plan-Kategorien</b>
+        <b>Plan-Kategorien</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           Die Kategorien im Wochenplan anpassen: umbenennen, ausblenden oder eigene ergänzen.
           Eigene Kategorien erscheinen in der Auswahl und landen als ⭐-Eintrag im Plan.
@@ -651,7 +651,7 @@ export default function Eltern() {
               });
             }}
             style={{ background: T.weich, color: T.text, fontWeight: 700 }}>
-            ✏️ Kategorien anpassen
+            Kategorien anpassen
           </button>
         ) : (
           <>
@@ -728,26 +728,26 @@ export default function Eltern() {
       </>)}
       {tab === "material" && (<>
       <Karte test="eltern-karten">
-        <b>🗃️ Karteikarten (Kompass-Vorbereitung)</b>
+        <b>Karteikarten (Kompass-Vorbereitung)</b>
         {(() => {
           const aktiv = aktiveKarten(data.einstellungen);
           const z = kastenZaehler(aktiv, data.lernstand.karteikasten.stand);
           return (
             <p data-test="karten-stand" style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
               <b>{aktiv.length} Karten aktiv</b> ({data.einstellungen.eigeneKarten.length} eigene, {data.einstellungen.kartenAus.length} ausgeblendet) ·
-              Kasten-Stand: 📥 {z[1]} · 📦 {z[2]} · 🏆 {z[3]} · {data.lernstand.karteikasten.runden} Runden gespielt.
+              Kasten-Stand: {z[1]} · 📦 {z[2]} · {z[3]} · {data.lernstand.karteikasten.runden} Runden gespielt.
               Unter „⚙️ Karten verwalten“ könnt ihr Karten ausblenden und eigene anlegen (z. B. die Lernwörter der Woche).
             </p>
           );
         })()}
         <button data-test="karten-oeffnen" onClick={() => navTo("karten")}
           style={{ background: T.weich, color: T.text, fontWeight: 700 }}>
-          🖨️ Karten ansehen, verwalten &amp; drucken
+          Karten ansehen, verwalten &amp; drucken
         </button>
       </Karte>
 
       <Karte test="eltern-doks">
-        <b>📂 Unterlagen (Dokumenten-Ablage)</b>
+        <b>Unterlagen (Dokumenten-Ablage)</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           {data.doks.length === 0
             ? "Noch leer. Legt hier PDFs und Bilder ab (z. B. die Kompass-Hefte) – verschlüsselt im Tresor, nur für euch lesbar."
@@ -756,24 +756,24 @@ export default function Eltern() {
         </p>
         <button data-test="doks-oeffnen" onClick={() => navTo("doks")}
           style={{ background: T.weich, color: T.text, fontWeight: 700 }}>
-          📂 Ablage öffnen
+          Ablage öffnen
         </button>
       </Karte>
       </>)}
       {tab === "leo" && (<>
       <Karte test="eltern-ki">
-        <b>🤖 KI-Funktionen</b>
+        <b>KI-Funktionen</b>
         <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           Jede Funktion einzeln freigeben (Standard: aus). Der Kostendeckel wird vom Server hart
           durchgesetzt; der Schlüssel liegt nur dort. Antworten sind immer kurz: höchstens 2 Blasen,
           eine Mach-Aufgabe – kein Lesestoff.
         </p>
         {[
-          { key: "erklaeren", name: "🦁 „Erklär es mir anders“ (nach Fehlversuchen)", da: true },
-          { key: "schrift", name: "🖐️ Schrift-Blick (Foto vom Blatt prüfen)", da: true },
-          { key: "aufsatz", name: "✍️ Aufsatz-Check (Foto vom Text)", da: true },
-          { key: "bericht", name: "📊 Wochenbericht", da: true },
-          { key: "saetze", name: "🔤 Persönliche Übungssätze", da: true },
+          { key: "erklaeren", name: "„Erklär es mir anders“ (nach Fehlversuchen)", da: true },
+          { key: "schrift", name: "Schrift-Blick (Foto vom Blatt prüfen)", da: true },
+          { key: "aufsatz", name: "Aufsatz-Check (Foto vom Text)", da: true },
+          { key: "bericht", name: "Wochenbericht", da: true },
+          { key: "saetze", name: "Persönliche Übungssätze", da: true },
         ].map((f) => (
           <div key={f.key} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, opacity: f.da ? 1 : 0.55 }}>
             <span style={{ flex: 1, fontSize: "var(--schrift-klein)" }}>{f.name}{f.da ? "" : " · kommt als Nächstes"}</span>
@@ -788,7 +788,7 @@ export default function Eltern() {
             </div>
           </div>
         ))}
-        <p style={{ margin: "14px 0 4px", fontSize: "var(--schrift-klein)" }}><b>🧠 Leo-Modell</b></p>
+        <p style={{ margin: "14px 0 4px", fontSize: "var(--schrift-klein)" }}><b>Leo-Modell</b></p>
         <Seg test="ki-modell" werte={[
           { v: "haiku", label: "Haiku · ~0,03 ct" },
           { v: "sonnet", label: "Sonnet · ~0,5 ct" },
@@ -845,7 +845,7 @@ export default function Eltern() {
                   setKi(await kiStatus()); // Verbrauch + letzter Fehler frisch anzeigen
                 }}
                 style={{ width: "100%", marginTop: 10, background: T.weich, color: T.text, fontWeight: 700 }}>
-                {kiTest?.laden ? "🧪 Teste …" : "🧪 KI-Verbindung testen (kostet ~1 Erklärung)"}
+                {kiTest?.laden ? "Teste …" : "KI-Verbindung testen (kostet ~1 Erklärung)"}
               </button>
               {kiTest && !kiTest.laden && (
                 <p data-test="ki-test-ergebnis" style={{ margin: "8px 0 0", fontSize: "var(--schrift-klein)", color: kiTest.ok ? T.ok : "var(--warn)", wordBreak: "break-word" }}>
@@ -863,7 +863,7 @@ export default function Eltern() {
       </>)}
       {tab === "konto" && (<>
       <Karte test="eltern-konto">
-        <b>👪 Familien-Konto</b>
+        <b>Familien-Konto</b>
         <p data-test="konto-status" style={{ margin: "4px 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           {konto === null ? "Prüfe Konto-Status …"
             : konto.angemeldet && konto.art === "sitzung" ? <>✅ Angemeldet{konto.email ? <> als <b>{konto.email}</b></> : ""} – dieses Gerät sichert in euren Konto-Tresor.</>
@@ -892,7 +892,7 @@ export default function Eltern() {
               value={kontoForm.passwort} onChange={(e) => setKontoForm({ ...kontoForm, passwort: e.target.value })} />
             <button data-test="konto-anmelden" onClick={() => kontoAktion(() => kontoAnmelden(kontoForm.email, kontoForm.passwort))}
               style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
-              🔑 Anmelden
+              Anmelden
             </button>
           </>
         )}
@@ -905,7 +905,7 @@ export default function Eltern() {
         {kontoMeldung && <p data-test="konto-meldung" style={{ margin: "8px 0 0", color: "var(--warn)", fontSize: "var(--schrift-klein)" }}>{kontoMeldung}</p>}
 
         <div style={{ marginTop: 14, borderTop: `1px solid ${T.rand}`, paddingTop: 10 }}>
-          <b>🧯 Wiederherstellungs-Code</b>
+          <b>Wiederherstellungs-Code</b>
           <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
             Euer Rettungsanker, falls das Eltern-Passwort verloren geht: Der Code öffnet den
             Tresor und ihr setzt ein neues Passwort. Druckt ihn aus und legt ihn sicher ab –
@@ -917,7 +917,7 @@ export default function Eltern() {
                 value={rett.pw} onChange={(e) => setRett({ ...rett, pw: e.target.value })} />
               <button data-test="rett-erzeugen" onClick={rettErzeugen}
                 style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
-                🧯 Wiederherstellungs-Code erzeugen
+                Wiederherstellungs-Code erzeugen
               </button>
             </>
           )}
@@ -930,7 +930,7 @@ export default function Eltern() {
               }}>{rett.code}</p>
               <button data-test="rett-drucken" onClick={rettDrucken}
                 style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
-                🖨️ Jetzt ausdrucken (einzige Kopie!)
+                Jetzt ausdrucken (einzige Kopie!)
               </button>
             </>
           )}
@@ -939,14 +939,14 @@ export default function Eltern() {
 
         {konto?.angemeldet && konto.kontoId === "stamm" && (
           <div style={{ marginTop: 14, borderTop: `1px solid ${T.rand}`, paddingTop: 10 }}>
-            <b>🎟️ Familien einladen</b>
+            <b>Familien einladen</b>
             <p style={{ margin: "4px 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
               Jeder Code lässt genau EINE neue Familie ein Konto anlegen (Einrichtung →
               „Einladungs-Code"). Gebt ihn persönlich weiter – er wird nur hier angezeigt.
             </p>
             <button data-test="einladung-erzeugen" onClick={einladungNeu}
               style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
-              🎟️ Neuen Einladungs-Code erzeugen
+              Neuen Einladungs-Code erzeugen
             </button>
             {einladungen.map((e) => (
               <div key={e.code} style={{ marginTop: 8, background: T.grund, borderRadius: T.radiusKlein, padding: 10 }}>
@@ -960,7 +960,7 @@ export default function Eltern() {
                 }}>{e.link}</p>
                 <button data-test="einladung-kopieren" onClick={() => einladungKopieren(e)}
                   style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
-                  📋 Einladung kopieren (Text + Link)
+                  Einladung kopieren (Text + Link)
                 </button>
               </div>
             ))}
@@ -989,7 +989,7 @@ export default function Eltern() {
         )}
         <button data-test="zum-datenschutz" onClick={() => navTo("datenschutz")}
           style={{ width: "100%", marginTop: 10, background: "transparent", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          📄 Datenschutzerklärung anzeigen
+          Datenschutzerklärung anzeigen
         </button>
       </Karte>
 
@@ -1003,7 +1003,7 @@ export default function Eltern() {
       </Karte>
 
       <Karte test="eltern-sync">
-        <b>☁️ Geräte-Abgleich</b>
+        <b>Geräte-Abgleich</b>
         <p data-test="autosync-status" style={{
           margin: "4px 0 6px", fontSize: "var(--schrift-klein)",
           color: autoSync.stand === "konflikt" ? "var(--warn)" : T.textLeise,
@@ -1011,7 +1011,7 @@ export default function Eltern() {
           {autoSync.stand === "ok" ? `🔄 Automatisch gesichert · Rev. ${autoSync.rev} · ${new Date(autoSync.zeit).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}${autoSync.geholt ? " (beim Anmelden vom Server geholt)" : ""}`
             : autoSync.stand === "wartet" || autoSync.stand === "laedt" ? "🔄 Auto-Sicherung läuft …"
             : autoSync.stand === "offline" ? "🔄 Auto-Sicherung wartet auf Netz – versucht es gleich wieder."
-            : autoSync.stand === "konflikt" ? "⚠️ Auto-Sicherung angehalten: Auf dem Server liegt ein NEUERER Stand (anderes Gerät). Bitte unten entscheiden: ⬇️ holen oder ⬆️ überschreiben."
+            : autoSync.stand === "konflikt" ? "⚠️ Auto-Sicherung angehalten: Auf dem Server liegt ein NEUERER Stand (anderes Gerät). Bitte unten entscheiden: holen oder überschreiben."
             : "🔄 Auto-Sicherung: an (springt bei der ersten Änderung an, sobald der Server erreichbar ist)."}
         </p>
         <p style={{ margin: "4px 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
@@ -1025,11 +1025,11 @@ export default function Eltern() {
           <>
             <button data-test="sync-hoch" style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700, marginBottom: 8 }}
               onClick={() => syncAktion(() => hochladen(idbStorage), (e) => `✅ Auf dem Server gesichert (Rev. ${e.rev}).`)}>
-              ⬆️ Diesen Stand auf den Server sichern
+              Diesen Stand auf den Server sichern
             </button>
             <button data-test="sync-runter" style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700, marginBottom: 8 }}
               onClick={() => setFrage("laden")}>
-              ⬇️ Server-Stand auf dieses Gerät holen
+              Server-Stand auf dieses Gerät holen
             </button>
           </>
         )}
@@ -1043,9 +1043,9 @@ export default function Eltern() {
         {frage?.typ === "konflikt" && (
           <div data-test="sync-konflikt" style={{ background: T.grund, borderRadius: T.radiusKlein, padding: 10, marginBottom: 8 }}>
             <p style={{ margin: "0 0 8px" }}>⚠️ Auf dem Server liegt ein <b>neuerer Stand</b> (von einem anderen Gerät). Nichts wurde überschrieben. Was soll gelten?</p>
-            <button onClick={ladenBestaetigt} style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700, marginBottom: 6 }}>⬇️ Server-Stand übernehmen (empfohlen)</button>
+            <button onClick={ladenBestaetigt} style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700, marginBottom: 6 }}>Server-Stand übernehmen (empfohlen)</button>
             <button onClick={() => syncAktion(() => konfliktUeberschreiben(idbStorage, frage.serverRev), (e) => `✅ Server überschrieben (Rev. ${e.rev}).`)}
-              style={{ width: "100%", background: T.weich, color: T.text, marginBottom: 6 }}>⬆️ Trotzdem diesen Stand hochladen</button>
+              style={{ width: "100%", background: T.weich, color: T.text, marginBottom: 6 }}>Trotzdem diesen Stand hochladen</button>
             <button onClick={() => setFrage(null)} style={{ width: "100%", background: T.weich, color: T.text }}>Abbrechen</button>
           </div>
         )}
@@ -1053,18 +1053,18 @@ export default function Eltern() {
       </Karte>
 
       <Karte test="eltern-daten">
-        <b>💾 Daten</b>
+        <b>Daten</b>
         <p style={{ margin: "4px 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           Backup regelmäßig sichern – es gibt keine Passwort-Wiederherstellung.
           Der Import versteht auch den „Lernstand sichern“-Export der bisherigen App.
         </p>
         <button data-test="export-knopf" onClick={exportieren}
           style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700, marginBottom: 8 }}>
-          💾 Backup als Datei sichern
+          Backup als Datei sichern
         </button>
         <button data-test="import-knopf" onClick={() => datei.current?.click()}
           style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700, marginBottom: 8 }}>
-          📥 Lernstand aus Datei übernehmen (auch Alt-App)
+          Lernstand aus Datei übernehmen (auch Alt-App)
         </button>
         <input ref={datei} type="file" accept="application/json,.json" hidden onChange={importieren} />
         {bericht && (
@@ -1078,7 +1078,7 @@ export default function Eltern() {
           </div>
         )}
         <details style={{ margin: "8px 0" }}>
-          <summary style={{ cursor: "pointer", color: T.textLeise }}>🔑 Lern-PIN ändern</summary>
+          <summary style={{ cursor: "pointer", color: T.textLeise }}>Lern-PIN ändern</summary>
           <div style={{ marginTop: 8 }}>
             <input data-test="pin-neu-pw" type="password" placeholder="Eltern-Passwort" style={feld}
               value={pinNeu.pw} onChange={(e) => setPinNeu({ ...pinNeu, pw: e.target.value })} />
@@ -1094,7 +1094,7 @@ export default function Eltern() {
         {meldung && <p data-test="eltern-meldung" style={{ color: T.ok, fontSize: "var(--schrift-klein)" }}>{meldung}</p>}
         <button data-test="sperren-knopf" onClick={tresor.sperren}
           style={{ width: "100%", background: "transparent", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          🔒 Tresor sperren
+          Tresor sperren
         </button>
       </Karte>
       </>)}

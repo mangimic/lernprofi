@@ -18,7 +18,7 @@ import { schachStart } from "../spiele/schach.js";
 const ALLE_SKINS = { ...MATCH_SKINS, tennis: TENNIS_SKIN, fussball: FUSSBALL_SKIN, fischen: WETTFISCHEN_SKIN };
 
 /* 🎮 Spielhalle: Ein Spielbesuch kostet 1 Münze (verdient beim Üben).
-   🎣 See-Abenteuer, ⛏️ Blockwelt, 🎾 Tennis- und ⚽ Fußball-Match sind
+   See-Abenteuer, Blockwelt, Tennis- und Fußball-Match sind
    originalgetreue Ports aus der Alt-App (Vanilla-Inseln mit
    React-Wrapper). Die Blockwelt wird dauerhaft im verschlüsselten
    Tresor gespeichert; Tennis und Fußball zählen ihre Matches dort. */
@@ -148,7 +148,7 @@ export default function Spielhalle() {
       return (
         <div data-test="see-ergebnis">
           <div style={karte}>
-            <h2 style={{ marginTop: 0 }}>🧺 Korb voll – alle {ergebnis.fische} Fische!</h2>
+            <h2 style={{ marginTop: 0 }}>Korb voll – alle {ergebnis.fische} Fische!</h2>
             <p>
               <b>{ergebnis.geloest} von {ergebnis.gesamt}</b> Fragen beim ersten Versuch richtig
               {ergebnis.fehler === 0 ? " – fehlerfrei, stark! 🏆" : ` · ${ergebnis.fehler} Fisch${ergebnis.fehler === 1 ? "" : "e"} erst beim zweiten Anlauf`}
@@ -164,17 +164,17 @@ export default function Spielhalle() {
       );
     }
     const info = {
-      tennis: { name: "🎾 Tennis", einheit: "Bällen", verb: "gewonnen" },
-      fussball: { name: "⚽ Fußball", einheit: "Bällen", verb: "verwandelt" },
-      dino: { name: "🦖 Dino-Rennen", einheit: "Fragen", verb: "geschafft" },
-      rakete: { name: "🚀 Raketen-Rennen", einheit: "Fragen", verb: "geschafft" },
-      fischen: { name: "🎣 Angel-Wettfischen", einheit: "Fischen", verb: "gefangen" },
+      tennis: { name: "Tennis", einheit: "Bällen", verb: "gewonnen" },
+      fussball: { name: "Fußball", einheit: "Bällen", verb: "verwandelt" },
+      dino: { name: "Dino-Rennen", einheit: "Fragen", verb: "geschafft" },
+      rakete: { name: "Raketen-Rennen", einheit: "Fragen", verb: "geschafft" },
+      fischen: { name: "Angel-Wettfischen", einheit: "Fischen", verb: "gefangen" },
     }[ergebnis.typ] || { name: ergebnis.typ, einheit: "Fragen", verb: "geschafft" };
     return (
       <div data-test="match-ergebnis">
         <div style={karte}>
           <h2 style={{ marginTop: 0 }}>
-            {ergebnis.gewonnen ? "🏆 Match gewonnen!" : "💪 Starkes Match!"}
+            {ergebnis.gewonnen ? "Match gewonnen!" : "Starkes Match!"}
           </h2>
           <p>
             {info.name} gegen <b>{ergebnis.gegner}</b>:

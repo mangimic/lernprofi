@@ -62,9 +62,9 @@ export default function VaultGate() {
   // Ein Einladungs-Link überspringt die Weiche (Code ist schon eingetragen).
   const [weg, setWeg] = useState(() => (einladungAusUrl() ? "einrichten" : "willkommen")); // willkommen | einrichten | anmelden | rettung
   const [anm, setAnm] = useState({ email: "", passwort: "" });
-  const [pwVergessen, setPwVergessen] = useState(false); // 🧯 lokaler Rettungs-Weg
+  const [pwVergessen, setPwVergessen] = useState(false); // lokaler Rettungs-Weg
   const [rett, setRett] = useState({ email: "", code: "", pw1: "", pw2: "" });
-  const [einverstanden, setEinverstanden] = useState(false); // 📄 Einwilligung (nur Konto-Weg)
+  const [einverstanden, setEinverstanden] = useState(false); // Einwilligung (nur Konto-Weg)
   const [zeigeDatenschutz, setZeigeDatenschutz] = useState(false);
 
   const los = async (arbeit) => {
@@ -165,7 +165,7 @@ export default function VaultGate() {
   const datenschutzLink = (
     <button data-test="datenschutz-link" onClick={() => setZeigeDatenschutz(true)}
       style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 4, fontSize: "var(--schrift-klein)" }}>
-      📄 Datenschutzerklärung
+      Datenschutzerklärung
     </button>
   );
 
@@ -181,16 +181,16 @@ export default function VaultGate() {
         <Karte>
           <h2 style={{ marginTop: 0 }}>Willkommen!</h2>
           <p style={{ color: T.textLeise }}>
-            Die Lern-App, in der Leo 🦁 dein Kind durch seine Lieblings-Welten
+            Die Lern-App, in der Leo dein Kind durch seine Lieblings-Welten
             begleitet – verschlüsselt, werbefrei, für Klasse 3 und 4.
           </p>
           <button data-test="willkommen-neu" onClick={() => { setWeg("einrichten"); setFehler(""); }}
             style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
-            ✨ Wir sind neu hier → Einrichten
+            Wir sind neu hier → Einrichten
           </button>
           <button data-test="willkommen-konto" onClick={() => { setWeg("anmelden"); setFehler(""); }}
             style={{ width: "100%", marginTop: 8, background: T.weich, color: T.text, fontWeight: 700 }}>
-            👪 Wir haben schon ein Konto → Anmelden
+            Wir haben schon ein Konto → Anmelden
           </button>
           {datenschutzLink}
         </Karte>
@@ -220,7 +220,7 @@ export default function VaultGate() {
           {fehler && <p data-test="gate-fehler" style={{ color: T.warn }}>{fehler}</p>}
           <button data-test="rett-ok" disabled={laeuft} onClick={neuGeraetRetten}
             style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
-            {laeuft ? "Einen Moment …" : "🧯 Tresor retten und neues Passwort setzen"}
+            {laeuft ? "Einen Moment …" : "Tresor retten und neues Passwort setzen"}
           </button>
           <button onClick={() => { setWeg("anmelden"); setFehler(""); }}
             style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 8, fontSize: "var(--schrift-klein)" }}>
@@ -250,11 +250,11 @@ export default function VaultGate() {
           {fehler && <p data-test="gate-fehler" style={{ color: T.warn }}>{fehler}</p>}
           <button data-test="anm-ok" disabled={laeuft} onClick={anmelden}
             style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
-            {laeuft ? "Einen Moment …" : "🔑 Anmelden und Tresor holen"}
+            {laeuft ? "Einen Moment …" : "Anmelden und Tresor holen"}
           </button>
           <button data-test="anm-pw-vergessen" onClick={() => { setWeg("rettung"); setFehler(""); }}
             style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 8, fontSize: "var(--schrift-klein)" }}>
-            🧯 Passwort vergessen? Mit Wiederherstellungs-Code
+            Passwort vergessen? Mit Wiederherstellungs-Code
           </button>
           <button data-test="anm-zurueck" onClick={() => { setWeg("willkommen"); setFehler(""); }}
             style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 4, fontSize: "var(--schrift-klein)" }}>
@@ -271,7 +271,7 @@ export default function VaultGate() {
       <div data-test="gate-einrichten" style={{ maxWidth: 480, margin: "0 auto", padding: "0 16px" }}>
         {kopf}
         <Karte>
-          <h2 style={{ marginTop: 0 }}>🔐 Tresor einrichten (für Eltern)</h2>
+          <h2 style={{ marginTop: 0 }}>Tresor einrichten (für Eltern)</h2>
           <p style={{ color: T.textLeise }}>
             Alle Lerndaten werden auf diesem Gerät <b>verschlüsselt</b> gespeichert.
             Ihr vergebt ein <b>Eltern-Passwort</b> (für Einstellungen und Backups)
@@ -314,11 +314,11 @@ export default function VaultGate() {
           {fehler && <p data-test="gate-fehler" style={{ color: T.warn }}>{fehler}</p>}
           <button data-test="einr-ok" disabled={laeuft} onClick={anlegen}
             style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
-            {laeuft ? "Einen Moment …" : "🔐 Tresor anlegen"}
+            {laeuft ? "Einen Moment …" : "Tresor anlegen"}
           </button>
           <button data-test="zum-anmelden" onClick={() => { setWeg("anmelden"); setFehler(""); }}
             style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 8, fontSize: "var(--schrift-klein)" }}>
-            👪 Wir haben schon ein Familien-Konto → Anmelden
+            Wir haben schon ein Familien-Konto → Anmelden
           </button>
           <button data-test="einr-zurueck" onClick={() => { setWeg("willkommen"); setFehler(""); }}
             style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 4, fontSize: "var(--schrift-klein)" }}>
@@ -344,16 +344,16 @@ export default function VaultGate() {
           <button data-test="pin-ok" disabled={laeuft || pin.length !== 4}
             onClick={() => los(() => tresor.entsperrenPin(pin))}
             style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
-            {laeuft ? "Einen Moment …" : "🚀 Los geht's!"}
+            {laeuft ? "Einen Moment …" : "Los geht's!"}
           </button>
           <button data-test="eltern-zugang" onClick={() => { setElternWeg(true); setFehler(""); }}
             style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 8, fontSize: "var(--schrift-klein)" }}>
-            🔧 Eltern-Zugang (mit Passwort)
+            Eltern-Zugang (mit Passwort)
           </button>
         </Karte>
       ) : !pwVergessen ? (
         <Karte>
-          <h2 style={{ marginTop: 0 }}>🔧 Eltern-Zugang</h2>
+          <h2 style={{ marginTop: 0 }}>Eltern-Zugang</h2>
           <Feld test="pw-eingabe" type="password" placeholder="Eltern-Passwort" value={passwort} autoFocus
             onChange={(e) => setPasswort(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") los(() => tresor.entsperrenPasswort(passwort)); }} />
@@ -365,7 +365,7 @@ export default function VaultGate() {
           </button>
           <button data-test="pw-vergessen" onClick={() => { setPwVergessen(true); setFehler(""); }}
             style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 8, fontSize: "var(--schrift-klein)" }}>
-            🧯 Passwort vergessen? Mit Wiederherstellungs-Code
+            Passwort vergessen? Mit Wiederherstellungs-Code
           </button>
           <button onClick={() => { setElternWeg(false); setFehler(""); }}
             style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 4, fontSize: "var(--schrift-klein)" }}>
@@ -389,7 +389,7 @@ export default function VaultGate() {
           {fehler && <p data-test="gate-fehler" style={{ color: T.warn }}>{fehler}</p>}
           <button data-test="rett-ok" disabled={laeuft} onClick={lokalRetten}
             style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
-            {laeuft ? "Einen Moment …" : "🧯 Neues Passwort setzen und entsperren"}
+            {laeuft ? "Einen Moment …" : "Neues Passwort setzen und entsperren"}
           </button>
           <button onClick={() => { setPwVergessen(false); setFehler(""); }}
             style={{ width: "100%", background: "transparent", color: T.textLeise, marginTop: 8, fontSize: "var(--schrift-klein)" }}>

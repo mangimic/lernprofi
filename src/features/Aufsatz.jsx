@@ -12,9 +12,9 @@ import { bildVerkleinern } from "../foto.js";
    Nie Rechtschreib-Korrekturen am Stück, nie Noten. */
 
 export const TEXTARTEN = [
-  { key: "vorgang", name: "🧪 Vorgangsbeschreibung", hinweis: "Reihenfolge · Zuerst/Dann/Danach · Präsens" },
-  { key: "erlebnis", name: "🌟 Erlebniserzählung", hinweis: "Einleitung · Höhepunkt · Schluss" },
-  { key: "bild", name: "🖼️ Bildergeschichte", hinweis: "Bilder der Reihe nach · Namen · Schluss-Satz" },
+  { key: "vorgang", name: "Vorgangsbeschreibung", hinweis: "Reihenfolge · Zuerst/Dann/Danach · Präsens" },
+  { key: "erlebnis", name: "Erlebniserzählung", hinweis: "Einleitung · Höhepunkt · Schluss" },
+  { key: "bild", name: "Bildergeschichte", hinweis: "Bilder der Reihe nach · Namen · Schluss-Satz" },
 ];
 
 export default function Aufsatz() {
@@ -84,21 +84,21 @@ export default function Aufsatz() {
 
         {!freigabe ? (
           <p data-test="aufsatz-freigabe-hinweis" style={{ margin: 0, color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-            📸 Schreib deinen Aufsatz ruhig fertig! Leos Aufsatz-Check (Foto prüfen)
+            Schreib deinen Aufsatz ruhig fertig! Leos Aufsatz-Check (Foto prüfen)
             können deine Eltern im Elternbereich freischalten.
           </p>
         ) : ki?.laden ? (
-          <p data-test="aufsatz-laden" style={{ margin: 0, color: T.textLeise }}>🦁 Leo liest deinen Aufsatz …</p>
+          <p data-test="aufsatz-laden" style={{ margin: 0, color: T.textLeise }}>Leo liest deinen Aufsatz …</p>
         ) : ki?.fehler ? (
           <>
             <p data-test="aufsatz-fehler" style={{ margin: "0 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-              {ki.fehler === "deckel" ? "🦁 Leos Budget ist für diesen Monat aufgebraucht – dein Aufsatz zählt trotzdem!"
-                : ki.fehler === "foto" ? "🦁 Das Foto konnte ich nicht öffnen – probier es nochmal."
-                : "🦁 Leo ist gerade nicht erreichbar – probier es später nochmal."}
+              {ki.fehler === "deckel" ? "Leos Budget ist für diesen Monat aufgebraucht – dein Aufsatz zählt trotzdem!"
+                : ki.fehler === "foto" ? "Das Foto konnte ich nicht öffnen – probier es nochmal."
+                : "Leo ist gerade nicht erreichbar – probier es später nochmal."}
             </p>
             <button data-test="aufsatz-nochmal" onClick={() => setKi(null)}
               style={{ width: "100%", background: T.weich, color: T.text, fontWeight: 700 }}>
-              🔁 Nochmal versuchen
+              Nochmal versuchen
             </button>
           </>
         ) : ki ? (
@@ -110,7 +110,7 @@ export default function Aufsatz() {
             {ki.offen < ki.sterne.length ? (
               <button data-test="aufsatz-weiter" className="bw-knopf mut-weiter"
                 onClick={() => setKi({ ...ki, offen: ki.offen + 1 })}>
-                💬 Weiter
+                Weiter
               </button>
             ) : (
               <>
@@ -138,20 +138,20 @@ export default function Aufsatz() {
           <>
             {schonHeute && (
               <p data-test="aufsatz-heute-fertig" style={{ margin: "0 0 8px", color: T.ok, fontWeight: 700 }}>
-                🎉 Heute schon einen Aufsatz geprüft! Noch einer geht – Münze gab es schon.
+                Heute schon einen Aufsatz geprüft! Noch einer geht – Münze gab es schon.
               </p>
             )}
             <label data-test="aufsatz-foto-label" style={{
               display: "block", textAlign: "center", background: T.primaer, color: T.primaerText,
               fontWeight: 700, borderRadius: T.radiusKlein, padding: "14px 12px", cursor: "pointer",
             }}>
-              📸 Foto von meinem Aufsatz machen
+              Foto von meinem Aufsatz machen
               <input data-test="aufsatz-foto" type="file" accept="image/*" capture="environment"
                 style={{ display: "none" }}
                 onChange={(e) => { fotoPruefen(e.target.files?.[0]); e.target.value = ""; }} />
             </label>
             <p style={{ margin: "8px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-              💡 Eine Seite pro Foto, Blatt gerade, gutes Licht.
+              Eine Seite pro Foto, Blatt gerade, gutes Licht.
             </p>
           </>
         )}

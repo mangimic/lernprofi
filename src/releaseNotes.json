@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-109",
+    "version": "0.84.2",
+    "datum": "2026-11-12",
+    "titel": "Ruhige Bühne, Etappe 3",
+    "entries": [
+      {
+        "type": "verbessert",
+        "text": "🎨 Dritte Etappe: Elternbereich, Wochenplan, Sperrbildschirm, Kompass, Aufsatz-Check, Schreib-Training, Karteikasten, Spielhalle-Ergebnisse, Einstufung und Vorgangsbeschreibung kommen ohne schmückende Emojis aus. Coach Leo spricht in den Spielen mit seiner Marke statt mit dem Löwen-Emoji. Fachliche Zeichen bleiben: Ampeln im Plan, Fortschrittspunkte im Sudoku, Frage und Lösung auf den Druckkarten."
+      }
+    ]
+  },
+  {
     "id": "rn-108",
     "version": "0.84.1",
     "datum": "2026-11-12",

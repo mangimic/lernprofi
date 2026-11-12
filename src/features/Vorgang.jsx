@@ -9,7 +9,7 @@ import { missionsOpts } from "../calc/tagesform.js";
 
 /* 📝 Vorgangsbeschreibung – originalgetreu aus der Alt-App:
    Ablauf wählen (7 Themen), Grundlagen lesen, drei Übungs-Spiele
-   (🧩 Ordnen, 🚦 Satzanfänge, 🧺 Zutaten-Check), druckbares
+   (Ordnen, Satzanfänge, Zutaten-Check), druckbares
    Arbeitsblatt (Schreiben passiert MIT DER HAND auf Papier),
    Muster-Lösung hinter der Fleiß-Hürde (3 Versuche + 3 Schritte)
    und der Selbst-Check nach den Schul-Kriterien.
@@ -95,7 +95,7 @@ export default function Vorgang({ zurueck }) {
   const Ablauf = () => (
     <>
       <div style={karte}>
-        <h2 style={{ marginTop: 0 }}>📋 Ablauf wählen</h2>
+        <h2 style={{ marginTop: 0 }}>Ablauf wählen</h2>
         <p style={{ color: T.textLeise }}>Wähle, worüber du eine Vorgangsbeschreibung schreibst.</p>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
           {Object.entries(REZEPTE).map(([key, rz]) => (
@@ -154,8 +154,8 @@ export default function Vorgang({ zurueck }) {
           <h3 style={{ marginTop: 0 }}>⭐ Profi-Ziele (Klasse 4)</h3>
           <p style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px", margin: 0, lineHeight: 1.6 }}>
             📏 Schreibe <b>mindestens 5 Schritte</b> – genau und in der richtigen <b>Reihenfolge</b>.<br />
-            🧰 Nenne <b>genaue Mengen und Hilfsmittel</b> (z. B. „zwei Esslöffel“, „eine scharfe Schere“).<br />
-            🔤 Benutze <b>Fachbegriffe</b> und schreibe sachlich in der <b>man-Form</b> (z. B. „Man nimmt …“).<br />
+            Nenne <b>genaue Mengen und Hilfsmittel</b> (z. B. „zwei Esslöffel“, „eine scharfe Schere“).<br />
+            Benutze <b>Fachbegriffe</b> und schreibe sachlich in der <b>man-Form</b> (z. B. „Man nimmt …“).<br />
             🔗 Verbinde Sätze mit <b>Bindewörtern</b>: <i>zuerst, danach, sobald, damit, zum Schluss</i>.<br />
             ✅ <b>Lies am Ende alles noch einmal</b> und prüfe die Reihenfolge.
           </p>
@@ -163,7 +163,7 @@ export default function Vorgang({ zurueck }) {
       )}
       <div style={karte}>
         <p style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px" }}>
-          💡 Merke: <b>Ein Schritt = ein ganzer Satz.</b> Schreibe in der <b>{profi ? "man-Form" : "Ich-Form"}</b> und setze am Ende einen <b>Punkt</b>.
+          Merke: <b>Ein Schritt = ein ganzer Satz.</b> Schreibe in der <b>{profi ? "man-Form" : "Ich-Form"}</b> und setze am Ende einen <b>Punkt</b>.
         </p>
         <button onClick={() => setTab("blatt")} style={primaer}>Weiter: Arbeitsblatt</button>
       </div>
@@ -189,7 +189,7 @@ export default function Vorgang({ zurueck }) {
     };
     return (
       <div style={karte}>
-        <h3 style={{ marginTop: 0 }}>🧩 Schritte ordnen</h3>
+        <h3 style={{ marginTop: 0 }}>Schritte ordnen</h3>
         <p style={{ color: T.textLeise }}>{r.emoji} {r.name} · Tippe die Schritte in der <b>richtigen Reihenfolge</b> an.</p>
         <PfadSVG total={total} done={o.next} />
         {!o.fertig && <p style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "8px 12px" }}>Welcher Schritt kommt als <b>{o.next + 1}.</b>?</p>}
@@ -211,9 +211,9 @@ export default function Vorgang({ zurueck }) {
         {o.fertig && (
           <>
             <p data-test="ord-ergebnis" style={{ color: T.ok, fontWeight: 700 }}>
-              🎉 Alle {total} Schritte geordnet – {o.ersteOk} von {total} direkt richtig! 🪙 +1 Münze
+              Alle {total} Schritte geordnet – {o.ersteOk} von {total} direkt richtig! 🪙 +1 Münze
             </p>
-            <button data-test="ord-nochmal" onClick={ordnenStart} style={primaer}>🔁 Nochmal (neu gemischt)</button>
+            <button data-test="ord-nochmal" onClick={ordnenStart} style={primaer}>Nochmal (neu gemischt)</button>
           </>
         )}
       </div>
@@ -246,17 +246,17 @@ export default function Vorgang({ zurueck }) {
     if (s.fertig) {
       return (
         <div style={karte}>
-          <h3 style={{ marginTop: 0 }}>🚦 Satzanfänge</h3>
+          <h3 style={{ marginTop: 0 }}>Satzanfänge</h3>
           <p data-test="anf-ergebnis" style={{ color: T.ok, fontWeight: 700 }}>
-            🎉 Alle {total} Sätze geschafft – {s.ersteOk} von {total} richtig! 🪙 +1 Münze
+            Alle {total} Sätze geschafft – {s.ersteOk} von {total} richtig! 🪙 +1 Münze
           </p>
-          <button data-test="anf-nochmal" onClick={anfangStart} style={primaer}>🔁 Nochmal</button>
+          <button data-test="anf-nochmal" onClick={anfangStart} style={primaer}>Nochmal</button>
         </div>
       );
     }
     return (
       <div style={karte}>
-        <h3 style={{ marginTop: 0 }}>🚦 Satzanfänge</h3>
+        <h3 style={{ marginTop: 0 }}>Satzanfänge</h3>
         <p style={{ color: T.textLeise }}>{r.emoji} {r.name} · Satz {s.i + 1} von {total}</p>
         <PfadSVG total={total} done={s.i} current={s.i} />
         <p style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "10px 12px", fontWeight: 600 }}>
@@ -320,7 +320,7 @@ export default function Vorgang({ zurueck }) {
     const alle = s.geprueft && s.karten.every((k, i) => (k.echt && s.sel.includes(i)) || (!k.echt && !s.sel.includes(i)));
     return (
       <div style={karte}>
-        <h3 style={{ marginTop: 0 }}>🧺 Zutaten-Check</h3>
+        <h3 style={{ marginTop: 0 }}>Zutaten-Check</h3>
         <p style={{ color: T.textLeise }}>{r.emoji} {r.name} · Packe ein, was du <b>wirklich brauchst</b> – aber nur das!</p>
         <div style={{ textAlign: "center", fontSize: 34, margin: "2px 0" }}>🧺</div>
         <PfadSVG total={nEcht} done={gefunden} />
@@ -345,10 +345,10 @@ export default function Vorgang({ zurueck }) {
         {s.geprueft ? (
           <>
             <p data-test="zut-ergebnis" style={{ color: alle ? T.ok : T.warn, fontWeight: 700 }}>
-              {alle ? "Perfekt eingepackt! 🌟 Alles Nötige ist im Korb – und nichts Falsches. 🪙 +1 Münze"
+              {alle ? "Perfekt eingepackt! Alles Nötige ist im Korb – und nichts Falsches. 🪙 +1 Münze"
                 : "Schau dir die Karten an: ✅ richtig eingepackt · 😮 vergessen · ❌ gehört nicht dazu. 🪙 +1 Münze"}
             </p>
-            <button data-test="zut-nochmal" onClick={zutatenStart} style={primaer}>🔁 Nochmal (neu gemischt)</button>
+            <button data-test="zut-nochmal" onClick={zutatenStart} style={primaer}>Nochmal (neu gemischt)</button>
           </>
         ) : (
           <button data-test="zut-pruefen" disabled={!s.sel.length} onClick={pruefen} style={{ ...primaer, marginTop: 10 }}>Prüfen</button>
@@ -371,7 +371,7 @@ export default function Vorgang({ zurueck }) {
     return (
       <>
         <div style={karte} className="kein-druck">
-          <h3 style={{ marginTop: 0 }}>🖨️ Arbeitsblatt</h3>
+          <h3 style={{ marginTop: 0 }}>Arbeitsblatt</h3>
           <p>Drucke das Blatt aus und schreibe die Vorgangsbeschreibung <b>mit der Hand</b>.</p>
           <button data-test="vg-drucken" onClick={drucken} style={primaer}>Arbeitsblatt drucken</button>
           <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)", marginBottom: 0 }}>
@@ -423,7 +423,7 @@ export default function Vorgang({ zurueck }) {
     return (
       <>
         <div style={karte}>
-          <h3 style={{ marginTop: 0 }}>🔑 Lösung</h3>
+          <h3 style={{ marginTop: 0 }}>Lösung</h3>
           <p>Die Lösung zeigt dir, wie ein guter Text aussehen kann. Aber <b>erst selbst versuchen!</b> 💪</p>
           <p style={{ color: T.textLeise }}><b>1)</b> Hast du es selbst versucht? Tippe nach jedem Versuch:</p>
           <button data-test="vg-versuch" onClick={() => setTries(Math.min(3, tries + 1))} style={weich}>Ich habe es versucht</button>
@@ -439,13 +439,13 @@ export default function Vorgang({ zurueck }) {
             {frei ? "Super, du hast fleißig geübt! Jetzt darfst du die Lösung ansehen. 🌟" : `Fast! Du brauchst noch: ${fehlt.join(" und ")}.`}
           </p>
           <button data-test="vg-loesung-zeigen" disabled={!frei} onClick={() => setLoesungOffen(true)} style={primaer}>
-            {frei ? "Lösung anzeigen" : "🔒 Lösung anzeigen"}
+            {frei ? "Lösung anzeigen" : "Lösung anzeigen"}
           </button>
         </div>
         {loesungOffen && (
           <div style={karte} data-test="vg-loesung">
             <h3 style={{ marginTop: 0 }}>So kann ein guter Text aussehen</h3>
-            <h4 style={{ margin: "4px 0" }}>✏️ {r.titel}</h4>
+            <h4 style={{ margin: "4px 0" }}>{r.titel}</h4>
             <p><b>Das brauche ich:</b> {r.zutaten}</p>
             <ol style={{ paddingLeft: 20, lineHeight: 1.6 }}>
               {r.loesung.map((s, i) => <li key={i} style={{ marginBottom: 6 }}>{s}</li>)}
@@ -496,8 +496,8 @@ export default function Vorgang({ zurueck }) {
   };
 
   /* ---------- Gerüst ---------- */
-  const UTABS = [["grundlagen", "📖 Grundlagen"], ["ordnen", "🧩 Ordnen"], ["anfang", "🚦 Satzanfänge"], ["zutaten", "🧺 Zutaten"]];
-  const TABS = [["ablauf", "📋 Ablauf"], ["ueben", "✏️ Üben"], ["blatt", "🖨️ Blatt"], ["loesung", "🔑 Lösung"], ["selbst", "🌸 Selbst-Check"]];
+  const UTABS = [["grundlagen", "Grundlagen"], ["ordnen", "Ordnen"], ["anfang", "Satzanfänge"], ["zutaten", "Zutaten"]];
+  const TABS = [["ablauf", "Ablauf"], ["ueben", "Üben"], ["blatt", "Blatt"], ["loesung", "Lösung"], ["selbst", "🌸 Selbst-Check"]];
   return (
     <div data-test="vorgang">
       <div style={{ ...karte, paddingBottom: 8 }} className="kein-druck">

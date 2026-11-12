@@ -36,6 +36,21 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.84.2: Ruhige Bühne, Etappe 3 – restliche Oberflächen ohne Deko-Emojis ----------
+console.log("== v0.84.2: Ruhige Bühne Etappe 3 ==");
+test("v0.84.2: Eltern/Wochenplan/Sperrbildschirm ohne Deko-Emojis, Leo-Marke in Sprechblasen, Schwierigkeit als Text", (() => {
+  const el = quelle("src/features/Eltern.jsx");
+  const css = quelle("src/styles/tokens.css");
+  return versionMindestens("0.84.2")
+    && !el.includes("🎟️ Neuen Einladungs-Code") && !el.includes('"🔧 ') && !/>🗓️ /.test(quelle("src/features/Wochenplan.jsx"))
+    && !css.includes('content: "🦁 "') && css.includes("data:image/svg+xml") // Leo-Marke als Sprechblasen-Zeichen
+    && !quelle("src/spiele/mutmacher.js").includes('mut-kopf">🦁')
+    && quelle("src/features/Einstufung.jsx").includes('" · leicht" : " · schwer"')
+    // fachliche Zeichen bleiben
+    && quelle("src/features/Sudoku.jsx").includes('"🟢"') && quelle("src/features/Karteikarten.jsx").includes("✅ Lösung")
+    && releaseNoteVorhanden("rn-109");
+})());
+
 // ---------- v0.84.1: Ruhige Bühne, Etappe 2 – Startseiten-Karten, Übungs-Auswahl, Überschriften ohne Emoji ----------
 console.log("== v0.84.1: Ruhige Bühne Etappe 2 ==");
 test("v0.84.1: Startseite, Übungs-Auswahl und Kopfzeilen ohne Emojis, Zeichen je Fach", (() => {
