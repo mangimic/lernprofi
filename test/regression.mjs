@@ -36,6 +36,18 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.85.1: Freigabe vorbereitet – Cloudflare bleibt, Access geht ----------
+console.log("== v0.85.1: Freigabe-Checkliste mit Server-Stand ==");
+test("v0.85.1: Checkliste nennt geprüften Stand, Access-Anwendung, Reihenfolge und Domain-Schritt", (() => {
+  const ck = quelle("docs/FREIGABE-CHECKLISTE.md");
+  return versionMindestens("0.85.1")
+    && ck.includes("## Stand 12.11.2026") && ck.includes("`SESSION_GEHEIM` fehlt") && ck.includes("kein `konto:*`")
+    && ck.includes("„lernprofi - Cloudflare Workers“") && ck.includes("Allow → Everyone")
+    && ck.includes("Erst NACH Schritt 3 und 4") && ck.includes("## 7. Optional: eigene Domain")
+    && quelle("src/features/Eltern.jsx").includes("location.origin}/?einladung=") // Einladungs-Link folgt der Domain
+    && releaseNoteVorhanden("rn-111");
+})());
+
 // ---------- v0.85: Hub „Training" + Start-Diät + Kopf-Symbole ----------
 console.log("== v0.85: Hub Training ==");
 test("v0.85: Navigationspunkt Training mit Kacheln, Startseite ohne Einstiegs-Liste, Hell/Dunkel + Neu? im Kopf", (() => {

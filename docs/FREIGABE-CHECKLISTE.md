@@ -3,6 +3,28 @@
 Reihenfolge einhalten – dann gibt es keinen Moment, in dem ein Gerät
 ausgesperrt ist. Cloudflare Access bleibt bis Schritt 5 als zweiter Zaun an.
 
+## Stand 12.11.2026 (per Cloudflare-API geprüft, nur lesend)
+
+| Punkt | Befund |
+|---|---|
+| Worker-Bindings | `ASSETS`, `TRESOR` (KV), Variable `lernprofiapi` – **`SESSION_GEHEIM` fehlt** → Anmelden/Verknüpfen antwortet 503 |
+| KV `lernprofi-tresor` | 2 Tresor-Hüllen, 3 Dokumente, 1 KI-Zähler, 2 unbenutzte Einladungs-Codes, **kein `konto:*`** → Stamm-Konto noch nicht verknüpft |
+| Access-Anwendung | „lernprofi - Cloudflare Workers“ (Zero Trust → Access → Applications), Sitzung 24 h, Policy **Allow → Everyone** |
+| Live-URL | `lernprofi.<subdomain>.workers.dev` leitet auf den Access-Login um; keine eigene Domain am Worker |
+
+⚠️ Die Policy „Everyone“ heißt: Jede Person, die den Access-Login mit
+irgendeiner E-Mail-Adresse besteht, bekommt den Header
+`Cf-Access-Authenticated-User-Email` – und damit laut `kontoVonAnfrage()`
+das **Stamm-Konto** (Einladungs-Codes erzeugen, Tresor-Hüllen lesen und
+überschreiben; Inhalte bleiben Chiffrat). Zwei Auswege, einer reicht:
+Policy auf eure E-Mail-Adressen einschränken, oder zügig Schritte 1, 3, 4
+erledigen und Access abschalten (Schritt 5) – danach kommt der Header nie
+mehr an und Stamm gibt es nur über die verknüpfte Sitzung.
+
+Das Setzen von `SESSION_GEHEIM` aus der Entwicklungsumgebung heraus ist
+bewusst gesperrt (Secret-Store-Schreibzugriff) – Schritt 1 bleibt ein
+Handgriff im Dashboard.
+
 ## 1. Einmalige Server-Vorbereitung
 
 - [ ] Sitzungs-Secret `SESSION_GEHEIM` anlegen – einer von zwei Wegen:
@@ -41,8 +63,13 @@ ausgesperrt ist. Cloudflare Access bleibt bis Schritt 5 als zweiter Zaun an.
 
 ## 5. Cloudflare Access abschalten
 
-- [ ] Im Cloudflare-Dashboard (Zero Trust) die Access-Anwendung für die
-  Worker-Domain entfernen/deaktivieren.
+- [ ] Im Cloudflare-Dashboard: Zero Trust → Access → Applications →
+  „lernprofi - Cloudflare Workers“ → Delete. (Die zweite Anwendung
+  „mangierierp - Cloudflare Pages“ gehört zur alten Pages-Seite und kann
+  bleiben.) Erst NACH Schritt 3 und 4 – sonst gibt es kein Konto, das
+  Einladungs-Codes erzeugen darf.
+- [ ] Gegenprobe ohne Anmeldung (z. B. privates Fenster): die Worker-URL
+  zeigt direkt die App, `/api/konto` antwortet `{"angemeldet":false}`.
 - [ ] Gegenprobe auf einem eurer Geräte: App lädt, Auto-Sicherung läuft
   (Elternbereich → Geräte-Abgleich „Verbunden"), Leo antwortet.
   Falls ein Gerät 401 meldet: dort einfach im Familien-Konto anmelden.
@@ -56,6 +83,15 @@ ausgesperrt ist. Cloudflare Access bleibt bis Schritt 5 als zweiter Zaun an.
   Familie: „Wir haben schon ein Familien-Konto → Anmelden".
 - [ ] Der Familie empfehlen: Wiederherstellungs-Code sofort erzeugen und
   ausdrucken (Elternbereich → Konto & Daten).
+
+## 7. Optional: eigene Domain (nimmt die größte Hürde für Eltern)
+
+- [ ] Domain registrieren (z. B. über Cloudflare Registrar, ~10 €/Jahr) und
+  am Worker als Custom Domain eintragen: Workers & Pages → „lernprofi“ →
+  Settings → Domains & Routes → Add → Custom Domain.
+- [ ] Danach erzeugt „Einladung kopieren“ automatisch Links mit der neuen
+  Adresse (die App nutzt `location.origin`).
+- [ ] Datenschutzerklärung/Impressum auf die neue Adresse prüfen.
 
 ## Rückweg (falls nötig)
 

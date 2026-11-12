@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-111",
+    "version": "0.85.1",
+    "datum": "2026-11-12",
+    "titel": "Freigabe vorbereitet: Cloudflare bleibt, Access geht",
+    "entries": [
+      {
+        "type": "verbessert",
+        "text": "🔓 Entscheidung festgehalten: Die App bleibt auf Cloudflare, der Access-Login aus der Bauzeit wird abgeschaltet – danach sehen Familien nur noch die App mit ihrem eigenen Familien-Konto."
+      },
+      {
+        "type": "verbessert",
+        "text": "📋 Freigabe-Checkliste mit dem geprüften Server-Stand (fehlendes Sitzungs-Secret, noch kein verknüpftes Stamm-Konto, Access-Policy „Everyone“) und der genauen Reihenfolge; optionaler Schritt „eigene Domain“ für kürzere Einladungs-Links."
+      }
+    ]
+  },
+  {
     "id": "rn-110",
     "version": "0.85.0",
     "datum": "2026-11-12",
