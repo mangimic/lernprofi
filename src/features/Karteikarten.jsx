@@ -18,7 +18,7 @@ function Zelle({ karte, seite }) {
   return (
     <div className={`kk-zelle ${karte.fach}`} data-test={seite === "vs" ? "karte-vs" : "karte-rs"}>
       <div className="kk-kopf">
-        {deko.emoji} {deko.name}{karte.typ === "schreiben" ? " · ✍️ Schreib-Karte" : ""}
+        {deko.emoji} {deko.name}{karte.typ === "schreiben" ? " · Schreib-Karte" : ""}
         <span className={seite === "vs" ? "kk-art aufgabe" : "kk-art loesung"}>
           {seite === "vs" ? "❓ Aufgabe" : "✅ Lösung"}
         </span>
@@ -40,7 +40,7 @@ function Zelle({ karte, seite }) {
   );
 }
 
-const FACH_CHIP = { 1: "📥 Fach 1", 2: "📦 Fach 2", 3: "🏆 Fach 3" };
+const FACH_CHIP = { 1: "Fach 1", 2: "📦 Fach 2", 3: "Fach 3" };
 
 export default function Karteikarten() {
   const { data, logChange, T, navTo, tresor } = useApp();
@@ -121,7 +121,7 @@ export default function Karteikarten() {
           erst LAUT antworten, dann umdrehen.
         </p>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          {[["alle", "Alle Karten"], ["deutsch", "📖 nur Deutsch"], ["mathe", "🔢 nur Mathe"]].map(([k, label]) => (
+          {[["alle", "Alle Karten"], ["deutsch", "nur Deutsch"], ["mathe", "nur Mathe"]].map(([k, label]) => (
             <button key={k} data-test={`karten-wahl-${k}`} onClick={() => setWahl(k)}
               style={{ flex: "1 1 120px", fontWeight: 700, background: wahl === k ? T.primaer : T.weich, color: wahl === k ? T.primaerText : T.text }}>
               {label}
@@ -129,12 +129,12 @@ export default function Karteikarten() {
           ))}
           <button data-test="karten-drucken" onClick={() => window.print()}
             style={{ flex: "2 1 200px", fontWeight: 700, background: T.ok, color: "#fff" }}>
-            🖨️ Jetzt drucken ({seiten.length * 2} Seiten · {karten.length} Karten)
+            Jetzt drucken ({seiten.length * 2} Seiten · {karten.length} Karten)
           </button>
           {tresor.elternModus && (
             <button data-test="karten-verwalten" onClick={() => setVerwalten(!verwalten)}
               style={{ flex: "1 1 160px", fontWeight: 700, background: verwalten ? T.primaer : T.weich, color: verwalten ? T.primaerText : T.text }}>
-              ⚙️ Karten verwalten
+              Karten verwalten
             </button>
           )}
         </div>
@@ -142,7 +142,7 @@ export default function Karteikarten() {
           <div data-test="karten-verwaltung" style={{ marginTop: 12 }}>
             <p data-test="karten-zaehler" style={{ margin: "0 0 8px", fontWeight: 700, fontSize: "var(--schrift-klein)" }}>
               {aktiv.length} aktiv · {aus.length} ausgeblendet · {eigene.length} eigene ·
-              Kasten-Stand je Karte: 📥 täglich / 📦 alle 3 Tage / 🏆 sitzt
+              Kasten-Stand je Karte: täglich / 📦 alle 3 Tage / sitzt
             </p>
             <div style={{ maxHeight: 340, overflowY: "auto", border: `1px solid ${T.rand}`, borderRadius: T.radiusKlein, padding: "6px 10px" }}>
               {verwaltbar.map((k) => (
@@ -167,8 +167,8 @@ export default function Karteikarten() {
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
               <select data-test="eigene-fach" value={neu.fach} onChange={(e) => setNeu({ ...neu, fach: e.target.value })}
                 style={{ minHeight: "var(--touch)", borderRadius: T.radiusKlein, border: `1px solid ${T.rand}`, background: T.grund, color: T.text, padding: "0 8px" }}>
-                <option value="deutsch">📖 Deutsch</option>
-                <option value="mathe">🔢 Mathe</option>
+                <option value="deutsch">Deutsch</option>
+                <option value="mathe">Mathe</option>
               </select>
               <input data-test="eigene-vs" type="text" maxLength={80} placeholder="Vorderseite (Frage / Lernwort)"
                 value={neu.vs} onChange={(e) => setNeu({ ...neu, vs: e.target.value })}

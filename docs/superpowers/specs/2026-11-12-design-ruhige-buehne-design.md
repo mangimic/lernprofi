@@ -41,3 +41,14 @@ als Etappe 2, damit die Smoke-Tests schrittweise mitwandern.
 - Regression: ältere Checks per Alternative erweitern, neuer Block v0.84.
 - Vitest für `jetztDran()`.
 - Gates komplett grün vor jedem Merge.
+
+## Status (12.11.2026)
+
+| Etappe | Inhalt | Stand |
+|---|---|---|
+| 1 (v0.84.0) | Tokens, Nunito, Zeichensatz, Shell, Tagesbühne, Übung, Spielhalle, Erst-Start | ✅ gemergt |
+| 2 (v0.84.1) | Startseiten-Karten, Übungs-Auswahl mit Fach-Zeichen, Kopfzeilen aller Bildschirme | ✅ gemergt |
+| 3 (v0.84.2) | Deko-Emoji-Präfixe in Eltern, Wochenplan, Sperrbildschirm, Kompass, Aufsatz, Schrift, Karteikasten, Spielhalle, Einstufung, Vorgang; Leo-Marke in Sprechblasen | ✅ |
+| 4 (offen) | Emojis in DATEN: Plan-Bausteine (`BAUSTEINE.emoji`), Eltern-Gruppen, Gesprächsimpulse, Welten-Knöpfe (`THEMEN_WELTEN.emoji`), Aufgaben-Bereiche (`emoji`-Felder in calc) → Zeichen-Zuordnung je Schlüssel; Illustrationen je Welt; Bewegung mit Bedeutung; WCAG-Audit | ⏳ |
+
+Bewusst behalten: fachliche Zeichen (Ampeln 🔴🟡🟢, Fortschrittspunkte 🟢⚪, ❓/✅ auf Druckkarten, Schachfiguren), Emojis in Aufgabentexten und Release-Notes.

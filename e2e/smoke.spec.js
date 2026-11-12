@@ -790,9 +790,9 @@ test("Einstufungstest: adaptiv testen, Stufen einstellen, Trainingsplan führt z
   };
 
   // Bereich 1 (Grundwortschatz): 2 leichte richtig → 2 schwere erscheinen; davon 1 falsch → Stufe 2
-  await expect(page.getByTestId("einstufung-frage")).toContainText("🌱 leicht");
+  await expect(page.getByTestId("einstufung-frage")).toContainText("leicht");
   await richtig(); await richtig();
-  await expect(page.getByTestId("einstufung-frage")).toContainText("🔥 schwer");
+  await expect(page.getByTestId("einstufung-frage")).toContainText("schwer");
   await richtig(); await falsch();
   // Bereich 2 (das/dass): 1 Fehler bei den leichten → Stufe 1, keine schweren
   await expect(page.getByTestId("einstufung-frage")).toContainText("Bereich 2 von 6");

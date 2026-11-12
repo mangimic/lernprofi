@@ -97,18 +97,18 @@ export default function Sudoku() {
       <div data-test="sudoku-fertig" style={karte}>
         <h2 style={{ marginTop: 0 }}>Sudoku gelöst!</h2>
         <p>
-          {fertig.fehler === 0 ? "🏆 Fehlerfrei – ganz stark!" : `Du hast dich ${fertig.fehler}-mal korrigiert – genau so lernt man Sudoku.`}
+          {fertig.fehler === 0 ? "Fehlerfrei – ganz stark!" : `Du hast dich ${fertig.fehler}-mal korrigiert – genau so lernt man Sudoku.`}
         </p>
         {fertig.aufgestiegen ? (
           <p data-test="sudoku-aufstieg" style={{ fontWeight: 800 }}>
-            ⬆️ Neue Stufe: {naechste.name} ({naechste.groesse}×{naechste.groesse}, Zahlen {naechste.zahlen})!
+            Neue Stufe: {naechste.name} ({naechste.groesse}×{naechste.groesse}, Zahlen {naechste.zahlen})!
           </p>
         ) : (
           <p style={{ color: T.textLeise }}>Fortschritt zur nächsten Stufe: {punkte}</p>
         )}
         <button data-test="sudoku-nochmal" onClick={neuesRaetsel}
           style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
-          🧩 Nächstes Rätsel
+          Nächstes Rätsel
         </button>
         <button onClick={() => navTo("start")}
           style={{ width: "100%", marginTop: 8, background: "transparent", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
@@ -178,7 +178,7 @@ export default function Sudoku() {
         </div>
         {hinweis && (
           <p data-test="sudoku-hinweis" style={{ margin: "10px 0 0", fontWeight: 700, fontSize: "var(--schrift-klein)" }}>
-            💡 {hinweis}
+            {hinweis}
           </p>
         )}
         {/* Bewusst rechts, weit weg von der Zahlenleiste (links): ein

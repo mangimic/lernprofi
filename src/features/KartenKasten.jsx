@@ -80,7 +80,7 @@ export default function KartenKasten() {
           <h2 style={{ marginTop: 0 }}>Runde geschafft!</h2>
           <p><b>{runde.gewusst} von {runde.gesamt}</b> gewusst · 🪙 +1 Münze (jetzt {data.lernstand.muenzen})</p>
           <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-            🏆 Im „sitzt!“-Fach liegen jetzt <b>{kastenZaehler(alleKarten, data.lernstand.karteikasten.stand)[3]}</b> Karten.
+            Im „sitzt!“-Fach liegen jetzt <b>{kastenZaehler(alleKarten, data.lernstand.karteikasten.stand)[3]}</b> Karten.
           </p>
           {faelligeKarten(alleKarten, data.lernstand.karteikasten.stand, heute).length > 0 && (
             <button data-test="kasten-nochmal" onClick={starten}
@@ -147,12 +147,12 @@ export default function KartenKasten() {
                     🧠 <b>Merkhilfe:</b> {karte.merk}
                   </p>
                   <p data-test="kasten-eingabe-ergebnis" style={{ fontWeight: 800, margin: "0 0 10px", color: geprueft.alle ? T.ok : "var(--warn)" }}>
-                    {geprueft.alle ? "🎉 Alles richtig!" : "Schau dir die Korrektur in Ruhe an!"}
+                    {geprueft.alle ? "Alles richtig!" : "Schau dir die Korrektur in Ruhe an!"}
                   </p>
                   <button type="button" data-test="kasten-eingabe-weiter"
                     onClick={() => (wiederholung ? weiter(runde) : werten(geprueft.alle))}
                     style={{ width: "100%", background: geprueft.alle ? T.ok : T.primaer, color: "#fff", fontWeight: 700 }}>
-                    {wiederholung ? "✔️ Weiter" : geprueft.alle ? "🙂 Weiter – ein Fach vor!" : "🤔 Weiter – die Karte kommt nochmal"}
+                    {wiederholung ? "✔️ Weiter" : geprueft.alle ? "Weiter – ein Fach vor!" : "🤔 Weiter – die Karte kommt nochmal"}
                   </button>
                 </>
               )}
@@ -160,7 +160,7 @@ export default function KartenKasten() {
           ) : !runde.offen ? (
             <>
               <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-                {karte.typ === "schreiben" ? "✍️ Schreib das Wort auf ein Blatt – dann umdrehen!" : "Sag die Antwort LAUT – dann umdrehen!"}
+                {karte.typ === "schreiben" ? "Schreib das Wort auf ein Blatt – dann umdrehen!" : "Sag die Antwort LAUT – dann umdrehen!"}
               </p>
               <button data-test="karte-umdrehen" onClick={() => setRunde({ ...runde, offen: true })}
                 style={{ width: "100%", background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
@@ -187,7 +187,7 @@ export default function KartenKasten() {
                   </button>
                   <button data-test="karte-gewusst" onClick={() => werten(true)}
                     style={{ flex: 1, height: "auto", padding: "10px 6px", background: T.ok, color: "#fff", fontWeight: 700 }}>
-                    🙂 Gewusst!<br /><small style={{ fontWeight: 400 }}>ein Fach weiter</small>
+                    Gewusst!<br /><small style={{ fontWeight: 400 }}>ein Fach weiter</small>
                   </button>
                 </div>
               )}
@@ -230,11 +230,11 @@ export default function KartenKasten() {
           </button>
         ) : (
           <p data-test="kasten-leer" style={{ margin: "12px 0 0", fontWeight: 700, color: T.ok }}>
-            🎉 Heute ist keine Karte fällig – alles im Rhythmus! Komm morgen wieder.
+            Heute ist keine Karte fällig – alles im Rhythmus! Komm morgen wieder.
           </p>
         )}
         <p style={{ margin: "10px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          Bisher {data.lernstand.karteikasten.runden} Runden gespielt · Papier-Version: Eltern → 🗃️ Karteikarten drucken.
+          Bisher {data.lernstand.karteikasten.runden} Runden gespielt · Papier-Version: Eltern → Karteikarten drucken.
         </p>
       </div>
       <button data-test="kasten-zurueck" onClick={() => navTo("start")}

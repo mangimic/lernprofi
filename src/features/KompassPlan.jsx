@@ -27,7 +27,7 @@ export default function KompassPlan() {
   const ziele = kompassTermine(termine, heute);
   const wochen = kompassWochen(heute, termine, data.lernstand.stufen);
   const montagHeute = wochen[0]?.montag;
-  const [uebernommen, setUebernommen] = useState(null); // 📅 Ergebnis der Fahrplan-Übernahme
+  const [uebernommen, setUebernommen] = useState(null); // Ergebnis der Fahrplan-Übernahme
 
   // 📝 Einmalig: die amtlichen Termine automatisch in den Plan übernehmen.
   const fehlen = ziele.length > 0 && !ziele[0].eingetragen;
@@ -61,7 +61,7 @@ export default function KompassPlan() {
       <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
         <h2 style={{ margin: "0 0 4px" }}>Kompass-Countdown</h2>
         {ziele.length === 0 ? (
-          <p style={{ margin: 0 }}>🌟 Gerade steht kein Kompass-Test an. Komm wieder, wenn es so weit ist!</p>
+          <p style={{ margin: 0 }}>Gerade steht kein Kompass-Test an. Komm wieder, wenn es so weit ist!</p>
         ) : (
           <>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "6px 0 8px" }}>
@@ -91,7 +91,7 @@ export default function KompassPlan() {
                 setUebernommen(erg);
               }}
               style={{ width: "100%", marginTop: 10, background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
-              📅 Fahrplan in meinen Wochenplan übernehmen
+              Fahrplan in meinen Wochenplan übernehmen
             </button>
             {uebernommen && (
               <p data-test="kp-in-plan-ergebnis" style={{ margin: "8px 0 0", fontWeight: 700, color: T.ok }}>
@@ -131,7 +131,7 @@ export default function KompassPlan() {
 
       {ziele.length > 0 && (
         <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
-          <b>🦁 Leos Tipps für die Wochen davor</b>
+          <b>Leos Tipps für die Wochen davor</b>
           <ul style={{ margin: "6px 0 0", paddingLeft: 20, lineHeight: 1.6 }}>
             <li>Lieber <b>jeden Tag 10 Minuten</b> als einmal eine Stunde – kleine Häppchen bleiben hängen.</li>
             <li>Die 🧪 <b>Generalprobe auf Papier</b> machst du mit einem echten Übungsheft: 45 Minuten, Timer stellen, danach gemeinsam anschauen.</li>

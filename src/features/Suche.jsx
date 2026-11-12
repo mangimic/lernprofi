@@ -35,7 +35,7 @@ export default function Suche({ zu }) {
       <div onClick={(ev) => ev.stopPropagation()}
         style={{ maxWidth: 480, width: "100%", background: T.karte, borderRadius: T.radius, padding: T.abstand }}>
         <form onSubmit={(e) => { e.preventDefault(); if (treffer.length) springen(treffer[0]); }}>
-          <input data-test="suche-eingabe" ref={feld} type="search" placeholder="🔍 Suchen … (Übung, Karte, Termin, Seite)"
+          <input data-test="suche-eingabe" ref={feld} type="search" placeholder="Suchen … (Übung, Karte, Termin, Seite)"
             value={frage} onChange={(e) => setFrage(e.target.value)} autoComplete="off"
             style={{ width: "100%", boxSizing: "border-box", minHeight: "var(--touch)", fontSize: "var(--schrift)",
               borderRadius: T.radiusKlein, border: `2px solid ${T.primaer}`, padding: "0 14px",

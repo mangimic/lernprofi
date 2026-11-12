@@ -87,7 +87,7 @@ export default function Doks() {
             </span>
             <button data-test={`dok-oeffnen-${d.id}`} onClick={() => oeffnen(d)} disabled={offenId === d.id}
               style={{ background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
-              {offenId === d.id ? "…" : "📖 Öffnen"}
+              {offenId === d.id ? "…" : "Öffnen"}
             </button>
             {tresor.elternModus && (
               <button data-test={`dok-weg-${d.id}`} onClick={() => loeschen(d)} aria-label={`${d.name} löschen`}
@@ -117,7 +117,7 @@ export default function Doks() {
             </select>
             <button data-test="dok-hochladen" onClick={hochladen} disabled={status?.art === "laeuft"}
               style={{ background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
-              🔒 Verschlüsselt hochladen
+              Verschlüsselt hochladen
             </button>
           </div>
           <p style={{ margin: "8px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>

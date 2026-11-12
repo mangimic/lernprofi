@@ -22,7 +22,7 @@ export function mutDialog(m, opts) {
   const bs = blasen.map((b, i) =>
     `<div class="bubble ${b.w}${b.sag ? " sag" : ""}${(!opts.alle && i > 0) ? " zu" : ""}" data-bi="${i}">${b.w === "kind" ? "🧒 " : ""}${b.sag ? "👉 <b>Deine Rolle – sag es laut und tippe:</b><br>" : ""}${b.t}</div>`).join("");
   return `<div class="mut-dialog" data-mental="${m.id}" data-test="mut-dialog">
-    <div class="mut-kopf">🦁 <b>Coach Leo</b> · Mutmacher — ${m.emoji} ${m.titel}</div>
+    <div class="mut-kopf"><b>Coach Leo</b> · Mutmacher — ${m.emoji} ${m.titel}</div>
     ${bs}
     ${opts.alle ? "" : `<button type="button" class="bw-knopf mut-weiter" data-test="mut-weiter">💬 Weiter</button>`}
   </div>`;
@@ -60,7 +60,7 @@ export function mutMini(m, rot) {
   if (!m) return "";
   const co = [m.trainieren, m.schluss][Math.abs(rot || 0) % 2];
   return `<div class="mut-dialog" data-mental="${m.id}">
-    <div class="mut-kopf">🦁 <b>Coach Leo</b> · Mutmacher — ${m.emoji} ${m.titel}</div>
+    <div class="mut-kopf"><b>Coach Leo</b> · Mutmacher — ${m.emoji} ${m.titel}</div>
     <div class="bubble coach">${co}</div>
     <div class="bubble kind">🧒 „${m.mut}“</div>
   </div>`;
@@ -71,7 +71,7 @@ export function mutKompakt(m, rot) {
   if (!m) return "";
   const v = [m.mut, m.punkt, m.mission];
   return `<div class="mut-dialog klein">
-    <div class="mut-kopf">🦁 Mutmacher</div>
+    <div class="mut-kopf">Mutmacher</div>
     <div class="bubble coach">${v[Math.abs(rot || 0) % v.length]}</div>
   </div>`;
 }

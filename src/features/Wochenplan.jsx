@@ -142,7 +142,7 @@ function TagSpalte({ idx, datum, heuteIdx, termine, bloecke, feste, ausfaelle, p
         {WOCHENTAGE[idx]} {datum.slice(8)}.{datum.slice(5, 7)}.{idx === heuteIdx ? " · heute" : ""} <span data-test={`ampel-${idx}`}>{ampel}</span>
       </div>
       <div style={{ color: T.textLeise, fontSize: "11.5px", marginBottom: 4, minHeight: 15 }}>
-        {frei ? `${frei.emoji} ${frei.name}` : schule ? `🏫 Schule ${SCHULE.jeTag?.[idx] || SCHULE.text}` : "🌞 schulfrei"}
+        {frei ? `${frei.emoji} ${frei.name}` : schule ? `🏫 Schule ${SCHULE.jeTag?.[idx] || SCHULE.text}` : "schulfrei"}
       </div>
       {schule && schuleAuf && (
         <div data-test={`schule-${idx}`} style={{
@@ -187,11 +187,11 @@ function TagSpalte({ idx, datum, heuteIdx, termine, bloecke, feste, ausfaelle, p
         );
       })}
       {p.lern > 0 && (
-        <div style={{ color: T.textLeise, fontSize: "12.5px" }}>⏱️ {p.lernMin} Min Lernen (10+5-Takt)</div>
+        <div style={{ color: T.textLeise, fontSize: "12.5px" }}>{p.lernMin} Min Lernen (10+5-Takt)</div>
       )}
       {p.hinweis && (
         <div data-test={`tag-hinweis-${idx}`} style={{ color: "#8a5a00", fontSize: "12.5px", marginTop: 4 }}>
-          🦁 {p.hinweis}
+          {p.hinweis}
         </div>
       )}
     </div>
@@ -257,7 +257,7 @@ function MonatsBlatt({ monat, setMonat, termine, wochenplanDoc, heute, oeffneWoc
       </div>
       <p data-test="kalender-ferien" style={{ margin: "10px 0 0", color: T.textLeise, fontSize: "12.5px" }}>
         Schuljahr {SCHULJAHR.name} (BW): {FERIEN_BW.map((f) => `${f.emoji} ${f.name} ${f.von.slice(8)}.${f.von.slice(5, 7)}.–${f.bis.slice(8)}.${f.bis.slice(5, 7)}.`).join(" · ")}
-        {" "}· 🎉 Ferien- und Feiertage sind ganztags planbar; bewegliche Ferientage trägt die Familie selbst ein.
+        {" "}· Ferien- und Feiertage sind ganztags planbar; bewegliche Ferientage trägt die Familie selbst ein.
       </p>
     </div>
   );
@@ -275,16 +275,16 @@ export default function Wochenplan() {
   const [montagAnzeige, setMontagAnzeige] = useState(() => wochenMontag(heute));
   const [ansicht, setAnsicht] = useState("woche"); // "woche" | "monat"
   const [monat, setMonat] = useState(() => ({ jahr: parseInt(heute.slice(0, 4), 10), monat: parseInt(heute.slice(5, 7), 10) }));
-  const [schuleAuf, setSchuleAuf] = useState(false); // 🏫 Vormittags-Stunden ein-/ausklappen
-  const [editor, setEditor] = useState(null); // ✏️ Baustein-Notiz: { id, notiz }
+  const [schuleAuf, setSchuleAuf] = useState(false); // Vormittags-Stunden ein-/ausklappen
+  const [editor, setEditor] = useState(null); // Baustein-Notiz: { id, notiz }
   const [festDialog, setFestDialog] = useState(null); // ❌ Ausfall-Frage für einen festen Termin
   const [verschieben, setVerschieben] = useState(null); // 📍 Baustein-Id, die ein neues Fenster sucht
   const [kindTermin, setKindTermin] = useState(null); // 📝 Eingabe: { art, fach, tag, datum, serie }
-  const [ktMonat, setKtMonat] = useState(null); // 📅 Kalender im Termin-Dialog: null = zugeklappt, sonst { jahr, monat }
+  const [ktMonat, setKtMonat] = useState(null); // Kalender im Termin-Dialog: null = zugeklappt, sonst { jahr, monat }
   const [fenster, setFenster] = useState(null); // 🪟 Direkt-Wahl fürs Fenster: { tag, slot, suche }
   const [terminDialog, setTerminDialog] = useState(null); // eingetragenen Termin ansehen/entfernen
   const [palette, setPalette] = useState(false); // 📝 Kategorien erst nach „Termin eintragen" zeigen
-  const [katSuche, setKatSuche] = useState(""); // 🔍 Suche/Freitext in der Kategorien-Auswahl
+  const [katSuche, setKatSuche] = useState(""); // Suche/Freitext in der Kategorien-Auswahl
   const montagAktiv = wochenMontag(heute);
   const montag = montagAnzeige;
   const plan = planFuerWoche(data.lernstand.wochenplan, montag);
@@ -389,15 +389,15 @@ export default function Wochenplan() {
               setWahl(null);
             }}
             style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: ansicht === "monat" ? T.primaer : T.weich, color: ansicht === "monat" ? T.primaerText : T.text }}>
-            🗓️ {ansicht === "monat" ? "Zur Woche" : "Monat"}
+            {ansicht === "monat" ? "Zur Woche" : "Monat"}
           </button>
           <button data-test="routine-uebernehmen" onClick={routineHolen} disabled={!routine.length}
             style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: T.weich, color: T.text, opacity: routine.length ? 1 : 0.5 }}>
-            🔁 Routine übernehmen
+            Routine übernehmen
           </button>
           <button data-test="routine-speichern" onClick={routineSpeichern} disabled={!plan.bloecke.some((b) => b.typ !== "freunde")}
             style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: T.weich, color: T.text }}>
-            💾 Als Routine speichern
+            Als Routine speichern
           </button>
           {plan.bloecke.length > 0 && (
             <button data-test="plan-kopieren"
@@ -418,7 +418,7 @@ export default function Wochenplan() {
           </button>
           <button data-test="schule-zeigen" onClick={() => setSchuleAuf(!schuleAuf)}
             style={{ height: "auto", minHeight: 0, padding: "7px 12px", fontWeight: 700, background: schuleAuf ? T.primaer : T.weich, color: schuleAuf ? T.primaerText : T.text }}>
-            🏫 Schulstunden
+            Schulstunden
           </button>
         </div>
         {ansicht === "monat" ? (
@@ -427,7 +427,7 @@ export default function Wochenplan() {
             oeffneWoche={(m) => { setMontagAnzeige(m); setAnsicht("woche"); }} />
         ) : (<>
         <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-          DU bestimmst dein Pensum – wochentags ab <b>13 Uhr</b> (🎲 erst Spielzeit nach dem Essen),
+          DU bestimmst dein Pensum – wochentags ab <b>13 Uhr</b> (erst Spielzeit nach dem Essen),
           am Wochenende <b>ab 9 Uhr</b>. Tippe ein freies Fenster direkt an (Auswahl mit Suche + eigener Text) – oder hol dir über „📝 Termin eintragen“ eine Kategorie
           und tippe dann ein Fenster (je 30 Minuten), oder zieh sie rüber. Eine Lernbox = {LERN_MINUTEN} Minuten, danach 5 Minuten Pause
           (Trampolin, essen, trinken – keine Bildschirme).
@@ -531,20 +531,20 @@ export default function Wochenplan() {
         )}
         <p data-test="plan-legende" style={{ margin: "8px 0 0", color: T.textLeise, fontSize: "12.5px" }}>
           <span style={{ background: "color-mix(in srgb, var(--ok) 7%, var(--karte))", border: "1.5px dashed color-mix(in srgb, var(--ok) 40%, var(--karte))", borderRadius: 4, padding: "1px 7px", color: "var(--ok)" }}>frei</span>
-          {" "}· <span style={{ background: "color-mix(in srgb, var(--warn) 16%, var(--karte))", border: "1.5px solid color-mix(in srgb, var(--warn) 45%, var(--karte))", borderRadius: 4, padding: "1px 7px" }}>🔒 blockiert</span>
+          {" "}· <span style={{ background: "color-mix(in srgb, var(--warn) 16%, var(--karte))", border: "1.5px solid color-mix(in srgb, var(--warn) 45%, var(--karte))", borderRadius: 4, padding: "1px 7px" }}>blockiert</span>
           {" "}· <span style={{ background: T.primaer, color: T.primaerText, borderRadius: 4, padding: "1px 7px" }}>Lernbox</span>
           {" "}· <span style={{ background: T.weich, borderRadius: 4, padding: "1px 7px" }}>Freizeit</span>
         </p>
         {pruefung.hinweise.length > 0 && (
           <div data-test="plan-hinweise" style={{ marginTop: 10, background: "var(--warn-weich, #ffe9b3)", color: "#5b4300", borderRadius: T.radiusKlein, padding: "8px 12px" }}>
             {pruefung.hinweise.map((h, i) => (
-              <p key={i} style={{ margin: i ? "6px 0 0" : 0, fontSize: "var(--schrift-klein)", fontWeight: 600 }}>🦁 {h}</p>
+              <p key={i} style={{ margin: i ? "6px 0 0" : 0, fontSize: "var(--schrift-klein)", fontWeight: 600 }}>{h}</p>
             ))}
           </div>
         )}
         {pruefung.ok && plan.bloecke.length > 0 && (
           <p data-test="plan-ok" style={{ margin: "10px 0 0", color: T.ok, fontWeight: 700 }}>
-            🦁 Starker Plan – gut verteilt und mit Zeit für dich! 💪
+            Starker Plan – gut verteilt und mit Zeit für dich! 💪
           </p>
         )}
         {(() => {
@@ -652,7 +652,7 @@ export default function Wochenplan() {
           display: "flex", alignItems: "center", justifyContent: "center", padding: 18,
         }}>
           <div onClick={(ev) => ev.stopPropagation()} style={{ maxWidth: 420, width: "100%", background: T.karte, borderRadius: T.radius, padding: T.abstand }}>
-            <h3 style={{ margin: "0 0 8px" }}>{kindTermin.editId != null ? "✏️ Termin bearbeiten" : "📝 Termin eintragen"}</h3>
+            <h3 style={{ margin: "0 0 8px" }}>{kindTermin.editId != null ? "Termin bearbeiten" : "📝 Termin eintragen"}</h3>
             <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
               {Object.entries(TERMIN_ARTEN).map(([k, art]) => (
                 <button key={k} data-test={`kt-art-${k}`} onClick={() => setKindTermin({ ...kindTermin, art: k })}
@@ -672,7 +672,7 @@ export default function Wochenplan() {
                 </button>
               ))}
             </div>
-            {/* 📅 Jeder Tag im Schuljahr: zuklappbarer Monatskalender –
+            {/* Jeder Tag im Schuljahr: zuklappbarer Monatskalender –
                 die Wochen-Knöpfe oben bleiben die Schnellwahl. */}
             {!ktMonat ? (
               <button data-test="kt-kalender"
@@ -682,7 +682,7 @@ export default function Wochenplan() {
                 }}
                 style={{ width: "100%", height: "auto", minHeight: 0, padding: "8px 6px", marginBottom: 8,
                   background: T.weich, color: T.text, fontWeight: 700, fontSize: "var(--schrift-klein)" }}>
-                📅 Anderen Tag im Kalender wählen{kindTermin.datum ? ` (gewählt: ${kindTermin.datum.split("-").reverse().join(".")})` : " (auch andere Wochen)"}
+                Anderen Tag im Kalender wählen{kindTermin.datum ? ` (gewählt: ${kindTermin.datum.split("-").reverse().join(".")})` : " (auch andere Wochen)"}
               </button>
             ) : (
               <div style={{ background: T.grund, borderRadius: T.radiusKlein, padding: 8, marginBottom: 8 }}>
@@ -726,7 +726,7 @@ export default function Wochenplan() {
             )}
             {kindTermin.editId == null ? (
               <>
-                <p style={{ margin: "0 0 4px", fontSize: "var(--schrift-klein)", color: T.textLeise }}>🔁 Wiederholen?</p>
+                <p style={{ margin: "0 0 4px", fontSize: "var(--schrift-klein)", color: T.textLeise }}>Wiederholen?</p>
                 <div style={{ display: "flex", gap: 4, marginBottom: 8 }}>
                   {[["nein", "einmalig"], ["4", "4 Wochen"], ["12", "12 Wochen"], ["schuljahr", "ganzes Schuljahr"]].map(([k, label]) => (
                     <button key={k} data-test={`kt-serie-${k}`} onClick={() => setKindTermin({ ...kindTermin, serie: k })}
@@ -785,7 +785,7 @@ export default function Wochenplan() {
               {TERMIN_ARTEN[terminDialog.art]?.emoji} {TERMIN_ARTEN[terminDialog.art]?.name}{terminDialog.fach ? ` · ${terminDialog.fach}` : ""}
             </h3>
             <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-              am {terminDialog.tag.split("-").reverse().join(".")}{Number.isInteger(terminDialog.serie) ? " · Teil einer 🔁 Serie" : ""}
+              am {terminDialog.tag.split("-").reverse().join(".")}{Number.isInteger(terminDialog.serie) ? " · Teil einer Serie" : ""}
             </p>
             <button data-test="termin-bearbeiten"
               onClick={() => {
@@ -799,7 +799,7 @@ export default function Wochenplan() {
                 setTerminDialog(null);
               }}
               style={{ width: "100%", marginBottom: 6, background: T.primaer, color: T.primaerText, fontWeight: 700 }}>
-              ✏️ Bearbeiten
+              Bearbeiten
             </button>
             {Number.isInteger(terminDialog.serie) && (
               <button data-test="serie-entfernen"
@@ -892,7 +892,7 @@ export default function Wochenplan() {
                 return (
                   <div style={{ marginTop: 10 }}>
                     <p style={{ margin: "0 0 4px", fontSize: "var(--schrift-klein)", color: T.textLeise }}>
-                      ⏱️ Von {uhr(block.slot)} bis …
+                      Von {uhr(block.slot)} bis …
                     </p>
                     <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                       {enden.map((ende) => (
@@ -912,7 +912,7 @@ export default function Wochenplan() {
               })()}
               <div style={{ marginTop: 10 }}>
                 <p style={{ margin: "0 0 4px", fontSize: "var(--schrift-klein)", color: T.textLeise }}>
-                  🔁 Auch in den nächsten Wochen (gleiche Stelle)?
+                  Auch in den nächsten Wochen (gleiche Stelle)?
                 </p>
                 <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                   {[["4", "4 Wochen"], ["12", "12 Wochen"], ["schuljahr", "ganzes Schuljahr"]].map(([k, label]) => (
