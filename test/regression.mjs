@@ -36,6 +36,54 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.87.0: Klassen-Modell, Klasse 1, Vorlesen ----------
+console.log("== v0.87.0: Klasse 1 + Vorlesen ==");
+test("v0.87: Klassen-Modul – Fächer, Kennenlern-Felder, Spiel-Quellen, Vorlese-Modus, Klassenwechsel", (() => {
+  const k = quelle("src/calc/klassen.js");
+  return versionMindestens("0.87.0")
+    && k.includes("export function faecherFuerKlasse") && k.includes("export function einstufungFelder")
+    && k.includes("export function einstufungPools") && k.includes("export function spielQuellen")
+    && k.includes("export function vorleseModus") && k.includes("export function klasseWechseln")
+    && k.includes("export function antwortenVorlesbar") && k.includes("K1_MATHE_DATEN") && k.includes("K1_DEUTSCH_DATEN")
+    && quelle("src/calc/migrateData.js").includes("[1, 2, 3, 4].includes(d.profil.klasse)")
+    && quelle("src/calc/migrateData.js").includes('vorlesen: "",')
+    && quelle("src/calc/onboarding.js").includes("export function schwerpunkteFuerKlasse")
+    && quelle("src/calc/einstufung.js").includes("felder = EINSTUFUNG_FELDER")
+    && quelle("src/calc/jetztDran.js").includes("feldInKlasse(k, klasse)");
+})());
+test("v0.87: Inhalte Klasse 1 – 7 Mathe- und 6 Deutsch-Bereiche mit eigenen Tests, neue Bild-Arten", (() => {
+  const m = quelle("src/calc/aufgaben/klasse1Mathe.js");
+  const d = quelle("src/calc/aufgaben/klasse1Deutsch.js");
+  const b = quelle("src/features/AufgabenBild.jsx");
+  return ["k1zahlen", "k1zerlegen", "k1plus", "k1minus", "k1geld", "k1formen", "k1uhr"].every((key) => m.includes(key))
+    && ["k1anlaut", "k1laute", "k1silben", "k1reime", "k1lesen", "k1saetze"].every((key) => d.includes(key))
+    && m.includes("rngAusSeed") && d.includes("K1_DEUTSCH_GRUPPEN")
+    && quelle("src/calc/aufgaben/klasse1Mathe.test.js").includes("poolGesund")
+    && quelle("src/calc/aufgaben/klasse1Deutsch.test.js").includes("poolGesund")
+    && b.includes("zwanzig: Zwanzig, muenzen: Muenzen, formen: Formen, emoji: EmojiBild");
+})());
+test("v0.87: Vorlesen über die Sprachausgabe des Geräts – Üben, Einstufung, Spiele; Oberfläche folgt der Klasse", (() => {
+  const v = quelle("src/vorlesen.js");
+  const u = quelle("src/features/Ueben.jsx");
+  const e = quelle("src/features/Einstufung.jsx");
+  const f = quelle("src/spiele/fragen.js");
+  const el = quelle("src/features/Eltern.jsx");
+  return v.includes("window.speechSynthesis") && v.includes('u.lang = "de-DE"') && !/fetch\(|https?:\/\//.test(v)
+    && quelle("src/features/VorleseKnopf.jsx").includes("if (!vorlesbar() || !text) return null;")
+    && quelle("src/features/Icon.jsx").includes("speaker:")
+    && u.includes("faecherFuerKlasse(klasse, thema)") && u.includes('test="vorlesen-frage"') && u.includes('test="vorlesen-antwort"')
+    && u.includes("fach.gruppen.map") && u.includes("fach.welten && !gruppe")
+    && e.includes("einstufungPools(klasse)") && e.includes("<AufgabenBild b={a.bild} />")
+    && f.includes("export function spielKlasseSetzen") && f.includes('data-test="spiel-vorlesen"')
+    && quelle("src/features/Spielhalle.jsx").includes("spielKlasseSetzen(data.profil.klasse")
+    && quelle("src/features/ErstStart.jsx").includes("KLASSEN_WAEHLBAR.map") && el.includes('test="klasse"') && el.includes('test="vorlesen"')
+    && quelle("src/features/Training.jsx").includes("data.profil.klasse >= 3 ? [{ test: \"zum-kasten\"")
+    && quelle("e2e/smoke.spec.js").includes("Kern: Klasse 1 – eigene Lernfelder")
+    && quelle("e2e/smoke.spec.js").includes("Kern: Spiele in Klasse 1")
+    && quelle("e2e/smoke.spec.js").includes("ohne Sprachausgabe")
+    && releaseNoteVorhanden("rn-114");
+})());
+
 // ---------- v0.86.0: Lern-App-Kern (Module) + keine Termine/Stundenpläne mehr im Code ----------
 console.log("== v0.86.0: Lern-App-Kern + Leak-Fix ==");
 test("v0.86: Datenmodell – Module (neu aus, Bestand an), Schule als Daten, Startwert ohne Termine", (() => {
@@ -904,7 +952,8 @@ test("v0.45: 5 Deutsch-Gruppen in calc, Leo-Wahl-Knopf und Gruppen-Navigation im
   const u = quelle("src/features/Ueben.jsx");
   return ["lesen", "schreiben", "woerter", "saetze", "texte"].every((k) => g.includes(`key: "${k}"`))
     && g.includes("export function leoWahl") && g.includes('typ === "modul"')
-    && u.includes('data-test="leo-wahl"') && u.includes("gruppe-zurueck") && u.includes("DEUTSCH_GRUPPEN")
+    && u.includes('data-test="leo-wahl"') && u.includes("gruppe-zurueck")
+    && (u.includes("DEUTSCH_GRUPPEN") || (u.includes("fach.gruppen") && quelle("src/calc/klassen.js").includes("gruppen: DEUTSCH_GRUPPEN"))) // seit v0.87 je Klasse aus klassen.js
     && releaseNoteVorhanden("rn-058");
 })());
 
@@ -916,7 +965,7 @@ test("v0.44: 6 Kompass-Bereiche vorhanden, in der Übungs-Liste verdrahtet, mit 
   const w = quelle("src/calc/wozu.js");
   return ["lesen", "strategie", "wortfam", "zusnomen", "steigern", "verbform"].every((key) => k.includes(`key: "${key}"`) && w.includes(`${key}:`))
     && k.includes("LESEN_DATEN") && k.includes("kontext: L_")
-    && u.includes("KOMPASS_DEUTSCH_DATEN")
+    && (u.includes("KOMPASS_DEUTSCH_DATEN") || quelle("src/calc/klassen.js").includes("...KOMPASS_DEUTSCH_DATEN")) // seit v0.87 in klassen.js
     && (u.includes("KOMPASS_DEUTSCH_BEREICHE") || quelle("src/calc/uebenGruppen.js").includes("...KOMPASS_DEUTSCH_BEREICHE"))
     && u.includes('data-test="frage-kontext"')
     && releaseNoteVorhanden("rn-057");
@@ -1442,7 +1491,7 @@ test("v0.22: alle 7 Satz-Pools nehmen die Übungs-Welt an (Kind wählt selbst)",
   const s2 = quelle("src/calc/aufgaben/saetze.js") + quelle("src/calc/aufgaben/deutschKonverter.js");
   return ["subjektPool(thema)", "praedikatPool(thema)", "gkPool(thema)", "redePool(thema)",
     "zeitPool(thema)", "wortartenPool(thema)", "faellePool(thema)"].every((f) => s2.includes(`function ${f}`))
-    && quelle("src/features/Ueben.jsx").includes("deutschDaten(thema)")
+    && (quelle("src/features/Ueben.jsx").includes("deutschDaten(thema)") || quelle("src/calc/klassen.js").includes("deutschDaten(thema)")) // seit v0.87 in klassen.js
     && quelle("src/features/Ueben.jsx").includes('data-test={`thema-')
     && quelle("src/calc/migrateData.js").includes("uebungsThema");
 })());
@@ -1953,8 +2002,9 @@ test("v0.4: Stark-Pool mit Mut-Sätzen", (() => {
 })());
 test("v0.4: Üben kennt alle 4 Fächer (Deutsch · Mathe · Sachkunde · Stark)", (() => {
   const u = quelle("src/features/Ueben.jsx");
-  return ["\"deutsch\"", "\"mathe\"", "\"sachkunde\"", "\"stark\""].every((f) => u.includes(f))
-    && (u.includes("DEUTSCH_BEREICHE") || quelle("src/calc/uebenGruppen.js").includes("...DEUTSCH_BEREICHE")) && u.includes("STARK_BEREICHE");
+  const uk = u + quelle("src/calc/klassen.js"); // seit v0.87 baut klassen.js die Fächer je Klasse
+  return ["\"deutsch\"", "\"mathe\"", "\"sachkunde\"", "\"stark\""].every((f) => uk.includes(f))
+    && (u.includes("DEUTSCH_BEREICHE") || quelle("src/calc/uebenGruppen.js").includes("...DEUTSCH_BEREICHE")) && uk.includes("STARK_BEREICHE");
 })());
 test("v0.4: kein Beschämungs-Vokabular in den Deutsch/Stark-Pools", (() => {
   const t = quelle("src/calc/aufgaben/deutsch.js") + quelle("src/calc/aufgaben/stark.js");

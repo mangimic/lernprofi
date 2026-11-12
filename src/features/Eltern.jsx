@@ -11,6 +11,7 @@ import { kiStatus, kiDeckelSetzen, kiErklaeren, kiBericht, kiSaetze } from "../k
 import { berichtDaten } from "../calc/bericht.js";
 import { BAUSTEINE, stundenplanAusText, stundenplanAlsText, mittagErzwingen } from "../calc/wochenplan.js";
 import { modulAn, modulInfo } from "../calc/module.js";
+import { KLASSEN_WAEHLBAR, bereicheFuerKlasse, klasseWechseln, vorleseModus } from "../calc/klassen.js";
 import { aktiveKarten } from "../calc/karteikarten.js";
 import { kastenZaehler } from "../calc/karteikasten.js";
 
@@ -404,7 +405,10 @@ export default function Eltern() {
           auf={(v) => einstellung({ stufenVorgabe: { ...vorgabe, global: v } }, `Globale Stufe: ${v === 0 ? "automatisch" : v}`)} />
         <details style={{ marginTop: 8 }}>
           <summary style={{ cursor: "pointer", color: T.textLeise }}>Je Lernfeld einstellen</summary>
-          {STUFEN_FELDER.map((f) => (
+          {/* 🎒 Klasse 1/2: die Lernfelder der Klasse; 3/4: die bewährte Liste */}
+          {(data.profil.klasse <= 2
+            ? bereicheFuerKlasse(data.profil.klasse).filter((b) => b.typ !== "modul").map((b) => ({ key: b.key, name: b.name }))
+            : STUFEN_FELDER).map((f) => (
             <div key={f.key} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
               <span style={{ flex: 1, fontSize: "var(--schrift-klein)" }}>{f.name}</span>
               <div style={{ flex: 1 }}>
@@ -427,6 +431,15 @@ export default function Eltern() {
         <Seg test="tagesform-aktiv" werte={[{ v: 1, label: "An" }, { v: 0, label: "Aus" }]}
           aktiv={data.einstellungen.tagesformAktiv ? 1 : 0}
           auf={(v) => einstellung({ tagesformAktiv: v === 1 }, `Tagesform-Frage ${v === 1 ? "an" : "aus"}`)} />
+        <p style={{ margin: "14px 0 8px" }}><b>Vorlesen</b></p>
+        <p style={{ margin: "0 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
+          Fragen und Antworten über die Sprachausgabe des Geräts vorlesen – ohne Internet, nichts verlässt das Gerät.
+          <b> Auto</b> liest jede Frage von selbst vor (Standard in Klasse 1), <b>Knopf</b> zeigt einen Lautsprecher
+          (Standard in Klasse 2).
+        </p>
+        <Seg test="vorlesen" werte={[{ v: "auto", label: "Auto" }, { v: "knopf", label: "Knopf" }, { v: "aus", label: "Aus" }]}
+          aktiv={vorleseModus(data.einstellungen, data.profil.klasse)}
+          auf={(v) => einstellung({ vorlesen: v }, `Vorlesen: ${v}`)} />
         <p style={{ margin: "14px 0 8px" }}><b>🤸 Bewegungspausen</b></p>
         <p style={{ margin: "0 0 8px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           Nach dieser Fokuszeit schlägt Leo eine kurze Bewegungspause vor – das beste Mittel gegen
@@ -1041,6 +1054,12 @@ export default function Eltern() {
         </p>
         <input data-test="profil-name" style={feld} placeholder="Vorname (freiwillig)" value={data.profil.name}
           onChange={(e) => logChange({ ...data, profil: { ...data.profil, name: e.target.value } }, "profil", "geaendert", "Name angepasst")} />
+        <p style={{ margin: "10px 0 6px", fontSize: "var(--schrift-klein)" }}>
+          <b>Klasse</b> <span style={{ color: T.textLeise }}>– bestimmt Lernfelder, Kennenlern-Runde und Spiel-Fragen. Ein Wechsel setzt das Kennenlern-Ergebnis zurück; Münzen und Spielstände bleiben.</span>
+        </p>
+        <Seg test="klasse" werte={KLASSEN_WAEHLBAR.map((k) => ({ v: k, label: `Klasse ${k}` }))}
+          aktiv={data.profil.klasse}
+          auf={(k) => logChange(klasseWechseln(data, k), "profil", "geaendert", `Klasse ${k} eingestellt`)} />
         {/* 🧩 Was ist für diese Familie freigeschaltet? (reine Anzeige, v0.86) */}
         <p data-test="module-info" style={{ margin: "4px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           {modulInfo(data)}

@@ -217,3 +217,7 @@ button > svg { vertical-align: -0.2em; margin-right: 2px; }
   body[data-druck] .vg-zeile { border-bottom-color: #888; }
   body[data-druck] .vg-kasten { border-color: #555; }
 }
+
+/* 🔊 Lautsprecher-Knopf in den Spielen (Klasse 1/2, v0.87) */
+.spiel-vorlesen { display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; width: 44px; min-width: 44px; height: 44px; min-height: 44px; padding: 0; margin-left: 6px; border-radius: 50%; background: var(--weich); color: var(--see); }
+.spiel-vorlesen > svg { margin: 0; vertical-align: 0; }

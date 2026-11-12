@@ -13,13 +13,34 @@ export const SCHWERPUNKTE = [
   { key: "mathe", emoji: "🔢", name: "Mathe-Grundlagen", felder: ["mrechnen", "mzahlen"] },
   { key: "mut", emoji: "💪", name: "Selbstvertrauen", felder: ["stark"] },
 ];
-export const SCHWERPUNKT_KEYS = SCHWERPUNKTE.map((s) => s.key);
+/* 🎒 Klasse 1 und 2 haben eigene Lernfelder – die Frage „Wo hakt es?" zeigt
+   darum je Klasse passende Schwerpunkte (v0.87). Die Schlüssel sind über
+   alle Klassen gültig, damit migrateData sie prüfen kann. */
+const SCHWERPUNKTE_K1 = [
+  { key: "lesen", emoji: "🔍", name: "Lesen", felder: ["k1lesen", "k1saetze"] },
+  { key: "laute", emoji: "👂", name: "Laute & Silben", felder: ["k1anlaut", "k1silben"] },
+  { key: "zahlen", emoji: "🔢", name: "Zahlen bis 20", felder: ["k1zahlen", "k1zerlegen"] },
+  { key: "mathe", emoji: "➕", name: "Plus & Minus", felder: ["k1plus", "k1minus"] },
+  { key: "mut", emoji: "💪", name: "Selbstvertrauen", felder: ["stark"] },
+];
+const SCHWERPUNKTE_K2 = [
+  { key: "lesen", emoji: "🔍", name: "Lesen & Verstehen", felder: ["k2lesen"] },
+  { key: "rechtschreiben", emoji: "✍️", name: "Richtig schreiben", felder: ["k2nomen", "k2verlaengern"] },
+  { key: "mathe", emoji: "➕", name: "Plus & Minus bis 100", felder: ["k2plus", "k2minus"] },
+  { key: "einmaleins", emoji: "✖️", name: "Einmaleins", felder: ["k2einmaleins"] },
+  { key: "mut", emoji: "💪", name: "Selbstvertrauen", felder: ["stark"] },
+];
+export function schwerpunkteFuerKlasse(klasse) {
+  return klasse === 1 ? SCHWERPUNKTE_K1 : klasse === 2 ? SCHWERPUNKTE_K2 : SCHWERPUNKTE;
+}
+export const SCHWERPUNKT_KEYS = [...new Set([...SCHWERPUNKTE, ...SCHWERPUNKTE_K1, ...SCHWERPUNKTE_K2].map((s) => s.key))];
 export const ZEIT_WAHL = [10, 15, 20, 30]; // Minuten pro Tag (Time-Boxing)
 
 /** Übungs-Felder zu den gewählten Schwerpunkten (eindeutig, Reihenfolge stabil). */
-export function schwerpunktFelder(schwerpunkte) {
+export function schwerpunktFelder(schwerpunkte, klasse = 4) {
+  const liste = schwerpunkteFuerKlasse(klasse);
   const felder = (Array.isArray(schwerpunkte) ? schwerpunkte : [])
-    .map((k) => SCHWERPUNKTE.find((s) => s.key === k))
+    .map((k) => liste.find((s) => s.key === k))
     .filter(Boolean)
     .flatMap((s) => s.felder);
   return [...new Set(felder)];
@@ -27,9 +48,9 @@ export function schwerpunktFelder(schwerpunkte) {
 
 /** 🎯 „empfohlen"-Markierung: Die Einstufung (gemessen) schlägt die
     Eltern-Schwerpunkte (geschätzt); ohne Einstufung zählen die Schwerpunkte. */
-export function istEmpfohlen(feldKey, einstufung, schwerpunkte) {
+export function istEmpfohlen(feldKey, einstufung, schwerpunkte, klasse = 4) {
   if (einstufung?.empfehlung) return einstufung.empfehlung.includes(feldKey);
-  return schwerpunktFelder(schwerpunkte).includes(feldKey);
+  return schwerpunktFelder(schwerpunkte, klasse).includes(feldKey);
 }
 
 /* 🚀 Geführter Erst-Start (3 Schritte): 1 Eltern-Fragen → Übergabe ans

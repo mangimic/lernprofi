@@ -24,13 +24,20 @@ function Strahl({ b }) {
       <line x1={pad - 14} y1={y} x2={W - pad + 14} y2={y} stroke={LINIE} strokeWidth="2" />
       {ticks.map((t) => {
         const frage = (b.frage || []).includes(t);
+        // Dichte Strahlen (z. B. 0–20 in Einerschritten): nur Fünfer beschriften,
+        // dazu die Nachbarn der Lücke – sonst kleben die Zahlen aneinander.
+        const dicht = ticks.length > 13;
+        const zeigen = !dicht || frage || t % 5 === 0 || t === b.von || t === b.bis
+          || (b.frage || []).some((f) => Math.abs(f - t) === b.schritt);
         return (
           <g key={t}>
-            <line x1={x(t)} y1={y - 7} x2={x(t)} y2={y + 7} stroke={LINIE} strokeWidth="2" />
-            <text x={x(t)} y={y + 21} textAnchor="middle" fontSize={frage ? 15 : 12}
-              fontWeight={frage ? 800 : 400} fill={frage ? WARN : LEISE}>
-              {frage ? "?" : t}
-            </text>
+            <line x1={x(t)} y1={y - (dicht && t % 5 !== 0 ? 5 : 7)} x2={x(t)} y2={y + (dicht && t % 5 !== 0 ? 5 : 7)} stroke={LINIE} strokeWidth="2" />
+            {zeigen && (
+              <text x={x(t)} y={y + 21} textAnchor="middle" fontSize={frage ? 15 : dicht ? 11 : 12}
+                fontWeight={frage ? 800 : 400} fill={frage ? WARN : LEISE}>
+                {frage ? "?" : t}
+              </text>
+            )}
           </g>
         );
       })}
@@ -628,12 +635,91 @@ function Laengen({ b }) {
   );
 }
 
+/* ---------- Klasse 1/2 (v0.87): Zwanzigerfeld, Geld, Formen-Reihe, Bildzeichen ---------- */
+const PLAETTCHEN = { rot: "#d6453d", blau: "#3e7cb1" };
+/** Zwanzigerfeld: 2 Reihen à 10, Fünfer-Lücke in der Mitte; erst rote, dann blaue Plättchen. */
+function Zwanzig({ b }) {
+  const rot = Math.max(0, Math.min(20, b.rot || 0));
+  const blau = Math.max(0, Math.min(20 - rot, b.blau || 0));
+  const x = (i) => 14 + (i % 10) * 26 + (i % 10 >= 5 ? 10 : 0);
+  const y = (i) => 16 + Math.floor(i / 10) * 28;
+  return (
+    <svg width="100%" viewBox="0 0 296 72" style={{ maxWidth: 360 }} role="img"
+      aria-label={`Zwanzigerfeld: ${rot} rote${blau ? ` und ${blau} blaue` : ""} Plättchen`}>
+      {Array.from({ length: 20 }, (_, i) => (
+        <circle key={i} cx={x(i)} cy={y(i)} r="10.5"
+          fill={i < rot ? PLAETTCHEN.rot : i < rot + blau ? PLAETTCHEN.blau : "var(--karte)"}
+          stroke={LINIE} strokeWidth="1.5" />
+      ))}
+    </svg>
+  );
+}
+/** Geld: Münzen (Cent bis 2 Euro) und Scheine (ab 5 Euro), Werte in Cent. */
+function Muenzen({ b }) {
+  const text = (c) => (c >= 100 ? `${c / 100} €` : `${c} ct`);
+  return (
+    <div role="img" aria-label={`Geld: ${(b.werte || []).map(text).join(", ")}`}
+      style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", alignItems: "center" }}>
+      {(b.werte || []).map((c, i) => (c >= 500 ? (
+        <svg key={i} width="78" height="44" viewBox="0 0 78 44" aria-hidden="true">
+          <rect x="1.5" y="1.5" width="75" height="41" rx="5" fill={c >= 2000 ? "#bcd6ef" : c >= 1000 ? "#f3c1b6" : "#cfd8c4"} stroke={LINIE} strokeWidth="1.5" />
+          <text x="39" y="28" textAnchor="middle" fontSize="17" fontWeight="900" fill="#1e2a3a" fontFamily="inherit">{text(c)}</text>
+        </svg>
+      ) : (
+        <svg key={i} width={c >= 100 ? 50 : c >= 10 ? 44 : 38} height={c >= 100 ? 50 : c >= 10 ? 44 : 38} viewBox="0 0 50 50" aria-hidden="true">
+          <circle cx="25" cy="25" r="23" fill={c >= 100 ? "#e8e2d2" : c >= 10 ? "#e6c35c" : "#c98a5a"} stroke={LINIE} strokeWidth="1.5" />
+          {c >= 100 && <circle cx="25" cy="25" r="15.5" fill={c === 200 ? "#e6c35c" : "#cfd3d6"} stroke={LINIE} strokeWidth="1" />}
+          <text x="25" y="31" textAnchor="middle" fontSize={c >= 100 ? 15 : 14} fontWeight="900" fill="#1e2a3a" fontFamily="inherit">{text(c)}</text>
+        </svg>
+      )))}
+    </div>
+  );
+}
+const FORM_FARBEN = { rot: "#d6453d", blau: "#3e7cb1", gelb: "#e6c35c", gruen: "#2f8a69" };
+/** Formen-Reihe: "kreis", "dreieck", "quadrat", "rechteck" (optional ":farbe"), "?" = Lücke. */
+function Formen({ b }) {
+  const folge = b.folge || [];
+  return (
+    <svg width="100%" viewBox={`0 0 ${folge.length * 54 + 6} 56`} style={{ maxWidth: folge.length * 62 }} role="img"
+      aria-label={`Formen-Reihe: ${folge.map((f) => (f === "?" ? "Lücke" : f.split(":")[0])).join(", ")}`}>
+      {folge.map((f, i) => {
+        const [form, farbe] = f.split(":");
+        const fill = FORM_FARBEN[farbe] || FLAECHE;
+        const x = 6 + i * 54;
+        if (form === "?") {
+          return (
+            <g key={i}>
+              <rect x={x + 2} y="6" width="44" height="44" rx="8" fill="none" stroke={WARN} strokeWidth="2" strokeDasharray="5 4" />
+              <text x={x + 24} y="36" textAnchor="middle" fontSize="24" fontWeight="900" fill={WARN} fontFamily="inherit">?</text>
+            </g>
+          );
+        }
+        if (form === "kreis") return <circle key={i} cx={x + 24} cy="28" r="21" fill={fill} stroke={LINIE} strokeWidth="2" />;
+        if (form === "dreieck") return <polygon key={i} points={`${x + 24},6 ${x + 46},49 ${x + 2},49`} fill={fill} stroke={LINIE} strokeWidth="2" strokeLinejoin="round" />;
+        if (form === "rechteck") return <rect key={i} x={x} y="13" width="48" height="30" fill={fill} stroke={LINIE} strokeWidth="2" />;
+        return <rect key={i} x={x + 4} y="8" width="40" height="40" fill={fill} stroke={LINIE} strokeWidth="2" />;
+      })}
+    </svg>
+  );
+}
+/** Bildzeichen: ein großes Emoji als Bild der Aufgabe (auch mehrfach – Mengen zählen). */
+function EmojiBild({ b }) {
+  const n = Math.max(1, Math.min(10, b.anzahl || 1));
+  return (
+    <div role="img" aria-label={n > 1 ? `${n} Bilder` : "Bild zur Aufgabe"}
+      style={{ display: "flex", flexWrap: "wrap", gap: n > 1 ? 6 : 0, justifyContent: "center", maxWidth: 300, fontSize: n > 1 ? 40 : 76, lineHeight: 1.1 }}>
+      {Array.from({ length: n }, (_, i) => <span key={i} aria-hidden="true">{b.zeichen}</span>)}
+    </div>
+  );
+}
+
 const ARTEN = {
   strahl: Strahl, folge: Folge, mauer: Mauer, form: Form, buchstaben: Buchstaben,
   kaestchen: Kaestchen, wuerfelturm: Wuerfelturm, netz: Netz, uhr: Uhr,
   kugeln: Kugeln, rad: Rad, balken: Balken, striche: Striche, schilder: Schilder,
   stromkreis: Stromkreis, kompassrose: Kompassrose, sonne: Sonne, dkarte: DKarte,
   wuerfel: Wuerfel, spielwuerfel: Spielwuerfel, laengen: Laengen, uhrplus: Uhrplus,
+  zwanzig: Zwanzig, muenzen: Muenzen, formen: Formen, emoji: EmojiBild,
 };
 export const BILD_ARTEN = Object.keys(ARTEN);
 

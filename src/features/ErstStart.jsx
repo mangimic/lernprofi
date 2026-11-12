@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useApp } from "../appContext.jsx";
 import { THEMEN_WELTEN } from "../calc/aufgaben/themen.js";
-import { SCHWERPUNKTE, ZEIT_WAHL, erstStartLage } from "../calc/onboarding.js";
+import { schwerpunkteFuerKlasse, ZEIT_WAHL, erstStartLage } from "../calc/onboarding.js";
+import { KLASSEN_WAEHLBAR } from "../calc/klassen.js";
 import { Icon, LeoMark } from "./Icon.jsx";
 
 /* 🚀 Geführter Erst-Start (v0.82): Eine Karte ganz oben auf der Startseite
@@ -39,8 +40,9 @@ export function FragebogenKarte() {
       </p>
       <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: "var(--schrift-klein)" }}>1. Welche Klasse?</p>
       <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
-        {[3, 4].map((k) => (
-          <button key={k} data-test={`fb-klasse-${k}`} onClick={() => setFb({ ...fb, klasse: k })}
+        {/* 🎒 Klassenwechsel leert die Schwerpunkte – jede Klasse hat eigene (v0.87) */}
+        {KLASSEN_WAEHLBAR.map((k) => (
+          <button key={k} data-test={`fb-klasse-${k}`} onClick={() => setFb({ ...fb, klasse: k, schwerpunkte: [] })}
             style={{ flex: 1, fontWeight: 700, background: fb.klasse === k ? T.primaer : T.weich, color: fb.klasse === k ? T.primaerText : T.text }}>
             Klasse {k}
           </button>
@@ -57,7 +59,7 @@ export function FragebogenKarte() {
       </div>
       <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: "var(--schrift-klein)" }}>3. Wo hakt es gerade? (mehrere möglich – empfiehlt passende Übungen)</p>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
-        {SCHWERPUNKTE.map((s) => (
+        {schwerpunkteFuerKlasse(fb.klasse).map((s) => (
           <button key={s.key} data-test={`fb-schwerpunkt-${s.key}`} onClick={() => fbSchwerpunkt(s.key)}
             style={{
               flex: "1 1 auto", fontWeight: 700, padding: "0 12px", whiteSpace: "nowrap",

@@ -26,8 +26,8 @@ export const PRO_STUFE = 2; // Aufgaben je Schwierigkeit und Feld
 
 /** Testplan: je Feld 2 leichte + (falls vorhanden) 2 schwere Aufgaben,
     per rng gezogen – deterministisch bei gleichem Seed. */
-export function einstufungPlan(pools, rng) {
-  return EINSTUFUNG_FELDER.map((feld) => {
+export function einstufungPlan(pools, rng, felder = EINSTUFUNG_FELDER) {
+  return felder.map((feld) => {
     const pool = pools[feld.key];
     return {
       ...feld,
@@ -50,7 +50,7 @@ export function einstufungStufe({ easyOk, hardOk, hardGefragt, max }) {
 export function stufenDeutung(stufe, max) {
   if (stufe === 1) return "hier zuerst üben 💪";
   if (stufe >= max) return "Profi – höchste Stufe 🌟";
-  return "sicher – Klasse-4-Niveau ✅";
+  return "sicher – auf Klassen-Niveau ✅";
 }
 
 /** Stellt die Stufen der getesteten Felder exakt auf das Ergebnis ein
