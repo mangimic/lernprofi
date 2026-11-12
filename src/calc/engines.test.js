@@ -96,8 +96,8 @@ describe("aufgabenRunde", () => {
     expect(antwortRichtig(a, "3")).toBe(false);
   });
 
-  it("die echten Pools (Mathe 5 + 3 Mathekönner · Sachkunde 6) sind gesund", () => {
-    expect(MATHE_BEREICHE.length).toBe(8); // 5 Stamm + 🏅 mk1x1/mkgesch/mkzr
+  it("die echten Pools (Mathe 5 + Uhrzeit + 3 Mathekönner · Sachkunde 6) sind gesund", () => {
+    expect(MATHE_BEREICHE.length).toBe(9); // 5 Stamm + 🕐 muhr + 🏅 mk1x1/mkgesch/mkzr
     expect(SACH_BEREICHE.length).toBe(6);
     for (const b of MATHE_BEREICHE) expect(poolGesund(MATHE_DATEN[b.key]), b.key).toBe(true);
     for (const b of SACH_BEREICHE) expect(poolGesund(SACH_DATEN[b.key]), b.key).toBe(true);

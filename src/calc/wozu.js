@@ -34,6 +34,7 @@ export const WOZU = {
   szeit: "Wer Geschichte kennt, versteht, warum heute alles so ist, wie es ist.",
   stark: "Stark mit Leo: die Sätze und Tricks, die dich auf dem Schulhof wirklich stark machen.",
   hoeren: "Genau hinhören = richtig schreiben. Du bist der Ton-Detektiv!",
+  muhr: "Wer die Uhr lesen und Zeiten rechnen kann, ist pünktlich am Bus – und weiß, wie lange die Pause noch geht.",
   // 🏅 Mathekönner-Schwerpunkte
   mk1x1: "Das 1×1 ist dein Rechen-Turbo – sitzt es, löst du alles doppelt so schnell.",
   mkgesch: "Rechengeschichten sind Mathe im echten Leben: erst verstehen, dann rechnen.",
