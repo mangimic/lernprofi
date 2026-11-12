@@ -36,6 +36,21 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.85.2: Access abgeschaltet – Familien-Konto ist der einzige Zaun ----------
+console.log("== v0.85.2: Access abgeschaltet ==");
+test("v0.85.2: Checkliste hakt Secret, Verknüpfung und Access-Abschaltung ab; Deploy-Doku markiert Access als historisch", (() => {
+  const ck = quelle("docs/FREIGABE-CHECKLISTE.md");
+  const dep = quelle("docs/DEPLOY-CLOUDFLARE.md");
+  return versionMindestens("0.85.2")
+    && ck.includes("## Stand 12.11.2026, 22 Uhr – Access abgeschaltet")
+    && ck.includes("- [x] Sitzungs-Secret `SESSION_GEHEIM` anlegen")
+    && ck.includes("- [x] Im Cloudflare-Dashboard: Zero Trust → Access → Applications →")
+    && ck.includes("- [x] Gegenprobe ohne Anmeldung")
+    && dep.includes("HISTORISCH, seit 12.11.2026 abgeschaltet")
+    && quelle("server/_lib/kontoApi.js").includes('request.headers.get("Cf-Access-Authenticated-User-Email")') // Brücke bleibt im Code (Rückweg), ist ohne Access tot
+    && releaseNoteVorhanden("rn-112");
+})());
+
 // ---------- v0.85.1: Freigabe vorbereitet – Cloudflare bleibt, Access geht ----------
 console.log("== v0.85.1: Freigabe-Checkliste mit Server-Stand ==");
 test("v0.85.1: Checkliste nennt geprüften Stand, Access-Anwendung, Reihenfolge und Domain-Schritt", (() => {

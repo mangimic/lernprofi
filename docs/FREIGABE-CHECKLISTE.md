@@ -1,9 +1,24 @@
 # Freigabe-Checkliste: erste fremde Familie onboarden (ab v0.74)
 
 Reihenfolge einhalten – dann gibt es keinen Moment, in dem ein Gerät
-ausgesperrt ist. Cloudflare Access bleibt bis Schritt 5 als zweiter Zaun an.
+ausgesperrt ist. Cloudflare Access war bis Schritt 5 der zweite Zaun –
+**seit 12.11.2026 abends ist er weg** (siehe Stand unten).
 
-## Stand 12.11.2026 (per Cloudflare-API geprüft, nur lesend)
+## Stand 12.11.2026, 22 Uhr – Access abgeschaltet
+
+| Punkt | Befund (per Cloudflare-API) |
+|---|---|
+| Worker-Bindings | `ASSETS`, `TRESOR`, `lernprofiapi`, **`SESSION_GEHEIM` (Secret) gesetzt** |
+| KV | `konto:stamm` + `email:*` vorhanden → Stamm-Konto verknüpft (21:06 UTC) |
+| Access | Anwendung „lernprofi - Cloudflare Workers“ **gelöscht**; nur noch „mangierierp - Cloudflare Pages“ (alte Pages-Seite) |
+| Live-Probe ohne Anmeldung | `/` → 200 HTML ohne Umleitung · `/api/konto` → `{"angemeldet":false}` · `POST /api/konto/einladung` → 403 · `version.json` 0.85.1 |
+
+Damit kommt der Header `Cf-Access-Authenticated-User-Email` nie mehr an:
+Stamm gibt es nur noch über die verknüpfte Sitzung, die Lücke der Policy
+„Everyone“ ist geschlossen. Offen bleiben Schritt 4 (jedes Gerät
+anmelden), die DPA (Schritt 2) und optional die Domain (Schritt 7).
+
+## Stand 12.11.2026, nachmittags (vor dem Abschalten, nur lesend geprüft)
 
 | Punkt | Befund |
 |---|---|
@@ -27,7 +42,7 @@ Handgriff im Dashboard.
 
 ## 1. Einmalige Server-Vorbereitung
 
-- [ ] Sitzungs-Secret `SESSION_GEHEIM` anlegen – einer von zwei Wegen:
+- [x] Sitzungs-Secret `SESSION_GEHEIM` anlegen – einer von zwei Wegen:
   - **Ohne Terminal (empfohlen, wie beim Secret „lernprofiapi"):**
     Cloudflare-Dashboard → Workers & Pages → Worker „lernprofi" →
     Settings → „Variables and Secrets" → Add → Type **Secret**,
@@ -50,7 +65,7 @@ Handgriff im Dashboard.
 
 ## 3. Stamm-Konto verknüpfen (euer Bestand)
 
-- [ ] Elternbereich → Konto & Daten → „Konto anlegen und verknüpfen"
+- [x] Elternbereich → Konto & Daten → „Konto anlegen und verknüpfen"
   (E-Mail + euer Eltern-Passwort; es wird vorher lokal am Tresor geprüft).
 - [ ] Wiederherstellungs-Code NEU erzeugen (damit er auch am Konto
   hinterlegt ist) und ausdrucken.
@@ -63,12 +78,12 @@ Handgriff im Dashboard.
 
 ## 5. Cloudflare Access abschalten
 
-- [ ] Im Cloudflare-Dashboard: Zero Trust → Access → Applications →
+- [x] Im Cloudflare-Dashboard: Zero Trust → Access → Applications →
   „lernprofi - Cloudflare Workers“ → Delete. (Die zweite Anwendung
   „mangierierp - Cloudflare Pages“ gehört zur alten Pages-Seite und kann
   bleiben.) Erst NACH Schritt 3 und 4 – sonst gibt es kein Konto, das
   Einladungs-Codes erzeugen darf.
-- [ ] Gegenprobe ohne Anmeldung (z. B. privates Fenster): die Worker-URL
+- [x] Gegenprobe ohne Anmeldung (z. B. privates Fenster): die Worker-URL
   zeigt direkt die App, `/api/konto` antwortet `{"angemeldet":false}`.
 - [ ] Gegenprobe auf einem eurer Geräte: App lädt, Auto-Sicherung läuft
   (Elternbereich → Geräte-Abgleich „Verbunden"), Leo antwortet.

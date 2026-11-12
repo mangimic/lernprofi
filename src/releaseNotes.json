@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-112",
+    "version": "0.85.2",
+    "datum": "2026-11-12",
+    "titel": "Tor offen: Access abgeschaltet",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🚪 Der Zaun aus der Bauzeit ist weg: Die App öffnet sich jetzt ohne Cloudflare-Login. Wer dazugehört, entscheidet allein das Familien-Konto – Einladungs-Code, E-Mail, Eltern-Passwort."
+      },
+      {
+        "type": "verbessert",
+        "text": "📋 Freigabe-Checkliste: Schritte 1, 3 und 5 erledigt und live geprüft (Startseite ohne Umleitung, Einladungen ohne Sitzung abgewiesen). Deploy-Doku kennzeichnet den Access-Abschnitt als historisch."
+      }
+    ]
+  },
+  {
     "id": "rn-111",
     "version": "0.85.1",
     "datum": "2026-11-12",
