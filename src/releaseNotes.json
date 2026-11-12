@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-110",
+    "version": "0.85.0",
+    "datum": "2026-11-12",
+    "titel": "Weniger scrollen: Hub „Training“",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🎯 Neuer Punkt „Training“ in der Navigation: Konzentration, Sudoku, Schreib-Training, Aufsatz-Check, Karteikasten, Unterlagen und die Kennenlern-Runde als Kacheln auf einem Bildschirm."
+      },
+      {
+        "type": "verbessert",
+        "text": "📱 Die Startseite passt jetzt auf eine Bildschirmhöhe: Jetzt dran, Kennzahlen, Tipps zum Einplanen als kleine Chips, Heute-Plan, Kennenlern-Zeile, Mut-Satz (Auswahl aufklappbar). Hell/Dunkel und „Neu?“ sind Symbole im Kopf neben der Suche, der doppelte Eltern-Knopf ist weg."
+      }
+    ]
+  },
+  {
     "id": "rn-109",
     "version": "0.84.2",
     "datum": "2026-11-12",

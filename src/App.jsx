@@ -5,6 +5,7 @@ import { zeitAbgelaufen } from "./calc/elternWerkzeuge.js";
 import { tagesformNoetig, tagesformEintragen, missionsLaengeHeute } from "./calc/tagesform.js";
 import releaseNotes from "./releaseNotes.json";
 import Start from "./features/Start.jsx";
+import Training from "./features/Training.jsx";
 import Ueben from "./features/Ueben.jsx";
 import Spielhalle from "./features/Spielhalle.jsx";
 import Konzentration from "./features/Konzentration.jsx";
@@ -23,7 +24,7 @@ import Datenschutz from "./features/Datenschutz.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.84.2";
+export const APP_VERSION = "0.85.0";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -182,9 +183,16 @@ export default function App() {
     { id: "ueben", label: "Üben", icon: "pencil", test: "nav-ueben" },
     { id: "plan", label: "Plan", icon: "calendar", test: "nav-plan" },
     { id: "spiele", label: "Spiele", icon: "gamepad", test: "nav-spiele" },
+    { id: "training", label: "Training", icon: "target", test: "nav-training" },
     ...(tresor.elternModus ? [{ id: "eltern", label: "Eltern", icon: "wrench", test: "nav-eltern" }] : []),
-    { id: "neu", label: "Neu?", icon: "sparkle", test: "nav-neu" },
   ];
+  // Kopf-Symbole: Hell/Dunkel und „Neu?" wohnen neben der Suche (v0.85)
+  const dunkel = data.einstellungen.thema === "dunkel";
+  const themaWechseln = () => logChange(
+    { ...data, einstellungen: { ...data.einstellungen, thema: dunkel ? "hell" : "dunkel" } },
+    "einstellungen", "geaendert", `Darstellung auf ${dunkel ? "Hell" : "Dunkel"} gestellt`,
+  );
+  const kopfKnopf = { height: "auto", minHeight: "var(--touch)", width: "var(--touch)", padding: 0, borderRadius: 14, background: T.weich, color: T.text, display: "inline-flex", alignItems: "center", justifyContent: "center" };
   return (
     <div
       data-test="app-shell"
@@ -203,17 +211,25 @@ export default function App() {
         <div data-test="version" style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           Version {APP_VERSION}
         </div>
-        <button data-test="suche-knopf" onClick={() => setSucheOffen(true)} aria-label="Suchen"
-          style={{ position: "absolute", right: 0, top: 2, height: "auto", minHeight: "var(--touch)",
-            padding: "6px 14px", background: T.weich, color: T.text, fontWeight: 700, fontSize: 18 }}>
-          🔍
-        </button>
+        <div style={{ position: "absolute", right: 0, top: 2, display: "flex", gap: 6 }}>
+          <button data-test="thema-schalter" onClick={themaWechseln} aria-label={dunkel ? "Hell einschalten" : "Dunkel einschalten"} style={kopfKnopf}>
+            <Icon name={dunkel ? "sun" : "moon"} size={22} />
+          </button>
+          <button data-test="nav-neu" onClick={() => navTo("neu")} aria-label="Was ist neu?"
+            style={{ ...kopfKnopf, background: route === "neu" ? "var(--primaer)" : T.weich, color: route === "neu" ? "var(--primaer-text)" : T.text }}>
+            <Icon name="sparkle" size={22} />
+          </button>
+          <button data-test="suche-knopf" onClick={() => setSucheOffen(true)} aria-label="Suchen" style={kopfKnopf}>
+            <Icon name="search" size={22} />
+          </button>
+        </div>
       </header>
       {sucheOffen && <Suche zu={() => setSucheOffen(false)} />}
 
       <main>
         {route === "neu" ? <WasIstNeu /> : route === "ueben" ? <Ueben /> :
          route === "spiele" ? <Spielhalle /> :
+         route === "training" ? <Training /> :
          route === "konz" ? <Konzentration /> :
          route === "sudoku" ? <Sudoku /> :
          route === "schrift" ? <Schrift /> :

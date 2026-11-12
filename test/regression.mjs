@@ -36,6 +36,24 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.85: Hub „Training" + Start-Diät + Kopf-Symbole ----------
+console.log("== v0.85: Hub Training ==");
+test("v0.85: Navigationspunkt Training mit Kacheln, Startseite ohne Einstiegs-Liste, Hell/Dunkel + Neu? im Kopf", (() => {
+  const app = quelle("src/App.jsx");
+  const tr = quelle("src/features/Training.jsx");
+  const st = quelle("src/features/Start.jsx");
+  return versionMindestens("0.85.0")
+    && app.includes('{ id: "training", label: "Training", icon: "target", test: "nav-training" }')
+    && app.includes('route === "training" ? <Training />') && app.includes('data-test="thema-schalter"') && app.includes('data-test="nav-neu"')
+    && !app.includes('{ id: "neu", label: "Neu?"') // Neu? ist Kopf-Symbol, kein Nav-Tab mehr
+    && tr.includes('data-test="training-seite"') && ["zum-konz", "zum-sudoku", "zum-schrift", "zum-aufsatz", "zum-kasten", "zum-doks"].every((t) => tr.includes(`"${t}"`))
+    && tr.includes('data-test="training-einstufung"')
+    && !st.includes('data-test="zum-sudoku"') && !st.includes('data-test="zum-eltern"') && !st.includes('data-test="thema-schalter"')
+    && st.includes('data-test="tipps-zeile"') && st.includes('data-test="mut-satz-oeffnen"') && st.includes('data-test="einstufung-start"')
+    && quelle("e2e/smoke.spec.js").includes('"nav-training"') && quelle("e2e/smoke.spec.js").includes("Startseite nahezu eine Bildschirmhöhe")
+    && releaseNoteVorhanden("rn-110");
+})());
+
 // ---------- v0.84.2: Ruhige Bühne, Etappe 3 – restliche Oberflächen ohne Deko-Emojis ----------
 console.log("== v0.84.2: Ruhige Bühne Etappe 3 ==");
 test("v0.84.2: Eltern/Wochenplan/Sperrbildschirm ohne Deko-Emojis, Leo-Marke in Sprechblasen, Schwierigkeit als Text", (() => {
@@ -58,7 +76,7 @@ test("v0.84.1: Startseite, Übungs-Auswahl und Kopfzeilen ohne Emojis, Zeichen j
   const ue = quelle("src/features/Ueben.jsx");
   return versionMindestens("0.84.1")
     && st.includes(">Hallo!<") && !st.includes("🪙 {data.lernstand.muenzen}") && !st.includes("🦁 Mut-Satz")
-    && st.includes('<Icon name={dunkel ? "sun" : "moon"}') && st.includes('<Icon name="wrench" size={20} /> Zum Elternbereich')
+    && (st + quelle("src/App.jsx")).includes('<Icon name={dunkel ? "sun" : "moon"}') // v0.85: Schalter im Kopf, Eltern-Knopf = Navigation
     && ue.includes("const FACH_ICON = {") && ue.includes("<Icon name={FACH_ICON[f.id]}") && !ue.includes("🎯 empfohlen")
     && !quelle("src/features/Eltern.jsx").includes("<h2>🔧 Elternbereich</h2>")
     && !quelle("src/features/Sudoku.jsx").includes("🧩 Sudoku-Training</h2>")
@@ -254,7 +272,7 @@ test("v0.79: Sudoku in Lern-Stufen (4x4 bis 9x9), eindeutige Raetsel, Regel-High
     && ui.includes("sudoku-zelle-") && ui.includes("sudoku-zahl-") && ui.includes("sudoku-hinweis")
     && ui.includes("leuchten") // Konflikt-Felder LEUCHTEN - die Regel wird sichtbar
     && quelle("src/App.jsx").includes('route === "sudoku"')
-    && quelle("src/features/Start.jsx").includes("zum-sudoku")
+    && (quelle("src/features/Start.jsx") + quelle("src/features/Training.jsx") + quelle("src/App.jsx")).includes("zum-sudoku") /* v0.85: Hub Training bzw. Navigation */
     && quelle("src/calc/migrateData.js").includes("sudokuStand")
     && quelle("src/calc/suche.js").includes("Sudoku-Training")
     && quelle("e2e/smoke.spec.js").includes("sudoku-fertig")
@@ -545,7 +563,7 @@ test("v0.61: verschlüsselte Doks-API (Server) + Ablage-Seite für Kind und Elte
     && seite.includes("dok-hochladen") && seite.includes("dok-oeffnen-") && seite.includes("tresor.elternModus")
     && quelle("src/features/Ueben.jsx").includes("original-dok")
     && quelle("src/calc/migrateData.js").includes("d.doks")
-    && quelle("src/features/Start.jsx").includes("zum-doks")
+    && (quelle("src/features/Start.jsx") + quelle("src/features/Training.jsx") + quelle("src/App.jsx")).includes("zum-doks") /* v0.85: Hub Training bzw. Navigation */
     && releaseNoteVorhanden("rn-077");
 })());
 
@@ -715,7 +733,7 @@ test("v0.51: Fundus-Aufgaben, Leitner-Logik, Kasten-Route, Karten-IDs, Migration
     && f.includes('data-test="kasten-start"') && f.includes("karte-gewusst") && f.includes("wiederholung")
     && a.includes('route === "kasten"') && a.includes('"kasten"].includes(route)')
     && quelle("src/calc/migrateData.js").includes("karteikasten")
-    && quelle("src/features/Start.jsx").includes('data-test="zum-kasten"')
+    && (quelle("src/features/Start.jsx") + quelle("src/features/Training.jsx") + quelle("src/App.jsx")).includes("zum-kasten") /* v0.85: Hub Training bzw. Navigation */
     && releaseNoteVorhanden("rn-065");
 })());
 
@@ -1181,7 +1199,7 @@ test("v0.26: Termine im Elternbereich + Datenmodell (wochenplan, termine)", (() 
     && quelle("src/calc/migrateData.js").includes("wochenplan")
     && quelle("src/calc/migrateData.js").includes("termine")
     && quelle("src/App.jsx").includes('route === "plan"')
-    && quelle("src/features/Start.jsx").includes('data-test="zum-plan"');
+    && (quelle("src/features/Start.jsx").includes('data-test="zum-plan"') || quelle("src/App.jsx").includes('"nav-plan"')) /* v0.85: Plan nur noch über die Navigation */;
 })());
 test("v0.26: keep_vars schützt Dashboard-Secrets vor Git-Deploys", (() => {
   return quelle("wrangler.jsonc").includes('"keep_vars": true')
@@ -1237,7 +1255,7 @@ test("v0.24: Aufsatz-Seite – Textarten, markierte Tipp-Stelle, Belohnung 1× a
 })());
 test("v0.24: Route + Start-Kachel + Eltern-Freigabe aufsatz scharf + Datenfeld", (() => {
   return quelle("src/App.jsx").includes('route === "aufsatz"')
-    && quelle("src/features/Start.jsx").includes('data-test="zum-aufsatz"')
+    && (quelle("src/features/Start.jsx") + quelle("src/features/Training.jsx") + quelle("src/App.jsx")).includes("zum-aufsatz") /* v0.85: Hub Training bzw. Navigation */
     && /\{ key: "aufsatz",[^\n]*da: true/.test(quelle("src/features/Eltern.jsx"))
     && quelle("src/calc/migrateData.js").includes("lernstand.aufsatz");
 })());
@@ -1289,7 +1307,7 @@ test("v0.23: Schrift-Seite – Satz des Tages, Mut-Satz-Vorrang, Foto-Verkleiner
 })());
 test("v0.23: Route + Start-Kachel + Eltern-Freigabe scharf, Belohnung nur 1× am Tag", (() => {
   return quelle("src/App.jsx").includes('route === "schrift"')
-    && quelle("src/features/Start.jsx").includes('data-test="zum-schrift"')
+    && (quelle("src/features/Start.jsx") + quelle("src/features/Training.jsx") + quelle("src/App.jsx")).includes("zum-schrift") /* v0.85: Hub Training bzw. Navigation */
     && /\{ key: "schrift",[^\n]*da: true/.test(quelle("src/features/Eltern.jsx"))
     && quelle("src/features/Schrift.jsx").includes("schonHeute ? {} :");
 })());
@@ -1684,7 +1702,7 @@ test("v0.12: Mut-Satz des Tages auf der Startseite (einer pro Tag, Original-Sät
     && quelle("src/calc/migrateData.js").includes("mutSatz");
 })());
 test("v0.12: Einstieg über die Startseite, Route ohne 6. Nav-Tab", (() => {
-  return quelle("src/features/Start.jsx").includes('data-test="zum-konz"')
+  return (quelle("src/features/Start.jsx") + quelle("src/features/Training.jsx") + quelle("src/App.jsx")).includes("zum-konz") /* v0.85: Hub Training bzw. Navigation */
     && quelle("src/App.jsx").includes('route === "konz"')
     && !quelle("src/App.jsx").includes('id: "konz"');
 })());
