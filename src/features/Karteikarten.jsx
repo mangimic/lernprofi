@@ -113,7 +113,7 @@ export default function Karteikarten() {
       `}</style>
 
       <div className="nur-schirm" style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
-        <h2 style={{ margin: "0 0 4px" }}>🗃️ Karteikarten zum Ausdrucken</h2>
+        <h2 style={{ margin: "0 0 4px" }}>Karteikarten zum Ausdrucken</h2>
         <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           4 Karten pro A4-Blatt. <b>Beidseitig drucken</b> („an der langen Kante spiegeln/wenden“) –
           dann liegt jede Antwort genau hinter ihrer Frage. An den gestrichelten Linien schneiden.

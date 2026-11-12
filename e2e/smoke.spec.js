@@ -662,7 +662,7 @@ test("Eltern-Werkzeuge: Spiel ausblenden, Münzen aus, Zeitlimit sperrt freundli
   await page.getByTestId("pin-eingabe").fill(PIN);
   await page.getByTestId("pin-ok").click();
   await expect(page.getByTestId("start-seite")).toBeVisible();
-  await expect(page.getByTestId("tages-stand")).toContainText("⏰ noch");
+  await expect(page.getByTestId("tages-stand")).toContainText("noch");
   await expect(page.getByTestId("zeit-sperre")).toBeVisible({ timeout: 15000 });
   await expect(page.getByTestId("zeit-sperre")).toContainText("Lernzeit für heute ist geschafft");
 
@@ -821,9 +821,9 @@ test("Einstufungstest: adaptiv testen, Stufen einstellen, Trainingsplan führt z
   await expect(page.getByTestId("trainingsplan")).toBeVisible(); // 🧭 zurück zur Herkunft (Start), nicht in der Bereichs-Wahl
   await page.getByTestId("nav-ueben").click();
   // 🎯-Abzeichen: an der Gruppe UND am Bereich, Mathe nach Einstufung auf Stufe 3
-  await expect(page.getByTestId("gruppe-schreiben")).toContainText("🎯 empfohlen");
+  await expect(page.getByTestId("gruppe-schreiben")).toContainText("empfohlen");
   await page.getByTestId("gruppe-schreiben").click();
-  await expect(page.getByTestId("bereich-dd")).toContainText("🎯 empfohlen");
+  await expect(page.getByTestId("bereich-dd")).toContainText("empfohlen");
   await page.getByTestId("ueben-fach-mathe").click();
   await expect(page.getByTestId("bereich-mzahlen")).toContainText("Stufe 3");
 });
@@ -931,7 +931,7 @@ test("Schreib-Training: Satz des Tages, Foto → Leos Schrift-Blick, Schrift-Rei
   await expect(page.getByTestId("blatt-anzeige")).toHaveCount(0);
 
   await page.getByTestId("schrift-zurueck").click();
-  await expect(page.getByTestId("tages-stand")).toContainText("🪙 1 Münze");
+  await expect(page.getByTestId("tages-stand")).toContainText("1 Münze");
 });
 
 test("Aufsatz-Check: Textart wählen, Foto → 2 Sterne + markierte Stelle + Mach-Aufgabe + Münze", async ({ page }) => {
@@ -976,7 +976,7 @@ test("Aufsatz-Check: Textart wählen, Foto → 2 Sterne + markierte Stelle + Mac
   await page.getByTestId("aufsatz-fertig").click();
   await expect(page.getByTestId("aufsatz-heute-fertig")).toBeVisible();
   await page.getByTestId("aufsatz-zurueck").click();
-  await expect(page.getByTestId("tages-stand")).toContainText("🪙 1 Münze");
+  await expect(page.getByTestId("tages-stand")).toContainText("1 Münze");
 });
 
 test("Wochenbericht + persönliche Übungssätze: Eltern geben frei, prüfen und spielen ein", async ({ page }) => {
@@ -1263,13 +1263,13 @@ test("Wochenplan: Termin, Bausteine per Antippen, 🦁-Wächter-Ampel, Plan übe
     await page.getByTestId("heute-haken").first().click();
   }
   await expect(page.getByTestId("heute-geschafft")).toContainText("Münze");
-  await expect(page.getByTestId("tages-stand")).toContainText("🪙 1 Münze");
+  await expect(page.getByTestId("tages-stand")).toContainText("1 Münze");
   // ↩︎ Abhaken rückgängig: Haken weg, „geschafft" verschwindet – erneutes Haken gibt KEINE zweite Münze/Mission
   await page.getByTestId("heute-unhaken").first().click();
   await expect(page.getByTestId("heute-geschafft")).toHaveCount(0);
   await page.getByTestId("heute-haken").first().click();
   await expect(page.getByTestId("heute-geschafft")).toBeVisible();
-  await expect(page.getByTestId("tages-stand")).toContainText("🪙 1 Münze");
+  await expect(page.getByTestId("tages-stand")).toContainText("1 Münze");
   await page.getByTestId("nav-plan").click();
   await expect(page.getByTestId("plan-bilanz")).toBeVisible();
 

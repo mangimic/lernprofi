@@ -77,7 +77,7 @@ export default function KartenKasten() {
     return (
       <div data-test="kasten-seite">
         <div data-test="kasten-ergebnis" style={karteCss}>
-          <h2 style={{ marginTop: 0 }}>🎉 Runde geschafft!</h2>
+          <h2 style={{ marginTop: 0 }}>Runde geschafft!</h2>
           <p><b>{runde.gewusst} von {runde.gesamt}</b> gewusst · 🪙 +1 Münze (jetzt {data.lernstand.muenzen})</p>
           <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
             🏆 Im „sitzt!“-Fach liegen jetzt <b>{kastenZaehler(alleKarten, data.lernstand.karteikasten.stand)[3]}</b> Karten.
@@ -209,7 +209,7 @@ export default function KartenKasten() {
   return (
     <div data-test="kasten-seite">
       <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
-        <h2 style={{ margin: "0 0 4px" }}>🗃️ Leos Karteikasten</h2>
+        <h2 style={{ margin: "0 0 4px" }}>Leos Karteikasten</h2>
         <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           „Gewusst“ → die Karte wandert ein Fach weiter. „Nochmal“ → zurück in Fach 1.
           So übst du automatisch genau das, was noch wackelt.

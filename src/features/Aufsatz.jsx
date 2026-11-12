@@ -63,7 +63,7 @@ export default function Aufsatz() {
   return (
     <div data-test="aufsatz-seite">
       <div style={karte}>
-        <h2 style={{ margin: "0 0 4px" }}>✍️ Aufsatz-Check</h2>
+        <h2 style={{ margin: "0 0 4px" }}>Aufsatz-Check</h2>
         <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           Dein Aufsatz entsteht auf Papier – Leo liest ihn vom Foto und zeigt dir
           2 Stärken und EINE Stelle, die noch besser geht. Keine Fehlerliste, versprochen.

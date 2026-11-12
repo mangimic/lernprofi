@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-108",
+    "version": "0.84.1",
+    "datum": "2026-11-12",
+    "titel": "Ruhige Bühne, Etappe 2",
+    "entries": [
+      {
+        "type": "verbessert",
+        "text": "🎨 Zweite Etappe des neuen Gesichts: Alle Karten der Startseite, die Fach- und Bereichs-Auswahl beim Üben sowie die Überschriften von Plan, Elternbereich, Sudoku, Schreib-Training, Aufsatz-Check, Karteikasten, Kompass und Sperrbildschirm kommen jetzt ohne Emojis aus. Fächer tragen eigene Zeichen, Leo erscheint als Marke, Hinweise werden leiser."
+      },
+      {
+        "type": "hinweis",
+        "text": "🧭 Noch unverändert: Emojis in Aufgabentexten, Spiel-Dialogen und Release-Notes – die folgen in der nächsten Etappe."
+      }
+    ]
+  },
+  {
     "id": "rn-107",
     "version": "0.84.0",
     "datum": "2026-11-12",

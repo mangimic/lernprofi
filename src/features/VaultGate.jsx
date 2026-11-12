@@ -179,7 +179,7 @@ export default function VaultGate() {
       <div data-test="gate-willkommen" style={{ maxWidth: 480, margin: "0 auto", padding: "0 16px" }}>
         {kopf}
         <Karte>
-          <h2 style={{ marginTop: 0 }}>Willkommen! 👋</h2>
+          <h2 style={{ marginTop: 0 }}>Willkommen!</h2>
           <p style={{ color: T.textLeise }}>
             Die Lern-App, in der Leo 🦁 dein Kind durch seine Lieblings-Welten
             begleitet – verschlüsselt, werbefrei, für Klasse 3 und 4.
@@ -203,7 +203,7 @@ export default function VaultGate() {
       <div data-test="gate-rettung" style={{ maxWidth: 480, margin: "0 auto", padding: "0 16px" }}>
         {kopf}
         <Karte>
-          <h2 style={{ marginTop: 0 }}>🧯 Passwort vergessen</h2>
+          <h2 style={{ marginTop: 0 }}>Passwort vergessen</h2>
           <p style={{ color: T.textLeise }}>
             Mit eurem <b>Wiederherstellungs-Code</b> (der ausgedruckte Zettel)
             meldet sich dieses Gerät an, holt den verschlüsselten Tresor und
@@ -236,7 +236,7 @@ export default function VaultGate() {
       <div data-test="gate-anmelden" style={{ maxWidth: 480, margin: "0 auto", padding: "0 16px" }}>
         {kopf}
         <Karte>
-          <h2 style={{ marginTop: 0 }}>👪 Mit Familien-Konto anmelden</h2>
+          <h2 style={{ marginTop: 0 }}>Mit Familien-Konto anmelden</h2>
           <p style={{ color: T.textLeise }}>
             Für Familien, die schon ein Konto haben: Dieses Gerät holt den
             <b> verschlüsselten</b> Tresor vom Server und entsperrt ihn mit
@@ -374,7 +374,7 @@ export default function VaultGate() {
         </Karte>
       ) : (
         <Karte>
-          <h2 style={{ marginTop: 0 }}>🧯 Passwort vergessen</h2>
+          <h2 style={{ marginTop: 0 }}>Passwort vergessen</h2>
           <p style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
             Euer <b>Wiederherstellungs-Code</b> (der ausgedruckte Zettel) öffnet den
             Tresor auf diesem Gerät – und ihr vergebt ein <b>neues</b> Eltern-Passwort.

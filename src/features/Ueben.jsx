@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Icon, LeoMark } from "./Icon.jsx";
 import { useApp } from "../appContext.jsx";
 import { MATHE_DATEN, MATHE_BEREICHE } from "../calc/aufgaben/mathe.js";
 import { SACH_DATEN, SACH_BEREICHE } from "../calc/aufgaben/sachkunde.js";
@@ -137,6 +138,8 @@ function ZeitStrahl() {
   );
 }
 
+// Zeichen je Fach (Designrichtung „Ruhige Bühne": eigene Zeichen statt Emojis)
+const FACH_ICON = { deutsch: "book", mathe: "numbers", sachkunde: "compass", stark: "heart" };
 function faecherBauen(thema) {
   return [
     { id: "deutsch", emoji: "📗", name: "Deutsch", bereiche: DEUTSCH_LISTE, daten: deutschDaten(thema) },
@@ -368,7 +371,7 @@ export default function Ueben() {
     return (
       <div data-test="runde-ergebnis">
         <div style={karte}>
-          <h2 style={{ marginTop: 0 }}>🎉 Runde geschafft!</h2>
+          <h2 style={{ marginTop: 0 }}>Runde geschafft!</h2>
           <p><b>{runde.geloest} von {runde.aufgaben.length}</b> richtig · 🪙 +1 Münze (jetzt {data.lernstand.muenzen})</p>
           {runde.ergebnis.stufeNeu && <p style={{ color: T.ok }}>⭐ Stark – Stufe {runde.stufe + 1} ist freigeschaltet!</p>}
           {runde.ergebnis.krone && <p style={{ color: T.ok }}>👑 Krone! Du hast die höchste Stufe fehlerfrei gemeistert.</p>}
@@ -670,18 +673,18 @@ export default function Ueben() {
         {faecher.map((f) => (
           <button key={f.id} data-test={`ueben-fach-${f.id}`} onClick={() => { setFachId(f.id); setGruppe(null); }}
             style={{
-              flex: 1, fontWeight: 700, padding: "0 4px",
+              flex: 1, fontWeight: 800, padding: "0 4px", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
               background: f.id === fachId ? T.primaer : T.weich,
               color: f.id === fachId ? T.primaerText : T.text,
             }}>
-            {f.emoji} {f.name}
+            <Icon name={FACH_ICON[f.id]} size={20} /> {f.name}
           </button>
         ))}
       </div>
       {fachId === "deutsch" && !gruppe && (
         <div style={{ ...karte, paddingTop: 12, paddingBottom: 12 }}>
           <p style={{ margin: "0 0 8px", fontSize: "var(--schrift-klein)" }}>
-            <b>🎨 Deine Übungs-Welt</b> <span style={{ color: T.textLeise }}>– für die Satz-Übungen (Subjekte bis Die 4 Fälle)</span>
+            <b>Deine Übungs-Welt</b> <span style={{ color: T.textLeise }}>– für die Satz-Übungen (Subjekte bis Die 4 Fälle)</span>
           </p>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {/* Lieblings-Welten (aus dem Interessen-Picker) stehen vorn */}
@@ -710,11 +713,11 @@ export default function Ueben() {
             : aktiveStufe(fortschritt, data.profil.klasse, fach.daten[b.key], stufenVorgabe(data.einstellungen, b.key));
           return (
             <button key={b.key} data-test={`bereich-${b.key}`} onClick={() => starten(b)}
-              style={{ ...karte, width: "100%", textAlign: "left", display: "block", border: `1px solid ${T.rand}` }}>
-              <b>{b.emoji} {b.name}</b>
-              <span style={{ float: "right", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-                {istEmpfohlen(b.key, data.lernstand.einstufung, data.profil.schwerpunkte) ? "🎯 empfohlen · " : ""}
-                {stufe === null ? "✏️ Üben + Schreiben" : <>🎯 Stufe {stufe}{fortschritt?.krone ? " 👑" : ""}</>}
+              style={{ ...karte, width: "100%", textAlign: "left", display: "block", boxShadow: "var(--schatten)" }}>
+              <b>{b.name}</b>
+              <span style={{ float: "right", color: T.textLeise, fontSize: "var(--schrift-klein)", fontWeight: 700 }}>
+                {istEmpfohlen(b.key, data.lernstand.einstufung, data.profil.schwerpunkte) ? "empfohlen · " : ""}
+                {stufe === null ? "Üben + Schreiben" : <>Stufe {stufe}{fortschritt?.krone ? " · Krone" : ""}</>}
               </span>
             </button>
           );
@@ -724,8 +727,8 @@ export default function Ueben() {
         const leoKnopf = fach.bereiche.length > 1 && wahl && (
           <button data-test="leo-wahl" onClick={() => starten(wahl)}
             style={{ ...karte, width: "100%", textAlign: "left", display: "block", background: T.primaer, color: T.primaerText, border: "none" }}>
-            <b>🦁 Einfach loslegen – Leo wählt für dich</b>
-            <span style={{ float: "right", fontSize: "var(--schrift-klein)", opacity: 0.9 }}>heute: {wahl.emoji} {wahl.name}</span>
+            <b style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><LeoMark size={24} /> Einfach loslegen – Leo wählt für dich</b>
+            <span style={{ float: "right", fontSize: "var(--schrift-klein)", opacity: 0.9 }}>heute: {wahl.name}</span>
           </button>
         );
         if (fachId !== "deutsch") {
@@ -739,7 +742,7 @@ export default function Ueben() {
                 style={{ background: "transparent", color: T.textLeise, fontSize: "var(--schrift-klein)", paddingLeft: 0 }}>
                 ← Alle Gruppen
               </button>
-              <p style={{ margin: "4px 0 8px", fontWeight: 800 }}>{g.emoji} {g.name}</p>
+              <p style={{ margin: "4px 0 8px", fontWeight: 800 }}>{g.name}</p>
               {g.felder.map((key) => fach.bereiche.find((b) => b.key === key)).filter(Boolean).map(bereichKnopf)}
             </>
           );
@@ -755,11 +758,11 @@ export default function Ueben() {
               return (
                 <button key={g.key} data-test={`gruppe-${g.key}`}
                   onClick={() => (felder.length === 1 ? starten(felder[0]) : setGruppe(g.key))}
-                  style={{ ...karte, width: "100%", textAlign: "left", display: "block", border: `1px solid ${T.rand}` }}>
-                  <b>{g.emoji} {g.name}</b>
-                  <span style={{ float: "right", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-                    {empfohlen ? "🎯 empfohlen · " : ""}
-                    {felder.length === 1 ? "los geht’s!" : `${felder.length} Übungen`}{kronen > 0 ? ` · 👑 ${kronen}` : ""}
+                  style={{ ...karte, width: "100%", textAlign: "left", display: "block", boxShadow: "var(--schatten)" }}>
+                  <b>{g.name}</b>
+                  <span style={{ float: "right", color: T.textLeise, fontSize: "var(--schrift-klein)", fontWeight: 700 }}>
+                    {empfohlen ? "empfohlen · " : ""}
+                    {felder.length === 1 ? "los geht’s!" : `${felder.length} Übungen`}{kronen > 0 ? ` · ${kronen} ${kronen === 1 ? "Krone" : "Kronen"}` : ""}
                   </span>
                 </button>
               );

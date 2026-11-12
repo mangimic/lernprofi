@@ -76,7 +76,7 @@ export default function Schrift() {
   return (
     <div data-test="schrift-seite">
       <div style={karte}>
-        <h2 style={{ margin: "0 0 4px" }}>🖐️ Schreib-Training</h2>
+        <h2 style={{ margin: "0 0 4px" }}>Schreib-Training</h2>
         <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           Ein Satz am Tag – mit der Hand, auf Papier. Das macht deine Schrift stark.
         </p>
