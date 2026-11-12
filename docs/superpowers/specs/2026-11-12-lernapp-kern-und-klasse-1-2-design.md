@@ -1,6 +1,6 @@
 # Lern-App-Kern für neue Familien + Klasse 1 und 2 – Spezifikation (v0.86 ff.)
 
-Stand: 12.11.2026 · Status: Entwurf zur Freigabe.
+Stand: 12.11.2026 · Status: Entwurf zur Freigabe (Prüfer-Durchgang eingearbeitet).
 
 ## Warum
 
@@ -84,19 +84,29 @@ stehen dem heute entgegen:
 - Migration: vorhandene Dokumente behalten `festeTermine` (schon als Array
   gespeichert); `schule` wird mit dem Default ergänzt. Kein Rückgriff auf
   Konstanten mehr (Zeile ~205 in `migrateData.js`).
-- Kommentare mit dem Vornamen (9 Stellen) → „das Kind“. Regressions-Check
-  v0.1 („keine echten Kind-Daten“) wird um die Dateien erweitert, die
-  bisher ausgenommen waren.
+- „Mittag & Spielzeit 13–14 Uhr“ (`mittagErzwingen`) wird zur Einstellung
+  `einstellungen.schule.mittag` (bool): bestehende Dokumente `true`, neue
+  `false`. Die Familienregel bleibt bei euch, fremde Familien bekommen
+  keinen Pflichtblock.
+- Kommentare mit dem Vornamen (11 Stellen in `src`, 1 in `e2e`, 5 in
+  `docs`) → „das Kind“. Regressions-Check v0.1 („keine echten Kind-Daten“)
+  prüft statt einer Einschlussliste von 5 Dateien alle Dateien unter
+  `src`, `server`, `e2e`, `test` und `docs` per Verzeichnis-Scan.
 - Smoke-Test „Wochenplan: Termin, Bausteine …“ und Kompass-Countdown legen
   ihre Termine selbst an statt auf Defaults zu bauen.
 
 ### B. Modul-Schalter (Etappe 1, gleicher PR)
 
 - `einstellungen.module = { plan: bool, ki: bool, schrift: bool }`.
-  Default in `leeresDokument`: alle `false`. Migration: Dokument mit
-  `version < 0.86` (also jedes bestehende) → alle `true`. Damit ist eure
-  Familie auf allen Geräten frei (das Dokument synchronisiert), jede neue
-  Familie startet im Kern.
+  Default in `leeresDokument`: alle `false`. Migration: ein Dokument, das
+  `einstellungen` schon hat, aber noch kein `module` → alle `true`;
+  gleichzeitig `schemaVersion` 1 → 2, damit künftige Dokumente eindeutig
+  erkennbar sind. Begründung: Heute gibt es im Speicher genau ein Konto
+  (eures, per KV geprüft am 12.11.), und „Lernstand aus Datei übernehmen“
+  importiert nur Alt-Dateien eurer eigenen Alt-App – beide dürfen den
+  Vollausbau. Damit ist eure Familie auf allen Geräten frei (das Dokument
+  synchronisiert), jede neue Familie startet im Kern. Bewusst nicht an die
+  Konto-Art `stamm` gebunden: die wäre offline nicht da.
 - Wirkung:
   - `plan: false` → kein Nav-Tab „Plan“, Route `plan`/`kompass` fällt auf
     Start zurück; Start ohne Heute-Plan-Karte, Kompass-Countdown und
@@ -124,8 +134,23 @@ stehen dem heute entgegen:
   mit Listen und Daten; 1/2 bekommen ihre eigenen Listen (unten), 3/4 die
   heutigen. `Ueben.faecherBauen`, `Einstufung`, `spiele/fragen.js`,
   `suche.js`, `jetztDran.feldTitel` und `leoWahl` ziehen daraus.
-- Stufen: Pools weiterhin `{ easy, hard }`; `stufenStart(klasse, pool)`
-  startet Klasse 2 auf Stufe 2 analog zu Klasse 4 (Klasse 1 auf 1).
+- Stufen: Pools weiterhin `{ easy, hard }`. Für Klasse 1 und 2 heißt
+  `easy` = Stoff des 1. Halbjahrs, `hard` = Stoff des 2. Halbjahrs (z. B.
+  Plus ohne / mit Zehnerübergang). Beide Klassen starten auf Stufe 1
+  (`stufenStart` bleibt nur für Klasse 4 bei 2) – die zweite Hälfte wird
+  wie heute durch eine fehlerfreie Runde freigeschaltet, die Kennenlern-
+  Runde kann sie direkt setzen.
+- Eltern-Fragebogen „Wo hakt es?“ (`SCHWERPUNKTE` in `onboarding.js`) wird
+  klassenabhängig: Klasse 1 → Lesen (k1lesen), Laute (k1anlaut), Zahlen
+  (k1zahlen), Rechnen (k1plus), Stark; Klasse 2 → Lesen (k2lesen),
+  Schreiben (k2nomen, k2verlaengern), Rechnen (k2plus), Einmaleins
+  (k2einmaleins), Stark; 3/4 wie heute. `jetztDran`/`istEmpfohlen` ziehen
+  daraus. Ein Klassenwechsel im Eltern-Bereich (neu: vier Knöpfe) setzt
+  `einstufung` und `schwerpunkte` zurück, Münzen und Spielstände bleiben.
+- Training für Klasse 1/2: Kachel „Karteikasten“ entfällt (Karten sind
+  Kompass-4-Stoff); Konzentration behält Zahlenkette und ABC, „Blitzlesen“
+  zieht aus dem Wort-Pool der Klasse (K1: k1lesen, K2: k2nomen +
+  k2verlaengern).
 - Kennenlern-Runde: `EINSTUFUNG_FELDER` wird klassenabhängig (je 6 Felder,
   siehe Listen, Spalte „K“).
 - Spiele: `spielMatheFrage`/`spielFrage` ziehen aus den Klassen-Pools
@@ -138,8 +163,10 @@ stehen dem heute entgegen:
 ### D. Inhalte Klasse 1 (Etappe 2) – Bildungsplan BW, Klasse 1
 
 Aufgabenformat wie heute (`{ f, r, x[], tipp, bild? }`), je Bereich ≥ 24
-easy / ≥ 20 hard, Zahlen-Aufgaben aus Generatoren mit festem Seed (wie
-`uhrzeit.js`), Wörter aus gepflegten Listen. Bild-Aufgaben nutzen
+easy / ≥ 20 hard. Zahlen-Aufgaben erzeugt ein Generator einmal beim Laden
+deterministisch (`rngAusSeed`/`mischen` aus `src/calc/rng.js`, fester Seed
+je Bereich), damit Pakete und Tests stabil bleiben; Wörter kommen aus
+gepflegten Listen. Bild-Aufgaben nutzen
 `AufgabenBild.jsx` (neu: Zwanzigerfeld, Münzen, Formen; vorhanden: Uhr,
 Blöcke).
 
@@ -198,6 +225,10 @@ K = Feld der Kennenlern-Runde dieser Klasse (je 3 Deutsch + 3 Mathe).
 - Datentexte für 1/2 sind kurz (Frage ≤ 60 Zeichen), Aufgaben können ein
   Feld `sprich` tragen, wenn der Vorlesetext vom Anzeigetext abweicht
   („Mit welchem Laut beginnt Affe?“ statt Emoji).
+- Spiele (Vanilla-JS, `seeAbenteuer.js`, `blockwelt.js`, `matchEngine.js`)
+  bekommen die Klasse und die Vorlesen-Einstellung übergeben und rufen
+  dasselbe Modul: Lautsprecher-Knopf neben der Frage, bei „auto“ wird die
+  Frage beim Erscheinen vorgelesen. Damit gilt das Anti-Ziel auch dort.
 - Ohne Sprachausgabe (seltene Browser): Knopf ausgeblendet, kein Fehler.
 
 ### G. Tests
