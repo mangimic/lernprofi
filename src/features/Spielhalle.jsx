@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Icon } from "./Icon.jsx";
 import { useApp } from "../appContext.jsx";
 import { spielStartbar, muenzeEinloesen } from "../calc/spiele.js";
 import { spielAktiv } from "../calc/elternWerkzeuge.js";
@@ -193,67 +194,98 @@ export default function Spielhalle() {
 
   return (
     <div data-test="spielhalle">
-      <div style={karte}>
-        <h2 style={{ marginTop: 0 }}>🎮 Spielhalle</h2>
-        <p style={{ color: T.textLeise }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12, marginBottom: T.abstand, flexWrap: "wrap" }}>
+        <div>
+          <div style={{ fontSize: "var(--schrift-klein)", fontWeight: 700, color: T.textLeise }}>Spielhalle</div>
+          <h2 style={{ margin: "2px 0 0", fontSize: "var(--schrift-titel)", lineHeight: 1.1 }}>Deine Welten</h2>
+        </div>
+        <div data-test="spielhalle-stand" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 16px", borderRadius: 999, background: T.karte, boxShadow: "var(--schatten)", fontWeight: 900 }}>
+          <Icon name="coin" size={22} style={{ color: "var(--primaer)" }} />
           {muenzenAn
-            ? <>Ein Spielbesuch kostet <b>1 🪙 Münze</b> – Münzen verdienst du beim Üben
-              (1 Runde = 1 Münze). Du hast gerade <b data-test="spielhalle-muenzen">{muenzen}</b> {muenzen === 1 ? "Münze" : "Münzen"}.</>
-            : <>🎟️ Freie Fahrt: Die Münz-Freischaltung ist gerade ausgeschaltet – viel Spaß!</>}
-        </p>
+            ? <><b data-test="spielhalle-muenzen">{muenzen}</b> {muenzen === 1 ? "Münze" : "Münzen"}</>
+            : <>Freie Fahrt</>}
+        </div>
       </div>
+      <p style={{ margin: "0 0 14px", color: T.textLeise, fontSize: "var(--schrift-klein)", fontWeight: 700 }}>
+        {muenzenAn
+          ? "Eine Münze pro Spiel – Münzen verdienst du beim Üben (1 Runde = 1 Münze). Deine Lieblings-Welten stehen vorn."
+          : "Die Münz-Freischaltung ist gerade ausgeschaltet – viel Spaß!"}
+      </p>
       {(() => {
         // 🎨 Spiele-Katalog mit Welten-Zuordnung: Spiele aus den
         // Lieblings-Welten des Kindes stehen vorn (mit ⭐ markiert).
         const matches = (id, wort = "Match") => (matchRunden(id)
           ? ` · ${matchRunden(id)} ${wort}${matchRunden(id) === 1 || wort === "Rennen" ? "" : "es"}` : "");
         const KATALOG = [
-          { id: "see", welt: "angeln", name: "🎣 See-Abenteuer",
+          { id: "see", welt: "angeln", name: "See-Abenteuer",
             text: "Lauf um den See, wirf die Angel aus und fang alle Fische – vom flinken Barsch bis zum Hecht, der sich dreimal wehrt!",
             extra: () => "" },
-          { id: "blockwelt", welt: "gaming", name: "⛏️ Blockwelt",
+          { id: "blockwelt", welt: "gaming", name: "Blockwelt",
             text: "Bau deine eigene Welt! Blöcke verdienst du mit Fragen, die Werkstatt schaltet Tiere, Möbel und 💥 TNT frei – deine Welt bleibt gespeichert.",
             extra: () => (data.lernstand.blockwelt?.verdient ? ` · 🎁 ${data.lernstand.blockwelt.verdient}` : "") },
-          { id: "tennis", welt: "tennis", name: "🎾 Tennis-Match",
+          { id: "tennis", welt: "tennis", name: "Tennis-Match",
             text: "Richtige Antwort = Punkt (15–30–40–Spiel), 2 Spiele gewinnen das Match – mit Coach Leo als Mutmacher an deiner Seite!",
             extra: () => matches("tennis") },
-          { id: "fussball", welt: "fussball", name: "⚽ Fußball-Match",
+          { id: "fussball", welt: "fussball", name: "Fußball-Match",
             text: "2 Halbzeiten mit je 5 Torchancen: richtig = TOOOR, falsch = Konter – bei Gleichstand entscheidet ein Elfmeter!",
             extra: () => matches("fussball") },
-          { id: "fischen", welt: "angeln", name: "🎣 Angel-Wettfischen",
+          { id: "fischen", welt: "angeln", name: "Angel-Wettfischen",
             text: "Wettfischen am See: richtig = der Fisch landet in DEINEM Eimer, falsch = er entwischt zum Gegner. Bei Gleichstand entscheidet der große Hecht!",
             extra: () => matches("fischen", "Wettfischen") },
-          { id: "dino", welt: "dinos", name: "🦖 Dino-Rennen",
+          { id: "dino", welt: "dinos", name: "Dino-Rennen",
             text: "Renn durchs Urzeit-Tal: richtig = Riesensprung für deinen Dino, falsch = der Gegner sprintet. 2 Runden – bei Gleichstand gibt's ein Foto-Finish!",
             extra: () => matches("dino", "Rennen") },
-          { id: "rakete", welt: "weltraum", name: "🚀 Raketen-Rennen",
+          { id: "rakete", welt: "weltraum", name: "Raketen-Rennen",
             text: "Wettflug zum Mond: richtig = voller Schub, falsch = der Gegner zieht davon. 2 Etappen mit Boxenstopp an der Raumstation!",
             extra: () => matches("rakete", "Rennen") },
-          { id: "schach", welt: null, name: "♟️ Schach",
+          { id: "schach", welt: null, name: "Schach",
             text: "Schach-Schule mit deinen Eröffnungen, Taktik-Aufgaben zum Antippen und echtes Schach gegen den Computer – mit Tipp und Zug-Zurück.",
             extra: () => "" },
         ];
         const interessen = data.profil.interessen || [];
         const lieblings = (sp) => !!sp.welt && interessen.includes(sp.welt);
         const sortiert = [...KATALOG].sort((a, b) => (lieblings(b) ? 1 : 0) - (lieblings(a) ? 1 : 0));
-        return sortiert.filter((sp) => sichtbar(sp.id)).map((sp) => (
-          <button key={sp.id} data-test={`spiel-${sp.id}`} onClick={() => starten(sp.id, sp.name.slice(sp.name.indexOf(" ") + 1))} disabled={!startbar}
-            style={{ ...karte, width: "100%", textAlign: "left", display: "block", border: `1px solid ${T.rand}`, opacity: startbar ? 1 : 0.6 }}>
-            <b>{sp.name}</b>
-            <span style={{ float: "right", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-              {lieblings(sp) ? "⭐ Deine Welt · " : ""}
-              {!muenzenAn ? "🎟️ Frei" : startbar ? "🪙 1 Münze einlösen" : "🔒 Übe für 1 Münze"}
-              {sp.extra()}
-            </span>
-            <p style={{ margin: "6px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-              {sp.text}
-            </p>
-          </button>
-        ));
+        // 🎨 Farbklima je Welt (Designrichtung „Ruhige Bühne"): Gold trägt Tinte-Text, der Rest Weiß.
+        const FARBE = { angeln: "var(--see)", dinos: "var(--ok)", weltraum: "var(--tinte)", fussball: "var(--primaer)", tennis: "#2F8A69", gaming: "#4B5D73" };
+        const ZEICHEN = { see: "compass", fischen: "flag", blockwelt: "puzzle", tennis: "target", fussball: "target", dino: "play", rakete: "sparkle", schach: "puzzle" };
+        return (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 14, marginBottom: T.abstand }}>
+            {sortiert.filter((sp) => sichtbar(sp.id)).map((sp) => {
+              const farbe = sp.welt ? FARBE[sp.welt] : null;
+              const hell = farbe === "var(--primaer)";
+              const textFarbe = !farbe ? T.text : hell ? "var(--primaer-text)" : "#fff";
+              const leise = !farbe ? T.textLeise : hell ? "rgba(30,42,58,0.75)" : "rgba(255,255,255,0.82)";
+              return (
+                <button key={sp.id} data-test={`spiel-${sp.id}`} onClick={() => starten(sp.id, sp.name)} disabled={!startbar}
+                  style={{
+                    textAlign: "left", display: "flex", flexDirection: "column", gap: 8, minHeight: 170, padding: 18,
+                    borderRadius: 26, background: farbe || T.karte, color: textFarbe,
+                    boxShadow: farbe ? "none" : "var(--schatten)", opacity: startbar ? 1 : 0.6,
+                  }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                    <Icon name={ZEICHEN[sp.id] || "sparkle"} size={28} weite={2} />
+                    {lieblings(sp) && (
+                      <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: "0.08em", textTransform: "uppercase", padding: "4px 10px", borderRadius: 999, background: hell ? "rgba(30,42,58,0.14)" : "rgba(255,255,255,0.22)" }}>
+                        Deine Welt
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ flex: 1 }} />
+                  <div style={{ fontSize: "var(--schrift-gross)", fontWeight: 900, lineHeight: 1.1 }}>{sp.name}</div>
+                  <div style={{ color: leise, fontSize: "var(--schrift-klein)", fontWeight: 700, lineHeight: 1.35 }}>{sp.text}</div>
+                  <div style={{ color: leise, fontSize: 12, fontWeight: 800 }}>
+                    {!muenzenAn ? "Frei" : startbar ? "1 Münze einlösen" : "Übe für 1 Münze"}
+                    {sp.extra()}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        );
       })()}
       {!startbar && (
         <button data-test="zum-ueben-aus-halle" onClick={() => navTo("ueben")} style={primaer}>
-          ✏️ Erst eine Runde üben
+          Erst eine Runde üben
         </button>
       )}
     </div>

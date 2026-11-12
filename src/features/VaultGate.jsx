@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { LeoMark } from "./Icon.jsx";
 import { useApp } from "../appContext.jsx";
 import { kontoRegistrieren, kontoAnmelden, kontoAnmeldenMitCode, kontoPasswortSetzen, kontoStatus, emailNormal, EMAIL_GUELTIG } from "../konto.js";
 import { passwortNeuSetzen } from "../vault.js";
@@ -155,7 +156,9 @@ export default function VaultGate() {
 
   const kopf = (
     <header style={{ textAlign: "center", margin: "18px 0" }}>
-      <h1 style={{ fontSize: "var(--schrift-gross)", margin: 0 }}>🦁 Leos Welten</h1>
+      <h1 style={{ fontSize: "var(--schrift-gross)", margin: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+        <LeoMark size={40} /> Leos Welten
+      </h1>
     </header>
   );
 

@@ -401,10 +401,16 @@ export default function Ueben() {
     return (
       <div data-test="frage-karte">
         <div style={karte}>
-          <p style={{ margin: "0 0 2px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
-            {runde.emoji} {runde.name} · Aufgabe {runde.index + 1} von {runde.aufgaben.length}
+          <div data-test="frage-fortschritt" role="img" aria-label={`Aufgabe ${runde.index + 1} von ${runde.aufgaben.length}`}
+            style={{ display: "flex", gap: 4, marginBottom: 8 }}>
+            {runde.aufgaben.map((_, i) => (
+              <div key={i} style={{ flex: 1, height: 7, borderRadius: 4, background: i < runde.index ? "var(--ok)" : i === runde.index ? "var(--primaer)" : "var(--rand)" }} />
+            ))}
+          </div>
+          <p style={{ margin: "0 0 2px", color: T.textLeise, fontSize: "var(--schrift-klein)", fontWeight: 700 }}>
+            {runde.name} · Aufgabe {runde.index + 1} von {runde.aufgaben.length}
             {runde.pakete > 1 ? ` · Paket ${runde.paket}/${runde.pakete}` : ""} ·
-            🎯 Stufe {runde.stufe}/{runde.stufenMax} ({STUFEN_NAMEN[runde.stufe]})
+            Stufe {runde.stufe}/{runde.stufenMax} ({STUFEN_NAMEN[runde.stufe]})
           </p>
           {runde.index === 0 && wozuSatz(runde.key) && (
             <p data-test="wozu-anker" style={{ margin: "2px 0 0", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Icon, LeoMark } from "./features/Icon.jsx";
 import { useApp } from "./appContext.jsx";
 import { zeitAbgelaufen } from "./calc/elternWerkzeuge.js";
 import { tagesformNoetig, tagesformEintragen, missionsLaengeHeute } from "./calc/tagesform.js";
@@ -22,7 +23,7 @@ import Datenschutz from "./features/Datenschutz.jsx";
 import VaultGate from "./features/VaultGate.jsx";
 
 /* App-Shell: Navigation, Routen, Version – KEINE Fachlogik. */
-export const APP_VERSION = "0.83.1";
+export const APP_VERSION = "0.84.0";
 
 const RN_TYP = {
   neu: "✨ Neu",
@@ -175,13 +176,14 @@ export default function App() {
       </div>
     );
   }
+  // Navigation mit eigenen Zeichen (kein Emoji) – Designrichtung „Ruhige Bühne"
   const tabs = [
-    { id: "start", label: "🏠 Start", test: "nav-start" },
-    { id: "ueben", label: "✏️ Üben", test: "nav-ueben" },
-    { id: "plan", label: "🗓️ Plan", test: "nav-plan" },
-    { id: "spiele", label: "🎮 Spiele", test: "nav-spiele" },
-    ...(tresor.elternModus ? [{ id: "eltern", label: "🔧 Eltern", test: "nav-eltern" }] : []),
-    { id: "neu", label: "✨ Neu?", test: "nav-neu" },
+    { id: "start", label: "Start", icon: "home", test: "nav-start" },
+    { id: "ueben", label: "Üben", icon: "pencil", test: "nav-ueben" },
+    { id: "plan", label: "Plan", icon: "calendar", test: "nav-plan" },
+    { id: "spiele", label: "Spiele", icon: "gamepad", test: "nav-spiele" },
+    ...(tresor.elternModus ? [{ id: "eltern", label: "Eltern", icon: "wrench", test: "nav-eltern" }] : []),
+    { id: "neu", label: "Neu?", icon: "sparkle", test: "nav-neu" },
   ];
   return (
     <div
@@ -191,11 +193,13 @@ export default function App() {
         maxWidth: route === "plan" ? "min(1360px, 100%)" : "var(--breite-max)",
         margin: "0 auto",
         padding: seitlich ? "16px 20px 40px" : isMobile ? "10px 12px 80px" : "16px 20px 90px",
-        paddingLeft: seitlich ? 136 : undefined,
+        paddingLeft: seitlich ? 124 : undefined,
       }}
     >
       <header style={{ textAlign: "center", marginBottom: T.abstand, position: "relative" }}>
-        <h1 style={{ fontSize: "var(--schrift-gross)", margin: "6px 0 0" }}>🦁 Leos Welten</h1>
+        <h1 style={{ fontSize: "var(--schrift-gross)", margin: "6px 0 0", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+          <LeoMark size={34} /> Leos Welten
+        </h1>
         <div data-test="version" style={{ color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           Version {APP_VERSION}
         </div>
@@ -231,7 +235,7 @@ export default function App() {
           top: 0,
           bottom: 0,
           left: 0,
-          width: 112,
+          width: 100,
           zIndex: 800,
           overflowY: "auto",
           transform: navWeg ? "translateX(-110%)" : "none",
@@ -239,9 +243,8 @@ export default function App() {
           display: "flex",
           flexDirection: "column",
           gap: 8,
-          padding: "12px 8px",
-          background: T.karte,
-          borderRight: `1px solid ${T.rand}`,
+          padding: "16px 10px",
+          background: "var(--tinte)",
         } : {
           position: "fixed",
           left: 0,
@@ -252,9 +255,8 @@ export default function App() {
           display: "flex",
           gap: 8,
           justifyContent: "center",
-          padding: "10px 12px",
-          background: T.karte,
-          borderTop: `1px solid ${T.rand}`,
+          padding: "8px 10px calc(8px + env(safe-area-inset-bottom))",
+          background: "var(--tinte)",
         }}
       >
         {tabs.map((t) => (
@@ -262,22 +264,17 @@ export default function App() {
             key={t.id}
             data-test={t.test}
             onClick={() => navTo(t.id)}
-            style={seitlich ? {
-              flex: "0 0 auto",
-              width: "100%",
-              minHeight: 64,
-              whiteSpace: "normal",
-              lineHeight: 1.2,
-              background: route === t.id ? T.primaer : T.weich,
-              color: route === t.id ? T.primaerText : T.text,
-              fontWeight: 700,
-            } : {
-              flex: "0 1 220px",
-              background: route === t.id ? T.primaer : T.weich,
-              color: route === t.id ? T.primaerText : T.text,
-              fontWeight: 700,
+            aria-current={route === t.id ? "page" : undefined}
+            style={{
+              ...(seitlich ? { flex: "0 0 auto", width: "100%", minHeight: 66 } : { flex: "1 1 0", minWidth: 0, minHeight: 58, maxWidth: 120 }),
+              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3,
+              padding: "6px 4px", borderRadius: 18, whiteSpace: "nowrap", lineHeight: 1.1,
+              fontSize: 12, fontWeight: 800,
+              background: route === t.id ? "var(--primaer)" : "transparent",
+              color: route === t.id ? "var(--primaer-text)" : "var(--tinte-leise)",
             }}
           >
+            <Icon name={t.icon} size={24} />
             {t.label}
           </button>
         ))}

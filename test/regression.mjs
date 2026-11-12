@@ -36,6 +36,30 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.84: Designrichtung „Ruhige Bühne" – Fundament, Shell, Leitbildschirme ----------
+console.log("== v0.84: Design Ruhige Bühne ==");
+test("v0.84: Tokens (Papier/Tinte/Gold), Nunito selbst gehostet, Zeichensatz, Tagesbühne, Welten-Kacheln", (() => {
+  const css = quelle("src/styles/tokens.css");
+  const app = quelle("src/App.jsx");
+  const st = quelle("src/features/Start.jsx");
+  const ic = quelle("src/features/Icon.jsx");
+  return versionMindestens("0.84.0")
+    && css.includes("--grund: #f7f3ea") && css.includes("--text: #1e2a3a") && css.includes("--primaer: #e09b2d")
+    && css.includes("--tinte:") && css.includes("--schatten:") && css.includes('font-family: "Nunito"')
+    && quelle("src/main.jsx").includes("@fontsource/nunito/800.css") // selbst gehostet – CSP font-src 'self' bleibt
+    && quelle("index.html").includes("font-src 'self'") && !quelle("index.html").includes("fonts.googleapis")
+    && ic.includes("export function Icon") && ic.includes("export function LeoMark") && ic.includes("export const ICON_NAMEN")
+    && app.includes('icon: "home"') && app.includes("<Icon name={t.icon}") && !app.includes('label: "🏠 Start"')
+    && quelle("src/calc/jetztDran.js").includes("export function jetztDran") && quelle("src/calc/jetztDran.test.js").includes("jetztDran(")
+    && st.includes('data-test="jetzt-dran"') && st.includes('data-test="jetzt-dran-los"') && st.includes('"stat-muenzen"')
+    && quelle("src/features/Ueben.jsx").includes('data-test="frage-fortschritt"')
+    && quelle("src/features/Spielhalle.jsx").includes("const FARBE = {") && quelle("src/features/Spielhalle.jsx").includes('name: "Dino-Rennen"')
+    && quelle("src/features/ErstStart.jsx").includes('<LeoMark size={120} stimmung="freut"')
+    && quelle("docs/superpowers/specs/2026-11-12-design-ruhige-buehne-design.md").includes("Ruhige Bühne")
+    && quelle("e2e/smoke.spec.js").includes('"jetzt-dran-los"')
+    && releaseNoteVorhanden("rn-107");
+})());
+
 // ---------- v0.83.1: Uhr wie im Schulheft + Heft-Aufgabentypen ----------
 console.log("== v0.83.1: Uhr wie im Schulheft ==");
 test("v0.83.1: Ziffernblatt mit Zahlen, 60 Strichen und farbigen Zeigern; Heft-Aufgaben in/vor/vergangen/Fahrplan", (() => {
@@ -87,7 +111,7 @@ test("v0.82.1: Hochkant-Tablet zeigt die Navigation als Spalte links, sonst unte
     && app.includes("const SEITLICH_QUERY")
     && (app.includes("(orientation: portrait) and (min-width: 641px)") || app.includes('SEITLICH_QUERY = "(min-width: 641px)"'))
     && app.includes("seitlich ? {") && app.includes('translateX(-110%)')
-    && app.includes('paddingLeft: seitlich ? 136')
+    && (app.includes('paddingLeft: seitlich ? 136') || app.includes('paddingLeft: seitlich ? 124')) // v0.84: schmalere Leiste
     && app.includes('data-test="nav-leiste"')
     && quelle("e2e/smoke.spec.js").includes("Navigation: iPad hochkant seitlich")
     && releaseNoteVorhanden("rn-103");
@@ -216,7 +240,7 @@ test("v0.78: EINE Engine + zwei Renn-Skins, Spielhalle sortiert nach Lieblings-W
     && re.includes('wissen: "Dino-Wissen"') && re.includes('wissen: "Weltraum-Wissen"')
     && quelle("src/spiele/dino.json").includes('"entscheidung"')
     && quelle("src/spiele/rakete.json").includes('"entscheidung"')
-    && (sh.includes("MATCH_SKINS[modus]") || sh.includes("ALLE_SKINS[modus]")) && sh.includes("⭐ Deine Welt")
+    && (sh.includes("MATCH_SKINS[modus]") || sh.includes("ALLE_SKINS[modus]")) && (sh.includes("⭐ Deine Welt") || sh.includes("Deine Welt")) // v0.84: Abzeichen ohne Stern
     && sh.includes('welt: "dinos"') && sh.includes('welt: "weltraum"')
     && quelle("src/calc/elternWerkzeuge.js").includes("Dino-Rennen")
     && quelle("src/calc/suche.js").includes("Raketen-Rennen")
@@ -243,8 +267,8 @@ test("v0.77: erste Frage neu/Konto, Einladungs-Link füllt den Code vor, Kopier-
 console.log("== v0.76: Leos Welten ==");
 test("v0.76: sichtbarer Name überall Leos Welten, Infrastruktur-Namen UNVERÄNDERT", (() => {
   return quelle("index.html").includes("<title>Leos Welten</title>")
-    && quelle("src/App.jsx").includes("🦁 Leos Welten")
-    && quelle("src/features/VaultGate.jsx").includes("🦁 Leos Welten")
+    && /🦁 Leos Welten|<LeoMark size=\{\d+\} \/> Leos Welten/.test(quelle("src/App.jsx")) // v0.84: Leo-Marke statt Emoji
+    && /🦁 Leos Welten|<LeoMark size=\{\d+\} \/> Leos Welten/.test(quelle("src/features/VaultGate.jsx"))
     && quelle("public/manifest.json").includes('"name": "Leos Welten"')
     && quelle("src/features/Karteikarten.jsx").includes("Leos Welten · Kompass 4")
     && quelle("src/features/Eltern.jsx").includes("Leos Welten – Wiederherstellungs-Code")
@@ -1939,7 +1963,7 @@ test("v0.1: CSP ohne Fremdquellen (nur 'self', kein http://, kein CDN)", (() => 
 test("v0.1: keine Fremd-CDNs im App-Code", !/cdn\.jsdelivr|cdnjs\.cloudflare|unpkg\.com|googleapis/.test(quelle("src/App.jsx") + quelle("src/main.jsx") + quelle("index.html")));
 test("v0.1: Design-Tokens mit Hell/Dunkel über data-theme", (() => {
   const t = quelle("src/styles/tokens.css");
-  return t.includes(":root") && t.includes('[data-theme="dark"]') && t.includes("--touch: 44px");
+  return t.includes(":root") && t.includes('[data-theme="dark"]') && (t.includes("--touch: 44px") || t.includes("--touch: 48px")); // v0.84: 48 px
 })());
 test("v0.1: migrateData mit SCHEMA_VERSION exportiert", /export const SCHEMA_VERSION = \d+/.test(quelle("src/calc/migrateData.js")));
 test("v0.1: calc bleibt rein (kein DOM, kein Date.now, kein fetch in src/calc)", (() => {
