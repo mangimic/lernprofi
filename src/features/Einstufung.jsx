@@ -122,7 +122,7 @@ export default function Einstufung() {
     return (
       <div data-test="einstufung">
         <div style={karte}>
-          <h2 style={{ marginTop: 0 }}>🧪 Einstufungstest</h2>
+          <h2 style={{ marginTop: 0 }}>Einstufungstest</h2>
           <p>
             Finde deinen Start! In <b>6 Bereichen</b> (Deutsch und Mathe) löst du erst
             <b> 2 leichte</b> Aufgaben – schaffst du beide, kommen <b>2 schwere</b> dazu.
@@ -147,7 +147,7 @@ export default function Einstufung() {
     return (
       <div data-test="einstufung-ergebnis">
         <div style={karte}>
-          <h2 style={{ marginTop: 0 }}>🧪 Dein Ergebnis</h2>
+          <h2 style={{ marginTop: 0 }}>Dein Ergebnis</h2>
           {Object.values(lauf.ergebnisse).map((e) => (
             <p key={e.name} data-test="einstufung-zeile" style={{ display: "flex", justifyContent: "space-between", gap: 8, margin: "6px 0" }}>
               <span>{e.emoji} {e.name}</span>

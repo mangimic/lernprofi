@@ -36,6 +36,23 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.84.1: Ruhige Bühne, Etappe 2 – Startseiten-Karten, Übungs-Auswahl, Überschriften ohne Emoji ----------
+console.log("== v0.84.1: Ruhige Bühne Etappe 2 ==");
+test("v0.84.1: Startseite, Übungs-Auswahl und Kopfzeilen ohne Emojis, Zeichen je Fach", (() => {
+  const st = quelle("src/features/Start.jsx");
+  const ue = quelle("src/features/Ueben.jsx");
+  return versionMindestens("0.84.1")
+    && st.includes(">Hallo!<") && !st.includes("🪙 {data.lernstand.muenzen}") && !st.includes("🦁 Mut-Satz")
+    && st.includes('<Icon name={dunkel ? "sun" : "moon"}') && st.includes('<Icon name="wrench" size={20} /> Zum Elternbereich')
+    && ue.includes("const FACH_ICON = {") && ue.includes("<Icon name={FACH_ICON[f.id]}") && !ue.includes("🎯 empfohlen")
+    && !quelle("src/features/Eltern.jsx").includes("<h2>🔧 Elternbereich</h2>")
+    && !quelle("src/features/Sudoku.jsx").includes("🧩 Sudoku-Training</h2>")
+    && !quelle("src/features/VaultGate.jsx").includes("Willkommen! 👋")
+    && quelle("src/styles/tokens.css").includes("button > svg")
+    && !quelle("e2e/smoke.spec.js").includes('toContainText("🎯 empfohlen")')
+    && releaseNoteVorhanden("rn-108");
+})());
+
 // ---------- v0.84: Designrichtung „Ruhige Bühne" – Fundament, Shell, Leitbildschirme ----------
 console.log("== v0.84: Design Ruhige Bühne ==");
 test("v0.84: Tokens (Papier/Tinte/Gold), Nunito selbst gehostet, Zeichensatz, Tagesbühne, Welten-Kacheln", (() => {
@@ -483,7 +500,7 @@ test("v0.64: Termine über den Monatskalender in jeder Woche setzen", (() => {
 console.log("== v0.63: Countdown oben ==");
 test("v0.63: Kompass-Karte ganz oben mit heutigen Themen und ▶️ in die Übung", (() => {
   const s = quelle("src/features/Start.jsx");
-  return s.indexOf('data-test="kompass-karte"') < s.indexOf("Hallo! 👋")
+  return s.indexOf('data-test="kompass-karte"') < (s.indexOf("Hallo! 👋") >= 0 ? s.indexOf("Hallo! 👋") : s.indexOf(">Hallo!<")) // v0.84.1: ohne Emoji
     && s.includes("kc-ueben-") && s.includes('data-test="kc-heute"')
     && s.includes("feldVonNotiz(b.notiz)")
     && s.includes("Heute steht kein Kompass-Thema im Plan")

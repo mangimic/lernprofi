@@ -21,7 +21,7 @@ export default function Datenschutz({ zurueck }) {
   const { T } = useApp();
   return (
     <div data-test="datenschutz-seite" style={{ maxWidth: 640, margin: "0 auto", padding: "0 16px" }}>
-      <h2 style={{ margin: "12px 0" }}>📄 Datenschutzerklärung</h2>
+      <h2 style={{ margin: "12px 0" }}>Datenschutzerklärung</h2>
       {ABSCHNITTE.map(([titel, text]) => (
         <div key={titel} style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: 10 }}>
           <b>{titel}</b>

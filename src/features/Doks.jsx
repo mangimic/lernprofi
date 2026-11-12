@@ -65,7 +65,7 @@ export default function Doks() {
   return (
     <div data-test="doks-seite">
       <div style={karte}>
-        <h2 style={{ margin: "0 0 4px" }}>📂 Unsere Unterlagen</h2>
+        <h2 style={{ margin: "0 0 4px" }}>Unsere Unterlagen</h2>
         <p style={{ margin: "0 0 10px", color: T.textLeise, fontSize: "var(--schrift-klein)" }}>
           Alles liegt verschlüsselt in eurem Tresor – nur ihr könnt es öffnen.
         </p>

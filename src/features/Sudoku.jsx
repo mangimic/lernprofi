@@ -95,7 +95,7 @@ export default function Sudoku() {
     const naechste = sudokuStufe(sudokuStand(data.lernstand.sudoku).stufe);
     return (
       <div data-test="sudoku-fertig" style={karte}>
-        <h2 style={{ marginTop: 0 }}>🎉 Sudoku gelöst!</h2>
+        <h2 style={{ marginTop: 0 }}>Sudoku gelöst!</h2>
         <p>
           {fertig.fehler === 0 ? "🏆 Fehlerfrei – ganz stark!" : `Du hast dich ${fertig.fehler}-mal korrigiert – genau so lernt man Sudoku.`}
         </p>
@@ -122,7 +122,7 @@ export default function Sudoku() {
     <div data-test="sudoku-seite">
       <div style={karte}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
-          <h2 style={{ margin: 0 }}>🧩 Sudoku-Training</h2>
+          <h2 style={{ margin: 0 }}>Sudoku-Training</h2>
           <span data-test="sudoku-fehler" style={{ color: T.textLeise, fontSize: "var(--schrift-klein)", whiteSpace: "nowrap" }}>
             {punkte} · Fehlversuche: {fehler}
           </span>

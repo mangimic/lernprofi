@@ -185,7 +185,7 @@ export default function Eltern() {
     if (!w) return;
     w.document.write(`<!doctype html><title>Wiederherstellungs-Code</title>
       <body style="font-family:system-ui;padding:40px">
-      <h2>🧯 Leos Welten – Wiederherstellungs-Code</h2>
+      <h2>Leos Welten – Wiederherstellungs-Code</h2>
       <p>Öffnet den Tresor, falls das Eltern-Passwort verloren geht.<br>
       Gut aufbewahren (z.&nbsp;B. zu den Zeugnissen) – wer den Zettel hat, kommt an die Lerndaten.</p>
       <p style="font-size:26px;font-family:ui-monospace,monospace;letter-spacing:1px"><b>${rett.code}</b></p>
@@ -266,7 +266,7 @@ export default function Eltern() {
 
   return (
     <div data-test="eltern-karte">
-      <h2>🔧 Elternbereich</h2>
+      <h2>Elternbereich</h2>
 
       {/* 📑 Gruppen-Navigation: eine Aufgabe, eine Ansicht – statt einer
           endlosen Liste. Die Leiste klebt oben und scrollt seitlich. */}

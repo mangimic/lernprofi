@@ -86,6 +86,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   outline-offset: 2px;
 }
 input, textarea, select { font-family: inherit; }
+button > svg { vertical-align: -0.2em; margin-right: 2px; }
 
 /* 🎣 See-Abenteuer (aus der Alt-App übernommen): Hochformat gestapelt,
    iPad-Querformat Feld + Fragen nebeneinander. */

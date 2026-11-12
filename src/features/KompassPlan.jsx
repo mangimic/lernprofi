@@ -59,7 +59,7 @@ export default function KompassPlan() {
   return (
     <div data-test="kompass-seite">
       <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
-        <h2 style={{ margin: "0 0 4px" }}>🧭 Kompass-Countdown</h2>
+        <h2 style={{ margin: "0 0 4px" }}>Kompass-Countdown</h2>
         {ziele.length === 0 ? (
           <p style={{ margin: 0 }}>🌟 Gerade steht kein Kompass-Test an. Komm wieder, wenn es so weit ist!</p>
         ) : (

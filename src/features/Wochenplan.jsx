@@ -350,7 +350,7 @@ export default function Wochenplan() {
     <div data-test="plan-seite">
       <div style={{ background: T.karte, borderRadius: T.radius, padding: T.abstand, marginBottom: T.abstand }}>
         <h2 style={{ margin: "0 0 4px" }}>
-          🗓️ Mein Wochenplan{" "}
+          Mein Wochenplan{" "}
           <span data-test="plan-kw" style={{ fontSize: "var(--schrift-klein)", color: T.textLeise, fontWeight: 400 }}>
             KW {kalenderWoche(montag)} · {tagDatum(montag, 0).slice(8)}.{tagDatum(montag, 0).slice(5, 7)}. – {tagDatum(montag, 6).slice(8)}.{tagDatum(montag, 6).slice(5, 7)}.{tagDatum(montag, 0).slice(0, 4) !== heute.slice(0, 4) ? `${tagDatum(montag, 0).slice(0, 4)}` : ""}
             {ferienAm(tagDatum(montag, 2)) ? ` · ${ferienAm(tagDatum(montag, 2)).emoji} ${ferienAm(tagDatum(montag, 2)).name}` : ""}
