@@ -36,6 +36,22 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.83.1: Uhr wie im Schulheft + Heft-Aufgabentypen ----------
+console.log("== v0.83.1: Uhr wie im Schulheft ==");
+test("v0.83.1: Ziffernblatt mit Zahlen, 60 Strichen und farbigen Zeigern; Heft-Aufgaben in/vor/vergangen/Fahrplan", (() => {
+  const ab = quelle("src/features/AufgabenBild.jsx");
+  const uz = quelle("src/calc/aufgaben/uhrzeit.js");
+  return versionMindestens("0.83.1")
+    && ab.includes("Array.from({ length: 60 }") && ab.includes('data-zeiger={name}')
+    && ab.includes("UHR_STUNDE") && ab.includes("UHR_MINUTE") && ab.includes('viewBox="0 0 120 120"')
+    && uz.includes("const ab = (f, jetzt, delta, x, tipp)") && uz.includes("const um = (f, wert, x, tipp)")
+    && uz.includes("Wie spät war es vor") && uz.includes("Wie viel Zeit ist vergangen") && uz.includes("Fahrplan:")
+    && uz.includes("Umsteigezeit") && uz.includes("5 ¼ h")
+    && quelle("src/calc/uhrzeit.test.js").includes("a.delta")
+    && quelle("e2e/smoke.spec.js").includes('data-zeiger="minute"')
+    && releaseNoteVorhanden("rn-106");
+})());
+
 // ---------- v0.83: Uhrzeit & Zeitspannen ----------
 console.log("== v0.83: Uhrzeit & Zeitspannen ==");
 test("v0.83: Mathe-Feld muhr mit nachgerechneten Uhr-Loesungen, Sprechweisen und Fahrplan-Aufgaben", (() => {

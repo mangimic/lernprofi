@@ -33,6 +33,20 @@ const plus = (f, von, dauer, x, tipp) => ({
 const lesen = (f, zeit, r, x, tipp) => ({ f, r, x, tipp, bild: { art: "uhr", zeit }, merkbild: { art: "uhr", zeit } });
 // Kurzschreiber: Dauer zwischen zwei Zeitpunkten (Lösung wird im Test nachgerechnet).
 const dauer = (f, von, bis, r, x, tipp) => ({ f, r, x, tipp, dauer: { von, bis } });
+// Kurzschreiber: Heft-Aufgabe „Wie spät ist es in …" (delta > 0) bzw. „Wie spät
+// war es vor …" (delta < 0): Die Zeiger-Uhr zeigt JETZT (12-Stunden-Blatt), die
+// Lösung ist die 24-Stunden-Zeit; das Merk-Bild läuft wie der Heft-Pfeil immer
+// vom früheren zum späteren Zeitpunkt.
+const zwoelf = (z) => { const [h, m] = z.split(":").map(Number); return `${h % 12 || 12}:${String(m).padStart(2, "0")}`; };
+const ab = (f, jetzt, delta, x, tipp) => ({
+  f, r: `${uhrPlus(jetzt, delta)} Uhr`, x, tipp, jetzt, delta,
+  bild: { art: "uhr", zeit: zwoelf(jetzt) },
+  merkbild: { art: "uhrplus", von: delta > 0 ? jetzt : uhrPlus(jetzt, delta), plus: Math.abs(delta), zeigt: true },
+});
+// Kurzschreiber: Umrechnung in Minuten oder Sekunden (Lösung wird im Test nachgerechnet).
+const um = (f, wert, x, tipp) => ({
+  f, r: wert.minuten !== undefined ? `${wert.minuten} Minuten` : `${wert.sekunden} Sekunden`, x, tipp, ...wert,
+});
 
 export const UHR_DATEN = {
   muhr: {
@@ -73,6 +87,20 @@ export const UHR_DATEN = {
         "30 + 30 = 60 Minuten = eine volle Stunde → 15:00 Uhr."),
       plus("6:45 Uhr + 15 Minuten = ?", "6:45", 15, ["6:60 Uhr", "7:15 Uhr"],
         "45 + 15 = 60 → die volle Stunde ist erreicht: 7:00 Uhr."),
+      // 📗 Heft „Zeit": Wandle um
+      um("6 h 30 min = ? Minuten", { minuten: 390 }, ["630 Minuten", "360 Minuten"], "6 · 60 = 360, dazu die 30."),
+      um("5 min 12 s = ? Sekunden", { sekunden: 312 }, ["512 Sekunden", "302 Sekunden"], "5 · 60 = 300, dazu die 12."),
+      um("½ min = ? Sekunden", { sekunden: 30 }, ["50 Sekunden", "5 Sekunden"], "Die Hälfte von 60 Sekunden."),
+      um("480 Sekunden = ? Minuten", { minuten: 8 }, ["48 Minuten", "4 Minuten"], "480 : 60 = 8."),
+      { f: "Welche Zeitspanne ist genauso lang wie 15 Minuten?", r: "eine viertel Stunde", x: ["eine halbe Stunde", "480 Sekunden"],
+        tipp: "60 : 4 = 15 – ein Viertel der Stunde." },
+      // 📗 Heft: Wie spät ist es in … (Zeiger-Uhr zeigt JETZT)
+      ab("Die Uhr zeigt die Zeit jetzt – es ist Nachmittag. Wie spät ist es in einer Viertelstunde?", "17:00", 15, ["17:45 Uhr", "16:45 Uhr"],
+        "Nachmittags: 5 + 12 = 17. Eine Viertelstunde = 15 Minuten dazu."),
+      ab("Die Uhr zeigt die Zeit jetzt – es ist Nachmittag. Wie spät ist es in einer halben Stunde?", "13:20", 30, ["13:40 Uhr", "14:20 Uhr"],
+        "Nachmittags: 1 + 12 = 13. 20 + 30 = 50 Minuten."),
+      ab("Die Uhr zeigt die Zeit jetzt – es ist Nachmittag. Wie spät ist es in eineinhalb Stunden?", "17:00", 90, ["17:30 Uhr", "19:30 Uhr"],
+        "Eineinhalb Stunden = 1 Stunde und 30 Minuten: 17:00 → 18:00 → 18:30."),
     ],
     hard: [
       lesen("Wie spät ist es – minutengenau?", "2:37", "2:37 Uhr", ["7:12 Uhr", "2:35 Uhr"],
@@ -116,6 +144,55 @@ export const UHR_DATEN = {
         tipp: "Eine Woche hat 7 Tage: 5 · 7." },
       { f: "Was ist eine ZEITSPANNE?", r: "Die Dauer von 15:00 Uhr bis 16:30 Uhr", x: ["Der Moment, in dem die Uhr genau 15:00 Uhr zeigt", "Die Ziffer 3 auf dem Ziffernblatt"],
         tipp: "Zeitpunkt = ein Moment (15:00 Uhr). Zeitspanne = die Dauer dazwischen (1 h 30 Min)." },
+      // 📗 Heft „Zeit – Zeitspannen": Wie spät ist es in … (Zeiger-Uhr zeigt JETZT: 13:27 Uhr)
+      ab("Die Uhr zeigt die Zeit jetzt – es ist Nachmittag. Wie spät ist es in 54 Minuten?", "13:27", 54, ["14:11 Uhr", "13:81 Uhr"],
+        "Jetzt ist 13:27 Uhr. Erst 33 Min bis 14:00, dann noch 21 Min."),
+      ab("Die Uhr zeigt die Zeit jetzt – es ist Nachmittag. Wie spät ist es in 2 h 35 min?", "13:27", 155, ["15:62 Uhr", "16:12 Uhr"],
+        "Erst die 2 Stunden: 15:27. Dann 33 Min bis 16:00 und noch 2 Min."),
+      ab("Die Uhr zeigt die Zeit jetzt – es ist Nachmittag. Wie spät ist es in 3 h 24 min?", "13:27", 204, ["16:41 Uhr", "17:01 Uhr"],
+        "Erst die 3 Stunden: 16:27. Dann 24 Min dazu: 16:51."),
+      // 📗 Heft: Wie spät war es vor … (Zeiger-Uhr zeigt JETZT: 7:54 Uhr)
+      ab("Die Uhr zeigt die Zeit jetzt – es ist Morgen. Wie spät war es vor 51 Minuten?", "7:54", -51, ["7:13 Uhr", "6:03 Uhr"],
+        "Rückwärts: 54 − 51 = 3 → 7:03 Uhr. Die Stunde bleibt."),
+      ab("Die Uhr zeigt die Zeit jetzt – es ist Morgen. Wie spät war es vor 1 h 32 min?", "7:54", -92, ["6:32 Uhr", "6:12 Uhr"],
+        "Erst 1 Stunde zurück: 6:54. Dann 32 Min zurück: 6:22."),
+      ab("Die Uhr zeigt die Zeit jetzt – es ist Morgen. Wie spät war es vor 2 h 58 min?", "7:54", -178, ["5:56 Uhr", "4:46 Uhr"],
+        "Erst 2 Stunden zurück: 5:54. Dann 54 Min bis 5:00, noch 4 Min: 4:56."),
+      // 📗 Heft: Wie viel Zeit ist vergangen?
+      dauer("Wie viel Zeit ist vergangen? Von 10:28 Uhr bis 13:25 Uhr.", "10:28", "13:25", "2 Stunden 57 Minuten", ["3 Stunden 3 Minuten", "2 Stunden 47 Minuten"],
+        "10:28 → 12:28 = 2 Stunden. Dann 32 Min bis 13:00 und 25 Min: 57 Min."),
+      dauer("Wie viel Zeit ist vergangen? Von 12:36 Uhr bis 15:11 Uhr.", "12:36", "15:11", "2 Stunden 35 Minuten", ["3 Stunden 25 Minuten", "2 Stunden 25 Minuten"],
+        "12:36 → 14:36 = 2 Stunden. Dann 24 Min bis 15:00 und 11 Min: 35 Min."),
+      dauer("Wie viel Zeit ist vergangen? Von 6:42 Uhr bis 8:25 Uhr.", "6:42", "8:25", "1 Stunde 43 Minuten", ["1 Stunde 23 Minuten", "2 Stunden 17 Minuten"],
+        "6:42 → 7:42 = 1 Stunde. Dann 18 Min bis 8:00 und 25 Min: 43 Min."),
+      // 📗 Heft: Fahrplan (Abfahrt · Fahrzeit · Ankunft – eins fehlt)
+      plus("Fahrplan: Abfahrt 13:10 Uhr, Fahrzeit 40 Minuten. Wann ist die Ankunft?", "13:10", 40, ["13:40 Uhr", "14:10 Uhr"],
+        "10 + 40 = 50 Minuten."),
+      ab("Fahrplan: Die Uhr zeigt die Ankunft (mittags, 12:24 Uhr). Die Fahrt dauerte 44 Minuten. Wann war die Abfahrt?", "12:24", -44, ["11:50 Uhr", "11:20 Uhr"],
+        "Rückwärts: 24 Min bis 12:00, dann noch 20 Min: 11:40 Uhr."),
+      dauer("Fahrplan: Abfahrt 13:05 Uhr, Ankunft 17:12 Uhr. Wie lange dauert die Fahrt?", "13:05", "17:12", "4 Stunden 7 Minuten", ["4 Stunden 17 Minuten", "3 Stunden 53 Minuten"],
+        "13:05 → 17:05 = 4 Stunden, dann noch 7 Min."),
+      plus("Fahrplan: Abfahrt 0:07 Uhr (nachts), Fahrzeit 2 h 56 min. Wann kommt der Zug an?", "0:07", 176, ["2:63 Uhr", "3:13 Uhr"],
+        "Erst 2 Stunden: 2:07. Dann 53 Min bis 3:00 und noch 3 Min."),
+      dauer("Fahrplan: Hannover ab 10:36 Uhr · Hamburg an 11:56 Uhr · Umsteigezeit 9 Minuten · Hamburg ab 12:05 Uhr · Lübeck an 12:48 Uhr. Wie lange ist Familie Förster von Hannover bis Lübeck unterwegs?", "10:36", "12:48", "2 Stunden 12 Minuten", ["2 Stunden 3 Minuten", "1 Stunde 20 Minuten"],
+        "Von der Abfahrt in Hannover bis zur Ankunft in Lübeck – das Umsteigen ist mit drin: 10:36 → 12:36 = 2 h, dann 12 Min."),
+      // 📗 Heft „Zeit": Wandle um – mit Vierteln, Sekunden und Tagen
+      um("5 ¼ h = ? Minuten", { minuten: 315 }, ["325 Minuten", "300 Minuten"], "5 · 60 = 300, eine Viertelstunde = 15."),
+      um("4 ¾ h = ? Minuten", { minuten: 285 }, ["275 Minuten", "300 Minuten"], "4 · 60 = 240, drei Viertel = 45."),
+      um("7 min 28 s = ? Sekunden", { sekunden: 448 }, ["728 Sekunden", "438 Sekunden"], "7 · 60 = 420, dazu die 28."),
+      um("2 ½ min = ? Sekunden", { sekunden: 150 }, ["250 Sekunden", "120 Sekunden"], "2 · 60 = 120, eine halbe Minute = 30."),
+      um("1 h = ? Sekunden", { sekunden: 3600 }, ["360 Sekunden", "600 Sekunden"], "60 Minuten · 60 Sekunden = 3600."),
+      { f: "538 s = ? min ? s", r: "8 Minuten 58 Sekunden", x: ["9 Minuten 8 Sekunden", "8 Minuten 38 Sekunden"],
+        tipp: "8 · 60 = 480. Rest: 538 − 480 = 58." },
+      { f: "1000 s = ? min ? s", r: "16 Minuten 40 Sekunden", x: ["17 Minuten 40 Sekunden", "10 Minuten"],
+        tipp: "16 · 60 = 960. Rest: 1000 − 960 = 40." },
+      { f: "220 min = ? h ? min", r: "3 Stunden 40 Minuten", x: ["2 Stunden 20 Minuten", "3 Stunden 20 Minuten"],
+        tipp: "3 · 60 = 180. Rest: 220 − 180 = 40." },
+      // 📗 Heft: Tabelle „Wie spät ist es in einer Dreiviertelstunde / in eineinhalb Stunden?"
+      ab("Die Uhr zeigt die Zeit jetzt – es ist Abend. Wie spät ist es in einer Dreiviertelstunde?", "20:05", 45, ["20:35 Uhr", "21:05 Uhr"],
+        "Abends: 8 + 12 = 20. Eine Dreiviertelstunde = 45 Min: 5 + 45 = 50."),
+      ab("Die Uhr zeigt die Zeit jetzt – es ist Morgen. Wie spät ist es in eineinhalb Stunden?", "7:27", 90, ["8:27 Uhr", "9:57 Uhr"],
+        "Eineinhalb Stunden = 1 h 30 min: 7:27 → 8:27 → 8:57."),
     ],
   },
 };
