@@ -20,14 +20,16 @@ import { zeitPool, wortartenPool, faellePool, redePool, gwsPool } from "./aufgab
 import { EINSTUFUNG_FELDER } from "./einstufung.js";
 import { K1_MATHE_DATEN, K1_MATHE_BEREICHE } from "./aufgaben/klasse1Mathe.js";
 import { K1_DEUTSCH_DATEN, K1_DEUTSCH_BEREICHE, K1_DEUTSCH_GRUPPEN } from "./aufgaben/klasse1Deutsch.js";
+import { K2_MATHE_DATEN, K2_MATHE_BEREICHE } from "./aufgaben/klasse2Mathe.js";
+import { K2_DEUTSCH_DATEN, K2_DEUTSCH_BEREICHE, K2_DEUTSCH_GRUPPEN } from "./aufgaben/klasse2Deutsch.js";
 
 /** Alle Klassenstufen des Datenmodells … */
 export const KLASSEN = [1, 2, 3, 4];
 /** … und die, für die es schon Inhalte gibt (Eltern können nur diese wählen). */
-export const KLASSEN_WAEHLBAR = [1, 3, 4];
+export const KLASSEN_WAEHLBAR = [1, 2, 3, 4];
 
 /** Hat diese Klasse eine eigene Lernwelt (statt der 3/4-Inhalte)? */
-const eigeneWelt = (klasse) => klasse === 1;
+const eigeneWelt = (klasse) => klasse === 1 || klasse === 2;
 
 /* 🎨 Klasse 3/4: Die Satz-Übungen folgen der gewählten Übungs-Welt
    (Alltag/Angeln/Tennis/…) – Regel- und Wissens-Pools bleiben themenfrei. */
@@ -50,6 +52,13 @@ export function faecherFuerKlasse(klasse, thema = "alltag") {
     return [
       { id: "deutsch", name: "Deutsch", bereiche: K1_DEUTSCH_BEREICHE, daten: K1_DEUTSCH_DATEN, gruppen: K1_DEUTSCH_GRUPPEN, welten: false },
       { id: "mathe", name: "Mathe", bereiche: K1_MATHE_BEREICHE, daten: K1_MATHE_DATEN, gruppen: null, welten: false },
+      STARK_FACH,
+    ];
+  }
+  if (klasse === 2) {
+    return [
+      { id: "deutsch", name: "Deutsch", bereiche: K2_DEUTSCH_BEREICHE, daten: K2_DEUTSCH_DATEN, gruppen: K2_DEUTSCH_GRUPPEN, welten: false },
+      { id: "mathe", name: "Mathe", bereiche: K2_MATHE_BEREICHE, daten: K2_MATHE_DATEN, gruppen: null, welten: false },
       STARK_FACH,
     ];
   }
@@ -76,7 +85,7 @@ export function feldInKlasse(key, klasse) {
 /** Anzeigename eines Lernfelds – über ALLE Klassen (alte Empfehlungen bleiben lesbar). */
 export function feldTitel(key) {
   if (key === "stark") return "Stark mit Leo";
-  for (const klasse of [4, 1]) {
+  for (const klasse of [4, 1, 2]) {
     const b = bereicheFuerKlasse(klasse).find((x) => x.key === key);
     if (b) return b.name;
   }
@@ -88,10 +97,14 @@ const EINSTUFUNG_K1 = [
   { key: "k1anlaut", fach: "Deutsch" }, { key: "k1silben", fach: "Deutsch" }, { key: "k1lesen", fach: "Deutsch" },
   { key: "k1zahlen", fach: "Mathe" }, { key: "k1zerlegen", fach: "Mathe" }, { key: "k1plus", fach: "Mathe" },
 ];
+const EINSTUFUNG_K2 = [
+  { key: "k2lesen", fach: "Deutsch" }, { key: "k2nomen", fach: "Deutsch" }, { key: "k2verben", fach: "Deutsch" },
+  { key: "k2zahlen", fach: "Mathe" }, { key: "k2plus", fach: "Mathe" }, { key: "k2einmaleins", fach: "Mathe" },
+];
 export function einstufungFelder(klasse) {
   if (!eigeneWelt(klasse)) return EINSTUFUNG_FELDER;
   const alle = bereicheFuerKlasse(klasse);
-  return EINSTUFUNG_K1.map((f) => {
+  return (klasse === 2 ? EINSTUFUNG_K2 : EINSTUFUNG_K1).map((f) => {
     const b = alle.find((x) => x.key === f.key);
     return { key: f.key, emoji: b.emoji, name: b.name, fach: f.fach };
   });
@@ -110,7 +123,10 @@ export function einstufungPools(klasse) {
 
 /* 🎮 Spiele: kurze Fragen aus den Pools der Klasse (ohne Bild/Lesetext,
    kurze Antworten). null = Klasse 3/4 nutzt die bisherigen Spiel-Fragen. */
-const SPIEL_FELDER = { 1: ["k1plus", "k1minus", "k1zerlegen", "k1reime", "k1silben"] };
+const SPIEL_FELDER = {
+  1: ["k1plus", "k1minus", "k1zerlegen", "k1reime", "k1silben"],
+  2: ["k2plus", "k2minus", "k2einmaleins", "k2teilen", "k2nomen", "k2adjektive", "k2verlaengern", "k2abc"],
+};
 const spielTauglich = (a) => !a.bild && !a.bloecke && !a.kontext && a.f.length <= 80
   && [a.r, ...a.x].every((o) => o.length <= 16);
 export function spielQuellen(klasse) {

@@ -48,9 +48,17 @@ describe("Klassenstufen – jede Klasse hat ihre eigene Lernwelt", () => {
     expect(k4).toEqual(expect.arrayContaining(["dd", "gws", "mrechnen", "muhr", "szeit", "stark"]));
     expect(k4).not.toContain("k1plus");
     expect(bereicheFuerKlasse(3)).toEqual(bereicheFuerKlasse(4));
+    // Klasse 2 (v0.88): 10 Deutsch- und 10 Mathe-Felder, eigene Gruppen, keine Sachkunde
+    const k2 = bereicheFuerKlasse(2).map((b) => b.key);
+    expect(k2).toEqual(expect.arrayContaining(["k2lesen", "k2nomen", "k2mehrzahl", "k2verben", "k2adjektive", "k2satzzeichen",
+      "k2silben", "k2verlaengern", "k2abc", "k2zusnomen", "k2zahlen", "k2plus", "k2minus", "k2einmaleins", "k2teilen",
+      "k2geld", "k2uhr", "k2laengen", "k2sach", "k2spiegeln", "stark"]));
+    expect(k2.length).toBe(21);
+    expect(faecherFuerKlasse(2).map((f) => f.id)).toEqual(["deutsch", "mathe", "stark"]);
+    expect(feldTitel("k2einmaleins")).toBe("Einmaleins");
     // Schlüssel sind über alle Klassen eindeutig (Stufen-Speicher teilt sich einen Namensraum)
-    const alle = [...new Set([...k1.filter((k) => k !== "stark"), ...k4])];
-    expect(alle.length).toBe(k1.length - 1 + k4.length);
+    const alle = [...new Set([...k1.filter((k) => k !== "stark"), ...k2.filter((k) => k !== "stark"), ...k4])];
+    expect(alle.length).toBe(k1.length - 1 + k2.length - 1 + k4.length);
     expect(feldInKlasse("k1plus", 1)).toBe(true);
     expect(feldInKlasse("k1plus", 4)).toBe(false);
     expect(feldInKlasse("stark", 1)).toBe(true);
@@ -65,9 +73,9 @@ describe("Klassenstufen – jede Klasse hat ihre eigene Lernwelt", () => {
       const felder = einstufungFelder(klasse);
       const pools = einstufungPools(klasse);
       expect(felder.length).toBe(6);
-      // Klasse 1: 3 Deutsch + 3 Mathe; Klasse 3/4 wie gehabt 4 Deutsch + 2 Mathe
-      expect(felder.filter((f) => f.fach === "Deutsch").length).toBe(klasse === 1 ? 3 : 4);
-      expect(felder.filter((f) => f.fach === "Mathe").length).toBe(klasse === 1 ? 3 : 2);
+      // Klasse 1/2: 3 Deutsch + 3 Mathe; Klasse 3/4 wie gehabt 4 Deutsch + 2 Mathe
+      expect(felder.filter((f) => f.fach === "Deutsch").length).toBe(klasse <= 2 ? 3 : 4);
+      expect(felder.filter((f) => f.fach === "Mathe").length).toBe(klasse <= 2 ? 3 : 2);
       for (const f of felder) {
         expect(feldInKlasse(f.key, klasse), f.key).toBe(true);
         expect(pools[f.key].easy.length, f.key).toBeGreaterThanOrEqual(2);
@@ -78,6 +86,7 @@ describe("Klassenstufen – jede Klasse hat ihre eigene Lernwelt", () => {
       expect(plan.every((p) => p.easy.length === 2)).toBe(true);
     }
     expect(einstufungFelder(1).map((f) => f.key)).toEqual(["k1anlaut", "k1silben", "k1lesen", "k1zahlen", "k1zerlegen", "k1plus"]);
+    expect(einstufungFelder(2).map((f) => f.key)).toEqual(["k2lesen", "k2nomen", "k2verben", "k2zahlen", "k2plus", "k2einmaleins"]);
     expect(einstufungFelder(4).map((f) => f.key)).toEqual(["gws", "dd", "zeit", "faelle", "mrechnen", "mzahlen"]);
   });
 
@@ -89,6 +98,7 @@ describe("Klassenstufen – jede Klasse hat ihre eigene Lernwelt", () => {
       }
     }
     expect(schwerpunktFelder(["mathe"], 1)).toEqual(["k1plus", "k1minus"]);
+    expect(schwerpunktFelder(["mathe", "einmaleins"], 2)).toEqual(["k2plus", "k2minus", "k2einmaleins"]);
     expect(schwerpunktFelder(["mathe"], 4)).toEqual(["mrechnen", "mzahlen"]);
     expect(schwerpunktFelder(["mathe"])).toEqual(["mrechnen", "mzahlen"]); // Standard bleibt Klasse 4
     expect(schwerpunktFelder(["laute"], 4)).toEqual([]); // Schwerpunkt einer anderen Klasse zählt nicht
@@ -100,14 +110,17 @@ describe("Klassenstufen – jede Klasse hat ihre eigene Lernwelt", () => {
   it("Spiel-Fragen: Klasse 1 zieht kurze Aufgaben ohne Bild aus den eigenen Pools, 3/4 bleibt beim Alten", () => {
     expect(spielQuellen(4)).toBeNull();
     expect(spielQuellen(3)).toBeNull();
-    const q = spielQuellen(1);
-    expect(q.leicht.length).toBeGreaterThanOrEqual(30);
-    expect(q.schwer.length).toBeGreaterThanOrEqual(20);
-    for (const a of [...q.leicht, ...q.schwer]) {
-      expect(a.bild).toBeUndefined();
-      expect(a.f.length).toBeLessThanOrEqual(80);
-      expect([a.r, ...a.x].every((o) => o.length <= 16)).toBe(true);
-      expect(a.x.length).toBe(2);
+    for (const klasse of [1, 2]) {
+      const q = spielQuellen(klasse);
+      expect(q.leicht.length).toBeGreaterThanOrEqual(30);
+      expect(q.schwer.length).toBeGreaterThanOrEqual(20);
+      for (const a of [...q.leicht, ...q.schwer]) {
+        expect(a.bild).toBeUndefined();
+        expect(a.kontext).toBeUndefined();
+        expect(a.f.length).toBeLessThanOrEqual(80);
+        expect([a.r, ...a.x].every((o) => o.length <= 16)).toBe(true);
+        expect(a.x.length).toBe(2);
+      }
     }
   });
 

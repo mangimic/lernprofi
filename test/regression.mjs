@@ -36,6 +36,29 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.88.0: Klasse 2 ----------
+console.log("== v0.88.0: Klasse 2 ==");
+test("v0.88: Inhalte Klasse 2 – 10 Mathe- und 10 Deutsch-Bereiche mit eigenen Tests", (() => {
+  const m = quelle("src/calc/aufgaben/klasse2Mathe.js");
+  const d = quelle("src/calc/aufgaben/klasse2Deutsch.js");
+  return versionMindestens("0.88.0")
+    && ["k2zahlen", "k2plus", "k2minus", "k2einmaleins", "k2teilen", "k2geld", "k2uhr", "k2laengen", "k2sach", "k2spiegeln"].every((key) => m.includes(key))
+    && ["k2lesen", "k2nomen", "k2mehrzahl", "k2verben", "k2adjektive", "k2satzzeichen", "k2silben", "k2verlaengern", "k2abc", "k2zusnomen"].every((key) => d.includes(key))
+    && m.includes("rngAusSeed") && d.includes("K2_DEUTSCH_GRUPPEN")
+    && quelle("src/calc/aufgaben/klasse2Mathe.test.js").includes("poolGesund")
+    && quelle("src/calc/aufgaben/klasse2Deutsch.test.js").includes("poolGesund");
+})());
+test("v0.88: Klasse 2 verdrahtet – wählbar, Kennenlern-Felder, Spiel-Quellen, Lesetext-Ansicht, Tests, Release-Note", (() => {
+  const k = quelle("src/calc/klassen.js");
+  return k.includes("KLASSEN_WAEHLBAR = [1, 2, 3, 4]") && k.includes("K2_MATHE_DATEN") && k.includes("K2_DEUTSCH_GRUPPEN")
+    && k.includes("EINSTUFUNG_K2") && k.includes('2: ["k2plus", "k2minus", "k2einmaleins"')
+    && quelle("src/features/Ueben.jsx").includes('runde.key === "lesen" || runde.key === "k2lesen"')
+    && quelle("src/calc/klassen.test.js").includes("Klasse 2 (v0.88)")
+    && quelle("e2e/smoke.spec.js").includes("Kern: Klasse 2 – eigene Lernfelder")
+    && quelle("e2e/smoke.spec.js").includes("Kern: Spiele in Klasse 2")
+    && releaseNoteVorhanden("rn-115");
+})());
+
 // ---------- v0.87.0: Klassen-Modell, Klasse 1, Vorlesen ----------
 console.log("== v0.87.0: Klasse 1 + Vorlesen ==");
 test("v0.87: Klassen-Modul – Fächer, Kennenlern-Felder, Spiel-Quellen, Vorlese-Modus, Klassenwechsel", (() => {

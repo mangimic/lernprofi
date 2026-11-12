@@ -434,7 +434,7 @@ export default function Ueben() {
 
           {runde.typ === "mc" ? (
             <>
-              {a.kontext && (runde.key === "lesen" ? (
+              {a.kontext && (runde.key === "lesen" || runde.key === "k2lesen" ? (
                 // 🔍 Lese-Detektiv: große Schrift, viel Zeilenabstand, ein Satz je Zeile –
                 // so verliert das Auge beim Zurückspringen nicht die Spur.
                 <div data-test="frage-kontext" style={{ background: T.grund, borderRadius: T.radiusKlein, padding: "14px 16px", display: "grid", gap: 10 }}>
