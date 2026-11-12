@@ -36,6 +36,22 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.83: Uhrzeit & Zeitspannen ----------
+console.log("== v0.83: Uhrzeit & Zeitspannen ==");
+test("v0.83: Mathe-Feld muhr mit nachgerechneten Uhr-Loesungen, Sprechweisen und Fahrplan-Aufgaben", (() => {
+  const uz = quelle("src/calc/aufgaben/uhrzeit.js");
+  return versionMindestens("0.83.0")
+    && uz.includes("export function uhrPlus") && uz.includes("export function uhrDauer")
+    && uz.includes('key: "muhr"') && uz.includes("dreiviertel") && uz.includes("Fahrplan")
+    && uz.includes('art: "uhr"') && uz.includes('art: "uhrplus"')
+    && quelle("src/calc/aufgaben/mathe.js").includes("Object.assign(MATHE_DATEN, MK_DATEN, UHR_DATEN)")
+    && quelle("src/calc/wozu.js").includes("muhr:")
+    && quelle("src/calc/uhrzeit.test.js").includes("uhrPlus(a.bild.von, a.bild.plus)")
+    && quelle("src/calc/engines.test.js").includes("MATHE_BEREICHE.length).toBe(9)")
+    && quelle("e2e/smoke.spec.js").includes("bereich-muhr")
+    && releaseNoteVorhanden("rn-105");
+})());
+
 // ---------- v0.82.2: Navigation auf dem iPad in beiden Lagen links ----------
 console.log("== v0.82.2: Navigation immer links (Tablet) ==");
 test("v0.82.2: Spalte links ab 641 px Breite in beiden Lagen, Handy unten", (() => {
@@ -388,7 +404,7 @@ test("v0.66: drei Mathekönner-Pools in Mathe verdrahtet, Wochenend-Planer mit E
   const kp = quelle("src/calc/koennerPlan.js");
   return ["mk1x1", "mkgesch", "mkzr"].every((k) => mk.includes(`${k}:`))
     && mk.includes("Rechengeschichten") && mk.includes("Zahlen bis 10 000")
-    && quelle("src/calc/aufgaben/mathe.js").includes("Object.assign(MATHE_DATEN, MK_DATEN)")
+    && /Object\.assign\(MATHE_DATEN, MK_DATEN(, UHR_DATEN)?\)/.test(quelle("src/calc/aufgaben/mathe.js")) // seit v0.83 auch UHR_DATEN
     && kp.includes("export function koennerEinplanen") && kp.includes("KOENNER_FELD_NAMEN")
     && quelle("src/calc/kompassPlan.js").includes("KOENNER_FELD_NAMEN")
     && quelle("src/features/Start.jsx").includes("koenner-einplanen")

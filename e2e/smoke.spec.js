@@ -2349,3 +2349,35 @@ test("Navigation: iPad hochkant seitlich als Spalte, sonst unten", async ({ page
   await page.getByTestId("nav-ueben").click();
   await expect(page.getByTestId("nav-ueben")).toHaveCSS("font-weight", /700|800|900/);
 });
+
+test("🕐 Uhrzeit & Zeitspannen: Ziffernblatt lesen, Merk-Bild nach der Antwort, Wozu-Anker", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("nav-ueben").click();
+  await page.getByTestId("ueben-fach-mathe").click();
+  await expect(page.getByTestId("bereich-muhr")).toContainText("Uhrzeit");
+  await page.getByTestId("bereich-muhr").click();
+  await expect(page.getByTestId("frage-karte")).toBeVisible();
+  await expect(page.getByTestId("wozu-anker")).toContainText("Uhr");
+  // Klasse 4 startet auf Stufe 2: erste Aufgabe = Ziffernblatt minutengenau ablesen
+  await expect(page.getByTestId("frage-text")).toContainText("minutengenau");
+  await expect(page.locator('[data-test="aufgaben-bild"][data-art="uhr"]')).toBeVisible();
+  await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+  await expect(page.getByTestId("feedback")).toBeVisible();
+  await page.getByTestId("weiter-knopf").click();
+  // Eine Uhr-PLUS-Aufgabe: vor der Antwort zeigt die Ziel-Uhr „?“, danach das Merk-Bild mit dem Weg des Zeigers
+  let gefunden = false;
+  for (let i = 0; i < 9; i++) {
+    const plusBild = page.locator('[data-test="aufgaben-bild"][data-art="uhrplus"]');
+    if (await plusBild.count()) {
+      await expect(plusBild).toContainText("?");
+      await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+      await expect(page.locator('[data-test="aufgaben-bild"][data-art="uhrplus"][data-merk="1"]')).toBeVisible();
+      gefunden = true;
+      break;
+    }
+    await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+    await page.getByTestId("weiter-knopf").click();
+  }
+  expect(gefunden, "eine Uhr-PLUS-Aufgabe im ersten Paket").toBe(true);
+  await page.getByTestId("abbrechen").click();
+});

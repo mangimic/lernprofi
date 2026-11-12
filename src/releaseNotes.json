@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-105",
+    "version": "0.83.0",
+    "datum": "2026-11-12",
+    "titel": "Uhrzeit & Zeitspannen",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🕐 Neues Mathe-Feld „Uhrzeit & Zeitspannen“ (Klasse 4): Uhren minutengenau ablesen, 12- und 24-Stunden-Schreibweise, Sprechweisen wie „viertel sechs“ und „dreiviertel vier“, Zeitspannen über die volle Stunde und über Mittag, Zeiteinheiten umrechnen (Stunden, Minuten, Sekunden, Tage, Wochen) und Fahrplan- und Stundenplan-Aufgaben. Mit Ziffernblatt-Bildern und Merk-Bildern, die den Weg des Minutenzeigers zeigen."
+      },
+      {
+        "type": "technik",
+        "text": "⚙️ Jede Uhr-Lösung wird im Test nachgerechnet (Start + Dauer, Dauer zwischen zwei Zeitpunkten) – eine falsche Lösung im Pool lässt die Tests rot werden."
+      }
+    ]
+  },
+  {
     "id": "rn-104",
     "version": "0.82.2",
     "datum": "2026-11-08",
