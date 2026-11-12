@@ -1,5 +1,25 @@
 [
   {
+    "id": "rn-115",
+    "version": "0.88.0",
+    "datum": "2026-11-12",
+    "titel": "Klasse 2 ist da",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "🎒 Klasse 2 mit eigener Lernwelt nach dem Bildungsplan: in Mathe Zahlen bis 100, Plus und Minus bis 100, Einmaleins, Teilen, Geld, die Uhr mit halb und viertel, Längen, Sachaufgaben sowie Spiegeln & Körper; in Deutsch Lesen & Verstehen, Nomen & Artikel, Einzahl & Mehrzahl, Verben, Adjektive, Satzzeichen, Silbentrennung, Verlängern, ABC und zusammengesetzte Nomen. Rund 1 000 Aufgaben."
+      },
+      {
+        "type": "neu",
+        "text": "🔊 In Klasse 2 liest ein Lautsprecher-Knopf Frage und Antworten auf Wunsch vor (nichts startet von selbst); Lesetexte lesen die Kinder selbst – in großer Schrift, ein Satz je Zeile."
+      },
+      {
+        "type": "neu",
+        "text": "🧪 Kennenlern-Runde, Schwerpunkt-Fragen der Eltern (zum Beispiel „Einmaleins“), Suche und Spiel-Fragen kennen jetzt alle vier Klassen. Die Klasse lässt sich im Elternbereich jederzeit umstellen."
+      }
+    ]
+  },
+  {
     "id": "rn-114",
     "version": "0.87.0",
     "datum": "2026-11-12",

@@ -289,6 +289,16 @@ K = Feld der Kennenlern-Runde dieser Klasse (je 3 Deutsch + 3 Mathe).
 - **Kennenlern-Runde** zeigt jetzt Bilder und Zahlenblöcke der Aufgaben
   (vorher nur Text) – nötig für Anlaute und Zwanzigerfeld.
 
+## Entscheidungen bei der Umsetzung (Etappe 3, v0.88.0)
+
+- **Lesetexte Klasse 2** nutzen die Lese-Detektiv-Ansicht (große Schrift,
+  ein Satz je Zeile); der Lautsprecher liest nur die Frage, nie den Text.
+- **Spiel-Fragen Klasse 2** kommen aus Plus, Minus, Einmaleins, Teilen,
+  Nomen, Adjektive, Verlängern und ABC (nur Aufgaben ohne Bild und Lesetext).
+- **Satzarten** bleiben bei Aussage-, Frage- und Ausrufesatz;
+  Fugenelemente (Sonnenblume) stehen nur auf der zweiten Stufe.
+- **Status:** Etappen 1–3 umgesetzt (v0.86.0, v0.87.0, v0.88.0).
+
 ## Was dem Bauenden überlassen bleibt
 
 - Wortlisten (mit Silben, Artikel, Mehrzahl, Emoji-Bild) – gepflegt in

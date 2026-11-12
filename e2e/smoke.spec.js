@@ -2741,3 +2741,81 @@ test("Kern: Spiele in Klasse 1 – Fragen aus den Klasse-1-Feldern, mit Lautspre
   await page.locator('[data-test="spiel-opt"][data-richtig="1"]').click();
   await expect(page.getByTestId("spiel-weiter")).toBeEnabled({ timeout: 10000 });
 });
+
+// ---------- v0.88: Klasse 2 – Zahlenraum 100, Einmaleins, erste Grammatik ----------
+test("Kern: Klasse 2 – eigene Lernfelder, Einmaleins-Runde, Lautsprecher nur auf Knopfdruck", async ({ page }) => {
+  const fehler = [];
+  page.on("pageerror", (e) => fehler.push(String(e)));
+  await sprachAttrappe(page);
+  await erstStartKlasse(page, 2);
+  await page.getByTestId("erststart-spaeter").click();
+  await expect(page.getByTestId("jetzt-dran")).toBeVisible();
+  await page.getByTestId("nav-ueben").click();
+  // Deutsch in vier Gruppen; Lesen und Sätze starten direkt (ein Feld), keine Sachkunde
+  await expect(page.getByTestId("ueben-fach-sachkunde")).toHaveCount(0);
+  await expect(page.getByTestId("gruppe-woerter")).toContainText("5 Übungen");
+  await page.getByTestId("gruppe-lesen").click();
+  await expect(page.getByTestId("frage-karte")).toBeVisible();
+  await expect(page.getByTestId("lese-satz").first()).toBeVisible(); // Lesetext in großer Schrift, ein Satz je Zeile
+  // Klasse 2: nichts wird von selbst vorgelesen, der Knopf liest auf Wunsch
+  await page.waitForTimeout(600);
+  expect(await gesprochen(page)).toEqual([]);
+  await page.getByTestId("vorlesen-frage").click();
+  await expect.poll(async () => (await gesprochen(page)).length).toBe(1);
+  await page.getByTestId("abbrechen").click();
+  // Mathe: Einmaleins-Runde komplett spielen
+  await page.getByTestId("ueben-fach-mathe").click();
+  await expect(page.getByTestId("bereich-k2zahlen")).toBeVisible();
+  await expect(page.getByTestId("bereich-k2spiegeln")).toBeVisible();
+  await expect(page.getByTestId("bereich-k1plus")).toHaveCount(0);
+  await page.getByTestId("bereich-k2einmaleins").click();
+  await expect(page.getByTestId("frage-text")).toContainText("·");
+  for (let i = 0; i < 10; i++) {
+    await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+    await page.getByTestId("weiter-knopf").click();
+  }
+  await expect(page.getByTestId("runde-ergebnis")).toContainText("10 von 10");
+  await page.getByTestId("zu-bereichen").click();
+  // Zahlen bis 100 zeigt Zehnerstangen/Einerwürfel oder einen Zahlenstrahl
+  await page.getByTestId("bereich-k2zahlen").click();
+  let bildGesehen = false;
+  for (let i = 0; i < 10 && !bildGesehen; i++) {
+    bildGesehen = (await page.locator('[data-test="zahlen-bloecke"], [data-test="aufgaben-bild"]').count()) > 0;
+    await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+    await page.getByTestId("weiter-knopf").click();
+  }
+  expect(bildGesehen, "mindestens eine Bild-Aufgabe im ersten Paket").toBeTruthy();
+  // Kennenlern-Runde Klasse 2 startet mit Lesen & Verstehen
+  await page.getByTestId("nav-training").click();
+  await expect(page.getByTestId("zum-kasten")).toHaveCount(0);
+  await page.getByTestId("training-einstufung").click();
+  await page.getByTestId("einstufung-los").click();
+  await expect(page.getByTestId("einstufung-frage")).toContainText("Lesen & Verstehen");
+  expect(fehler).toEqual([]);
+});
+
+test("Kern: Spiele in Klasse 2 – Einmaleins und Wörter statt Klasse-4-Fragen", async ({ page }) => {
+  await sprachAttrappe(page);
+  await erstStartKlasse(page, 2);
+  await page.getByTestId("erststart-spaeter").click();
+  await page.getByTestId("nav-ueben").click();
+  await page.getByTestId("ueben-fach-mathe").click();
+  await page.getByTestId("bereich-k2plus").click();
+  for (let i = 0; i < 10; i++) {
+    await page.locator('[data-test="antwort-opt"][data-richtig="1"]').click();
+    await page.getByTestId("weiter-knopf").click();
+  }
+  await expect(page.getByTestId("runde-ergebnis")).toBeVisible();
+  await page.getByTestId("nav-spiele").click();
+  await page.getByTestId("spiel-see").click();
+  await expect(page.getByTestId("see-spiel")).toBeVisible();
+  await page.evaluate(() => { window.__SPIEL_SCHNELL__ = true; });
+  await page.locator('[data-test="spiel-spot"]').first().click();
+  await expect(page.getByTestId("spiel-frage")).toBeVisible({ timeout: 15000 });
+  await expect(page.getByTestId("spiel-frage")).not.toContainText("richtig geschrieben");
+  await expect(page.getByTestId("spiel-opt")).toHaveCount(3);
+  await expect(page.getByTestId("spiel-vorlesen")).toBeVisible(); // Knopf-Modus: Lautsprecher da, aber nichts von selbst
+  expect(await gesprochen(page)).toEqual([]);
+  await page.locator('[data-test="spiel-opt"][data-richtig="1"]').click();
+  await expect(page.getByTestId("spiel-weiter")).toBeEnabled({ timeout: 10000 });
+});

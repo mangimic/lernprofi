@@ -1,6 +1,6 @@
 # Lern-App-Kern + Klasse 1 und 2 – Umsetzungsplan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Neue Familien bekommen die reine Lern-App ohne personenbezogene Daten im Code; Plan, Leo-KI und Schreib-Training bleiben der Bestandsfamilie; Klasse 1 und 2 bekommen eigene Lerninhalte mit Vorlesen.
 
@@ -44,9 +44,9 @@
 - `wochenplan.js`: `FESTE_TERMINE_STANDARD = []`; `SCHULE`/`SCHULSTUNDEN` entfallen; `SCHUL_RASTER = [[470,515],[515,560],[580,625],[625,670],[690,735],[735,780]]`; `schulStunden(schule, tag)`, `schulZeilen(schule, tag)`, `schulFaecher(schule, tag)`, `schuleText(schule) → "7:50–13:00"`, `stundenplanAusText(text) → stunden` (je Zeile `Mo: Fach, Fach, …`; `(AG)` am Fach = freiwillig; leere Fächer `-` überspringen den Slot), `stundenplanAlsText(stunden) → string`.
 - `testFixtures.js`: `TEST_FESTE` (gleiche Slots wie bisher, fiktive Namen: Mo 16:00 „Töpfern“ 60 freiwillig, Mo 18:00 „Orchester“ 60, Di 14:00 „Englisch-AG“ 60 inaktiv „bis 14:50“, Di 16:00 „Flöten-Stunde“ 30, Di 17:00 „Turnen“ 60, Mi 15:00 „Lernzeit“ 60 inaktiv, Do 17:00 „Schwimmen“ 60, Do 18:30 „Jugendfeuerwehr“ 90 „bis 20:00“, über `mittagErzwingen`), `TEST_SCHULE` (fiktiver Stundenplan Mo–Fr, 6 Stunden, eine AG).
 
-- [ ] Tests zuerst (rot): `leeresDokument` → `module` alle false, `festeTermine` `[]`, `schule.mittag` false, `schemaVersion` 2; Bestandsdokument `{ einstellungen: { festeTermine: [ein Termin] } }` → `module` alle true, `mittag` true, 7 Mittag-Einträge + Termin; Dokument ohne `einstellungen` → Kern; `{ einstellungen: {} }` (uralt, ohne `festeTermine`) → `festeTermine` nur Mittag (weil Bestand), kein fremder Termin; Idempotenz; `stundenplanAusText("Mo: Deutsch, Mathe, -, Musik (AG)")` → Slots 0, 1, 3 mit `freiwillig` an Slot 3, Rundreise über `stundenplanAlsText`; `schulFaecher(TEST_SCHULE, 0)` ohne AG und Dubletten; `schulZeilen` mit Pausen nur bei eingetragenen Stunden.
-- [ ] Implementieren, bestehende Tests auf `TEST_FESTE`/`TEST_SCHULE` umstellen (Assertions mit den neuen fiktiven Namen).
-- [ ] `npx vitest run src/calc` grün. Commit.
+- [x] Tests zuerst (rot): `leeresDokument` → `module` alle false, `festeTermine` `[]`, `schule.mittag` false, `schemaVersion` 2; Bestandsdokument `{ einstellungen: { festeTermine: [ein Termin] } }` → `module` alle true, `mittag` true, 7 Mittag-Einträge + Termin; Dokument ohne `einstellungen` → Kern; `{ einstellungen: {} }` (uralt, ohne `festeTermine`) → `festeTermine` nur Mittag (weil Bestand), kein fremder Termin; Idempotenz; `stundenplanAusText("Mo: Deutsch, Mathe, -, Musik (AG)")` → Slots 0, 1, 3 mit `freiwillig` an Slot 3, Rundreise über `stundenplanAlsText`; `schulFaecher(TEST_SCHULE, 0)` ohne AG und Dubletten; `schulZeilen` mit Pausen nur bei eingetragenen Stunden.
+- [x] Implementieren, bestehende Tests auf `TEST_FESTE`/`TEST_SCHULE` umstellen (Assertions mit den neuen fiktiven Namen).
+- [x] `npx vitest run src/calc` grün. Commit.
 
 ### Task 2: Wochenplan-/Start-Anzeige und Eltern-Editor „Schulzeiten & Stundenplan“
 
@@ -54,7 +54,7 @@
 
 **Interfaces:** Karte `data-test="eltern-schule"`: Textarea `schule-text` (5 Zeilen Mo–Fr, vorbefüllt mit `stundenplanAlsText`), Knopf `schule-speichern`, Schalter `mittag-1`/`mittag-0` („Mittag & Spielzeit 13–14 Uhr blocken“). Wochenplan: Kopfzeile `Schule ${schuleText(schule)}`; `schule-zeigen` nur, wenn irgendein Tag Stunden hat.
 
-- [ ] Umsetzen; Smoke-Test „Wochenplan: Termin, Bausteine …“ trägt den fiktiven Stundenplan über den Editor ein bzw. nutzt den Test-Seed (Task 4).
+- [x] Umsetzen; Smoke-Test „Wochenplan: Termin, Bausteine …“ trägt den fiktiven Stundenplan über den Editor ein bzw. nutzt den Test-Seed (Task 4).
 
 ### Task 3: Modul-Schalter in der Oberfläche
 
@@ -67,18 +67,18 @@
 - App: Tab „Plan“ nur bei plan; `routeErlaubt` falsch → `<Start />`. Start: ohne plan keine `kompass-karte`, `tipps-zeile`, `heute-plan`; erste Kennzahl dann `stat-missionen` („Mini-Missionen“, `tag.missionen` von `missionsZiel`). Training: `zum-schrift` nur schrift, `zum-aufsatz` nur ki, `zum-doks` nur plan. Üben: KI-Erklärer nur bei ki; „Am Original“-Hinweis nur bei plan. Eltern: Tabs `plan` und `leo` nur bei Modul; `eltern-bericht`, `eltern-saetze` nur ki; `eltern-doks` nur plan; KI-Freigabe „Schrift-Blick“ nur schrift; Zeile `module-info` in „Konto & Daten“ (`Freigeschaltet: Plan · Leo · Schreib-Training` bzw. „Lern-App-Kern“).
 - appContext: Alt-App-Import behält `einstellungen.module` und `einstellungen.schule` des aktuellen Tresors. Test-Seed: bei Erstbefüllung wird `window.__ERSTDOK__` (nur Tests) als Quelle durch `migrateData` geschickt.
 
-- [ ] Tests zuerst: `routeErlaubt` für alle fünf gesperrten Routen und eine freie; `jetztDran` mit offenem Plan-Block und Modul aus → `art` ≠ "plan"; `sucheIndex` ohne „Mein Wochenplan“/Termine im Kern, mit im Vollausbau.
-- [ ] Implementieren. `npx vitest run` grün. Commit.
+- [x] Tests zuerst: `routeErlaubt` für alle fünf gesperrten Routen und eine freie; `jetztDran` mit offenem Plan-Block und Modul aus → `art` ≠ "plan"; `sucheIndex` ohne „Mein Wochenplan“/Termine im Kern, mit im Vollausbau.
+- [x] Implementieren. `npx vitest run` grün. Commit.
 
 ### Task 4: Smoke, Namen raus, Regression, Version
 
 **Files:** Modify `e2e/smoke.spec.js`, `test/regression.mjs`, `src/App.jsx`, `src/releaseNotes.json`, alle Dateien mit dem Vornamen (11 in `src`, 1 in `e2e`, Doku), `docs/FREIGABE-CHECKLISTE.md`, Spec (Abweichungen: Alt-Import behält Module; Unterlagen zählen zum Modul plan; Blitzlesen hat eigene Tier-Wortliste).
 
-- [ ] `test.beforeEach`: für Tests, deren Titel nicht mit „Kern:“ beginnt, `page.addInitScript` mit `window.__ERSTDOK__ = { einstellungen: { module: alle true, festeTermine: TEST_FESTE-Kopie, schule: fiktiver Plan + mittag true } }`. Assertions mit alten Namen auf die fiktiven ändern.
-- [ ] Neuer Test „Kern: neue Familie sieht weder Plan noch Leo noch Schreib-Training“: kein `nav-plan`, Training ohne `zum-schrift`/`zum-aufsatz`, Eltern ohne `eb-tab-plan`/`eb-tab-leo`, `module-info` enthält „Lern-App-Kern“, `stat-missionen` sichtbar, Suche nach „Wochenplan“ ohne Treffer.
-- [ ] Neuer Test „Stundenplan: Eltern tragen ihn als Text ein, der Wochenplan zeigt ihn“.
-- [ ] Regression: Block v0.86.0; v0.1-Check als Verzeichnis-Scan über `src`, `server`, `e2e`, `test`, `docs` (Muster aus Teilstrings gebaut); alte Checks (Zeilen ~1068, 1109, 1142, 1182, 1191) per Alternative.
-- [ ] `APP_VERSION` 0.86.0, rn-113. `npm run gates` grün. Commit, Push, PR, Merge.
+- [x] `test.beforeEach`: für Tests, deren Titel nicht mit „Kern:“ beginnt, `page.addInitScript` mit `window.__ERSTDOK__ = { einstellungen: { module: alle true, festeTermine: TEST_FESTE-Kopie, schule: fiktiver Plan + mittag true } }`. Assertions mit alten Namen auf die fiktiven ändern.
+- [x] Neuer Test „Kern: neue Familie sieht weder Plan noch Leo noch Schreib-Training“: kein `nav-plan`, Training ohne `zum-schrift`/`zum-aufsatz`, Eltern ohne `eb-tab-plan`/`eb-tab-leo`, `module-info` enthält „Lern-App-Kern“, `stat-missionen` sichtbar, Suche nach „Wochenplan“ ohne Treffer.
+- [x] Neuer Test „Stundenplan: Eltern tragen ihn als Text ein, der Wochenplan zeigt ihn“.
+- [x] Regression: Block v0.86.0; v0.1-Check als Verzeichnis-Scan über `src`, `server`, `e2e`, `test`, `docs` (Muster aus Teilstrings gebaut); alte Checks (Zeilen ~1068, 1109, 1142, 1182, 1191) per Alternative.
+- [x] `APP_VERSION` 0.86.0, rn-113. `npm run gates` grün. Commit, Push, PR, Merge.
 
 ## Etappe 2 – v0.87.0: Klassen-Modell, Klasse 1, Vorlesen
 
@@ -92,8 +92,8 @@
 - `klasse1Deutsch.js`: `K1_DEUTSCH_DATEN` (Keys `k1anlaut, k1laute, k1silben, k1reime, k1lesen, k1saetze`), `K1_DEUTSCH_BEREICHE`, `K1_DEUTSCH_GRUPPEN`.
 - Rechenaufgaben tragen `term: { a, op: "+"|"-"|"·"|":", b }`; der Test rechnet `r` nach. `sprich` für alles mit Symbolen oder Bild-Emoji. Bild-Arten: vorhanden `uhr`, `strahl`, Feld `bloecke`; neu `zwanzig { rot, blau }`, `muenzen { werte: Cent[] }`, `formen { folge: string[] }`, `emoji { zeichen, anzahl? }`.
 
-- [ ] Test zuerst: je Pool `poolGesund`, Mindestgrößen, genau 2 Falschantworten, keine doppelten Fragen, `term` nachgerechnet, Frage ≤ 70 Zeichen, deterministisch (zweimaliger Import-Vergleich über erneute Erzeugung).
-- [ ] Inhalte erzeugen (Generatoren mit `rngAusSeed`). Commit.
+- [x] Test zuerst: je Pool `poolGesund`, Mindestgrößen, genau 2 Falschantworten, keine doppelten Fragen, `term` nachgerechnet, Frage ≤ 70 Zeichen, deterministisch (zweimaliger Import-Vergleich über erneute Erzeugung).
+- [x] Inhalte erzeugen (Generatoren mit `rngAusSeed`). Commit.
 
 ### Task 6: Klassen-Modul und Verdrahtung
 
@@ -106,8 +106,8 @@
 - `fragen.js`: `spielKlasseSetzen(klasse, vorleseModus)`; `spielFrage` zieht für 1/2 aus `spielQuellen`.
 - UI-Ids: `fb-klasse-1..4`, Eltern `klasse-1..4` (Karte `eltern-profil`), `vorlesen-auto|knopf|aus` (Karte `eltern-lernen`). Training: `zum-kasten` nur Klasse ≥ 3.
 
-- [ ] Tests zuerst: jede Klasse liefert Fächer mit Pools für jeden Bereich; Keys über alle Klassen eindeutig; jedes Kennenlern-Feld hat einen Pool mit easy ≥ 2; `schwerpunktFelder` je Klasse nur existierende Keys; `klasseWechseln` räumt auf; `jetztDran` nach Wechsel 4 → 1 mit alter Empfehlung zeigt kein 3/4-Feld (Empfehlung wird nur genutzt, wenn der Key zur Klasse gehört).
-- [ ] Implementieren, `npx vitest run` grün. Commit.
+- [x] Tests zuerst: jede Klasse liefert Fächer mit Pools für jeden Bereich; Keys über alle Klassen eindeutig; jedes Kennenlern-Feld hat einen Pool mit easy ≥ 2; `schwerpunktFelder` je Klasse nur existierende Keys; `klasseWechseln` räumt auf; `jetztDran` nach Wechsel 4 → 1 mit alter Empfehlung zeigt kein 3/4-Feld (Empfehlung wird nur genutzt, wenn der Key zur Klasse gehört).
+- [x] Implementieren, `npx vitest run` grün. Commit.
 
 ### Task 7: Vorlesen
 
@@ -115,13 +115,13 @@
 
 **Interfaces (Produces):** `vorlesbar() → boolean`; `vorlesen(text) → boolean` (bricht Laufendes ab, `lang "de-DE"`, `rate 0.9`); `vorleseStopp()`; `sprechText(aufgabe) → string` (`sprich` vor `f`, Emojis entfernt). `<VorleseKnopf text test klein />` rendert nichts ohne Sprachausgabe. Ids: `vorlesen-frage`, `vorlesen-antwort` (je Antwort), `spiel-vorlesen`.
 
-- [ ] Test zuerst: `sprechText` (sprich schlägt f, Emojis raus), `vorlesen` ohne `speechSynthesis` → false ohne Fehler, mit Attrappe → `speak` mit Text und `de-DE`.
-- [ ] Implementieren: Auto-Vorlesen der Frage bei Modus „auto“ je Aufgabenwechsel; Spiele über delegierten Klick auf `[data-sprich]`. Commit.
+- [x] Test zuerst: `sprechText` (sprich schlägt f, Emojis raus), `vorlesen` ohne `speechSynthesis` → false ohne Fehler, mit Attrappe → `speak` mit Text und `de-DE`.
+- [x] Implementieren: Auto-Vorlesen der Frage bei Modus „auto“ je Aufgabenwechsel; Spiele über delegierten Klick auf `[data-sprich]`. Commit.
 
 ### Task 8: Smoke, Regression, Version (Etappe 2)
 
-- [ ] Smoke: „Kern: Erst-Start mit Klasse 1 – nur Klasse-1-Bereiche, Frage wird vorgelesen“ (Sprachausgabe per Init-Script als Attrappe, die gesprochene Texte sammelt); „Kern: Klassenwechsel im Elternbereich räumt Empfehlungen auf“; „Kern: Kennenlern-Runde Klasse 1 läuft durch“; „Kern: Spiel stellt in Klasse 1 Fragen bis 20“.
-- [ ] Regression v0.87.0, `APP_VERSION` 0.87.0, rn-114, Gates, PR, Merge.
+- [x] Smoke: „Kern: Erst-Start mit Klasse 1 – nur Klasse-1-Bereiche, Frage wird vorgelesen“ (Sprachausgabe per Init-Script als Attrappe, die gesprochene Texte sammelt); „Kern: Klassenwechsel im Elternbereich räumt Empfehlungen auf“; „Kern: Kennenlern-Runde Klasse 1 läuft durch“; „Kern: Spiel stellt in Klasse 1 Fragen bis 20“.
+- [x] Regression v0.87.0, `APP_VERSION` 0.87.0, rn-114, Gates, PR, Merge.
 
 ## Etappe 3 – v0.88.0: Klasse 2
 
@@ -131,5 +131,5 @@
 
 ### Task 10: Klasse 2 verdrahten, Smoke, Regression, Version
 
-- [ ] `klassen.js` um Klasse 2 ergänzen (Fächer, Kennenlern-Felder `k2lesen, k2nomen, k2verben, k2zahlen, k2plus, k2einmaleins`, Spiel-Quellen, Schwerpunkte).
-- [ ] Smoke: „Kern: Klasse 2 – Einmaleins-Runde spielbar, Lautsprecher als Knopf“; Regression v0.88.0; `APP_VERSION` 0.88.0, rn-115; Gates, PR, Merge.
+- [x] `klassen.js` um Klasse 2 ergänzen (Fächer, Kennenlern-Felder `k2lesen, k2nomen, k2verben, k2zahlen, k2plus, k2einmaleins`, Spiel-Quellen, Schwerpunkte).
+- [x] Smoke: „Kern: Klasse 2 – Einmaleins-Runde spielbar, Lautsprecher als Knopf“; Regression v0.88.0; `APP_VERSION` 0.88.0, rn-115; Gates, PR, Merge.
