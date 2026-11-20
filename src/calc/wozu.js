@@ -21,6 +21,7 @@ export const WOZU = {
   dd: "das oder dass steht in fast jedem Text – knack den Trick, und es sitzt für immer.",
   doppel: "Doppelte Mitlaute hört man – wer sie schreibt, gewinnt beim Diktat.",
   vorgang: "Wer gut beschreibt, dem kann jeder folgen – vom Waffelrezept bis zur Bauanleitung.",
+  bericht: "Wer berichten kann, erzählt genau, was passiert ist – wie ein Reporter oder die Polizei.",
   mrechnen: "Kopfrechnen brauchst du beim Einkaufen, beim Taschengeld – jeden Tag.",
   mzahlen: "Wer Zahlen versteht, liest Tabellen und Spielstände wie ein Trainer.",
   mgeo: "Formen und Flächen stecken in allem, was du baust – auch in der Blockwelt.",

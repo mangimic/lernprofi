@@ -1,5 +1,29 @@
 [
   {
+    "id": "rn-117",
+    "version": "0.89.0",
+    "datum": "2026-11-20",
+    "titel": "Bericht schreiben – als Reporter",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "📰 Neu in Deutsch unter „Texte schreiben“: Bericht schreiben. Sieben Fälle zur Wahl – der Autounfall am Parkhaus aus der Schule, ein Fahrradunfall und fünf Fälle aus Fußball, Angeln, Tennis, Dinos und Weltraum. Zu jedem Fall gibt es eine Zeugenaussage, den Leitfaden mit den sieben W-Fragen (Wann, Wo, Was, Wer, Warum, Wie, Welche Folgen) und einen Muster-Bericht."
+      },
+      {
+        "type": "neu",
+        "text": "🎮 Vier kurze Übungs-Spiele: W-Fragen-Detektiv (Notiz der richtigen Frage zuordnen), Reporter-Filter (Gefühle, Meinungen und wörtliche Rede fliegen raus), Zeitmaschine (Verben in die Vergangenheit setzen) und Bericht ordnen (Einleitung, Hauptteil, Schluss). Jede Antwort bekommt sofort eine Begründung."
+      },
+      {
+        "type": "neu",
+        "text": "🧰 Lernhilfen: Merkkarte mit Bauplan in drei Farben, Zeugenaussage zum Anhören, Wortspeicher mit Satzanfängen und Vergangenheitsformen auf dem Arbeitsblatt, Reporter-Ausweis mit Stempeln für jedes geschaffte Spiel. Das Arbeitsblatt zum Ausdrucken enthält den Leitfaden wie in der Schule; die Lösung öffnet sich erst nach eigenen Versuchen."
+      },
+      {
+        "type": "neu",
+        "text": "✍️ Der Aufsatz-Check kennt jetzt auch die Textart „Bericht“ (W-Fragen, sachlich, Vergangenheit)."
+      }
+    ]
+  },
+  {
     "id": "rn-116",
     "version": "0.88.1",
     "datum": "2026-11-20",

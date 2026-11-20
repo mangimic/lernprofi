@@ -41,6 +41,7 @@ export function leeresDokument(heute) {
       konzentration: null, // Zahlenkette, ABC-Bestwerte, Blitzlese-Runden
       mutSatz: { tag: "", idx: 0 }, // Mut-Satz des Tages (Stark mit Leo)
       vorgang: null,       // Vorgangsbeschreibung: gewählter Ablauf + Selbst-Check
+      berichtText: null,   // Bericht schreiben: gewählter Fall + Stempel + Selbst-Check
       zeit: { tag: "", sek: 0 }, // heute verbrauchte Lernzeit (Time-Boxing)
       tagesform: { tag: "", modus: "" }, // NUR heutige Tagesform – keine Fähigkeitseinstufung
       fokusRekord: 0,            // längste Fokus-Serie (Aufgaben am Stück)
@@ -119,6 +120,7 @@ export function migrateData(alt, heute) {
   if (!istObjekt(d.lernstand.blockwelt)) d.lernstand.blockwelt = null;
   if (!istObjekt(d.lernstand.konzentration)) d.lernstand.konzentration = null;
   if (!istObjekt(d.lernstand.vorgang)) d.lernstand.vorgang = null;
+  if (!istObjekt(d.lernstand.berichtText)) d.lernstand.berichtText = null;
   const zeit = istObjekt(d.lernstand.zeit) ? d.lernstand.zeit : {};
   d.lernstand.zeit = {
     tag: typeof zeit.tag === "string" ? zeit.tag : "",
