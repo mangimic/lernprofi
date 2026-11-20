@@ -13,10 +13,18 @@ ausgesperrt ist. Cloudflare Access war bis Schritt 5 der zweite Zaun –
 | Access | Anwendung „lernprofi - Cloudflare Workers“ **gelöscht**; nur noch „mangierierp - Cloudflare Pages“ (alte Pages-Seite) |
 | Live-Probe ohne Anmeldung | `/` → 200 HTML ohne Umleitung · `/api/konto` → `{"angemeldet":false}` · `POST /api/konto/einladung` → 403 · `version.json` 0.85.1 |
 
-Damit kommt der Header `Cf-Access-Authenticated-User-Email` nie mehr an:
-Stamm gibt es nur noch über die verknüpfte Sitzung, die Lücke der Policy
-„Everyone“ ist geschlossen. Offen bleiben Schritt 4 (jedes Gerät
+Damit setzt Access den Header `Cf-Access-Authenticated-User-Email` nicht
+mehr: Stamm gibt es nur noch über die verknüpfte Sitzung, die Lücke der
+Policy „Everyone“ ist geschlossen. Offen bleiben Schritt 4 (jedes Gerät
 anmelden), die DPA (Schritt 2) und optional die Domain (Schritt 7).
+
+🔒 **Seit v0.88.1 hängt das nicht mehr an Access:** `kontoVonAnfrage()`
+prüft selbst. Sobald `konto:stamm` in KV existiert (Stamm-Konto verknüpft,
+Schritt 3), gibt der Header kein Stamm-Konto mehr – egal, ob Access an oder
+aus ist und wer den Header mitschickt. Stamm-Rechte (Einladungs-Codes,
+Tresor-Hüllen, Dokumente, Leo) gibt es dann ausschließlich über eine
+gültige Sitzung (`SESSION_GEHEIM`). Nur `DEV_OHNE_ACCESS=1` für lokales
+`wrangler dev` bleibt wie bisher.
 
 ## Stand 12.11.2026, nachmittags (vor dem Abschalten, nur lesend geprüft)
 
@@ -35,6 +43,15 @@ das **Stamm-Konto** (Einladungs-Codes erzeugen, Tresor-Hüllen lesen und
 Policy auf eure E-Mail-Adressen einschränken, oder zügig Schritte 1, 3, 4
 erledigen und Access abschalten (Schritt 5) – danach kommt der Header nie
 mehr an und Stamm gibt es nur über die verknüpfte Sitzung.
+
+✅ **Seit v0.88.1 ist diese Lücke mit der Verknüpfung geschlossen** – auch
+bei Policy „Everyone“: Existiert `konto:stamm` (Schritt 3 erledigt), gibt
+der Access-Header kein Stamm-Konto mehr; Stamm gibt es nur noch über die
+Sitzung. Die Warnung gilt nur noch für die Zeit VOR der Verknüpfung (oder
+nach dem Löschen des Stamm-Kontos). Wer Access in dieser Zeit braucht,
+setzt am Worker die Variable `STAMM_EMAILS` (kommagetrennte Eltern-E-Mails)
+– dann trägt die Brücke nur für diese Access-Adressen – oder schränkt die
+Policy ein.
 
 Das Setzen von `SESSION_GEHEIM` aus der Entwicklungsumgebung heraus ist
 bewusst gesperrt (Secret-Store-Schreibzugriff) – Schritt 1 bleibt ein
@@ -117,4 +134,7 @@ Handgriff im Dashboard.
 ## Rückweg (falls nötig)
 
 Access wieder einschalten sperrt sofort alles hinter den alten Zaun;
-Sitzungen und Konten funktionieren dahinter unverändert weiter.
+Sitzungen und Konten funktionieren dahinter unverändert weiter. Der
+Access-Login allein gibt aber kein Stamm-Konto mehr (seit v0.88.1, sobald
+`konto:stamm` existiert) – jedes Gerät meldet sich zusätzlich im
+Familien-Konto an.

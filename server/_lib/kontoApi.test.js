@@ -59,6 +59,48 @@ describe("kontoApi – Sitzungen", () => {
       .toMatchObject({ kontoId: STAMM_KONTO, art: "stamm" });
     expect(await kontoVonAnfrage(anfrage("GET", "/api/meta"), env)).toBe(null);
   });
+
+  it("🔒 Access-Brücke endet mit der Verknüpfung: konto:stamm da → Header gibt kein Stamm mehr", async () => {
+    const env = mockEnv();
+    const perAccess = () => kontoVonAnfrage(anfrage("GET", "/api/meta", null, mitAccess), env);
+    // vorher (unverknüpft): Brücke trägt
+    expect(await perAccess()).toMatchObject({ kontoId: STAMM_KONTO, art: "stamm" });
+    // verknüpft: der Header allein reicht nicht mehr
+    env.TRESOR._map.set(`konto:${STAMM_KONTO}`, JSON.stringify({ kontoId: STAMM_KONTO, email: "familie@example.com" }));
+    expect(await perAccess()).toBe(null);
+    // die Stamm-SITZUNG trägt weiter – mit und ohne Header
+    const token = await sitzungAusstellen(env.SESSION_GEHEIM, STAMM_KONTO);
+    expect(await kontoVonAnfrage(anfrage("GET", "/api/meta", null, { cookie: `${SITZUNG_COOKIE}=${token}` }), env))
+      .toMatchObject({ kontoId: STAMM_KONTO, art: "sitzung" });
+    expect(await kontoVonAnfrage(anfrage("GET", "/api/meta", null, { ...mitAccess, cookie: `${SITZUNG_COOKIE}=${token}` }), env))
+      .toMatchObject({ kontoId: STAMM_KONTO, art: "sitzung" });
+  });
+
+  it("🔒 STAMM_EMAILS: gesetzt → nur gelistete Access-E-Mails bekommen die Brücke (bis zur Verknüpfung)", async () => {
+    const env = { ...mockEnv(), STAMM_EMAILS: "eltern@example.com, Zweite@Example.com ,," };
+    const als = (email) => kontoVonAnfrage(
+      anfrage("GET", "/api/meta", null, { "Cf-Access-Authenticated-User-Email": email }), env);
+    expect(await als("fremd@example.com")).toBe(null);
+    expect(await als("eltern@example.com.boese.example")).toBe(null);
+    expect(await als("eltern@example.com")).toMatchObject({ kontoId: STAMM_KONTO, art: "stamm" });
+    expect(await als(" ELTERN@example.com ")).toMatchObject({ kontoId: STAMM_KONTO, art: "stamm" });
+    expect(await als("zweite@example.com")).toMatchObject({ kontoId: STAMM_KONTO, art: "stamm" });
+    // leere/fehlende Variable = bisheriges Verhalten bis zur Verknüpfung
+    expect(await kontoVonAnfrage(anfrage("GET", "/api/meta", null, mitAccess), { ...mockEnv(), STAMM_EMAILS: " , " }))
+      .toMatchObject({ kontoId: STAMM_KONTO, art: "stamm" });
+    // nach der Verknüpfung hilft auch die gelistete E-Mail nicht mehr
+    env.TRESOR._map.set(`konto:${STAMM_KONTO}`, JSON.stringify({ kontoId: STAMM_KONTO, email: "eltern@example.com" }));
+    expect(await als("eltern@example.com")).toBe(null);
+  });
+
+  it("DEV_OHNE_ACCESS=1 (nur wrangler dev) gibt weiter Stamm – ohne Header, trotz Verknüpfung und STAMM_EMAILS", async () => {
+    const env = { ...mockEnv(), DEV_OHNE_ACCESS: "1", STAMM_EMAILS: "eltern@example.com" };
+    expect(await kontoVonAnfrage(anfrage("GET", "/api/meta"), env)).toMatchObject({ kontoId: STAMM_KONTO, art: "stamm" });
+    env.TRESOR._map.set(`konto:${STAMM_KONTO}`, JSON.stringify({ kontoId: STAMM_KONTO, email: "eltern@example.com" }));
+    expect(await kontoVonAnfrage(anfrage("GET", "/api/meta"), env)).toMatchObject({ kontoId: STAMM_KONTO, art: "stamm" });
+    // nur der exakte Wert "1" zählt
+    expect(await kontoVonAnfrage(anfrage("GET", "/api/meta"), { ...mockEnv(), DEV_OHNE_ACCESS: "true" })).toBe(null);
+  });
 });
 
 describe("kontoApi – Registrieren und Login", () => {
@@ -165,12 +207,22 @@ describe("kontoApi – Registrieren und Login", () => {
     expect(r.status).toBe(201);
     expect((await r.json()).kontoId).toBe(STAMM_KONTO);
     expect(env.TRESOR._map.get("email:familie@example.com")).toBe(STAMM_KONTO);
-    // der Access-Weg zeigt jetzt die verknüpfte E-Mail
-    const wer = await kontoApi(anfrage("GET", "/api/konto", null, mitAccess), env);
-    expect(await wer.json()).toMatchObject({ angemeldet: true, kontoId: STAMM_KONTO, email: "familie@example.com" });
-    // nur einmal verknüpfbar
+    // die Sitzung aus der Verknüpfung zeigt die verknüpfte E-Mail
+    const wer = await kontoApi(anfrage("GET", "/api/konto", null, { cookie: cookieVon(r) }), env);
+    expect(await wer.json()).toMatchObject({ angemeldet: true, kontoId: STAMM_KONTO, art: "sitzung", email: "familie@example.com" });
+    // 🔒 seit v0.88.1: Mit der Verknüpfung ist die Access-Brücke zu – der
+    // Header allein ist niemand mehr (kein Wer-bin-ich, keine Einladung,
+    // keine zweite Verknüpfung, kein Tresor).
+    expect(await (await kontoApi(anfrage("GET", "/api/konto", null, mitAccess), env)).json()).toEqual({ angemeldet: false });
+    expect((await kontoApi(anfrage("POST", "/api/konto/einladung", null, mitAccess), env)).status).toBe(403);
+    expect((await kontoApi(anfrage("POST", "/api/konto/registrieren",
+      { ...body, email: "zweite@example.com" }, mitAccess), env)).status).toBe(403);
+    expect(env.TRESOR._map.has("email:zweite@example.com")).toBe(false);
+    expect([...env.TRESOR._map.keys()].filter((k) => k.startsWith("einladung:"))).toEqual([]);
+    expect((await vaultApi(anfrage("GET", "/api/vault", null, mitAccess), env)).status).toBe(401);
+    // nur einmal verknüpfbar – auch mit der Stamm-Sitzung
     const nochmal = await kontoApi(anfrage("POST", "/api/konto/registrieren",
-      { ...body, email: "zweite@example.com" }, mitAccess), env);
+      { ...body, email: "zweite@example.com" }, { cookie: cookieVon(r) }), env);
     expect(nochmal.status).toBe(409);
     // und danach geht der normale Login mit demselben Beweis
     const login = await kontoApi(anfrage("POST", "/api/konto/login",
@@ -254,9 +306,12 @@ describe("kontoApi + vaultApi – Konten sind strikt getrennt", () => {
     // Stamm-Löschung räumt auch die Alt-Lage (tresor:v1, Doks ohne Präfix)
     env.TRESOR._map.set("tresor:v1", JSON.stringify({ rev: 1, blobs: BLOBS_A }));
     env.TRESOR._map.set("dok:daltdok1", JSON.stringify(paket));
-    await kontoApi(anfrage("POST", "/api/konto/registrieren",
+    const stamm = await kontoApi(anfrage("POST", "/api/konto/registrieren",
       { stamm: true, email: "familie@example.com", authBeweis: BEWEIS }, mitAccess), env);
-    expect((await kontoApi(anfrage("POST", "/api/konto/loeschen", { beweis: BEWEIS }, mitAccess), env)).status).toBe(200);
+    // 🔒 der Access-Header allein löscht nach der Verknüpfung nichts mehr
+    expect((await kontoApi(anfrage("POST", "/api/konto/loeschen", { beweis: BEWEIS }, mitAccess), env)).status).toBe(401);
+    expect(env.TRESOR._map.has(`konto:${STAMM_KONTO}`)).toBe(true);
+    expect((await kontoApi(anfrage("POST", "/api/konto/loeschen", { beweis: BEWEIS }, { cookie: cookieVon(stamm) }), env)).status).toBe(200);
     for (const k of ["tresor:v1", "dok:daltdok1", `tresor:${STAMM_KONTO}`, `konto:${STAMM_KONTO}`]) {
       expect(env.TRESOR._map.has(k), k).toBe(false);
     }

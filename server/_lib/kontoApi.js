@@ -11,7 +11,12 @@
    Zugangs-Auflösung (kontoVonAnfrage) für ALLE /api/*-Routen:
    1. Gültiges Sitzungs-Cookie  → dieses Konto      (art "sitzung")
    2. Cloudflare-Access-Header  → Stamm-Konto        (art "stamm")
-      – die Brücke fürs Bestandskonto, bis der Login-Client da ist.
+      – die Brücke fürs Bestandskonto, NUR bis zur Verknüpfung:
+      Sobald `konto:stamm` in KV existiert, ist sie zu (seit v0.88.1) –
+      Stamm gibt es dann ausschließlich über die Sitzung. Optional
+      davor: Variable STAMM_EMAILS (kommagetrennt) – ist sie gesetzt,
+      trägt die Brücke nur für diese Access-E-Mails.
+      DEV_OHNE_ACCESS=1 (nur lokales `wrangler dev`) gibt immer Stamm.
    3. sonst                     → null (401 beim Aufrufer)
 
    Endpunkte:
@@ -27,7 +32,7 @@
    Sitzungen: HMAC-SHA256-Token (Worker-Secret SESSION_GEHEIM, anlegen mit
    `npx wrangler secret put SESSION_GEHEIM` – langer Zufallswert), 30 Tage,
    HttpOnly-Cookie. Ohne Secret antworten die Konto-Routen 503; die
-   Stamm-Brücke funktioniert auch ohne.
+   Stamm-Brücke funktioniert (bis zur Verknüpfung) auch ohne.
    ============================================================ */
 
 export const STAMM_KONTO = "stamm"; // das Bestandskonto (Familie 1)
@@ -118,14 +123,28 @@ function sitzungsCookie(token, loeschen = false) {
   return `${SITZUNG_COOKIE}=${loeschen ? "" : token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${alter}`;
 }
 
-/** Löst die Anfrage auf ein Konto auf (Sitzung → Konto, Access → Stamm). */
+/** 🔒 Trägt die Access-Brücke diese Anfrage? Nur mit Access-Header, nur
+    für erlaubte E-Mails (falls STAMM_EMAILS gesetzt ist) und nur, solange
+    das Stamm-Konto NICHT verknüpft ist. */
+async function accessBrueckeOffen(request, env) {
+  const email = (request.headers.get("Cf-Access-Authenticated-User-Email") || "").trim().toLowerCase();
+  if (!email) return false;
+  const erlaubt = String(env?.STAMM_EMAILS || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+  if (erlaubt.length && !erlaubt.includes(email)) return false;
+  // Verknüpft = Brücke zu. Ohne KV gibt es weder Konten noch Daten.
+  if (env?.TRESOR && await env.TRESOR.get(`konto:${STAMM_KONTO}`)) return false;
+  return true;
+}
+
+/** Löst die Anfrage auf ein Konto auf (Sitzung → Konto; Access → Stamm,
+    solange das Stamm-Konto unverknüpft ist). */
 export async function kontoVonAnfrage(request, env, jetzt = new Date()) {
   const token = cookieLesen(request, SITZUNG_COOKIE);
   if (token && env?.SESSION_GEHEIM) {
     const kontoId = await sitzungPruefen(env.SESSION_GEHEIM, token, jetzt);
     if (kontoId) return { kontoId, art: "sitzung" };
   }
-  if (env?.DEV_OHNE_ACCESS === "1" || request.headers.get("Cf-Access-Authenticated-User-Email")) {
+  if (env?.DEV_OHNE_ACCESS === "1" || await accessBrueckeOffen(request, env)) {
     return { kontoId: STAMM_KONTO, art: "stamm" };
   }
   return null;
@@ -147,7 +166,8 @@ export async function kontoApi(request, env, jetzt = new Date()) {
   }
   if (request.method !== "POST") return json(404, { fehler: "Unbekannte Konto-Route." });
 
-  // 🎟️ Einladungs-Code erzeugen – nur das Stamm-Konto (Access) darf das.
+  // 🎟️ Einladungs-Code erzeugen – nur das Stamm-Konto darf das (Sitzung;
+  // die Access-Brücke nur bis zur Verknüpfung).
   if (url.pathname === "/api/konto/einladung") {
     const konto = await kontoVonAnfrage(request, env, jetzt);
     if (!konto || konto.kontoId !== STAMM_KONTO) {
@@ -230,7 +250,7 @@ export async function kontoApi(request, env, jetzt = new Date()) {
   }
 
   // 🧯 Wiederherstellungs-Beweis hinterlegen (ersetzt einen alten) –
-  // braucht ein angemeldetes Konto (Sitzung oder verknüpftes Stamm-Konto).
+  // braucht ein angemeldetes Konto (Sitzung).
   if (url.pathname === "/api/konto/rettung") {
     const konto = await kontoVonAnfrage(request, env, jetzt);
     const satz = konto ? await kv.get(`konto:${konto.kontoId}`, "json") : null;

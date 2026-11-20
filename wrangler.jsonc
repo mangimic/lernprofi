@@ -14,6 +14,9 @@
   //   (langer Zufallswert, z. B. `openssl rand -base64 48`):
   //   npx wrangler secret put SESSION_GEHEIM
   // Optional: "vars": { "KI_DECKEL_MAX_CENT": "1000" }
+  // 🔒 Optional (nur falls Access wieder vor einem UNVERKNÜPFTEN Stamm-Konto
+  //   steht): STAMM_EMAILS = kommagetrennte Access-E-Mails, die die Stamm-
+  //   Brücke nutzen dürfen – im Dashboard als Variable anlegen, nicht hier.
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS"

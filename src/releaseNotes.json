@@ -1,5 +1,21 @@
 [
   {
+    "id": "rn-116",
+    "version": "0.88.1",
+    "datum": "2026-11-20",
+    "titel": "Sicherheit: Stamm-Konto nur noch über die Anmeldung",
+    "entries": [
+      {
+        "type": "fix",
+        "text": "🔒 Die Brücke aus der Bauzeit (Cloudflare-Access-Kopfzeile → Stamm-Konto) endet jetzt mit der Verknüpfung: Sobald das Stamm-Konto verknüpft ist, gibt es Stamm-Rechte – Einladungs-Codes, Tresor-Hüllen, Dokumente, Leo – nur noch über die Anmeldung im Familien-Konto. Die Kopfzeile allein reicht nicht mehr."
+      },
+      {
+        "type": "technik",
+        "text": "🧰 Optionale Server-Variable STAMM_EMAILS (kommagetrennt): Bis zur Verknüpfung trägt die Brücke dann nur für diese Access-E-Mail-Adressen. Lokales Entwickeln mit DEV_OHNE_ACCESS=1 bleibt unverändert. Freigabe-Checkliste und Deploy-Doku sind angepasst."
+      }
+    ]
+  },
+  {
     "id": "rn-115",
     "version": "0.88.0",
     "datum": "2026-11-12",
