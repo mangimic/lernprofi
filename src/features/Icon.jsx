@@ -32,6 +32,8 @@ const PFADE = {
   sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></>,
   x: <><path d="M6 6l12 12M18 6L6 18" /></>,
   play: <><path d="M7 5l12 7-12 7z" /></>,
+  stop: <><rect x="6" y="6" width="12" height="12" rx="1.5" /></>,
+  restart: <><path d="M5 12a7 7 0 107-7H8" /><path d="M11 2L8 5l3 3" /></>,
   flag: <><path d="M5 21V4h11l-1.5 4L16 12H5" /></>,
   speaker: <><path d="M4 10v4h4l5 4V6l-5 4z" /><path d="M16.5 9a4 4 0 010 6M19 6.5a8 8 0 010 11" /></>,
   heart: <><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z" /></>,

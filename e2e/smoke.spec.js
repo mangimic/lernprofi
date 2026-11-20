@@ -2620,6 +2620,63 @@ test("Stundenplan: Eltern tragen ihn als Text ein – Wochenplan zeigt die Schul
   await expect(page.getByTestId("fest-0-780")).toContainText("Mittag & Spielzeit");
 });
 
+// ---------- v0.90: Vorlesen mit Start/Stopp und Merk-Stelle ----------
+test("Vorlesen: Start/Stopp-Knopf merkt sich den Satz und liest dort weiter, „Von vorn“ beginnt neu", async ({ page }) => {
+  // Sprachausgabe als Attrappe, die das Satz-Ende auslösen kann (headless hat keine Stimme)
+  await page.addInitScript(() => {
+    window.__SAETZE__ = [];
+    window.SpeechSynthesisUtterance = function (text) { this.text = text; };
+    Object.defineProperty(window, "speechSynthesis", {
+      configurable: true,
+      value: { cancel() {}, speak(u) { window.__SAETZE__.push(u); } },
+    });
+  });
+  const saetze = () => page.evaluate(() => window.__SAETZE__.map((u) => u.text));
+  const satzFertig = () => page.evaluate(() => { const l = window.__SAETZE__; l[l.length - 1].onend(); });
+  await tresorAnlegen(page);
+  await page.getByTestId("nav-ueben").click();
+  await deutschBereich(page, "bericht");
+  await page.locator('[data-test="bt-fall"][data-key="fussball"]').click();
+  await page.getByTestId("bt-los").click();
+  const knopf = page.getByTestId("bt-zeuge-vorlesen");
+  await expect(knopf).toHaveAttribute("data-zustand", "start");
+
+  // ▶️ Start: liest Satz für Satz
+  await knopf.click();
+  await expect(knopf).toHaveAttribute("data-zustand", "laeuft");
+  await expect(knopf).toHaveAttribute("aria-label", "Vorlesen stoppen");
+  await satzFertig();
+  await satzFertig();
+  const bisher = await saetze();
+  expect(bisher).toHaveLength(3);
+  expect(new Set(bisher).size).toBe(3); // drei verschiedene Sätze, keine Textwand in einem Stück
+
+  // ⏹️ Stopp: Stelle gemerkt, „Von vorn“ erscheint
+  await knopf.click();
+  await expect(knopf).toHaveAttribute("data-zustand", "pause");
+  await expect(knopf).toHaveAttribute("aria-label", "Weiter vorlesen");
+  await expect(page.getByTestId("bt-zeuge-vorlesen-vonvorn")).toBeVisible();
+  expect(await saetze()).toHaveLength(3);
+
+  // Die Stelle übersteht den Wechsel in die Spiele und zurück
+  await page.getByTestId("bt-utab-filter").click();
+  await expect(knopf).toHaveCount(0);
+  await page.getByTestId("bt-utab-merkkarte").click();
+  await expect(knopf).toHaveAttribute("data-zustand", "pause");
+
+  // ▶️ Start: weiter beim dritten Satz, nicht von vorn
+  await knopf.click();
+  await expect(knopf).toHaveAttribute("data-zustand", "laeuft");
+  expect((await saetze())[3]).toBe(bisher[2]);
+
+  // ↺ Von vorn
+  await knopf.click();
+  await page.getByTestId("bt-zeuge-vorlesen-vonvorn").click();
+  await expect(knopf).toHaveAttribute("data-zustand", "laeuft");
+  const alle = await saetze();
+  expect(alle[alle.length - 1]).toBe(bisher[0]);
+});
+
 // ---------- v0.87: Klasse 1 – eigene Lernwelt mit Vorlesen ----------
 // Sprachausgabe als Attrappe: sammelt, was vorgelesen würde (headless hat keine Stimme).
 async function sprachAttrappe(page) {

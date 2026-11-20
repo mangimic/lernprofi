@@ -1,5 +1,29 @@
 [
   {
+    "id": "rn-118",
+    "version": "0.90.0",
+    "datum": "2026-11-20",
+    "titel": "Vorlesen mit Start und Stopp",
+    "entries": [
+      {
+        "type": "neu",
+        "text": "▶️⏹️ Der Vorlese-Knopf ist jetzt ein Start/Stopp-Knopf: Antippen startet das Vorlesen, nochmal Antippen hält es an. Solange vorgelesen wird, zeigt der Knopf ein Stopp-Zeichen."
+      },
+      {
+        "type": "neu",
+        "text": "📍 Die App merkt sich, bei welchem Satz gestoppt wurde. Der nächste Start liest genau dort weiter – auch wenn zwischendurch ein Spiel geöffnet war. Ein zweiter Knopf „Von vorn“ beginnt den Text neu. Das gilt für lange Texte wie die Zeugenaussage beim Bericht; kurze Fragen und Antworten werden wie bisher am Stück gelesen."
+      },
+      {
+        "type": "hinweis",
+        "text": "Die gemerkte Stelle bleibt, solange die App offen ist. Nach dem Schließen oder Neuladen beginnt jeder Text wieder vorn; gespeichert oder übertragen wird dafür nichts. In den Spielen bleibt der Lautsprecher-Knopf wie bisher."
+      },
+      {
+        "type": "technik",
+        "text": "⚙️ Lange Texte werden Satz für Satz an die Sprachausgabe des Geräts gegeben statt in einem Stück – so ist die Stelle bekannt, und das Anhalten funktioniert auch auf dem iPad zuverlässig."
+      }
+    ]
+  },
+  {
     "id": "rn-117",
     "version": "0.89.0",
     "datum": "2026-11-20",

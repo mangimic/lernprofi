@@ -1,7 +1,10 @@
 import { describe, it, expect, afterEach } from "vitest";
-import { vorlesbar, vorlesen, vorleseStopp, sprechText, sprechSauber } from "./vorlesen.js";
+import {
+  vorlesbar, vorlesen, vorleseStopp, sprechText, sprechSauber,
+  saetzeTeilen, vorlesenWeiter, vorlesenVonVorn, vorlesePause, vorleseLaeuft, vorleseStelle, vorleseAbo,
+} from "./vorlesen.js";
 
-afterEach(() => { delete globalThis.window; });
+afterEach(() => { vorleseStopp(); delete globalThis.window; });
 
 describe("Vorlesen – Sprachausgabe des Geräts, nie Pflicht", () => {
   it("sprechText: `sprich` schlägt die Frage, Emojis und Platzhalter werden sprechbar", () => {
@@ -46,5 +49,75 @@ describe("Vorlesen – Sprachausgabe des Geräts, nie Pflicht", () => {
     // wirft der Browser (z. B. ohne Nutzer-Geste), bleibt die App ruhig
     globalThis.window.speechSynthesis.speak = () => { throw new Error("blockiert"); };
     expect(vorlesen("Hallo")).toBe(false);
+  });
+});
+
+describe("Vorlesen mit Start/Stopp – die Stelle wird gemerkt", () => {
+  const LANG = "Also, das war vielleicht ein Schreck! Ich kam gerade vom Einkaufen, es war Dienstag, der 17. Februar, so gegen 18:00 Uhr. "
+    + "An der Ausfahrt fuhr ein rotes Auto heraus. Ich dachte: „Hilfe, das sieht böse aus!“ Zum Glück wurde niemand verletzt.";
+
+  function attrappe() {
+    const gesprochen = [];
+    globalThis.window = {
+      SpeechSynthesisUtterance: function (text) { this.text = text; },
+      speechSynthesis: { cancel: () => {}, speak: (u) => gesprochen.push(u) },
+    };
+    return { gesprochen, satzFertig: () => gesprochen[gesprochen.length - 1].onend() };
+  }
+
+  it("saetzeTeilen: kurze Texte bleiben ganz, lange werden Sätze – Datum und Uhrzeit bleiben heil", () => {
+    expect(saetzeTeilen("Wie viel ist 7 plus 5? Rechne!")).toEqual(["Wie viel ist 7 plus 5? Rechne!"]);
+    expect(saetzeTeilen("")).toEqual([]);
+    const teile = saetzeTeilen(LANG);
+    expect(teile).toEqual([
+      "Also, das war vielleicht ein Schreck!",
+      "Ich kam gerade vom Einkaufen, es war Dienstag, der 17. Februar, so gegen 18:00 Uhr.",
+      "An der Ausfahrt fuhr ein rotes Auto heraus.",
+      "Ich dachte: „Hilfe, das sieht böse aus!“",
+      "Zum Glück wurde niemand verletzt.",
+    ]);
+    expect(teile.join(" ")).toBe(sprechSauber(LANG)); // nichts geht verloren
+  });
+
+  it("Stopp merkt den Satz, Start liest dort weiter, am Ende beginnt es wieder vorn", () => {
+    const { gesprochen, satzFertig } = attrappe();
+    const teile = saetzeTeilen(LANG);
+    let meldungen = 0;
+    const ab = vorleseAbo(() => { meldungen++; });
+    expect(vorlesenWeiter(LANG)).toBe(true);
+    expect(vorleseLaeuft(LANG)).toBe(true);
+    expect(gesprochen.map((u) => u.text)).toEqual([teile[0]]);
+    satzFertig(); satzFertig(); // Satz 1 und 2 gehört, Satz 3 läuft
+    expect(gesprochen[2].text).toBe(teile[2]);
+    vorlesePause();
+    expect(vorleseLaeuft(LANG)).toBe(false);
+    expect(vorleseStelle(LANG)).toBe(2);
+    gesprochen[2].onend(); // spätes Ende-Ereignis des abgebrochenen Satzes: darf nichts auslösen
+    expect(gesprochen).toHaveLength(3);
+    expect(vorlesenWeiter(LANG)).toBe(true); // ▶️ weiter bei Satz 3
+    expect(gesprochen[3].text).toBe(teile[2]);
+    satzFertig(); satzFertig(); satzFertig(); // bis zum Schluss
+    expect(vorleseLaeuft(LANG)).toBe(false);
+    expect(vorleseStelle(LANG)).toBe(0);
+    expect(meldungen).toBeGreaterThanOrEqual(4);
+    ab();
+  });
+
+  it("„Von vorn“ vergisst die Stelle; ein anderer Text unterbricht und merkt die alte Stelle", () => {
+    const { gesprochen, satzFertig } = attrappe();
+    const teile = saetzeTeilen(LANG);
+    vorlesenWeiter(LANG); satzFertig();
+    vorlesenWeiter("Ein anderer kurzer Text."); // Knopf an anderer Stelle gedrückt
+    expect(vorleseLaeuft("Ein anderer kurzer Text.")).toBe(true);
+    expect(vorleseStelle(LANG)).toBe(1);
+    vorlesenVonVorn(LANG);
+    expect(vorleseStelle(LANG)).toBe(0);
+    expect(gesprochen[gesprochen.length - 1].text).toBe(teile[0]);
+    satzFertig();
+    vorleseStopp(); // Abbruch ohne Merken (Fragenwechsel)
+    expect(vorleseStelle(LANG)).toBe(0);
+    vorlesenWeiter(LANG); satzFertig(); satzFertig();
+    vorlesen(LANG); // automatisches Vorlesen beginnt immer vorn
+    expect(gesprochen[gesprochen.length - 1].text).toBe(teile[0]);
   });
 });

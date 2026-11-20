@@ -36,6 +36,23 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.90.0: Vorlesen mit Start/Stopp und Merk-Stelle ----------
+console.log("== v0.90.0: Vorlesen Start/Stopp ==");
+test("v0.90: Vorlesen satzweise mit Merk-Stelle – Start, Stopp, Von vorn; nichts wird gespeichert", (() => {
+  const v = quelle("src/vorlesen.js");
+  const k = quelle("src/features/VorleseKnopf.jsx");
+  return versionMindestens("0.90.0")
+    && v.includes("export function saetzeTeilen") && v.includes("export function vorlesenWeiter")
+    && v.includes("export function vorlesePause") && v.includes("export function vorlesenVonVorn")
+    && v.includes("export function vorleseStelle") && !/localStorage|sessionStorage|\(\?<[=!]/.test(v)
+    && k.includes("useSyncExternalStore") && k.includes("data-zustand={zustand}") && k.includes("-vonvorn")
+    && k.includes('"Vorlesen stoppen"') && k.includes('"Weiter vorlesen"')
+    && quelle("src/features/Icon.jsx").includes("stop:") && quelle("src/features/Icon.jsx").includes("restart:")
+    && quelle("src/vorlesen.test.js").includes("Stopp merkt den Satz")
+    && quelle("e2e/smoke.spec.js").includes("bt-zeuge-vorlesen-vonvorn")
+    && releaseNoteVorhanden("rn-118");
+})());
+
 // ---------- v0.89.0: Bericht schreiben ----------
 console.log("== v0.89.0: Bericht schreiben ==");
 test("v0.89: APP_VERSION mindestens 0.89.0", versionMindestens("0.89.0"));
