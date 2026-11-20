@@ -1,5 +1,17 @@
 [
   {
+    "id": "rn-116",
+    "version": "0.88.1",
+    "datum": "2026-11-20",
+    "titel": "Sudoku-Test hält an jedem Tag",
+    "entries": [
+      {
+        "type": "technik",
+        "text": "⚙️ Der automatische Test zur Rückfrage bei „Anderes Rätsel“ im Sudoku-Training ging von genau einem Fehlversuch aus. Das Rätsel wechselt aber täglich, und damit auch, wie viele Zahlen vor der richtigen danebenliegen – der Test zählt jetzt mit und läuft an jedem Tag durch. An der App selbst ändert sich nichts."
+      }
+    ]
+  },
+  {
     "id": "rn-115",
     "version": "0.88.0",
     "datum": "2026-11-12",

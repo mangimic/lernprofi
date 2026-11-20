@@ -36,6 +36,16 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.88.1: Sudoku-Smoke-Test datumsunabhängig ----------
+console.log("== v0.88.1: Sudoku-Smoke-Test ==");
+test("v0.88.1: Sudoku-Rückfrage-Test zählt die Fehlversuche mit, statt eine feste Zahl zu erwarten", (() => {
+  const e2e = quelle("e2e/smoke.spec.js");
+  return versionMindestens("0.88.1")
+    && e2e.includes("fehlversuche++") && e2e.includes("Fehlversuche: ${fehlversuche}")
+    && !e2e.includes('toContainText("Fehlversuche: 1")')
+    && releaseNoteVorhanden("rn-116");
+})());
+
 // ---------- v0.88.0: Klasse 2 ----------
 console.log("== v0.88.0: Klasse 2 ==");
 test("v0.88: Inhalte Klasse 2 – 10 Mathe- und 10 Deutsch-Bereiche mit eigenen Tests", (() => {
