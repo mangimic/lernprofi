@@ -1961,21 +1961,28 @@ test("Sudoku-Training: „Anderes Rätsel“ steht rechts und fragt nach, bevor 
   await expect(page.getByTestId("sudoku-neu-frage")).toHaveCount(0);
   await expect(page.locator('[data-test^="sudoku-zelle-"]')).toHaveCount(16);
 
-  // Spielstand erzeugen: ein Fehlversuch (Zähler 1) + eine richtig gesetzte Zahl
+  // Spielstand erzeugen: mindestens ein Fehlversuch + eine richtig gesetzte Zahl.
+  // Das Rätsel hängt am Tagesdatum (Seed) – wie viele Zahlen vor der richtigen
+  // danebenliegen, ist also jeden Tag anders. Darum mitzählen statt „1“ annehmen.
   const zellText = async (r, c) => (await page.getByTestId(`sudoku-zelle-${r}-${c}`).textContent()).trim();
   let gesetzt = null;
+  let fehlversuche = 0;
   suchen: for (let r = 0; r < 4; r++) {
     for (let c = 0; c < 4; c++) {
       if (await zellText(r, c)) continue;
       await page.getByTestId(`sudoku-zelle-${r}-${c}`).click();
       for (let n = 1; n <= 4; n++) {
         await page.getByTestId(`sudoku-zahl-${n}`).click();
-        if ((await zellText(r, c)) === String(n)) { gesetzt = { r, c, n }; break suchen; }
+        if ((await zellText(r, c)) === String(n)) { gesetzt = gesetzt || { r, c, n }; break; }
+        fehlversuche++;
       }
+      // Gehört in ein Feld die 1, gab es dort keinen Fehlversuch → nächstes Feld
+      if (gesetzt && fehlversuche > 0) break suchen;
     }
   }
   expect(gesetzt).not.toBeNull();
-  await expect(page.getByTestId("sudoku-fehler")).toContainText("Fehlversuche: 1");
+  expect(fehlversuche).toBeGreaterThan(0);
+  await expect(page.getByTestId("sudoku-fehler")).toContainText(`Fehlversuche: ${fehlversuche}`);
 
   // Antippen mit Spielstand → Rückfrage statt Sofort-Verlust
   await page.getByTestId("sudoku-neu").click();
@@ -1985,7 +1992,7 @@ test("Sudoku-Training: „Anderes Rätsel“ steht rechts und fragt nach, bevor 
   await page.getByTestId("sudoku-neu-nein").click();
   await expect(page.getByTestId("sudoku-neu-frage")).toHaveCount(0);
   expect(await zellText(gesetzt.r, gesetzt.c)).toBe(String(gesetzt.n));
-  await expect(page.getByTestId("sudoku-fehler")).toContainText("Fehlversuche: 1");
+  await expect(page.getByTestId("sudoku-fehler")).toContainText(`Fehlversuche: ${fehlversuche}`);
   // „Ja“: frisches Rätsel, Zähler auf 0
   await page.getByTestId("sudoku-neu").click();
   await page.getByTestId("sudoku-neu-ja").click();
