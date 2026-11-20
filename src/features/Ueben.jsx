@@ -16,6 +16,7 @@ import { auswahlPruefen } from "../calc/wortTippen.js";
 import { muenzenNachRunde, aufgabenZaehlen, heutigerTag, lernspur } from "../calc/lerntage.js";
 import { missionsOpts, tagesModus } from "../calc/tagesform.js";
 import Vorgang from "./Vorgang.jsx";
+import BerichtText from "./BerichtText.jsx";
 import { kiErklaeren } from "../ki.js";
 import { THEMEN_WELTEN } from "../calc/aufgaben/themen.js";
 import { istEmpfohlen } from "../calc/onboarding.js";
@@ -349,8 +350,9 @@ export default function Ueben() {
     setRunde({ ...runde, ergebnis: erg });
   };
 
-  // --- Modul (Vorgangsbeschreibung): eigene Ansicht statt Runde ---
+  // --- Modul (Vorgangsbeschreibung, Bericht): eigene Ansicht statt Runde ---
   if (runde?.typ === "modul") {
+    if (runde.key === "bericht") return <BerichtText zurueck={rundeZu} />;
     return <Vorgang zurueck={rundeZu} />;
   }
 

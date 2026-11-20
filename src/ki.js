@@ -52,7 +52,7 @@ export async function kiSchrift(daten) {
 }
 
 /** ✍️ Aufsatz-Check: Foto (Base64) + Textart → 2 Sterne, 1 Tipp-Stelle, Mach-Aufgabe.
-    daten: { bild, textart ("vorgang"|"erlebnis"|"bild"), typ, modell } */
+    daten: { bild, textart ("vorgang"|"bericht"|"erlebnis"|"bild"), typ, modell } */
 export async function kiAufsatz(daten) {
   try {
     const { status, daten: d } = await anfrage("/api/ki/aufsatz", {
