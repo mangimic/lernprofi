@@ -36,6 +36,39 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.89.0: Bericht schreiben ----------
+console.log("== v0.89.0: Bericht schreiben ==");
+test("v0.89: APP_VERSION mindestens 0.89.0", versionMindestens("0.89.0"));
+test("v0.89: Release-Note rn-116 vorhanden", releaseNoteVorhanden("rn-116"));
+test("v0.89: 7 Fälle mit Leitfaden (7 W-Fragen), Muster-Bericht und reiner Logik", (() => {
+  const q = quelle("src/calc/aufgaben/berichtText.js");
+  return ["parkhaus", "fahrrad", "fussball", "angeln", "tennis", "dinos", "weltraum"].every((k) => q.includes(k + ": {"))
+    && ["wann", "wo", "was", "wer", "warum", "wie", "folgen"].every((k) => q.includes(`key: "${k}"`))
+    && q.includes("Parkhaus Ost") && q.includes("berichtGesund") && q.includes("reporterRang")
+    && quelle("src/calc/aufgaben/berichtText.test.js").includes("berichtGesund");
+})());
+test("v0.89: vier Spiele + Merkkarte + Arbeitsblatt mit Leitfaden + Lösungs-Hürde + Selbst-Check", (() => {
+  const v = quelle("src/features/BerichtText.jsx");
+  return v.includes("bt-tab-${") && v.includes("bt-utab-${")
+    && ["wfragen", "filter", "zeit"].every((t) => v.includes(`${t}: {`)) && v.includes("Ordnen()")
+    && v.includes('data-test="bt-drucken"') && v.includes("Leitfaden W-Fragen zum Bericht")
+    && v.includes("tries >= 3 && geschrieben >= 3") && v.includes("BT_KRIT_INHALT") && v.includes("mit der Hand");
+})());
+test("v0.89: Lernhilfen – Vorlesen der Zeugenaussage, Reporter-Ausweis, Belohnung, Stand im Tresor", (() => {
+  const v = quelle("src/features/BerichtText.jsx");
+  return v.includes("VorleseKnopf") && v.includes('data-test="bt-ausweis"')
+    && v.includes("muenzenNachRunde") && v.includes("aufgabenZaehlen") && v.includes("missionsOpts(")
+    && quelle("src/calc/migrateData.js").includes("berichtText: null");
+})());
+test("v0.89: verdrahtet – Übungs-Liste, Gruppe Texte, Wozu-Satz, Aufsatz-Check", (() => {
+  const g = quelle("src/calc/uebenGruppen.js");
+  return g.includes('key: "bericht"') && g.includes('felder: ["gesch", "vorgang", "bericht"]')
+    && quelle("src/features/Ueben.jsx").includes('runde.key === "bericht"')
+    && quelle("src/calc/wozu.js").includes("bericht:")
+    && quelle("src/features/Aufsatz.jsx").includes('key: "bericht"')
+    && quelle("server/_lib/kiApi.js").includes("bericht: \"Bericht:");
+})());
+
 // ---------- v0.88.0: Klasse 2 ----------
 console.log("== v0.88.0: Klasse 2 ==");
 test("v0.88: Inhalte Klasse 2 – 10 Mathe- und 10 Deutsch-Bereiche mit eigenen Tests", (() => {

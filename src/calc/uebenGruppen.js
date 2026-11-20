@@ -21,6 +21,7 @@ export const DEUTSCH_LISTE = [
   ...KOMPASS_DEUTSCH_BEREICHE, // 🧭 die Aufgabenformate aus dem Kompass-4-Test
   HOEREN_BEREICH, // 🔊 gezieltes Rechtschreib-Training nach typischen Fehlermustern
   { key: "vorgang", emoji: "📝", name: "Vorgangsbeschreibung", typ: "modul" },
+  { key: "bericht", emoji: "📰", name: "Bericht schreiben", typ: "modul" },
 ];
 
 export const DEUTSCH_GRUPPEN = [
@@ -28,7 +29,7 @@ export const DEUTSCH_GRUPPEN = [
   { key: "schreiben", emoji: "✍️", name: "Richtig schreiben", felder: ["gk", "gws", "dd", "doppel", "strategie", "wortfam", "hoeren"] },
   { key: "woerter", emoji: "🏷️", name: "Wörter & Wortarten", felder: ["wa", "zeit", "verbform", "steigern", "zusnomen", "faelle"] },
   { key: "saetze", emoji: "🧲", name: "Sätze & Satzglieder", felder: ["subj", "praed", "satzglied", "rede"] },
-  { key: "texte", emoji: "📚", name: "Texte schreiben", felder: ["gesch", "vorgang"] },
+  { key: "texte", emoji: "📚", name: "Texte schreiben", felder: ["gesch", "vorgang", "bericht"] },
 ];
 
 /** Zu welcher Gruppe gehört ein Lernfeld? (null = Fach ohne Gruppen) */

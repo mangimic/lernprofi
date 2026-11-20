@@ -154,6 +154,7 @@ REGELN (alle verbindlich):
    (markieren statt Fehlerliste), nie Rechtschreib-Korrekturen am Stück. */
 export const AUFSATZ_KRITERIEN = {
   vorgang: "Vorgangsbeschreibung: Stimmt die Reihenfolge? Gibt es Zuerst/Dann/Danach/Zum-Schluss-Wörter? Steht alles im Präsens? Sind alle Schritte da, sodass jemand es nachmachen könnte?",
+  bericht: "Bericht: Beantwortet die Einleitung Wann, Wo, Was und Wer? Wird im Hauptteil der Reihe nach berichtet, wie und warum es passiert ist? Stehen am Schluss die Folgen? Ist der Text sachlich (keine Gefühle, keine Meinung, keine wörtliche Rede) und steht er im Präteritum?",
   erlebnis: "Erlebniserzählung: Gibt es Einleitung, Höhepunkt und Schluss? Wird der Höhepunkt ausführlich und spannend erzählt (wörtliche Rede, Gefühle, treffende Wörter statt „dann…dann…dann“)?",
   bild: "Bildergeschichte: Passt die Geschichte zu den Bildern und ihrer Reihenfolge? Haben die Figuren Namen? Gibt es einen richtigen Schluss-Satz?",
 };
@@ -472,7 +473,7 @@ export async function kiApi(request, env, jetzt = new Date()) {
     const kriterien = AUFSATZ_KRITERIEN[eingabe?.textart];
     if (!bild || bild.length < 100) return json(400, { fehler: "Erwartet { bild (Base64-JPEG), textart }." });
     if (bild.length > 1_500_000) return json(400, { fehler: "Das Foto ist zu groß – die App verkleinert es normalerweise selbst." });
-    if (!kriterien) return json(400, { fehler: "Unbekannte textart (vorgang | erlebnis | bild)." });
+    if (!kriterien) return json(400, { fehler: "Unbekannte textart (vorgang | bericht | erlebnis | bild)." });
 
     const deckelCent = await deckelLesen();
     const stand = await standLesen();
