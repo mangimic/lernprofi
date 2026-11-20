@@ -34,11 +34,16 @@ gelten überall dieselbe Lern-PIN und dasselbe Eltern-Passwort.
 
 Access war der Zaun der Bauzeit (Etappen 6–8). Seit v0.70 hat die App ein
 eigenes Familien-Konto (E-Mail + Eltern-Passwort, Sitzungs-Cookie); seit
-dem Abschalten sehen Familien nur noch die App. Der Header
-`Cf-Access-Authenticated-User-Email` kommt nicht mehr an, die Stamm-Brücke
-in `kontoVonAnfrage()` ist damit tot – Stamm nur über die verknüpfte
-Sitzung. Rückweg: Anwendung neu anlegen (Schritte unten), dann greift der
-Zaun sofort wieder. Die Schritte bleiben als Anleitung stehen:
+dem Abschalten sehen Familien nur noch die App. Access setzt den Header
+`Cf-Access-Authenticated-User-Email` nicht mehr, und seit v0.89.1 schließt
+`kontoVonAnfrage()` die Stamm-Brücke selbst: Sobald `konto:stamm` in KV
+existiert (Stamm-Konto verknüpft), gibt der Header kein Stamm-Konto mehr –
+Stamm nur über die verknüpfte Sitzung. Davor lässt sich die Brücke mit der
+optionalen Worker-Variable `STAMM_EMAILS` (kommagetrennte Eltern-E-Mails)
+auf bestimmte Access-Adressen einschränken. Rückweg: Anwendung neu anlegen
+(Schritte unten), dann greift der Zaun sofort wieder – als zweiter Zaun VOR
+der Anmeldung im Familien-Konto, nicht mehr statt ihr. Die Schritte bleiben
+als Anleitung stehen:
 
 
 1. Dashboard → **Zero Trust → Access → Applications → Add application → Self-hosted**.
@@ -47,7 +52,9 @@ Zaun sofort wieder. Die Schritte bleiben als Anleitung stehen:
    Session-Dauer großzügig wählen (z. B. 1 Monat), damit das Kind nicht
    ständig durch den Access-Login muss.
 4. Die API prüft zusätzlich den Header `Cf-Access-Authenticated-User-Email` –
-   ohne Access-Session antwortet `/api/*` mit 401.
+   ohne Access-Session antwortet `/api/*` mit 401. (Seit v0.89.1 gilt das
+   nur, solange das Stamm-Konto unverknüpft ist; danach zählt allein die
+   Sitzung des Familien-Kontos.)
 5. Wichtig für offline: Die **installierte PWA startet aus dem Cache**
    auch ohne Netz; nur der Abgleich braucht eine gültige Access-Session.
    Nach Aktivierung einmal den Flugmodus-Test machen.

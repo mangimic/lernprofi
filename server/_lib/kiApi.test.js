@@ -110,6 +110,19 @@ describe("kiApi – Routen", () => {
     expect(r.status).toBe(401);
   });
 
+  it("🔒 Access-Brücke endet mit der Verknüpfung: konto:stamm da → 401, Claude wird nicht gerufen", async () => {
+    const env = mockEnv();
+    const claude = claudeMock();
+    vi.stubGlobal("fetch", claude);
+    expect((await kiApi(anfrage("GET", "/api/ki/status"), env, JETZT)).status).toBe(200); // unverknüpft: Brücke
+    env._map.set("konto:stamm", JSON.stringify({ kontoId: "stamm", email: "familie@example.com" }));
+    expect((await kiApi(anfrage("GET", "/api/ki/status"), env, JETZT)).status).toBe(401);
+    expect((await kiApi(anfrage("POST", "/api/ki/deckel", { cent: 900 }), env, JETZT)).status).toBe(401);
+    expect((await kiApi(anfrage("POST", "/api/ki/erklaeren", { frage: "Wem gibt er den Ball?" }), env, JETZT)).status).toBe(401);
+    expect(claude).not.toHaveBeenCalled();
+    expect(env._map.has("ki:deckel")).toBe(false);
+  });
+
   it("status meldet fehlenden Schlüssel/KV ehrlich, sonst verfügbar mit Deckel", async () => {
     const ohne = await (await kiApi(anfrage("GET", "/api/ki/status"), mockEnv({ mitSchluessel: false }), JETZT)).json();
     expect(ohne.verfuegbar).toBe(false);

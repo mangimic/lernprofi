@@ -36,6 +36,29 @@ function versionMindestens(v) {
 }
 const releaseNoteVorhanden = (id) => JSON.parse(quelle("src/releaseNotes.json")).some((r) => r.id === id);
 
+// ---------- v0.89.1: Access-Brücke endet mit der Stamm-Verknüpfung ----------
+console.log("== v0.89.1: Access-Brücke endet mit der Verknüpfung ==");
+test("v0.89.1: kontoVonAnfrage – Brücke nur ohne konto:stamm, STAMM_EMAILS optional, DEV_OHNE_ACCESS bleibt", (() => {
+  const ko = quelle("server/_lib/kontoApi.js");
+  const bruecke = ko.slice(ko.indexOf("async function accessBrueckeOffen"), ko.indexOf("export async function kontoApi"));
+  return versionMindestens("0.89.1")
+    && bruecke.includes("env.TRESOR.get(`konto:${STAMM_KONTO}`)") && bruecke.includes("env?.STAMM_EMAILS")
+    && bruecke.includes('env?.DEV_OHNE_ACCESS === "1" || await accessBrueckeOffen(request, env)')
+    // der Header wird NUR in accessBrueckeOffen gelesen – kein zweiter Weg an der Prüfung vorbei
+    && ko.split("Cf-Access-Authenticated-User-Email").length === 2
+    && !quelle("server/_lib/kiApi.js").includes("Cf-Access-Authenticated-User-Email")
+    && !quelle("server/index.js").includes("Cf-Access-Authenticated-User-Email");
+})());
+test("v0.89.1: Vitest deckt beide Zustände ab (Konto, Tresor, KI); Doku und Release-Note nennen die Änderung", (() => {
+  const ck = quelle("docs/FREIGABE-CHECKLISTE.md");
+  return ["kontoApi", "vaultApi", "kiApi"].every((n) => quelle(`server/_lib/${n}.test.js`).includes("Access-Brücke endet mit der Verknüpfung"))
+    && quelle("server/_lib/kontoApi.test.js").includes("STAMM_EMAILS") && quelle("server/_lib/vaultApi.test.js").includes("STAMM_EMAILS")
+    && quelle("server/_lib/kontoApi.test.js").includes("DEV_OHNE_ACCESS=1") && quelle("server/_lib/vaultApi.test.js").includes("DEV_OHNE_ACCESS=1")
+    && ck.includes("Seit v0.89.1") && ck.includes("STAMM_EMAILS")
+    && quelle("docs/DEPLOY-CLOUDFLARE.md").includes("STAMM_EMAILS")
+    && releaseNoteVorhanden("rn-118");
+})());
+
 // ---------- v0.89.0: Bericht schreiben ----------
 console.log("== v0.89.0: Bericht schreiben ==");
 test("v0.89: APP_VERSION mindestens 0.89.0", versionMindestens("0.89.0"));
