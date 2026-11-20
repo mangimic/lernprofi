@@ -18,7 +18,7 @@ mehr: Stamm gibt es nur noch über die verknüpfte Sitzung, die Lücke der
 Policy „Everyone“ ist geschlossen. Offen bleiben Schritt 4 (jedes Gerät
 anmelden), die DPA (Schritt 2) und optional die Domain (Schritt 7).
 
-🔒 **Seit v0.88.1 hängt das nicht mehr an Access:** `kontoVonAnfrage()`
+🔒 **Seit v0.89.1 hängt das nicht mehr an Access:** `kontoVonAnfrage()`
 prüft selbst. Sobald `konto:stamm` in KV existiert (Stamm-Konto verknüpft,
 Schritt 3), gibt der Header kein Stamm-Konto mehr – egal, ob Access an oder
 aus ist und wer den Header mitschickt. Stamm-Rechte (Einladungs-Codes,
@@ -44,7 +44,7 @@ Policy auf eure E-Mail-Adressen einschränken, oder zügig Schritte 1, 3, 4
 erledigen und Access abschalten (Schritt 5) – danach kommt der Header nie
 mehr an und Stamm gibt es nur über die verknüpfte Sitzung.
 
-✅ **Seit v0.88.1 ist diese Lücke mit der Verknüpfung geschlossen** – auch
+✅ **Seit v0.89.1 ist diese Lücke mit der Verknüpfung geschlossen** – auch
 bei Policy „Everyone“: Existiert `konto:stamm` (Schritt 3 erledigt), gibt
 der Access-Header kein Stamm-Konto mehr; Stamm gibt es nur noch über die
 Sitzung. Die Warnung gilt nur noch für die Zeit VOR der Verknüpfung (oder
@@ -135,6 +135,6 @@ Handgriff im Dashboard.
 
 Access wieder einschalten sperrt sofort alles hinter den alten Zaun;
 Sitzungen und Konten funktionieren dahinter unverändert weiter. Der
-Access-Login allein gibt aber kein Stamm-Konto mehr (seit v0.88.1, sobald
+Access-Login allein gibt aber kein Stamm-Konto mehr (seit v0.89.1, sobald
 `konto:stamm` existiert) – jedes Gerät meldet sich zusätzlich im
 Familien-Konto an.

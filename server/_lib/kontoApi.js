@@ -12,7 +12,7 @@
    1. Gültiges Sitzungs-Cookie  → dieses Konto      (art "sitzung")
    2. Cloudflare-Access-Header  → Stamm-Konto        (art "stamm")
       – die Brücke fürs Bestandskonto, NUR bis zur Verknüpfung:
-      Sobald `konto:stamm` in KV existiert, ist sie zu (seit v0.88.1) –
+      Sobald `konto:stamm` in KV existiert, ist sie zu (seit v0.89.1) –
       Stamm gibt es dann ausschließlich über die Sitzung. Optional
       davor: Variable STAMM_EMAILS (kommagetrennt) – ist sie gesetzt,
       trägt die Brücke nur für diese Access-E-Mails.

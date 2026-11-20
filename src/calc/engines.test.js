@@ -153,11 +153,11 @@ describe("aufgabenRunde", () => {
     }
   });
 
-  it("🗂️ Übungs-Gruppen decken alle 20 Deutsch-Felder genau einmal ab; Leo wählt fair", () => {
+  it("🗂️ Übungs-Gruppen decken alle 21 Deutsch-Felder genau einmal ab; Leo wählt fair", () => {
     const alleFelder = DEUTSCH_GRUPPEN.flatMap((g) => g.felder);
     expect(alleFelder.length).toBe(new Set(alleFelder).size); // kein Feld doppelt
     expect([...alleFelder].sort()).toEqual([
-      "dd", "doppel", "faelle", "gesch", "gk", "gws", "hoeren", "lesen", "praed", "rede", "satzglied",
+      "bericht", "dd", "doppel", "faelle", "gesch", "gk", "gws", "hoeren", "lesen", "praed", "rede", "satzglied",
       "steigern", "strategie", "subj", "verbform", "vorgang", "wa", "wortfam", "zeit", "zusnomen",
     ]);
     expect(gruppeVonFeld("lesen").felder).toEqual(["lesen"]); // Ein-Feld-Gruppe startet direkt
@@ -702,7 +702,7 @@ describe("übungs-welten & wozu-anker", () => {
 
   it("jedes Lernfeld hat einen Wozu-Satz (kurz, ohne Diagnose-Wörter)", async () => {
     const { WOZU, wozuSatz } = await import("./wozu.js");
-    const KEYS = ["subj", "praed", "satzglied", "rede", "zeit", "wa", "faelle", "gk", "gws", "gesch", "dd", "doppel", "vorgang",
+    const KEYS = ["subj", "praed", "satzglied", "rede", "zeit", "wa", "faelle", "gk", "gws", "gesch", "dd", "doppel", "vorgang", "bericht",
       "mrechnen", "mzahlen", "mgeo", "mgroessen", "mdaten",
       "sstrom", "srad", "skarte", "sgemeinde", "skoerper", "szeit", "stark"];
     for (const k of KEYS) {

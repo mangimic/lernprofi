@@ -54,7 +54,7 @@ const GRUPPE_VON = {
   gk: "schreiben", gws: "schreiben", dd: "schreiben", doppel: "schreiben", strategie: "schreiben", wortfam: "schreiben", hoeren: "schreiben",
   wa: "woerter", zeit: "woerter", verbform: "woerter", steigern: "woerter", zusnomen: "woerter", faelle: "woerter",
   subj: "saetze", praed: "saetze", satzglied: "saetze", rede: "saetze",
-  gesch: "texte", vorgang: "texte",
+  gesch: "texte", vorgang: "texte", bericht: "texte",
 };
 async function deutschBereich(page, key) {
   if (await page.getByTestId("gruppe-zurueck").count()) await page.getByTestId("gruppe-zurueck").click();
@@ -644,6 +644,64 @@ test("Vorgangsbeschreibung: Ablauf wählen, drei Spiele, Arbeitsblatt, Lösungs-
   await page.getByTestId("selbst-inhalt").first().check();
   await page.getByTestId("selbst-form").last().check();
   await expect(page.getByTestId("selbst-stand")).toContainText("2 von 12");
+});
+
+test("Bericht schreiben: Fall wählen, vier Spiele mit Stempeln, Arbeitsblatt mit Leitfaden, Lösungs-Hürde, Selbst-Check", async ({ page }) => {
+  await tresorAnlegen(page);
+  await page.getByTestId("nav-ueben").click();
+  await deutschBereich(page, "bericht");
+  await expect(page.getByTestId("bericht")).toBeVisible();
+  await expect(page.getByTestId("bt-stempel-stand")).toContainText("0 von 4");
+
+  // 🗂️ Fall: Fußball wählen, Merkkarte mit Zeugenaussage
+  await page.locator('[data-test="bt-fall"][data-key="fussball"]').click();
+  await page.getByTestId("bt-los").click();
+  await page.getByTestId("bt-zeuge-zeigen").click();
+  await expect(page.getByTestId("bt-zeuge")).toContainText("Haltet den Hund");
+  await page.getByTestId("bt-zu-spielen").click();
+
+  // 🔎 W-Fragen, 🗑️ Filter, ⏳ Zeitmaschine: jede Karte richtig, Rückmeldung mit Grund
+  for (const [spiel, karten] of [["wfragen", 7], ["filter", 6], ["zeit", 4]]) {
+    await page.getByTestId(`bt-utab-${spiel}`).click();
+    for (let i = 0; i < karten; i++) {
+      await page.locator('[data-test="bt-opt"][data-richtig="1"]').click();
+      await expect(page.getByTestId("bt-feedback")).toContainText("Richtig");
+      await page.getByTestId("bt-weiter").click();
+    }
+    await expect(page.getByTestId("bt-quiz-ergebnis")).toContainText(`${karten} von ${karten}`);
+  }
+
+  // 🧩 Ordnen: ein Fehlversuch mit Bauplan-Hinweis, dann alle 5 der Reihe nach
+  await page.getByTestId("bt-utab-ordnen").click();
+  await page.locator('[data-test="bt-ord-satz"][data-i="4"]').click();
+  await expect(page.getByTestId("bt-feedback")).toContainText("Einleitung");
+  for (const i of [0, 1, 2, 3, 4]) await page.locator(`[data-test="bt-ord-satz"][data-i="${i}"]`).click();
+  await expect(page.getByTestId("bt-ord-ergebnis")).toContainText("4 von 5");
+
+  // 🪪 Reporter-Ausweis: vier Stempel, Rang Chefreporter
+  await page.getByTestId("bt-tab-fall").click();
+  await expect(page.getByTestId("bt-stempel-stand")).toContainText("4 von 4");
+  await expect(page.getByTestId("bt-ausweis")).toContainText("Chefreporter");
+
+  // 🖨️ Arbeitsblatt mit dem Schul-Leitfaden
+  await page.getByTestId("bt-tab-blatt").click();
+  await expect(page.getByTestId("bt-blatt")).toContainText("Bericht: Hund stoppt Fußballspiel");
+  await expect(page.getByTestId("bt-blatt")).toContainText("Leitfaden W-Fragen zum Bericht");
+  await expect(page.getByTestId("bt-blatt")).toContainText("Welche Folgen?");
+
+  // 🔑 Lösung erst nach der Fleiß-Hürde (3 Versuche + 3 Teile)
+  await page.getByTestId("bt-tab-loesung").click();
+  await expect(page.getByTestId("bt-loesung-zeigen")).toBeDisabled();
+  for (let i = 0; i < 3; i++) await page.getByTestId("bt-versuch").click();
+  for (let i = 0; i < 3; i++) await page.getByTestId("bt-geschrieben").nth(i).check();
+  await page.getByTestId("bt-loesung-zeigen").click();
+  await expect(page.getByTestId("bt-loesung")).toContainText("unterbrach gegen 15:20 Uhr ein Hund das Fußballspiel");
+
+  // 🌸 Selbst-Check zählt mit
+  await page.getByTestId("bt-tab-selbst").click();
+  await page.getByTestId("bt-selbst-inhalt").first().check();
+  await page.getByTestId("bt-selbst-sprache").last().check();
+  await expect(page.getByTestId("bt-selbst-stand")).toContainText("2 von 12");
 });
 
 test("Eltern-Werkzeuge: Spiel ausblenden, Münzen aus, Zeitlimit sperrt freundlich", async ({ page }) => {
@@ -1962,8 +2020,8 @@ test("Sudoku-Training: „Anderes Rätsel“ steht rechts und fragt nach, bevor 
   await expect(page.locator('[data-test^="sudoku-zelle-"]')).toHaveCount(16);
 
   // Spielstand erzeugen: mindestens ein Fehlversuch + eine richtig gesetzte Zahl.
-  // Das Rätsel hängt am Tagesdatum (Seed) – deshalb mitzählen statt eine feste
-  // Zahl zu erwarten (v0.88.1: der Test war nur an manchen Tagen grün).
+  // Das Rätsel hängt am Tagesdatum (Seed) – wie viele Zahlen vor der richtigen
+  // danebenliegen, ist also jeden Tag anders. Darum mitzählen statt „1“ annehmen.
   const zellText = async (r, c) => (await page.getByTestId(`sudoku-zelle-${r}-${c}`).textContent()).trim();
   let gesetzt = null;
   let fehlversuche = 0;
@@ -1973,13 +2031,11 @@ test("Sudoku-Training: „Anderes Rätsel“ steht rechts und fragt nach, bevor 
       await page.getByTestId(`sudoku-zelle-${r}-${c}`).click();
       for (let n = 1; n <= 4; n++) {
         await page.getByTestId(`sudoku-zahl-${n}`).click();
-        if ((await zellText(r, c)) === String(n)) {
-          gesetzt = { r, c, n };
-          if (fehlversuche > 0) break suchen;
-          break; // gleich richtig getroffen → nächstes leeres Feld, bis ein Fehlversuch dabei ist
-        }
+        if ((await zellText(r, c)) === String(n)) { gesetzt = gesetzt || { r, c, n }; break; }
         fehlversuche++;
       }
+      // Gehört in ein Feld die 1, gab es dort keinen Fehlversuch → nächstes Feld
+      if (gesetzt && fehlversuche > 0) break suchen;
     }
   }
   expect(gesetzt).not.toBeNull();

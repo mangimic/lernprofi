@@ -14,7 +14,7 @@
    Zugang (seit v0.70 Multi-Tenant): kontoVonAnfrage (kontoApi.js)
    löst jede Anfrage auf EIN Konto auf – Sitzungs-Cookie ODER die
    Stamm-Brücke (Cloudflare Access → Bestandskonto "stamm"; seit
-   v0.88.1 nur noch, bis das Stamm-Konto verknüpft ist).
+   v0.89.1 nur noch, bis das Stamm-Konto verknüpft ist).
    Jedes Konto hat seinen eigenen Tresor (tresor:<kontoId>) und
    eigene Dokumente (dok:<kontoId>:<id>). Die Alt-Schlüssel ohne
    Konto-Präfix (tresor:v1, dok:<id>) wandern beim ersten Zugriff

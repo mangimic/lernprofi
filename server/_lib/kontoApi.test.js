@@ -210,7 +210,7 @@ describe("kontoApi – Registrieren und Login", () => {
     // die Sitzung aus der Verknüpfung zeigt die verknüpfte E-Mail
     const wer = await kontoApi(anfrage("GET", "/api/konto", null, { cookie: cookieVon(r) }), env);
     expect(await wer.json()).toMatchObject({ angemeldet: true, kontoId: STAMM_KONTO, art: "sitzung", email: "familie@example.com" });
-    // 🔒 seit v0.88.1: Mit der Verknüpfung ist die Access-Brücke zu – der
+    // 🔒 seit v0.89.1: Mit der Verknüpfung ist die Access-Brücke zu – der
     // Header allein ist niemand mehr (kein Wer-bin-ich, keine Einladung,
     // keine zweite Verknüpfung, kein Tresor).
     expect(await (await kontoApi(anfrage("GET", "/api/konto", null, mitAccess), env)).json()).toEqual({ angemeldet: false });

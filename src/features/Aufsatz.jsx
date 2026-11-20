@@ -13,6 +13,7 @@ import { bildVerkleinern } from "../foto.js";
 
 export const TEXTARTEN = [
   { key: "vorgang", name: "Vorgangsbeschreibung", hinweis: "Reihenfolge · Zuerst/Dann/Danach · Präsens" },
+  { key: "bericht", name: "Bericht", hinweis: "W-Fragen · sachlich · Vergangenheit" },
   { key: "erlebnis", name: "Erlebniserzählung", hinweis: "Einleitung · Höhepunkt · Schluss" },
   { key: "bild", name: "Bildergeschichte", hinweis: "Bilder der Reihe nach · Namen · Schluss-Satz" },
 ];
